@@ -1,0 +1,1 @@
+# procedura uruchamiaja wątki

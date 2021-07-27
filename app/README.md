@@ -1,0 +1,1 @@
+Strona serwerowa interfejsu uzytkownika - rest api (flask restful)
