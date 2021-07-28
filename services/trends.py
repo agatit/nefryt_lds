@@ -32,7 +32,6 @@ class TrendQuick(Trend):
     def send_data(self):
         threading.Timer(1, self.send_data).start()
         #KAROL: wysyła dane do bazy danych, do zrobienia
-        print(time.time())
 
 
     def run(self):
@@ -127,7 +126,7 @@ class TrendWriter:
 
     def run(self):
         for t in self.trend_list:
-            t.run()
+            print(t) #t.run() tu będzie 
 
 if __name__ == "__main__":
 
