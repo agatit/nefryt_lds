@@ -1,4 +1,3 @@
-from os import times
 import pyodbc
 import threading
 import logging
@@ -85,16 +84,19 @@ class TrendWriter:
 
     def send_data(self, t):
         threading.Timer(get_time_delay(), self.send_data, args = [t]).start()
-        start_time = round(time.time())
-        timestamp = int(datetime.utcnow().timestamp())
+        start_time = time.time() 
+        timestamp = datetime.utcnow().timestamp()
+
+        if (isinstance(t, TrendDeriv)):
+            timestamp = timestamp - t.window_size //100
 
         if start_time - t.timestamp < 1 : 
             con = pyodbc.connect(self.connection_string, unicode_results = True, autocommit=True)
             cur = con.cursor()
-            pack = struct.pack('<100H', *t.data)
-            print("Wysyłam paczke z rejestru: " + str(t.register) + 'o godz UTC:' + str(datetime.fromtimestamp(timestamp)))
-            cur.execute("INSERT INTO lds.Trend(TrendDefID, Time, Data) values (?, ?, ?)", t.trend_ID, timestamp, pack)
-            con.close()    
+            pack = struct.pack('<100h', * (t.data))
+            print("Wysyłam paczke z  sterownika nr" + str(t.trend_ID) + ' o godz UTC:' + str(datetime.fromtimestamp(timestamp)))
+            cur.execute("INSERT INTO lds.Trend(TrendDefID, Time, Data) values (?, ?, ?)", t.trend_ID, int(timestamp), pack)
+            con.close()         
 
     def run(self):
         threading.Thread(target = serv.serve_forever).start()
@@ -102,6 +104,10 @@ class TrendWriter:
             if (isinstance(t, TrendQuick)):
                 t.run()
                 threading.Timer(get_time_delay(), self.send_data, args = [t]).start()
+
+            if (isinstance(t, TrendDeriv)):
+                t.run()
+                threading.Timer(get_time_delay(), self.send_data, args = [t]).start() 
        
 
 if __name__ == "__main__":

@@ -1,4 +1,13 @@
+from sys import maxsize
+import threading
 import time
+import queue
+import threading
+import scipy
+from scipy import signal
+
+def get_time_delay():
+    return int(time.time()) + 1 - time.time()
 
 #KAROL: każda klasa ma przynajmniej jeden argument i jest to Trend_ID
 class Trend:
@@ -8,6 +17,9 @@ class Trend:
 
     def __init__(self, server,  trend_ID):
         self.trend_ID = int(trend_ID)
+        self.data = 100*[0]
+        self.timestamp = time.time()
+        self.window_size = 0
         self.server = server
         pass
 
@@ -30,7 +42,6 @@ class TrendQuick(Trend):
         self.scaled_min = int(scaled_min)
         self.scaled_max = int(scaled_max)
         self.data = 100*[0]
-        self.timestamp = time.time()
 
     def read(self, slave_id, function_code, address):
         return self.data[address - self.register]
@@ -54,7 +65,24 @@ class TrendDeriv(Trend):
     def __init__(self, server, trend_ID,  trend_quick, window_size):
         super().__init__(server, trend_ID)
         self.trend_quick = trend_quick
-        self.window_size = window_size
+        self.data = 100*[0]
+        self.window_size = int(window_size)
+        self.queue = list()
+        
+
+    def run(self):
+        threading.Timer(get_time_delay(), self.run).start()
+        N = self.window_size
+        cur_data = self.trend_quick.data
+
+        if len(self.queue) == 2 * N + 100:
+            kernel = list(range(-N, N + 1))
+            self.timestamp = time.time()
+            self.data = list(map(int, scipy.signal.fftconvolve(self.queue, kernel, mode='valid') * (4/(N*N))))
+            self.queue = self.queue[100:]
+
+        self.queue = self.queue + cur_data
+    
 
     def __str__(self):
         return str(self.trend_ID) + ", " +  str(self.trend_quick) + ", " + str(self.window_size)
@@ -64,7 +92,7 @@ class TrendMean(Trend):
     def __init__(self, server, trend_ID, trend_quick, window_size):
         super().__init__(server, trend_ID)
         self.trend_quick = trend_quick
-        self.window_size = window_size
+        self.window_size = int(window_size)
         pass
 
     def __str__(self):
