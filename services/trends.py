@@ -1,15 +1,16 @@
+from datetime import datetime
 from sys import maxsize
 import threading
 import time
-import queue
 import threading
 import scipy
 from scipy import signal
 
+begin_time = time.time()
+
 def get_time_delay():
     return int(time.time()) + 1 - time.time()
 
-#KAROL: każda klasa ma przynajmniej jeden argument i jest to Trend_ID
 class Trend:
 
     def get_ID(self):
@@ -53,15 +54,35 @@ class TrendQuick(Trend):
     def run(self):
         self.server.route_map.add_rule(self.read, [1], [3, 4], list(range(self.register, self.register + 100)))
         self.server.route_map.add_rule(self.write, [1], [6, 16], list(range(self.register, self.register + 100)))
-        pass
-
-    def __str__(self):
-        return  str(self.trend_ID) + ', ' + str(self.host_name) + ', ' +  str(self.port) + ', ' + str(self.slave_ID) + '...'    
 
 
 class TrendDeriv(Trend):
-    # powinien uruchamiać wątek przeliczający, parametrem konstruktora powinien być TrendQuick
-    # powinien utrzymywać bufor wartości i uzupełniać ją wartościami z quick trendu
+    
+    def __init__(self, server, trend_ID,  trend_quick, window_size):
+        super().__init__(server, trend_ID)
+        self.trend_quick = trend_quick
+        self.data = 100*[0]
+        self.window_size = int(window_size)
+        self.queue = list()
+        
+
+    def run(self):
+        threading.Timer( get_time_delay(), self.run).start()
+        self.timestamp = time.time()
+        N = self.window_size
+        cur_data = self.trend_quick.data
+
+        if len(self.queue) == 2 * N + 100 :
+            kernel = list(range(-N, N + 1))
+            self.data = list(map(int, scipy.signal.fftconvolve(self.queue, kernel, mode='valid') * (1/(N*(N+1)))))
+            self.queue = self.queue[100:]
+
+        if int(begin_time) != int(self.trend_quick.timestamp) :
+            self.queue = self.queue + cur_data
+    
+
+class TrendMean(Trend):
+
     def __init__(self, server, trend_ID,  trend_quick, window_size):
         super().__init__(server, trend_ID)
         self.trend_quick = trend_quick
@@ -75,25 +96,18 @@ class TrendDeriv(Trend):
         N = self.window_size
         cur_data = self.trend_quick.data
 
-        if len(self.queue) == 2 * N + 100:
-            kernel = list(range(-N, N + 1))
+        if len(self.queue) == 2 * N + 100 :
             self.timestamp = time.time()
-            self.data = list(map(int, scipy.signal.fftconvolve(self.queue, kernel, mode='valid') * (4/(N*N))))
+
+            for i in range(100) : 
+                index = i
+                suma = self.queue[i]
+                while index < 2*N :
+                    index = index + 100
+                    suma = suma + self.queue[index]
+                self.data[i] =  suma // (N//50 + 1)
+
             self.queue = self.queue[100:]
 
-        self.queue = self.queue + cur_data
-    
-
-    def __str__(self):
-        return str(self.trend_ID) + ", " +  str(self.trend_quick) + ", " + str(self.window_size)
-
-class TrendMean(Trend):
-    # j.w.
-    def __init__(self, server, trend_ID, trend_quick, window_size):
-        super().__init__(server, trend_ID)
-        self.trend_quick = trend_quick
-        self.window_size = int(window_size)
-        pass
-
-    def __str__(self):
-        return str(self.trend_ID) + ", " +  str(self.trend_quick) + ", " + str(self.window_size)
+        if int(begin_time) != int(self.trend_quick.timestamp) :
+            self.queue = self.queue + cur_data

@@ -6,6 +6,8 @@ import struct
 from datetime import datetime
 from socketserver import ThreadingTCPServer
 from trends import TrendQuick, TrendDeriv, TrendMean
+import scipy
+from scipy import signal
 
 from umodbus import conf
 from umodbus.server.tcp import RequestHandler, get_server
@@ -17,14 +19,13 @@ conf.SIGNED_VALUES = True
 
 serv = get_server(ThreadingTCPServer, ("0.0.0.0", 502 ), RequestHandler)
 
+begin_time = time.time()
 
 def get_time_delay():
     return int(time.time()) + 1 - time.time()
 
 class TrendWriter:
-
-    #KAROL: zwraca trend o podanym ID, przydatne dla DERIV i MEAN 
-    # bo w bazie danych jest podany nr ID QUICK TREND-U
+    
     def get_trend(self, trend_ID):
         for trend in self.trend_list:
             if trend.get_ID() == int(trend_ID):
@@ -34,13 +35,9 @@ class TrendWriter:
     def __init__(self, connection_string):
         self.connection_string = connection_string
 
-
-        # buduje listę obiektów odpowiednich klas na podstawie bazy danych
-        # inicjalizuje je właściwymi parametrami
         self.trend_list = []
         trend_list_args = []
 
-        #KAROL: tworzę sobie tablicę z wartościami, następnie je zapisuje i tworzę odpowiednio klasy
         con = pyodbc.connect(connection_string, unicode_results = True)
         cur = con.cursor()
         cur.execute("""SELECT 
@@ -80,40 +77,49 @@ class TrendWriter:
 
             self.trend_list.append(trend) 
 
-        con.close()    
+        con.close()   
 
-    def send_data(self, t):
-        threading.Timer(get_time_delay(), self.send_data, args = [t]).start()
-        start_time = time.time() 
+    def send_math_data(self, trend):
+        threading.Timer(get_time_delay(), self.send_math_data, args = [trend]).start()
+        start_time = time.time()
         timestamp = datetime.utcnow().timestamp()
+        timestamp = timestamp - trend.window_size // 100
 
-        if (isinstance(t, TrendDeriv)):
-            timestamp = timestamp - t.window_size //100
+        while round(start_time - trend.timestamp ) >=1:
+            pass
 
-        if start_time - t.timestamp < 1 : 
+        if start_time - begin_time >  2 * trend.window_size // 100 + 1:
             con = pyodbc.connect(self.connection_string, unicode_results = True, autocommit=True)
             cur = con.cursor()
-            pack = struct.pack('<100h', * (t.data))
-            print("Wysyłam paczke z  sterownika nr" + str(t.trend_ID) + ' o godz UTC:' + str(datetime.fromtimestamp(timestamp)))
-            cur.execute("INSERT INTO lds.Trend(TrendDefID, Time, Data) values (?, ?, ?)", t.trend_ID, int(timestamp), pack)
-            con.close()         
+            pack = struct.pack('<100h', * (trend.data))
+            cur.execute("INSERT INTO lds.Trend(TrendDefID, Time, Data) values (?, ?, ?)", trend.trend_ID, int(timestamp), pack)
+            con.close()
+
+    def send_quick_data(self, trend):
+        threading.Timer(get_time_delay(), self.send_quick_data, args = [trend]).start()
+        start_time = time.time()
+        timestamp = datetime.utcnow().timestamp() 
+
+        if 0 <= start_time - trend.timestamp < 1 and int(trend.timestamp) != int(begin_time) :
+            con = pyodbc.connect(self.connection_string, unicode_results = True, autocommit=True)
+            cur = con.cursor()
+            pack = struct.pack('<100h', * (trend.data))
+            cur.execute("INSERT INTO lds.Trend(TrendDefID, Time, Data) values (?, ?, ?)", trend.trend_ID, int(timestamp), pack)
+            con.close()        
+
 
     def run(self):
         threading.Thread(target = serv.serve_forever).start()
-        for t in self.trend_list: 
-            if (isinstance(t, TrendQuick)):
-                t.run()
-                threading.Timer(get_time_delay(), self.send_data, args = [t]).start()
-
-            if (isinstance(t, TrendDeriv)):
-                t.run()
-                threading.Timer(get_time_delay(), self.send_data, args = [t]).start() 
-       
+        for trend in self.trend_list:
+            trend.run()
+            if isinstance(trend, TrendQuick): 
+                threading.Timer(get_time_delay(), self.send_quick_data, args = [trend]).start()
+            elif isinstance(trend, TrendDeriv):
+                threading.Timer(get_time_delay(), self.send_math_data, args = [trend]).start()
 
 if __name__ == "__main__":
-
-    tl = TrendWriter('DRIVER={SQL Server};SERVER=SERVERDB\MSSQLSERVER2016' + \
-                    ';DATABASE=NefrytLDS_NEW' + \
-                    ';UID=sa' + \
-                    ';PWD=Onyks$us')
+    tl = TrendWriter('DRIVER={SQL Server};SERVER=192.168.18.11' + \
+                     ';DATABASE=NefrytLDS_NEW' + \
+                     ';UID=sa' + \
+                     ';PWD=Onyks$us')
     tl.run()            
