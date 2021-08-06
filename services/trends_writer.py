@@ -85,11 +85,10 @@ class TrendWriter:
         timestamp = datetime.utcnow().timestamp()
         timestamp = timestamp - trend.window_size // 100
 
-        while round(start_time - trend.timestamp ) >=1:
-            pass
 
         if start_time - begin_time >  2 * trend.window_size // 100 + 1:
             con = pyodbc.connect(self.connection_string, unicode_results = True, autocommit=True)
+            #if trend.trend_ID == 101: print("paczka o:", trend.timestamp, start_time)
             cur = con.cursor()
             pack = struct.pack('<100h', * (trend.data))
             cur.execute("INSERT INTO lds.Trend(TrendDefID, Time, Data) values (?, ?, ?)", trend.trend_ID, int(timestamp), pack)
@@ -97,13 +96,14 @@ class TrendWriter:
 
     def send_quick_data(self, trend):
         threading.Timer(get_time_delay(), self.send_quick_data, args = [trend]).start()
+        data = trend.data
         start_time = time.time()
         timestamp = datetime.utcnow().timestamp() 
 
         if 0 <= start_time - trend.timestamp < 1 and int(trend.timestamp) != int(begin_time) :
             con = pyodbc.connect(self.connection_string, unicode_results = True, autocommit=True)
             cur = con.cursor()
-            pack = struct.pack('<100h', * (trend.data))
+            pack = struct.pack('<100h', * data)
             cur.execute("INSERT INTO lds.Trend(TrendDefID, Time, Data) values (?, ?, ?)", trend.trend_ID, int(timestamp), pack)
             con.close()        
 
