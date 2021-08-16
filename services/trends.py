@@ -1,15 +1,9 @@
-from datetime import datetime
-from sys import maxsize
 import threading
 import time
 import threading
 import scipy
 from scipy import signal
 
-begin_time = time.time()
-
-def get_time_delay():
-    return int(time.time()) + 1 - time.time()
 
 class Trend:
 
@@ -19,9 +13,9 @@ class Trend:
     def __init__(self, server,  trend_ID):
         self.trend_ID = int(trend_ID)
         self.data = 100*[0]
-        self.timestamp = time.time()
         self.window_size = 0
         self.server = server
+        self.timestamp = None
         pass
 
     def run(self):
@@ -29,7 +23,7 @@ class Trend:
 
 
 class TrendQuick(Trend):
-    # powinien uruchamiać wątki serwera modbus
+    
     def __init__(self, server, trend_ID, host_name, port,
                  slave_ID, register, raw_min,
                  raw_max, scaled_min, scaled_max ):
@@ -42,17 +36,14 @@ class TrendQuick(Trend):
         self.raw_max = int(raw_max)
         self.scaled_min = int(scaled_min)
         self.scaled_max = int(scaled_max)
-        self.data = 100*[0]
-
-    def read(self, slave_id, function_code, address):
-        return self.data[address - self.register]
+        self.data = 100*[None]
+        self.send_next_tick = int(time.time()) + 1
 
     def write(self, slave_id, function_code, address, value):
-        self.timestamp = time.time()
-        self.data[address - self.register] = value
+        self.timestamp = int(time.time())
+        self.data[99 - address + self.register] = value
 
     def run(self):
-        self.server.route_map.add_rule(self.read, [1], [3, 4], list(range(self.register, self.register + 100)))
         self.server.route_map.add_rule(self.write, [1], [6, 16], list(range(self.register, self.register + 100)))
 
 
@@ -60,15 +51,16 @@ class TrendDeriv(Trend):
     
     def __init__(self, server, trend_ID,  trend_quick, window_size):
         super().__init__(server, trend_ID)
+        self.run_next_tick = int(time.time()) + 1
+        self.send_next_tick = self.run_next_tick + 0.5
         self.trend_quick = trend_quick
-        self.data = 100*[0]
+        self.data = 100*[None]
         self.window_size = int(window_size)
         self.queue = list()
         
 
     def run(self):
-        threading.Timer( get_time_delay(), self.run).start()
-        self.timestamp = time.time()
+        self.timestamp = self.trend_quick.timestamp
         N = self.window_size
         cur_data = self.trend_quick.data
 
@@ -77,37 +69,22 @@ class TrendDeriv(Trend):
             self.data = list(map(int, scipy.signal.fftconvolve(self.queue, kernel, mode='valid') * (1/(N*(N+1)))))
             self.queue = self.queue[100:]
 
-        if int(begin_time) != int(self.trend_quick.timestamp) :
+        if self.timestamp and not None in cur_data :
+            if self.run_next_tick - self.timestamp != 1:
+                cur_data = 100 * [ cur_data[0] ]
             self.queue = self.queue + cur_data
+
+        
+        self.run_next_tick = self.run_next_tick + 1
+        threading.Timer(self.run_next_tick - time.time(), self.run).start()
+
     
 
 class TrendMean(Trend):
 
     def __init__(self, server, trend_ID,  trend_quick, window_size):
-        super().__init__(server, trend_ID)
-        self.trend_quick = trend_quick
-        self.data = 100*[0]
-        self.window_size = int(window_size)
-        self.queue = list()
+        pass
         
 
     def run(self):
-        threading.Timer(get_time_delay(), self.run).start()
-        N = self.window_size
-        cur_data = self.trend_quick.data
-
-        if len(self.queue) == 2 * N + 100 :
-            self.timestamp = time.time()
-
-            for i in range(100) : 
-                index = i
-                suma = self.queue[i]
-                while index < 2*N :
-                    index = index + 100
-                    suma = suma + self.queue[index]
-                self.data[i] =  suma // (N//50 + 1)
-
-            self.queue = self.queue[100:]
-
-        if int(begin_time) != int(self.trend_quick.timestamp) :
-            self.queue = self.queue + cur_data
+        pass
