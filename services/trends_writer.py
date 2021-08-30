@@ -86,7 +86,7 @@ class TrendWriter:
         now = int(trend.send_next_tick)
         trend.send_next_tick = trend.send_next_tick + 1
         threading.Timer(trend.send_next_tick - time.time(), self.send_data, args = [trend]).start()
-        N = trend.window_size // 100 + 1
+        N = trend.window_size // 100 
 
         if timestamp and not None in data and (now - timestamp == 1 or isinstance(trend, TrendDeriv) ):
             
@@ -99,27 +99,22 @@ class TrendWriter:
                 con.close()
 
             except pyodbc.IntegrityError:
-                 logging.error("Próba wstawienia rekordu, który już istnieje.")
+                logging.error("Próba wstawienia rekordu, który już istnieje.")
 
             except pyodbc.Error:
-                logging.error("Brak połączenia z serwerem")
+                logging.error("Brak połączenia z serwerem.")
 
 
     def run(self):
         threading.Thread(target = serv.serve_forever).start()
-        for trend in self.trend_list:
-            if isinstance(trend, TrendQuick) : 
-                threading.Timer(trend.send_next_tick - time.time(), trend.run).start()
-                threading.Timer(trend.send_next_tick - time.time(), self.send_data, args = [trend]).start()
+        for trend in self.trend_list: 
+            threading.Timer(trend.run_next_tick - time.time(), trend.run).start()
+            threading.Timer(trend.send_next_tick - time.time(), self.send_data, args = [trend]).start()
 
-            if isinstance(trend, TrendDeriv) : 
-                threading.Timer(trend.run_next_tick - time.time(), trend.run).start()
-                threading.Timer(trend.send_next_tick - time.time(), self.send_data, args = [trend]).start()
 
 if __name__ == "__main__":
     time.sleep(int(time.time()) + 1 - time.time())
-    tl = TrendWriter('DRIVER={SQL Server};SERVER=192.168.18.11' + \
+    TrendWriter('DRIVER={SQL Server};SERVER=192.168.18.11' + \
                      ';DATABASE=NefrytLDS_NEW' + \
                      ';UID=sa' + \
-                     ';PWD=Onyks$us')
-    tl.run()
+                     ';PWD=Onyks$us').run()
