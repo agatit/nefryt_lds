@@ -1,21 +1,16 @@
+import logging
 import pyodbc
 import threading
-import logging
 import time
 import struct
 from datetime import datetime
 from socketserver import ThreadingTCPServer
+
 from trends import TrendQuick, TrendDeriv, TrendMean
 
 from umodbus import conf
 from umodbus.server.tcp import RequestHandler, get_server
-from umodbus.utils import log_to_stream
 
-log_to_stream(level=logging.DEBUG)
-
-conf.SIGNED_VALUES = True
-
-serv = get_server(ThreadingTCPServer, ("0.0.0.0", 502 ), RequestHandler)
 
 def get_utc_timestamp(local_timestamp):
     return datetime.utcfromtimestamp(local_timestamp).timestamp()
@@ -29,8 +24,12 @@ class TrendWriter:
         return None        
 
     def __init__(self, connection_string):
-        self.connection_string = connection_string
+        conf.SIGNED_VALUES = True
 
+        self.connection_string = connection_string
+        self.terminate = False
+        self.serv = get_server(ThreadingTCPServer, ("0.0.0.0", 502 ), RequestHandler)
+        self.serv.daemon_threads = True
         self.trend_list = []
         trend_list_args = []
 
@@ -60,35 +59,41 @@ class TrendWriter:
                     args.append(row[1])
                     row = cur.fetchone()
 
-                trend_list_args.append([*args, trend_type])       
-            
-            for trend_args in trend_list_args:
+                trend_list_args.append([*args, trend_type])
 
-                if trend_args[-1] == 'DERIV' :
-                    trend = TrendDeriv(serv, trend_args[0], self.get_trend(trend_args[1]), trend_args[2])
+            con.close()
 
-                elif trend_args[-1] == 'MEAN' : 
-                    trend = TrendMean(serv, trend_args[0], self.get_trend(trend_args[1]), trend_args[2])
+        except pyodbc.Error:
+            logging.fatal("No database connection.") 
 
-                elif trend_args[-1] == 'QUICK' :
-                    trend = TrendQuick(serv, *trend_args[0:9])
+          
+        for trend_args in trend_list_args:
 
-                self.trend_list.append(trend) 
+            if trend_args[-1] == 'DERIV' :
+                trend = TrendDeriv(self.serv, trend_args[0], self.get_trend(trend_args[1]), trend_args[2])
 
-            con.close()  
+            elif trend_args[-1] == 'MEAN' : 
+                    trend = TrendMean(self.serv, trend_args[0], self.get_trend(trend_args[1]), trend_args[2])
 
-        except pyodbc.Error :
-            logging.error("Brak połączenia z bazą danych.") 
+            elif trend_args[-1] == 'QUICK' :
+                trend = TrendQuick(self.serv, *trend_args[0:9])
+
+            self.trend_list.append(trend) 
 
     def send_data(self, trend):
         data = trend.data
         timestamp = trend.timestamp
+
+        if self.terminate:
+            trend.terminate = True
+            return
+
         now = int(trend.send_next_tick)
         trend.send_next_tick = trend.send_next_tick + 1
         threading.Timer(trend.send_next_tick - time.time(), self.send_data, args = [trend]).start()
         N = trend.window_size // 100 
 
-        if timestamp and not None in data and (now - timestamp == 1 or isinstance(trend, TrendDeriv) ):
+        if timestamp and not None in data and (now - timestamp == 1 or not isinstance(trend, TrendQuick)):
             
             try:
                 con = pyodbc.connect(self.connection_string, unicode_results = True, autocommit=True)
@@ -97,24 +102,33 @@ class TrendWriter:
                 cur.execute("INSERT INTO lds.Trend(TrendDefID, Time, Data) values (?, ?, ?)",
                          trend.trend_ID, get_utc_timestamp(now - N), pack)
                 con.close()
+                return
 
             except pyodbc.IntegrityError:
-                logging.error("Próba wstawienia rekordu, który już istnieje.")
-
+                logging.error("Integrity Error. The record already exist.")
+                return
+            
             except pyodbc.Error:
-                logging.error("Brak połączenia z serwerem.")
+                logging.error("Lost Database Connection.")
+                return
+        
+        if timestamp and not None in data and now - timestamp == 1 :
+            logging.info("Wrong timestamp.")
+            return
+        
+        
+
 
 
     def run(self):
-        threading.Thread(target = serv.serve_forever).start()
-        for trend in self.trend_list: 
+        time.sleep( int(time.time()) + 1 - time.time())
+        for trend in self.trend_list:
             threading.Timer(trend.run_next_tick - time.time(), trend.run).start()
             threading.Timer(trend.send_next_tick - time.time(), self.send_data, args = [trend]).start()
 
+        self.serv.serve_forever()
 
-if __name__ == "__main__":
-    time.sleep(int(time.time()) + 1 - time.time())
-    TrendWriter('DRIVER={SQL Server};SERVER=192.168.18.11' + \
-                     ';DATABASE=NefrytLDS_NEW' + \
-                     ';UID=sa' + \
-                     ';PWD=Onyks$us').run()
+    def stop(self):
+        self.terminate = True
+        self.serv.shutdown()
+        self.serv.server_close()
