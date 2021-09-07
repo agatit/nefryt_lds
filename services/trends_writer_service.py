@@ -23,6 +23,7 @@ class TrendsWriterService(win32serviceutil.ServiceFramework):
     def parse_command_line(cls):
         win32serviceutil.HandleCommandLine(cls)
 
+
     def __init__(self, args):
         try:
             handler = RotatingFileHandler(path + '/log/' + self._svc_name_ + '.log',
@@ -39,10 +40,12 @@ class TrendsWriterService(win32serviceutil.ServiceFramework):
         except:
             logging.fatal(f"{self._svc_name_} creation failed.")
 
+
     def SvcStop(self):
         self.stop()
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.hWaitStop)
+
 
     def SvcDoRun(self):
         self.start()
@@ -51,12 +54,14 @@ class TrendsWriterService(win32serviceutil.ServiceFramework):
                               (self._svc_name_, ''))
         self.main()
 
+
     def start(self):
         logging.info(f"Trends Writer started as service {self._svc_name_}.")
         self.writer = TrendWriter('DRIVER={SQL Server};SERVER=192.168.18.11' + \
                      ';DATABASE=NefrytLDS_NEW' + \
                      ';UID=sa' + \
                      ';PWD=Onyks$us')
+
 
     def stop(self):
         self.writer.stop()
@@ -65,6 +70,8 @@ class TrendsWriterService(win32serviceutil.ServiceFramework):
 
     def main(self):
         self.writer.run()
+
+
 
 if __name__ == '__main__':
     TrendsWriterService.parse_command_line()

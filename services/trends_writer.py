@@ -15,13 +15,16 @@ from umodbus.server.tcp import RequestHandler, get_server
 def get_utc_timestamp(local_timestamp):
     return datetime.utcfromtimestamp(local_timestamp).timestamp()
 
+
 class TrendWriter:
-    
+
+
     def get_trend(self, trend_ID):
         for trend in self.trend_list:
             if trend.get_ID() == int(trend_ID):
                 return trend
         return None        
+
 
     def __init__(self, connection_string):
         conf.SIGNED_VALUES = True
@@ -116,9 +119,6 @@ class TrendWriter:
             logging.info("Wrong timestamp.")
             return
         
-        
-
-
 
     def run(self):
         time.sleep( int(time.time()) + 1 - time.time())
@@ -127,6 +127,7 @@ class TrendWriter:
             threading.Timer(trend.send_next_tick - time.time(), self.send_data, args = [trend]).start()
 
         self.serv.serve_forever()
+
 
     def stop(self):
         self.terminate = True

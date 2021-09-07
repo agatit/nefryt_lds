@@ -2,10 +2,13 @@ import threading
 import time
 import scipy.signal
 
+
 class Trend:
+
 
     def get_ID(self):
         return self.trend_ID
+
 
     def __init__(self, server,  trend_ID, window_size = 0):
         self.run_next_tick = int(time.time()) + 1
@@ -16,12 +19,14 @@ class Trend:
         self.timestamp = None
         self.terminate = False
 
+
     def run(self):
         pass
 
 
-class TrendQuick(Trend):
-    
+
+class TrendQuick(Trend): 
+
 
     def __init__(self, server, trend_ID, host_name, port,
                  slave_ID, register, raw_min,
@@ -37,9 +42,11 @@ class TrendQuick(Trend):
         self.scaled_min = int(scaled_min)
         self.scaled_max = int(scaled_max)
 
+
     def write(self, slave_id, function_code, address, value):
         self.timestamp = int(time.time())
         self.data[99 - address + self.register] = value
+
 
     def run(self):
         @self.server.route(slave_ids = [1], function_codes = [6, 16], addresses = list(range(self.register, self.register + 100)))
@@ -48,14 +55,16 @@ class TrendQuick(Trend):
             self.data[99 - address + self.register] = value
 
 
+
 class TrendDeriv(Trend):
-    
+
+
     def __init__(self, server, trend_ID,  trend_quick, window_size):
         super().__init__(server, trend_ID, int(window_size))
         self.send_next_tick = self.run_next_tick + 0.5  
         self.trend_quick = trend_quick
         self.queue = list()
-        
+
 
     def run(self):
         self.timestamp = self.trend_quick.timestamp
@@ -76,20 +85,20 @@ class TrendDeriv(Trend):
             self.data = list(map(int, scipy.signal.fftconvolve(self.queue, kernel, mode='valid') *norm))
             self.queue = self.queue[100:]
 
-        
         self.run_next_tick = self.run_next_tick + 1
         threading.Timer(self.run_next_tick - time.time(), self.run).start()
 
-    
+
 
 class TrendMean(Trend):
+
 
     def __init__(self, server, trend_ID,  trend_quick, window_size):
         super().__init__(server, trend_ID, int(window_size))
         self.send_next_tick = self.run_next_tick + 0.5
         self.trend_quick = trend_quick
         self.queue = list()
-        
+
 
     def run(self):
         self.timestamp = self.trend_quick.timestamp
@@ -105,11 +114,10 @@ class TrendMean(Trend):
             self.queue = self.queue + cur_data
 
         if len(self.queue) == 2 * N + 100 :
-            kernel = (2 * N + 1) * [0]
+            kernel = (2 * N + 1) * [ 1/N ]
             norm = 1/(N*(N+1))
             self.data = list(map(int, scipy.signal.fftconvolve(self.queue, kernel, mode='valid') * norm))
             self.queue = self.queue[100:]
 
         self.run_next_tick = self.run_next_tick + 1
         threading.Timer(self.run_next_tick - time.time(), self.run).start()
-
