@@ -57,10 +57,11 @@ class TrendsWriterService(win32serviceutil.ServiceFramework):
 
     def start(self):
         logging.info(f"Trends Writer started as service {self._svc_name_}.")
-        self.writer = TrendWriter('DRIVER={SQL Server};SERVER=192.168.18.11' + \
-                     ';DATABASE=NefrytLDS_NEW' + \
-                     ';UID=sa' + \
-                     ';PWD=Onyks$us')
+        self.writer = TrendWriter('DRIVER={SQL Server};' + \
+                                  'SERVER=SERVERDB,1447' + \
+                                  ';DATABASE=NefrytLDSDemo' + \
+                                  ';UID=sa' + \
+                                  ';PWD=Onyks$us')
 
 
     def stop(self):

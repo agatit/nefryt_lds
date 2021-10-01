@@ -94,7 +94,7 @@ class TrendWriter:
         now = int(trend.send_next_tick)
         trend.send_next_tick = trend.send_next_tick + 1
         threading.Timer(trend.send_next_tick - time.time(), self.send_data, args = [trend]).start()
-        N = trend.window_size // 100 
+        N = trend.window_size // 100 + 1
 
         if timestamp and not None in data and (now - timestamp == 1 or not isinstance(trend, TrendQuick)):
             
@@ -133,3 +133,12 @@ class TrendWriter:
         self.terminate = True
         self.serv.shutdown()
         self.serv.server_close()
+
+
+if __name__ == '__main__':
+    t = TrendWriter('DRIVER={SQL Server}' + \
+                    ';SERVER=SERVERDB,1447' + \
+                    ';DATABASE=NefrytLDSDemo' + \
+                    ';UID=sa' + \
+                    ';PWD=Onyks$us')
+    t.run()
