@@ -20,29 +20,3 @@ class MethodParam(Base_lds):
         for key in self.__mapper__.c.keys():
             dict_[key] = getattr(self, key)
         return dict_
-
-    # schemas/orm/MethodParam.yaml
-# type: object
-# x-tablename: MethodParam
-# x-schema-name: lds
-# required:
-#     - MethodParamDefID
-#     - MethodID
-# properties:
-#     MethodParamDefID:
-#         x-primary-key: true
-#         x-autoincrement: false
-#         type: integer
-#         nullable: false
-#         description: none
-#         example: 0
-#     MethodID:
-#         x-primary-key: true
-#         x-autoincrement: false
-#         type: integer
-#         nullable: false
-#         description: none
-#     Value:
-#         type: string
-#         pattern: ^ .{0, 30}
-#         description: none

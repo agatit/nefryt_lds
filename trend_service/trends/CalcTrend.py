@@ -1,10 +1,11 @@
 from .TrendBase import TrendBase
+from ..database import *
 
 
 class CalcTrend(TrendBase):
 
-    def __init__(self, trend_ID):
-        super().__init__(trend_ID)
+    def __init__(self, trend: orm.Trend):
+        super().__init__(trend)
 
     def readParamsFromDB(self):
         pass

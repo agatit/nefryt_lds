@@ -31,33 +31,7 @@ TCPServer.allow_reuse_address = True
 app = get_server(TCPServer, ('', 502), MyRequestHandler.MyRequestHandler)
 
 def main():
-
-    # try:
-    trends = service_trend.get_all()
-    trend_def = service_trend_def.get_all()
-    trend_param = service_trend_param.get_all()
-    trend_param_def = service_trend_param_def.get_all()
     
-    #  pobranie wszystkich trendow "QUICK"
-    quick_trends = service_trend.get_quick_trends()
-    
-    test = []
-    
-    for trend in trends:
-        print(service_trend.get_all_childs(trend, 'DERIV' ,'TrendID'))
-        test.append([trend, service_trend.get_all_childs(trend, 'DERIV' ,'TrendID')])
-    
-    
-    print("alala")
-        # trend -> trendefid
-        #  if trendefid -> "deriv"
-        #  find trendparam where trenparamdefID = trendparam
-        
-        
-
-    # except Exception as e:
-    #     print(e)
-
     try:
         app.serve_forever()
     finally:

@@ -20,32 +20,3 @@ class TrendData(Base_lds):
         for key in self.__mapper__.c.keys():
             dict_[key] = getattr(self, key)
         return dict_
-# # schemas/orm/TrendData.yaml
-# type: object
-# x-tablename: TrendData
-# x-schema-name: lds
-# required:
-#   - TrendID
-#   - Time
-#   - Data
-# properties:
-#   TrendID:
-#     x-primary-key: true
-#     x-autoincrement: false
-#     type: integer
-#     nullable: false
-#     description: none
-#     example: 0
-#   Time:
-#     x-primary-key: true
-#     x-autoincrement: false
-#     type: integer
-#     format: int64
-#     nullable: false
-#     description: none
-#   Data:
-#     type: string
-#     format: binary
-#     nullable: false
-#     maxLength: 200
-#     # pattern: ^.{0,200}

@@ -18,24 +18,3 @@ class Pipeline(Base_lds):
         for key in self.__mapper__.c.keys():
             dict_[key] = getattr(self, key)
         return dict_
-# # schemas/orm/Pipeline.yaml
-# type: object
-# x-tablename: Pipeline
-# x-schema-name: lds
-# required:
-#   - ID
-# properties:
-#   ID:
-#     x-primary-key: true
-#     x-autoincrement: true
-#     type: integer
-#     nullable: false
-#     description: none
-#     example: 0
-#   Name:
-#     type: string
-#     pattern: ^.{0,30}
-#     description: none
-#   BeginPos:
-#     type: number
-#     description: none

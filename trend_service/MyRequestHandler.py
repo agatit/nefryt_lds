@@ -20,6 +20,11 @@ class MyRequestHandler(RequestHandler):
         self.trend_param_const = service_trend_param.get_all()
         self.trend_param_def_const = service_trend_param_def.get_all()
 
+        #  pobranie wszystkich trendow "QUICK" i ich dzieci
+        self.quick_trends_const = service_trend.get_quick_trends()
+        for quick_trend in self.quick_trends_const:
+            service_trend.find_and_add_childs(quick_trend)
+
         super().__init__(request, client_address, server)
 
     def process(self, request_adu):
@@ -34,14 +39,14 @@ class MyRequestHandler(RequestHandler):
 
         function = create_function_from_request_pdu(request_pdu)
 
-        for trend in self.trends_const:
+        for quick_trend in self.quick_trends_const:
             trend_params = service_trend_param.get_TrendParam_for_specific_trend(
-                trend, "ModbusRegister")
+                quick_trend.trend, "ModbusRegister")
 
             for trend_param in trend_params:
                 # and int(trend_param.Value) == 1000:
-                if trend_param.TrendID == trend.ID and int(trend_param.Value) == function.starting_address:
-                    service_calulcate.calulcate_trend(trend, function)
+                if trend_param.TrendID == quick_trend.trend.ID and int(trend_param.Value) == function.starting_address:
+                    service_calulcate.calulcate_trend(quick_trend.trend, function)
 
         response_pdu = function.create_response_pdu()
         response_adu = self.create_response_adu(meta_data, response_pdu)

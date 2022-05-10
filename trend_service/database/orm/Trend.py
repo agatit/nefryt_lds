@@ -1,6 +1,6 @@
 
 from ...database import Base_lds
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, CHAR
 
 
 class Trend(Base_lds):
@@ -10,7 +10,7 @@ class Trend(Base_lds):
                 autoincrement=False, nullable=False)
     Name = Column("Name", String(30))
     TrendGroupID = Column("TrendGroupID", Integer)
-    TrendDefID = Column("TrendDefID", Integer)
+    TrendDefID = Column("TrendDefID", CHAR(length=30))
 
     def __repr__(self):
         return '<Trend> ' + str(self.columns_to_dict())
@@ -20,28 +20,3 @@ class Trend(Base_lds):
         for key in self.__mapper__.c.keys():
             dict_[key] = getattr(self, key)
         return dict_
-
-# # schemas/orm/Trend.yaml
-# type: object
-# x-tablename: Trend
-# x-schema-name: lds
-# required:
-#   - ID
-# properties:
-#   ID:
-#     x-primary-key: true
-#     x-autoincrement: false
-#     type: integer
-#     nullable: false
-#     example: 0
-#     description: none
-#   Name:
-#     type: string
-#     pattern: ^.{0,30}
-#     description: none
-#   TrendGroupID:
-#     type: integer
-#     description: none
-#   TrendDefID:
-#     type: integer
-#     description: none

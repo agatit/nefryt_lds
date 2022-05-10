@@ -4,14 +4,10 @@ import sqlalchemy as sql
 from sqlalchemy import and_
 
 from ..database import Session, engine, orm
+from ..trends import QuickTrend, TrendBase, DerivTrend, DiffTrend, MeanTrend
 from . import service_trend_def, service_trend_param_def
 
 __list = []
-
-# class TrendService():
-#     def __init__(self):
-#         pass
-
 
 def __fetch() -> List[orm.Trend]:
     stmt = sql.select([orm.Trend])
@@ -93,34 +89,72 @@ def get_all_childs(trend: orm.Trend, trend_def_name: str, trend_param_def_name: 
     return __childs
 
 
-def get_quick_trends() -> List[orm.Trend]:
-    # select t.ID, t.Name
-    # from lds.Trend t
-    # join lds.TrendDef td on td.ID = t.TrendDefID
-    # where td.Name = 'QUICK'
-
+def get_quick_trends() -> List[QuickTrend]:
     stmt = sql.select([orm.Trend]) \
         .join(orm.TrendDef, orm.TrendDef.ID == orm.Trend.TrendDefID) \
-        .where(orm.TrendDef.Name == 'QUICK')
+        .where(orm.TrendDef.ID == 'QUICK')
+
+    print(stmt)
 
     quick_trends = []
     result = Session.execute(stmt).fetchall()
     for trend in result:
-        quick_trends.append(trend[0])
+        quickTrend = QuickTrend(trend[0])
+        quick_trends.append(quickTrend)
 
     return quick_trends
-    #         # query = sql.select(
-    #         # [orm.Method.PipelineID.label('PipelineID'),
-    #         #  orm.Method.ID.label('MethodID'),
-    #         #  orm.MethodParamDef.ID.label('MethodParamDefID'),
-    #         #  orm.MethodParamDef.DataType.label('DataType'),
-    #         #  orm.MethodParamDef.Name.label('Name'),
-    #         #  orm.MethodParam.Value.label('Value')
-    #         #  ]) \
-    #         # .select_from(orm.Method) \
-    #         # .join(orm.MethodDef, orm.Method.MethodDefID == orm.MethodDef.ID) \
-    #         # .join(orm.MethodParamDef, orm.MethodDef.ID == orm.MethodParamDef.MethodDefID) \
-    #         # .join(orm.MethodParam, orm.MethodParamDef.ID == orm.MethodParam.MethodParamDefID) \
-    #         # .where(and_(orm.Method.PipelineID == pipeline_id, orm.MethodDef.ID == method_id))
 
-    # pass
+
+def find_and_add_childs(trend_base: TrendBase):
+
+    stmt = sql.select([orm.Trend, orm.TrendDef]) \
+        .join(orm.TrendDef, orm.TrendDef.ID == orm.Trend.TrendDefID) \
+        .join(orm.TrendParam, orm.TrendParam.TrendID == orm.Trend.ID) \
+        .join(orm.TrendParamDef, and_(orm.TrendParamDef.ID == orm.TrendParam.TrendParamDefID, orm.TrendDef.ID == orm.TrendParamDef.TrendDefID)) \
+        .where(and_(orm.TrendParamDef.DataType == 'TREND', orm.TrendParam.Value == trend_base.trend.ID))
+
+    # print(stmt)
+
+    results = Session.execute(stmt).fetchall()
+    for result in results:
+        # print(result[0])
+        # print(result[1])
+        trend = result[0]
+        trend_def = result[1]
+
+        if trend_def.ID.strip() == 'QUICK':
+            quick_trend = QuickTrend(trend)
+            trend_base.children.append(quick_trend)
+        elif trend_def.ID.strip() == 'DERIV':
+            deriv_trend = DerivTrend(trend)
+            trend_base.children.append(deriv_trend)
+        elif trend_def.ID.strip() == 'MEAN':
+            mean_trend = MeanTrend(trend)
+            trend_base.children.append(mean_trend)
+        elif trend_def.ID.strip() == 'DIFF':
+            diff_trend = DiffTrend(trend)
+            trend_base.children.append(diff_trend)
+        else:
+            print('Unknown trend def: ' + trend_def.Name)
+
+    for child in trend_base.children:
+        find_and_add_childs(child)
+
+
+def get_params_and_values(trend: orm.Trend):
+    
+    stmt = sql.select([orm.TrendParamDef, orm.TrendParam]) \
+        .select_from(orm.Trend) \
+        .join(orm.TrendDef, orm.Trend.TrendDefID == orm.TrendDef.ID) \
+        .join(orm.TrendParamDef, orm.TrendDef.ID == orm.TrendParamDef.TrendDefID) \
+        .join(orm.TrendParam, and_(orm.TrendParamDef.ID == orm.TrendParam.TrendParamDefID, orm.Trend.ID == orm.TrendParam.TrendID)) \
+        .where(orm.Trend.ID == trend.ID)
+    
+    results = Session.execute(stmt).fetchall()
+
+    __list = []
+    for tpd, tp in results:
+        __list.append((tpd.Name, tp.Value))
+    
+    
+    return __list

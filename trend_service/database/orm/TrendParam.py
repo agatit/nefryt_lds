@@ -1,13 +1,13 @@
 
 from ...database import Base_lds
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, LargeBinary
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, LargeBinary, CHAR
 
 
 class TrendParam(Base_lds):
     __tablename__ = 'TrendParam'
     __table_args__ = {'schema': 'lds'}
     TrendParamDefID = Column("TrendParamDefID",
-                             Integer, primary_key=True, autoincrement=False, nullable=False)
+                             CHAR(length=30), primary_key=True, autoincrement=False, nullable=False)
     TrendID = Column("TrendID", Integer, primary_key=True, autoincrement=False, nullable=False)
     Value = Column("Value", String(30))
 
