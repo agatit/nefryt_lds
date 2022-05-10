@@ -1,4 +1,4 @@
-# from . import Trend
+# from . import TrendBase
 # from . import QuickTrend
 # from . import CalcTrend
 # from . import MeanTrend

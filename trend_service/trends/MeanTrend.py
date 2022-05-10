@@ -1,3 +1,6 @@
+from .CalcTrend import CalcTrend
+
+
 class MeanTrend(CalcTrend):
 
     def __init__(self, trend_ID):

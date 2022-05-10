@@ -14,7 +14,7 @@ from . import MyRequestHandler
 from .database import Session, engine, orm
 from .services import (service_trend, service_trend_def, service_trend_param,
                        service_trend_param_def)
-from .trends_writer import TrendWriter
+# from .trends_writer import TrendWriter
 
 print(__name__)
 
@@ -37,6 +37,10 @@ def main():
     trend_def = service_trend_def.get_all()
     trend_param = service_trend_param.get_all()
     trend_param_def = service_trend_param_def.get_all()
+    
+    #  pobranie wszystkich trendow "QUICK"
+    quick_trends = service_trend.get_quick_trends()
+    
     test = []
     
     for trend in trends:
