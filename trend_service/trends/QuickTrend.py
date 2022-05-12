@@ -3,16 +3,16 @@ from sqlalchemy import and_
 
 from ..database import *
 from ..database import Session, engine, orm
-from .TrendBase import TrendBase
 from ..services import service_trend
+from .TrendBase import TrendBase
+
 
 class QuickTrend(TrendBase):
 
     def __init__(self, trend: orm.Trend):
         super().__init__(trend)
-        
-    def processData(self):
-        pass
 
-    def save(self):
+    def processData(self, data):
+        for child in self.children:
+            child.processData(data)
         pass

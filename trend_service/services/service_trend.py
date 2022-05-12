@@ -152,9 +152,9 @@ def get_params_and_values(trend: orm.Trend):
     
     results = Session.execute(stmt).fetchall()
 
-    __list = []
+    __dict = {}
     for tpd, tp in results:
-        __list.append((tpd.Name, tp.Value))
+        __dict[tpd.Name] = tp.Value
     
     
-    return __list
+    return __dict

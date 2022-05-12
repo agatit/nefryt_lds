@@ -1,5 +1,10 @@
-from .TrendBase import TrendBase
+import sqlalchemy as sql
+from sqlalchemy import and_
+
 from ..database import *
+from ..database import Session, engine, orm
+from ..services import service_trend
+from .TrendBase import TrendBase
 
 
 class CalcTrend(TrendBase):
@@ -7,13 +12,7 @@ class CalcTrend(TrendBase):
     def __init__(self, trend: orm.Trend):
         super().__init__(trend)
 
-    def readParamsFromDB(self):
-        pass
-
-    def processData(self):
-        pass
-
-    def save(self):
+    def processData(self, data):
         pass
 
     def calculate(self):

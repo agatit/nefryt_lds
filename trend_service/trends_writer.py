@@ -62,8 +62,8 @@
 #             trend = None
 
 #             if trend_args[-1] == 'DERIV':
-#                 trend = TrendDeriv(self.serv, trend_args[0], self.get_trend(
-#                     trend_args[1]), trend_args[2])
+                # trend = TrendDeriv(self.serv, trend_args[0], self.get_trend(
+                #     trend_args[1]), trend_args[2])
 
 #             elif trend_args[-1] == 'MEAN':
 #                 trend = TrendMean(self.serv, trend_args[0], self.get_trend(
