@@ -40,6 +40,7 @@ def calulcate_trend(trend: orm.Trend, function):
             # self.queue = self.queue[100:]
             service_trend_data.insert(trend_id, data)
         except Exception as e:
+            logging.exception(e)
             print(e)
 
         pass
@@ -67,6 +68,7 @@ def calulcate_trend(trend: orm.Trend, function):
             # self.queue = self.queue[100:]
             service_trend_data.insert(trend_id, data)
         except Exception as e:
+            logging.exception(e)
             print(e)
 
         pass

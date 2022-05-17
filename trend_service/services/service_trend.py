@@ -41,7 +41,7 @@ def find_child_of_trend(trend: orm.Trend, trend_def_name: str, trend_param_def_n
     stmt = sql.select([orm.TrendParamDef]) \
         .where(and_(orm.TrendParamDef.Name == trend_param_def_name, orm.TrendParamDef.TrendDefID == trend.TrendDefID))
 
-    print(stmt)
+    # print(stmt)
 
     trend_param_def = Session.execute(stmt).fetchone()
     # print(trend_param_def)
@@ -49,7 +49,7 @@ def find_child_of_trend(trend: orm.Trend, trend_def_name: str, trend_param_def_n
         return None
 
     trend_param_def = trend_param_def[0]
-    print(trend_param_def)
+    # print(trend_param_def)
     stmt = sql.select([orm.TrendParam]) \
         .where(and_(orm.TrendParam.TrendParamDefID == trend_param_def.ID,
                     orm.TrendParam.TrendID == trend.ID))
@@ -59,7 +59,7 @@ def find_child_of_trend(trend: orm.Trend, trend_def_name: str, trend_param_def_n
     if (trend_param == None):
         return None
 
-    print(trend_param)
+    # print(trend_param)
 
     trend_param = trend_param[0]
 
@@ -72,7 +72,7 @@ def find_child_of_trend(trend: orm.Trend, trend_def_name: str, trend_param_def_n
         return None
 
     trend_child = trend_child[0]
-    print(trend_child)
+    # print(trend_child)
 
     return trend_child
 
@@ -94,7 +94,7 @@ def get_quick_trends() -> List[QuickTrend]:
         .join(orm.TrendDef, orm.TrendDef.ID == orm.Trend.TrendDefID) \
         .where(orm.TrendDef.ID == 'QUICK')
 
-    print(stmt)
+    # print(stmt)
 
     quick_trends = []
     result = Session.execute(stmt).fetchall()
@@ -104,6 +104,19 @@ def get_quick_trends() -> List[QuickTrend]:
 
     return quick_trends
 
+
+def get_all_trends() -> List[TrendBase]:
+    stms = sql.select([orm.Trend])
+    
+    trends = []
+
+    result = Session.execute(stms).fetchall()
+    for trend in result:
+        t = TrendBase(trend[0])
+        trends.append(t)
+        
+    return trends
+        
 
 def find_and_add_childs(trend_base: TrendBase):
 
@@ -117,8 +130,6 @@ def find_and_add_childs(trend_base: TrendBase):
 
     results = Session.execute(stmt).fetchall()
     for result in results:
-        # print(result[0])
-        # print(result[1])
         trend = result[0]
         trend_def = result[1]
 
@@ -132,7 +143,7 @@ def find_and_add_childs(trend_base: TrendBase):
             mean_trend = MeanTrend(trend)
             trend_base.children.append(mean_trend)
         elif trend_def.ID.strip() == 'DIFF':
-            diff_trend = DiffTrend(trend)
+            diff_trend = DiffTrend(trend, trend_base.trend.ID)
             trend_base.children.append(diff_trend)
         else:
             print('Unknown trend def: ' + trend_def.Name)

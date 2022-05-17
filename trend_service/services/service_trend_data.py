@@ -18,6 +18,7 @@ def insert(trend: orm.Trend, data, time):
         Session.execute(insert_stmt)
         Session.commit()
     except Exception as e:
+        logging.exception(e)
         print(e)
         Session.rollback()
         raise

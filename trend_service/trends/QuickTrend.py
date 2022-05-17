@@ -1,9 +1,6 @@
-import sqlalchemy as sql
-from sqlalchemy import and_
+import logging
 
-from ..database import *
-from ..database import Session, engine, orm
-from ..services import service_trend
+from ..database import orm
 from .TrendBase import TrendBase
 
 
@@ -11,8 +8,12 @@ class QuickTrend(TrendBase):
 
     def __init__(self, trend: orm.Trend):
         super().__init__(trend)
+        logging.info(self.__class__.__name__ + ": initialized")
 
-    def processData(self, data):
-        for child in self.children:
-            child.processData(data)
-        pass
+    def processData(self, data, parent_id: int = None):
+        try:
+            for child in self.children:
+                child.processData(data, parent_id)
+        except Exception as e:
+            logging.exception(e)
+            print(e)
