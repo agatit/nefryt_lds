@@ -36,8 +36,6 @@ class DerivTrend(CalcTrend):
                 for trend_data in recent_trend_data_list:
                     decoded = list(struct.unpack('<100h', trend_data[0].Data))
                     self.storage = np.append(self.storage, decoded)
-                
-                self.parent_storage_initiate = True
             
             if len(self.storage) >= 2 * self.window_size + 100:
                 kernel = np.array(
