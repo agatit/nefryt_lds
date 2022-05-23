@@ -2,8 +2,28 @@ from typing import List
 
 import sqlalchemy as sql
 
+from trend_service.database.orm.TrendData import TrendData
+
 from ..database import Session, engine, orm
 from ..database.orm import Trend
+
+
+def get(trend_id: int, limit: int) -> List[orm.TrendData]:
+
+    try:
+        stmt = sql.select([orm.TrendData]) \
+            .where(orm.TrendData.TrendID == trend_id) \
+            .order_by(orm.TrendData.Time) \
+            .limit(limit)
+
+        result = Session.execute(stmt)
+        trend_data = result.fetchall()
+        return trend_data
+
+    except Exception as e:
+        print(e)
+        Session.rollback()
+        raise
 
 
 def insert(trend: orm.Trend, data, time):

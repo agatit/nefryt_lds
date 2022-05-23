@@ -26,8 +26,8 @@ conf.SIGNED_VALUES = True
 TCPServer.allow_reuse_address = True
 app = get_server(TCPServer, ('', 502), MyRequestHandler.MyRequestHandler)
 
-
 def main():
+    
     logging.warning('Server started')
     try:
         app.serve_forever()
