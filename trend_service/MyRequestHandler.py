@@ -1,5 +1,3 @@
-import time
-
 from umodbus import log
 from umodbus.exceptions import ModbusError, ServerDeviceFailureError
 from umodbus.functions import create_function_from_request_pdu

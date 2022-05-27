@@ -12,7 +12,8 @@ from . import MyRequestHandler
 
 print(__name__)
 log_file_name = 'nefryt_lds_service.log'
-logging.basicConfig(format='%(asctime)s %(message)s', filename=log_file_name, level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s',
+                    filename=log_file_name, level=logging.INFO)
 
 # Add stream handler to logger 'uModbus'.
 log_to_stream(level=logging.DEBUG)
@@ -26,8 +27,9 @@ conf.SIGNED_VALUES = True
 TCPServer.allow_reuse_address = True
 app = get_server(TCPServer, ('', 502), MyRequestHandler.MyRequestHandler)
 
+
 def main():
-    
+
     logging.warning('Server started')
     try:
         app.serve_forever()

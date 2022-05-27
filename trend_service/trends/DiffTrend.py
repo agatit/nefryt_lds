@@ -24,19 +24,20 @@ class DiffTrend(CalcTrend):
         try:
             diff = self.difference(self.trendID_A, self.trendID_A)
             logging.info(self.__class__.__name__ + ": data calculated")
-            return diff
+            return (diff, 0)
         except Exception as e:
+            print(DiffTrend.__name__ + ": " + str(e))
             raise e
 
     def difference(self, A, B):
-        if self.dict_parentID_data[A].size == 100 and self.dict_parentID_data[B].size == 100:
-            data_A = self.dict_parentID_data[A][:100]
-            data_B = self.dict_parentID_data[B][:100]
+        if self.dict_parentID_data[A].size == self.output_size and self.dict_parentID_data[B].size == self.output_size:
+            data_A = self.dict_parentID_data[A][:self.output_size]
+            data_B = self.dict_parentID_data[B][:self.output_size]
 
             float_diff = data_A - data_B
             int_diff = float_diff.astype(int)
-            self.dict_parentID_data[A] = self.dict_parentID_data[A][100:]
-            self.dict_parentID_data[B] = self.dict_parentID_data[B][100:]
+            self.dict_parentID_data[A] = self.dict_parentID_data[A][self.output_size:]
+            self.dict_parentID_data[B] = self.dict_parentID_data[B][self.output_size:]
 
             return int_diff
         else:

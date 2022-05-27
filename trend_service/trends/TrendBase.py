@@ -33,16 +33,13 @@ class TrendBase(metaclass=FlyweightMeta):
     def processData(self, data, parent_id: int = None):
         raise NotImplementedError
 
-    def save(self, data):
+    def save(self, data, timestamp: int = None):
         try:
+            if timestamp is None:
+                timestamp = int(time.time())
+            #  2 okna razy 100
             packed_data = struct.pack('<100h', *data)
-            now = int(time.time())
-            # from datetime import datetime
-
-            # print(now)
-            # data_time = datetime.fromtimestamp(now)
-            # print(f"save: {data_time}\n{now}")
-            service_trend_data.insert(self.trend, packed_data, now)
+            service_trend_data.insert(self.trend, packed_data, timestamp)
             logging.info(self.__class__.__name__ + ": data saved")
         except Exception as e:
             logging.exception(e)

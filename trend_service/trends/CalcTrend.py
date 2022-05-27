@@ -5,6 +5,7 @@ import numpy as np
 from ..database import orm
 from ..services import service_trend_data
 from .TrendBase import TrendBase
+import time
 
 
 class CalcTrend(TrendBase):
@@ -12,12 +13,18 @@ class CalcTrend(TrendBase):
     def __init__(self, trend: orm.Trend, parent_id: int = None):
         super().__init__(trend)
 
+        self.output_size = 100
+
     def processData(self, data, parent_id: int = None):
         try:
+            timestamp = int(time.time())
             result = self.calculate(data, parent_id)
-            if result is not None:
-                self.save(result)
+            if result is not None and result[0] is not None:
+                calculated_data, diff_in_time = result
+                timestamp = timestamp - diff_in_time
+                self.save(calculated_data, timestamp)
         except Exception as e:
+            print(e)
             raise e
 
     def calculate(self, data, parent_id: int = None):
@@ -27,7 +34,7 @@ class CalcTrend(TrendBase):
         try:
             valid = []
             recent_trend_data_list = service_trend_data.get(
-                parent_id, 2*self.window_size/100)
+                parent_id, 2 * self.window_size)
 
             from datetime import datetime
             timestamp = recent_trend_data_list[0][0].Time

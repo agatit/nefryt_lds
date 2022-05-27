@@ -13,7 +13,8 @@ class QuickTrend(TrendBase):
     def processData(self, data, parent_id: int = None):
         try:
             for child in self.children:
+                # timestamp = int(time.time())
                 child.processData(data, parent_id)
         except Exception as e:
             logging.exception(e)
-            print(e)
+            # raise e
