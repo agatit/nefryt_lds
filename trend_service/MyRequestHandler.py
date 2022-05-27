@@ -1,3 +1,5 @@
+import time
+
 from umodbus import log
 from umodbus.exceptions import ModbusError, ServerDeviceFailureError
 from umodbus.functions import create_function_from_request_pdu
@@ -37,6 +39,10 @@ class MyRequestHandler(RequestHandler):
                 quick_trend.save(function.values)
                 quick_trend.processData(
                     data=function.values, parent_id=quick_trend.trend.ID)
+
+        # from datetime import datetime
+        # t = datetime.now().time()
+        # print(f"Odpowiedz do modbus: {t}")
 
         response_pdu = function.create_response_pdu()
         response_adu = self.create_response_adu(meta_data, response_pdu)

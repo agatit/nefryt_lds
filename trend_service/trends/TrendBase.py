@@ -36,7 +36,12 @@ class TrendBase(metaclass=FlyweightMeta):
     def save(self, data):
         try:
             packed_data = struct.pack('<100h', *data)
-            now = int(time.time() * 1000)
+            now = int(time.time())
+            # from datetime import datetime
+
+            # print(now)
+            # data_time = datetime.fromtimestamp(now)
+            # print(f"save: {data_time}\n{now}")
             service_trend_data.insert(self.trend, packed_data, now)
             logging.info(self.__class__.__name__ + ": data saved")
         except Exception as e:

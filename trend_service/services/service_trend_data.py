@@ -1,5 +1,5 @@
 from typing import List
-
+import logging
 import sqlalchemy as sql
 
 from trend_service.database.orm.TrendData import TrendData
@@ -13,7 +13,7 @@ def get(trend_id: int, limit: int) -> List[orm.TrendData]:
     try:
         stmt = sql.select([orm.TrendData]) \
             .where(orm.TrendData.TrendID == trend_id) \
-            .order_by(orm.TrendData.Time) \
+            .order_by(orm.TrendData.Time.desc()) \
             .limit(limit)
 
         result = Session.execute(stmt)

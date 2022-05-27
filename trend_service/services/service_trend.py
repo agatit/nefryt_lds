@@ -137,10 +137,10 @@ def find_and_add_childs(trend_base: TrendBase):
             quick_trend = QuickTrend(trend)
             trend_base.children.append(quick_trend)
         elif trend_def.ID.strip() == 'DERIV':
-            deriv_trend = DerivTrend(trend)
+            deriv_trend = DerivTrend(trend, trend_base.trend.ID)
             trend_base.children.append(deriv_trend)
         elif trend_def.ID.strip() == 'MEAN':
-            mean_trend = MeanTrend(trend)
+            mean_trend = MeanTrend(trend, trend_base.trend.ID)
             trend_base.children.append(mean_trend)
         elif trend_def.ID.strip() == 'DIFF':
             diff_trend = DiffTrend(trend, trend_base.trend.ID)
