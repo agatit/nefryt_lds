@@ -1,0 +1,48 @@
+# schemas/orm/Event.yaml
+type: object
+required:
+  - ID
+  - EventDefID
+  - MethodID
+  - BeginDate
+properties:
+  ID:
+    type: integer
+    format: int64
+    example: 0
+    readOnly: true
+    description: none
+  EventDefID:
+    type: integer
+    description: none
+  MethodID:
+    type: integer
+    description: none
+  BeginDate:
+    type: string
+    format: date-time
+    description: none
+  AckDate:
+    type: string
+    format: date-time
+    description: none
+  EndDate:
+    type: string
+    format: date-time
+    description: none
+  Details:
+    type: string
+    description: none    
+  Position:
+    type: integer
+    description: none   
+  Caption:
+    type: string
+    description: none
+  Verbosity:
+    type: string
+    description: none
+  Silient:
+    type: boolean
+    description: none     
+

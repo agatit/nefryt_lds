@@ -1,0 +1,6 @@
+name: editorPipelineId
+in: path
+required: true
+description: The id of the editor pipeline to retrieve
+schema:
+  type: integer

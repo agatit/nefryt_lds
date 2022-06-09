@@ -1,0 +1,6 @@
+name: pipelineId
+in: path
+required: true
+description: The id of the pipeline to retrieve
+schema:
+  type: integer

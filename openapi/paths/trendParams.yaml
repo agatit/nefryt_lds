@@ -1,0 +1,20 @@
+get:
+  summary: List trend params
+  operationId: listTrendParams
+  description: List all trend params
+  tags:
+    - trends
+  parameters:
+    - $ref: "../parameters/path/trendId.yaml"
+  responses:
+    "200":
+      description: A array of params
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/TrendParam.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+    

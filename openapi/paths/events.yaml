@@ -1,0 +1,17 @@
+get:
+  summary: List events
+  operationId: listEvents
+  description: List all events
+  tags:
+    - events
+  responses:
+    "200":
+      description: A array of events
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/Event.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

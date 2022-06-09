@@ -1,0 +1,24 @@
+# schemas/orm/MethodParamDef.yaml
+type: object
+required:  
+  - ID
+properties:
+  ID:
+    type: integer
+    nullable: false
+    readOnly: true
+    description: none
+    example: 0
+  MethodDefID:
+    type: integer
+    description: none  
+  Name:
+    type: string
+    # any char with length 0-30 only
+    pattern: ^.{0,30}
+    description: none
+  DataType:
+    type: string
+    # any char with length 0-6 only
+    pattern: ^.{0,6}
+    description: none

@@ -1,0 +1,6 @@
+name: editorNodeId
+in: path
+required: true
+description: The id of the editor node to retrieve
+schema:
+  type: integer

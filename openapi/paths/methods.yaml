@@ -1,0 +1,42 @@
+get:
+  summary: List pipelnie methods
+  operationId: listMethods
+  description: List all methods
+  tags:
+    - methods
+  parameters:
+    - $ref: "../parameters/path/pipelineId.yaml"
+  responses:
+    "200":
+      description: A array of  methods
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/Method.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+post:
+  summary: Creates method
+  operationId: createMethod
+  description: Creates a  method
+  tags:
+    - methods
+  parameters:
+    - $ref: "../parameters/path/pipelineId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Method.yaml"
+  responses:
+    "201":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Method.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

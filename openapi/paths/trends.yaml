@@ -1,0 +1,39 @@
+get:
+  summary: List trends
+  operationId: listTrends
+  description: List all trends
+  tags:
+    - trends
+  # parameters:
+  #   - $ref: "../parameters/query/limit.yaml"
+  responses:
+    "200":
+      description: A array of trends
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/Trend.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+post:
+  summary: Create trend
+  operationId: createTrend
+  description: Create a trend
+  tags:
+    - trends
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Trend.yaml"
+  responses:
+    "201":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Trend.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

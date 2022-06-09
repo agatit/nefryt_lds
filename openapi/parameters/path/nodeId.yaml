@@ -1,0 +1,6 @@
+name: nodeId
+in: path
+required: true
+description: The id of the node to retrieve
+schema:
+  type: integer

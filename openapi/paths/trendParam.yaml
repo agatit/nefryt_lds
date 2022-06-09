@@ -1,0 +1,42 @@
+get:
+  summary: Gets trend param detail
+  operationId: getTrendParamById
+  description: Info for specific trend param
+  tags:
+    - trends
+  parameters:
+    - $ref: "../parameters/path/trendId.yaml"
+    - $ref: "../parameters/path/trendParamDefId.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/TrendParam.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+put:
+  summary: Update trend params
+  operationId: updateTrendParam
+  description: Updates trend param
+  tags:
+    - trends
+  parameters:
+    - $ref: "../parameters/path/trendId.yaml"
+    - $ref: "../parameters/path/trendParamDefId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/TrendParam.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/TrendParam.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

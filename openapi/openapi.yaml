@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: Nefryt LDS API
+  description: Database API for Nefryt LDS
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/
+    description: Optional server description, e.g. Main (production) server
+  - url: http://localhost:8080/test
+    description: Optional server description, e.g. Internal staging server for testing
+paths:
+  # ref to files ./paths/endpoint.yaml
+  /trend:
+    $ref: "./paths/trends.yaml"
+  /trend/{trendId}:
+    $ref: "./paths/trend.yaml"
+  /trend/{trendId}/param:
+    $ref: "./paths/trendParams.yaml"
+  /trend/{trendId}/param/{trendParamDefId}:
+    $ref: "./paths/trendParam.yaml"
+  /trend/{trendIdList}/data/{begin}/{end}/{samples}:
+    $ref: "./paths/trendData.yaml"
+  /trend_def:
+    $ref: "./paths/trendDefs.yaml"    
+  /node:
+    $ref: "./paths/nodes.yaml"
+  /node/{nodeId}:
+    $ref: "./paths/node.yaml"
+  /pipeline:
+    $ref: "./paths/pipelines.yaml"
+  /pipeline/{pipelineId}:
+    $ref: "./paths/pipeline.yaml"
+  /pipeline/{pipelineId}/method:
+    $ref: "./paths/methods.yaml" 
+  /pipeline/{pipelineId}/method/{methodId}:
+    $ref: "./paths/method.yaml"     
+  /pipeline/{pipelineId}/method/{methodId}/param:
+    $ref: "./paths/methodParams.yaml"
+  /pipeline/{pipelineId}/method/{methodParaDefId}:
+    $ref: "./paths/methodParam.yaml"       
+  /event:
+    $ref: "./paths/events.yaml"
+  /event/{eventId}:
+    $ref: "./paths/event.yaml"
+  /event/{eventId}/ack:
+    $ref: "./paths/eventAck.yaml"
+components:
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+  responses:
+    $ref: "./responses/_index.yaml"

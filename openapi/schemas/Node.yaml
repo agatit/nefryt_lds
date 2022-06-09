@@ -1,0 +1,26 @@
+# schemas/orm/Node.yaml
+type: object
+required:  
+  - ID
+  - Type
+properties:
+  ID:
+    type: integer
+    readOnly: true
+    description: none
+    example: 0
+  Type:
+    type: string
+    nullable: false
+    pattern: ^.{0,6}
+    description: none  
+  TrendID:
+    type: integer
+    nullable: true
+    description: none
+  Name:
+    type: string
+    pattern: ^.{0,50}
+    description: none
+  EditorParams:
+    $ref: "./EditorNode.yaml"

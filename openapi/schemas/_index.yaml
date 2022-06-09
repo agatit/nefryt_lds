@@ -1,0 +1,38 @@
+Link:
+  $ref: "./Link.yaml"
+Method:
+  $ref: "./Method.yaml"
+MethodDef:
+  $ref: "./MethodDef.yaml"
+MethodParam:
+  $ref: "./MethodParam.yaml"
+MethodParamDef:
+  $ref: "./MethodParamDef.yaml"
+Node:
+  $ref: "./Node.yaml"
+Pipeline:
+  $ref: "./Pipeline.yaml"
+PipelineNode:
+  $ref: "./PipelineNode.yaml"
+Trend:
+  $ref: "./Trend.yaml"
+TrendData:
+  $ref: "./TrendData.yaml"
+TrendDef:
+  $ref: "./TrendDef.yaml"
+TrendGroup:
+  $ref: "./TrendGroup.yaml"
+TrendParam:
+  $ref: "./TrendParam.yaml"
+TrendParamDef:
+  $ref: "./TrendParamDef.yaml"
+Event:
+  $ref: "./Event.yaml"
+EditorPipeline:
+  $ref: "./EditorPipeline.yaml"
+EditorNode:
+  $ref: "./EditorNode.yaml"
+Error:
+  $ref: "./Error.yaml"
+Information:
+  $ref: "./Information.yaml"

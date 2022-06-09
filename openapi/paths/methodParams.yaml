@@ -1,0 +1,20 @@
+get:
+  summary: List pipelnie method params
+  operationId: listMethodParams
+  description: List all  method params
+  tags:
+    - methods
+  parameters:
+    - $ref: "../parameters/path/pipelineId.yaml"
+    - $ref: "../parameters/path/methodId.yaml"
+  responses:
+    "200":
+      description: A array of  methods params
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/MethodParam.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

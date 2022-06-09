@@ -1,0 +1,13 @@
+post:
+  summary: Acknowledges ack
+  operationId: ackEvent
+  description: Acknowledges an event
+  tags:
+    - events
+  parameters:
+    - $ref: "../parameters/path/eventId.yaml"
+  responses:
+    "200":
+      $ref: "../responses/Updated.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

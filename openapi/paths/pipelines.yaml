@@ -1,0 +1,38 @@
+get:
+  summary: List pipelines
+  operationId: listPipelines
+  description: List all pipelines
+  tags:
+    - pipelines
+  responses:
+    "200":
+      description: A array of pipelines
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/Pipeline.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+post:
+  summary: Create pipeline
+  operationId: createPipeline
+  description: Create a pipeline
+  tags:
+    - pipelines
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Pipeline.yaml"
+  responses:
+    "201":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Pipeline.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

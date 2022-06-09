@@ -1,0 +1,15 @@
+# schemas/orm/EditorNode.yaml
+type: object
+required:
+  - PosX
+  - PosY
+properties:
+  PosX:
+    type: integer
+    nullable: false
+    pattern: ^.{0,6}
+    description: none
+  PosY:
+    type: integer
+    nullable: false
+    description: none

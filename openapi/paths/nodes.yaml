@@ -1,0 +1,39 @@
+get:
+  summary: List nodes
+  operationId: listNodes
+  description: List all nodes
+  tags:
+    - nodes
+  responses:
+    "200":
+      description: A array of nodes
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/Node.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+post:
+  summary: Create nodes
+  operationId: createNode
+  description: Create a nodes
+  tags:
+    - nodes
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Node.yaml"
+  responses:
+    "201":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Node.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+      

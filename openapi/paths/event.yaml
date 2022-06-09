@@ -1,0 +1,17 @@
+get:
+  summary: Gets detailed event
+  operationId: getEventById
+  description: Info for specific event
+  tags:
+    - events
+  parameters:
+    - $ref: "../parameters/path/eventId.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Event.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

@@ -1,0 +1,55 @@
+get:
+  summary: Gets node details
+  operationId: getNodeById
+  description: Info for specific node
+  tags:
+    - nodes
+  parameters:
+    - $ref: "../parameters/path/nodeId.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Node.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+put:
+  summary: Updates nodes
+  operationId: updateNode
+  description: Updates a nodes
+  tags:
+    - nodes
+  parameters:
+    - $ref: "../parameters/path/nodeId.yaml"    
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Node.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Node.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"  
+
+delete:
+  summary: Deletes node
+  operationId: deleteNodeById
+  description: Deletes specific node
+  tags:
+    - nodes
+  parameters:
+    - $ref: "../parameters/path/nodeId.yaml"
+  responses:
+    "204":
+      $ref: "../responses/Deleted.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+

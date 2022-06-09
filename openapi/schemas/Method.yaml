@@ -1,0 +1,24 @@
+# schemas/orm/Method.yaml
+type: object
+required:  
+  - ID
+  - MethodDefID
+  - PipelineID
+properties:
+  ID:
+    type: integer
+    readOnly: true
+    description: none
+    example: 0
+  MethodDefID:
+    type: integer
+    nullable: false
+    example: 0
+  PipelineID:
+    type: integer
+    nullable: false
+    example: 0
+  Name:
+    type: string
+    example: Arthur Dent
+    pattern: ^.{0,30}

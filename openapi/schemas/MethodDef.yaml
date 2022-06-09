@@ -1,0 +1,15 @@
+# schemas/orm/MethodDef.yaml
+type: object
+required:  
+  - ID
+properties:
+  ID:
+    type: integer
+    nullable: false
+    readOnly: true
+    description: none
+    example: 0
+  Name:
+    type: string
+    pattern: ^.{0,30}
+    description: none

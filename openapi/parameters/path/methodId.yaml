@@ -1,0 +1,6 @@
+name: methodId
+in: path
+required: true
+description: The id of the pipeline method to retrieve
+schema:
+  type: integer

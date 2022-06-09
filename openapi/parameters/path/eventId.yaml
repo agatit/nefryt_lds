@@ -1,0 +1,6 @@
+name: eventId
+in: path
+required: true
+description: The id of the event to retrieve
+schema:
+  type: integer

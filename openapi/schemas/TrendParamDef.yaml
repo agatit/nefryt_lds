@@ -1,0 +1,24 @@
+# schemas/orm/TrendParamDef.yaml
+type: object
+required:
+  - ID
+  - TrendDefID
+properties:
+  ID:
+    type: integer
+    nullable: false
+    readOnly: true
+    description: none
+    example: 0
+  TrendDefID:
+    type: integer
+    nullable: false
+    description: none
+  Name:
+    type: string
+    pattern: ^.{0,30}
+    description: none
+  DataType:
+    type: string
+    pattern: ^.{0,6}
+    description: none

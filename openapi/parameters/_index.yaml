@@ -1,0 +1,17 @@
+# path
+eventId:
+  $ref: "./path/eventId.yaml"
+nodeId:
+  $ref: "./path/nodeId.yaml"
+pipelineId:
+  $ref: "./path/pipelineId.yaml"
+pipelineMethodId:
+  $ref: "./path/methodId.yaml"
+trendId:
+  $ref: "./path/trendId.yaml"
+trendParamDefId:
+  $ref: "./path/trendParamDefId.yaml"
+editorNodeId:
+  $ref: "./path/editorNodeId.yaml"
+editorPipelineId:
+  $ref: "./path/editorPipelineId.yaml"

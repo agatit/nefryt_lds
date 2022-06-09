@@ -1,0 +1,17 @@
+# schemas/orm/TrendData.yaml
+
+type: object
+required:
+  - Timestamp
+  - TimestampMs
+properties:
+  Timestamp:
+    type: integer
+  TimestampMs:
+    type: integer    
+additionalProperties:
+  type: number
+
+
+
+

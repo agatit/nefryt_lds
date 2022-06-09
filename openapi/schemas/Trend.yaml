@@ -1,0 +1,34 @@
+# schemas/orm/Trend.yaml
+type: object
+required:  
+  - ID
+properties:
+  ID:
+    type: integer
+    nullable: false
+    readOnly: true
+    example: 0
+    description: none
+  Name:
+    type: string
+    pattern: ^.{0,30}
+    description: none
+  TrendGroupID:
+    type: integer
+    description: none
+  TrendDefID:
+    type: string
+    description: none
+  TimeExponent:
+    type: integer
+    description: none
+  Format:
+    type: string
+    description: none    
+  UnitID:
+    type: string
+    description: none
+  Color:
+    type: string
+  AxisLabel:
+    type: string

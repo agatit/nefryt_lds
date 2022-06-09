@@ -1,0 +1,57 @@
+get:
+  summary: Gets  method details
+  operationId: getMethodById
+  description: Info for specific  method
+  tags:
+    - methods
+  parameters:
+    - $ref: "../parameters/path/pipelineId.yaml"
+    - $ref: "../parameters/path/methodId.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/method.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+put:
+  summary: Updates method
+  operationId: updateMethod
+  description: Updates  method
+  tags:
+    - methods
+  parameters:
+    - $ref: "../parameters/path/pipelineId.yaml"
+    - $ref: "../parameters/path/methodId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Method.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Method.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+delete:
+  summary: Deletes  method
+  operationId: deleteMethodById
+  description: Deletes specific  method
+  tags:
+    - methods
+  parameters:
+    - $ref: "../parameters/path/pipelineId.yaml"
+    - $ref: "../parameters/path/methodId.yaml"
+  responses:
+    "204":
+      $ref: "../responses/Deleted.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

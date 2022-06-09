@@ -1,0 +1,21 @@
+# schemas/orm/TrendGroup.yaml
+type: object
+required:  
+  - ID
+  - Name
+  - AnalisisOnly
+properties:
+  ID:
+    type: integer
+    nullable: false
+    readOnly: true
+    description: none
+    example: 0
+  Name:
+    type: string
+    pattern: ^.{0,100}
+    description: none
+  AnalisisOnly:
+    type: boolean
+    description: none
+

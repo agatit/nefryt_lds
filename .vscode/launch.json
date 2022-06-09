@@ -10,6 +10,14 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: api module",
+            "type": "python",
+            "request": "launch",
+            "module": "api",
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

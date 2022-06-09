@@ -1,0 +1,25 @@
+# schemas/orm/EditorPipeline.yaml
+type: object
+required:
+  - AreaWidth
+  - AreaHeight
+  - AreaWidthDivision
+  - AreaHeightDivision
+properties:
+  AreaWidth:
+    type: integer
+    nullable: false
+    pattern: ^.{0,6}
+    description: none
+  AreaHeight:
+    type: integer
+    nullable: false
+    description: none
+  AreaWidthDivision:
+    type: integer
+    nullable: false
+    description: none
+  AreaHeightDivision:
+    type: integer
+    nullable: false
+    description: none

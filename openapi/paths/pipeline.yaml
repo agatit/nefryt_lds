@@ -1,0 +1,55 @@
+get:
+  summary: Gets pipeline details
+  operationId: getPipelineById
+  description: Info for specific pipeline
+  tags:
+    - pipelines
+  parameters:
+    - $ref: "../parameters/path/pipelineId.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Pipeline.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+put:
+  summary: Updates pipeline
+  operationId: updatePipeline
+  description: Updates pipeline
+  tags:
+    - pipelines
+  parameters:
+    - $ref: "../parameters/path/PipelineId.yaml"    
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Pipeline.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Pipeline.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+delete:
+  summary: Deletes pipeline
+  operationId: deletePipelineById
+  description: Deletes specific pipeline
+  tags:
+    - pipelines
+  parameters:
+    - $ref: "../parameters/path/PipelineId.yaml"
+  responses:
+    "204":
+      $ref: "../responses/Deleted.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+

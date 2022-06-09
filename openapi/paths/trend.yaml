@@ -1,0 +1,55 @@
+get:
+  summary: Detail trend
+  operationId: getTrendById
+  description: Info for specific trend
+  tags:
+    - trends
+  parameters:
+    - $ref: "../parameters/path/trendId.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+        # multipart/form-data:
+          schema:
+            $ref: "../schemas/Trend.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+put:
+  summary: Update trend
+  operationId: updateTrend
+  description: Update a trend
+  tags:
+    - trends
+  parameters:
+    - $ref: "../parameters/path/trendId.yaml"    
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Trend.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Trend.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+delete:
+  summary: Deletes trend
+  operationId: deleteTrendById
+  description: Deletes specific trend
+  tags:
+    - trends
+  parameters:
+    - $ref: "../parameters/path/trendId.yaml"
+  responses:
+    "204":
+      $ref: "../responses/Deleted.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

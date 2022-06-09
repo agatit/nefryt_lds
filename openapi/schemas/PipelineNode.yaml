@@ -1,0 +1,18 @@
+# schemas/orm/PipelineNode.yaml
+type: object
+required:
+  - ID
+  - NodeID
+properties:
+  ID:
+    type: integer
+    nullable: false
+    readOnly: true
+    description: none
+    example: 0
+  NodeID:
+    type: integer
+    description: none
+  First:
+    type: boolean
+    description: none

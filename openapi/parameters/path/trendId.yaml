@@ -1,0 +1,6 @@
+name: trendId # Note the name is the same as in the path
+in: path
+required: true
+description: The id of the trend to retrieve
+schema:
+  type: integer
