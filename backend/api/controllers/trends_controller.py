@@ -13,7 +13,7 @@ from api.models.trend_def import TrendDef  # noqa: E501
 from api import util
 
 from sqlalchemy import alias, select, delete, and_
-from database import db
+from api import session
 from database.models import lds
 
 
@@ -43,9 +43,9 @@ def create_trend(trend=None):  # noqa: E501
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
         db_trend.UnitID = api_trend.unit_id
-        db.session.add(db_trend)
+        session.add(db_trend)
         
-        db.session.commit()
+        session.commit()
 
         return get_trend_by_id(db_trend.ID)
 
@@ -65,11 +65,11 @@ def delete_trend_by_id(trend_id):  # noqa: E501
     :rtype: Information
     """
     try:        
-        db_trend = db.session.get(lds.Trend, trend_id)
+        db_trend = session.get(lds.Trend, trend_id)
         if db_trend is None:
             return Error(message="Not Found", code=404), 404
-        db.session.delete(db_trend)
-        db.session.commit()
+        session.delete(db_trend)
+        session.commit()
 
         return Information(message="Success", status=200), 200
 
@@ -88,7 +88,7 @@ def get_trend_by_id(trend_id):  # noqa: E501
     :rtype: Trend
     """
     try:
-        db_trend = db.session.get(lds.Trend, trend_id)
+        db_trend = session.get(lds.Trend, trend_id)
         if db_trend is None:
             return Error(message="Not Found", code=404), 404
 
@@ -122,7 +122,7 @@ def update_trend(trend_id, trend=None):  # noqa: E501
         else:
             return Error(message="Expected a JSON request", code=400), 400
 
-        db_trend = db.session.get(lds.Trend, trend_id)
+        db_trend = session.get(lds.Trend, trend_id)
         if db_trend is None:
             return Error(message="Not Found", code=404), 404
 
@@ -131,9 +131,9 @@ def update_trend(trend_id, trend=None):  # noqa: E501
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
         db_trend.UnitID = api_trend.unit_id
-        db.session.add(db_trend)
+        session.add(db_trend)
 
-        db.session.commit()
+        session.commit()
 
         return get_trend_by_id(db_trend.ID)
 
@@ -150,7 +150,7 @@ def list_trends():  # noqa: E501
     :rtype: List[Trend]
     """
     try:
-        db_trends = db.session.execute(
+        db_trends = session.execute(
             select(lds.Trend)
         ).fetchall()
 
@@ -207,7 +207,7 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
             last_timestamp_ms = (last_timestamp_ms + inc_ms) % 100
 
         for trend_id in trend_id_list:
-            cursor = db.session.execute(
+            cursor = session.execute(
                 select(lds.TrendData)\
                     .where(and_(lds.TrendData.Time >= begin, lds.TrendData.Time <= end, lds.TrendData.TrendID==trend_id))
             )
@@ -243,7 +243,7 @@ def get_trend_param_by_id(trend_id, trend_param_def_id):  # noqa: E501
     :rtype: TrendParam
     """
     try:
-        db_trend_param = db.session.get(lds.TrendParam, (trend_param_def_id, trend_id))
+        db_trend_param = session.get(lds.TrendParam, (trend_param_def_id, trend_id))
         if db_trend_param is None:
             return Error(message="Not Found", code=404), 404
 
@@ -287,7 +287,7 @@ def list_trend_params(trend_id):  # noqa: E501
             .outerjoin(tp, and_(tpd.c.ID == tp.c.TrendParamDefID, t.c.ID == tp.c.TrendID)) \
             .where(t.c.ID == trend_id)
 
-        db_trend_params = db.session.execute(stmt).fetchall()
+        db_trend_params = session.execute(stmt).fetchall()
 
 
         if db_trend_params is None:
@@ -325,15 +325,15 @@ def update_trend_param(trend_id, trend_param_def_id, trend_param=None):  # noqa:
         if connexion.request.is_json:
             api_trend_param = TrendParam.from_dict(connexion.request.get_json())  # noqa: E501
 
-        db_trend_param = db.session.get(lds.TrendParam, (trend_param_def_id, trend_id))
+        db_trend_param = session.get(lds.TrendParam, (trend_param_def_id, trend_id))
         if db_trend_param is None:
             return Error(message="Not Found", code=404), 404
 
         
         db_trend_param.Value = api_trend_param.value
-        db.session.add(db_trend_param)
+        session.add(db_trend_param)
 
-        db.session.commit()
+        session.commit()
 
         return get_trend_param_by_id(db_trend_param.TrendID, db_trend_param.TrendParamDefID)
 
@@ -349,7 +349,7 @@ def list_trend_defs():  # noqa: E501
     :rtype: List[Trend]
     """
     try:
-        trends = db.session.execute(
+        trends = session.execute(
             select(lds.TrendDef)
         ).fetchall()
 

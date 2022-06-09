@@ -9,7 +9,7 @@ from api.models.editor_node import EditorNode  # noqa: E501
 from api import util
 
 from sqlalchemy import alias, select, delete
-from database import db
+from api import session
 from database.models import editor, lds
 
 
@@ -34,17 +34,17 @@ def create_node(node=None):  # noqa: E501
         db_node.Type = node.type
         db_node.TrendID = node.trend_id
         db_node.Name = node.name
-        db.session.add(db_node)
-        db.session.flush()
+        session.add(db_node)
+        session.flush()
 
         if node.editor_params:
             db_editor_node = editor.Node()
             db_editor_node.ID = db_node.ID
             db_editor_node.PosX = node.editor_params.pos_x
             db_editor_node.PosY = node.editor_params.pos_y
-            db.session.add(db_editor_node)
+            session.add(db_editor_node)
         
-        db.session.commit()
+        session.commit()
 
         return get_node_by_id(db_node.ID)
 
@@ -69,26 +69,26 @@ def update_node(node_id, node=None):  # noqa: E501
         else:
             return Error(message="Expected a JSON request", code=400), 400
 
-        db_node = db.session.get(lds.Node, node_id)
+        db_node = session.get(lds.Node, node_id)
         if db_node is None:
             return Error(message="Not Found", code=404), 404
 
         db_node.Type = api_node.type
         db_node.TrendID = api_node.trend_id
         db_node.Name = api_node.name
-        db.session.add(db_node)
-        db.session.flush()
+        session.add(db_node)
+        session.flush()
 
-        db_editor_node = db.session.get(editor.Node, node_id)
+        db_editor_node = session.get(editor.Node, node_id)
         if db_editor_node is None:
             db_editor_node = editor.Node()
             db_editor_node.ID = node_id
 
         db_editor_node.PosX = api_node.editor_params.pos_x
         db_editor_node.PosY = api_node.editor_params.pos_y
-        db.session.add(db_editor_node)
+        session.add(db_editor_node)
 
-        db.session.commit()
+        session.commit()
 
         return get_node_by_id(db_node.ID)
 
@@ -106,11 +106,11 @@ def delete_node_by_id(node_id):  # noqa: E501
     :rtype: Information
     """
     try:        
-        db_node = db.session.get(lds.Node, node_id)
+        db_node = session.get(lds.Node, node_id)
         if db_node is None:
             return Error(message="Not Found", code=404), 404
-        db.session.delete(db_node)
-        db.session.commit()
+        session.delete(db_node)
+        session.commit()
 
         return Information(message="Success", status=200), 200
 
@@ -129,7 +129,7 @@ def get_node_by_id(node_id):  # noqa: E501
     :rtype: Node
     """
     try:
-        node = db.session.get(lds.Node, node_id)
+        node = session.get(lds.Node, node_id)
         if node is None:
             return Error(message="Not Found", code=404), 404
         api_node = Node()
@@ -138,7 +138,7 @@ def get_node_by_id(node_id):  # noqa: E501
         api_node.trend_id = node.TrendID
         api_node.name = node.Name
 
-        editor_node = db.session.get(editor.Node, node_id)
+        editor_node = session.get(editor.Node, node_id)
         if editor_node is not None:
             api_node.editor_params = EditorNode()
             api_node.editor_params.pos_x = editor_node.PosX
@@ -161,7 +161,7 @@ def list_nodes():  # noqa: E501
     try:
         ln = alias(lds.Node, "ln")
         en = alias(editor.Node, "en")
-        nodes = db.session.execute(
+        nodes = session.execute(
             select([ln, en]).outerjoin(en, en.c.ID == ln.c.ID )
         ).fetchall()
 

@@ -12,12 +12,20 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python: api module",
+            "name": "API",
             "type": "python",
             "request": "launch",
             "module": "api",
             "console": "integratedTerminal",
             "justMyCode": false
-        }
+        },
+        {
+            "name": "TRENDS_WRITER",
+            "type": "python",
+            "request": "launch",
+            "module": "trends_writer",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }        
     ]
 }

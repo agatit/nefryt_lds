@@ -1,0 +1,11 @@
+pymssql == 2.2.4
+umodbus
+SQLAlchemy
+numpy 
+scipy 
+matplotlib 
+ipython 
+jupyter 
+pandas 
+sympy 
+nose

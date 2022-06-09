@@ -9,7 +9,7 @@ from api.models.information import Information  # noqa: E501
 from api import util
 
 from sqlalchemy import alias, select, delete, and_
-from database import db
+from api import session
 from database.models import lds
 
 def ack_event(event_id):  # noqa: E501
@@ -28,12 +28,12 @@ def ack_event(event_id):  # noqa: E501
         else:
             return Error(message="Expected a JSON request", code=400), 400
 
-        db_event: lds.Event = db.session.get(lds.Event, api_event.id)
+        db_event: lds.Event = session.get(lds.Event, api_event.id)
         if db_event is None:
             return Error(message="Not Found", code=404), 404       
         db_event.AckDate = datetime.timestamp(datetime.now())
-        db.session.add(db_event)
-        db.session.commit()
+        session.add(db_event)
+        session.commit()
 
         return Information(message="events acknowledged", status=200), 200
 
@@ -52,7 +52,7 @@ def get_event_by_id(event_id):  # noqa: E501
     :rtype: Event
     """
     try:
-        db_event: lds.Event = db.session.get(lds.Event, event_id)
+        db_event: lds.Event = session.get(lds.Event, event_id)
         if db_event is None:
             return Error(message="Not Found", code=404), 404
         api_event = Event()
@@ -80,7 +80,7 @@ def list_events():  # noqa: E501
     :rtype: List[Event]
     """
     try:
-        db_events: list[lds.Event] = db.session.execute(
+        db_events: list[lds.Event] = session.execute(
             select(lds.Event)
                 .join(lds.EventDef)
                 .where(and_(lds.EventDef.Enabled == True, lds.EventDef.Visible == True))
