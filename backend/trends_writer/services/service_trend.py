@@ -2,13 +2,14 @@ from typing import List
 
 import sqlalchemy as sql
 from sqlalchemy import and_
-
 from trends_writer import session
-from database.models import lds
-from ..trends import QuickTrend, TrendBase, DerivTrend, DiffTrend, MeanTrend
+from database import lds
+from ..trends import QuickTrend, TrendBase, DerivTrend, MeanTrend, DiffTrend
+
 from . import service_trend_def, service_trend_param_def
 
 __list = []
+
 
 def __fetch() -> List[lds.Trend]:
     stmt = sql.select([lds.Trend])
@@ -42,7 +43,7 @@ def find_child_of_trend(trend: lds.Trend, trend_def_name: str, trend_param_def_n
     stmt = sql.select([lds.TrendParamDef]) \
         .where(and_(lds.TrendParamDef.Name == trend_param_def_name, lds.TrendParamDef.TrendDefID == trend.TrendDefID))
 
-    print(stmt)
+    # print(stmt)
 
     trend_param_def = session.execute(stmt).fetchone()
     # print(trend_param_def)
@@ -50,7 +51,7 @@ def find_child_of_trend(trend: lds.Trend, trend_def_name: str, trend_param_def_n
         return None
 
     trend_param_def = trend_param_def[0]
-    print(trend_param_def)
+    # print(trend_param_def)
     stmt = sql.select([lds.TrendParam]) \
         .where(and_(lds.TrendParam.TrendParamDefID == trend_param_def.ID,
                     lds.TrendParam.TrendID == trend.ID))
@@ -60,7 +61,7 @@ def find_child_of_trend(trend: lds.Trend, trend_def_name: str, trend_param_def_n
     if (trend_param == None):
         return None
 
-    print(trend_param)
+    # print(trend_param)
 
     trend_param = trend_param[0]
 
@@ -73,7 +74,7 @@ def find_child_of_trend(trend: lds.Trend, trend_def_name: str, trend_param_def_n
         return None
 
     trend_child = trend_child[0]
-    print(trend_child)
+    # print(trend_child)
 
     return trend_child
 
@@ -95,7 +96,7 @@ def get_quick_trends() -> List[QuickTrend]:
         .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) \
         .where(lds.TrendDef.ID == 'QUICK')
 
-    print(stmt)
+    # print(stmt)
 
     quick_trends = []
     result = session.execute(stmt).fetchall()
@@ -104,6 +105,19 @@ def get_quick_trends() -> List[QuickTrend]:
         quick_trends.append(quickTrend)
 
     return quick_trends
+
+
+def get_all_trends() -> List[TrendBase]:
+    stms = sql.select([lds.Trend])
+
+    trends = []
+
+    result = session.execute(stms).fetchall()
+    for trend in result:
+        t = TrendBase(trend[0])
+        trends.append(t)
+
+    return trends
 
 
 def find_and_add_childs(trend_base: TrendBase):
@@ -118,8 +132,6 @@ def find_and_add_childs(trend_base: TrendBase):
 
     results = session.execute(stmt).fetchall()
     for result in results:
-        # print(result[0])
-        # print(result[1])
         trend = result[0]
         trend_def = result[1]
 
@@ -127,13 +139,13 @@ def find_and_add_childs(trend_base: TrendBase):
             quick_trend = QuickTrend(trend)
             trend_base.children.append(quick_trend)
         elif trend_def.ID.strip() == 'DERIV':
-            deriv_trend = DerivTrend(trend)
+            deriv_trend = DerivTrend(trend, trend_base.trend.ID)
             trend_base.children.append(deriv_trend)
         elif trend_def.ID.strip() == 'MEAN':
-            mean_trend = MeanTrend(trend)
+            mean_trend = MeanTrend(trend, trend_base.trend.ID)
             trend_base.children.append(mean_trend)
         elif trend_def.ID.strip() == 'DIFF':
-            diff_trend = DiffTrend(trend)
+            diff_trend = DiffTrend(trend, trend_base.trend.ID)
             trend_base.children.append(diff_trend)
         else:
             print('Unknown trend def: ' + trend_def.Name)
@@ -141,21 +153,3 @@ def find_and_add_childs(trend_base: TrendBase):
     for child in trend_base.children:
         find_and_add_childs(child)
 
-
-def get_params_and_values(trend: lds.Trend):
-    
-    stmt = sql.select([lds.TrendParamDef, lds.TrendParam]) \
-        .select_from(lds.Trend) \
-        .join(lds.TrendDef, lds.Trend.TrendDefID == lds.TrendDef.ID) \
-        .join(lds.TrendParamDef, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID) \
-        .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.Trend.ID == lds.TrendParam.TrendID)) \
-        .where(lds.Trend.ID == trend.ID)
-    
-    results = session.execute(stmt).fetchall()
-
-    __list = []
-    for tpd, tp in results:
-        __list.append((tpd.Name, tp.Value))
-    
-    
-    return __list

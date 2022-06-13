@@ -15,8 +15,13 @@ def main():
                 pythonic_params=True)
 
     # app.app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql+pymssql://sa:Onyks$us@serverdb:1447/NefrytLDSDemo'
-    app.app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo?driver=ODBC+Driver+17+for+SQL+Server'
-    
+    # app.app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo?driver=ODBC+Driver+17+for+SQL+Server'
+    app.app.config['SQLALCHEMY_DATABASE_URI'] = \
+        'mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo' \
+        '?driver=ODBC+Driver+18+for+SQL+Server' \
+        '&TrustServerCertificate=Yes' \
+        '&Encrypt=No'   
+
     app.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"future": True}
 

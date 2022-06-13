@@ -17,7 +17,8 @@
             "request": "launch",
             "module": "api",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend"
         },
         {
             "name": "TRENDS_WRITER",
@@ -25,7 +26,8 @@
             "request": "launch",
             "module": "trends_writer",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend"
         }        
     ]
 }

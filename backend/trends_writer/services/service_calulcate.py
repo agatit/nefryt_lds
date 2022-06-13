@@ -1,9 +1,7 @@
 import scipy
+import logging
 
-from sqlalchemy import alias, select, delete
-from trends_writer import session
-from database.models import lds
-
+from database import lds
 from . import (service_trend, service_trend_data, service_trend_def,
                service_trend_param, service_trend_param_def)
 
@@ -43,6 +41,7 @@ def calulcate_trend(trend: lds.Trend, function):
             # self.queue = self.queue[100:]
             service_trend_data.insert(trend_id, data)
         except Exception as e:
+            logging.exception(e)
             print(e)
 
         pass
@@ -70,6 +69,7 @@ def calulcate_trend(trend: lds.Trend, function):
             # self.queue = self.queue[100:]
             service_trend_data.insert(trend_id, data)
         except Exception as e:
+            logging.exception(e)
             print(e)
 
         pass

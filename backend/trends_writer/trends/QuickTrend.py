@@ -1,18 +1,20 @@
-import sqlalchemy as sql
-from sqlalchemy import and_
+import logging
 
-from trends_writer import session
-from database.models import lds
+from database import lds
 from .TrendBase import TrendBase
-from ..services import service_trend
+
 
 class QuickTrend(TrendBase):
 
     def __init__(self, trend: lds.Trend):
         super().__init__(trend)
-        
-    def processData(self):
-        pass
+        logging.info(self.__class__.__name__ + ": initialized")
 
-    def save(self):
-        pass
+    def processData(self, data, parent_id: int = None):
+        try:
+            for child in self.children:
+                # timestamp = int(time.time())
+                child.processData(data, parent_id)
+        except Exception as e:
+            logging.exception(e)
+            # raise e

@@ -1,15 +1,14 @@
 from typing import List
 
-import sqlalchemy as sql
-
+from sqlalchemy import select
 from trends_writer import session
-from database.models import lds
+from database import lds
 
 __list = []
 
 
 def __fetch() -> List[lds.TrendDef]:
-    stmt = sql.select([lds.TrendDef])
+    stmt = select([lds.TrendDef])
     result = session.execute(stmt).fetchall()
     for trend in result:
         __list.append(trend[0])

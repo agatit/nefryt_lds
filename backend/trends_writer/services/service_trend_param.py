@@ -1,9 +1,8 @@
 from typing import List
 
 import sqlalchemy as sql
-
 from trends_writer import session
-from database.models import lds
+from database import lds
 from . import service_trend_param_def
 
 __list = []

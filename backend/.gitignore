@@ -69,6 +69,11 @@ target/
 /Scripts
 /Include
 pyvenv.cfg
+/bin
+/share
+/include
+/lib
+/lib64
 
 # generators
 .openapi-generator

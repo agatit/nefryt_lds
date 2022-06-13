@@ -8,20 +8,14 @@ from umodbus.utils import (get_function_code_from_request_pdu,
                            pack_exception_pdu, pack_mbap, recv_exactly,
                            unpack_mbap)
 
-from .services import (service_trend, service_trend_data, service_trend_def,
-                       service_trend_param, service_trend_param_def, service_calulcate)
+from .services import service_trend
 
 
 class MyRequestHandler(RequestHandler):
     def __init__(self, request, client_address, server):
-
-        self.trends_const = service_trend.get_all()
-        self.trend_def_const = service_trend_def.get_all()
-        self.trend_param_const = service_trend_param.get_all()
-        self.trend_param_def_const = service_trend_param_def.get_all()
-
-        #  pobranie wszystkich trendow "QUICK" i ich dzieci
+        # pobranie wszystkich trendow "QUICK" i ich dzieci
         self.quick_trends_const = service_trend.get_quick_trends()
+
         for quick_trend in self.quick_trends_const:
             service_trend.find_and_add_childs(quick_trend)
 
@@ -38,26 +32,17 @@ class MyRequestHandler(RequestHandler):
         request_pdu = self.get_request_pdu(request_adu)
 
         function = create_function_from_request_pdu(request_pdu)
-
         for quick_trend in self.quick_trends_const:
-            trend_params = service_trend_param.get_TrendParam_for_specific_trend(
-                quick_trend.trend, "ModbusRegister")
+            if int(quick_trend.params['MODBUS_REGISTER']) == function.starting_address:
+                quick_trend.save(function.values)
+                quick_trend.processData(
+                    data=function.values, parent_id=quick_trend.trend.ID)
 
-            for trend_param in trend_params:
-                # and int(trend_param.Value) == 1000:
-                if trend_param.TrendID == quick_trend.trend.ID and int(trend_param.Value) == function.starting_address:
-                    service_calulcate.calulcate_trend(quick_trend.trend, function)
+        # from datetime import datetime
+        # t = datetime.now().time()
+        # print(f"Odpowiedz do modbus: {t}")
 
         response_pdu = function.create_response_pdu()
         response_adu = self.create_response_adu(meta_data, response_pdu)
 
         return response_adu
-
-    # def create_my_response(self, function, metadata, results):
-    #     try:
-    #         # ReadFunction's use results of callbacks to build response
-    #         # PDU...
-    #         return function.create_response_pdu(results)
-    #     except TypeError:
-    #         # ...other functions don't.
-    #         return function.create_response_pdu()
