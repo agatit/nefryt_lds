@@ -202,7 +202,7 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
         last_timestamp = begin
         last_timestamp_ms = 0
         for _ in range(samples):
-            api_trend_data.append({"timestamp": last_timestamp, "timestamp_ms": last_timestamp_ms})
+            api_trend_data.append({"Timestamp": last_timestamp, "TimestampMs": last_timestamp_ms})
             last_timestamp += (last_timestamp_ms + inc_ms) // 100
             last_timestamp_ms = (last_timestamp_ms + inc_ms) % 100
 
@@ -215,13 +215,13 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
             db_data = cursor.fetchone()
             if db_data is not None:
                 db_data_values = struct.unpack("H"*100, db_data[0].Data)
-                for api_data in api_trend_data:
-                    while db_data is not None and db_data[0].Time < api_data["timestamp"]:
+                for api_data in api_trend_data: 
+                    while db_data is not None and db_data[0].Time < api_data["Timestamp"]:
                         db_data = cursor.fetchone()
                     if db_data is None:
                         break                        
-                    if db_data[0].Time == api_data["timestamp"]:
-                        api_data[str(trend_id)] = db_data_values[api_data["timestamp_ms"]]
+                    if db_data[0].Time == api_data["Timestamp"]:
+                        api_data[str(trend_id)] = db_data_values[api_data["TimestampMs"]]
 
         return api_trend_data, 200
 
