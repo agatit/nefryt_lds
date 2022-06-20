@@ -24,6 +24,7 @@
 
 /*
 api/__main__.py
+api/__init__.py
 api/controllers/nodes_controller.py
 api/controllers/pipelines_controller.py
 api/controllers/events_controller.py

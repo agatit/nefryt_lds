@@ -17,7 +17,7 @@ class Trend(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, name=None, trend_group_id=None, trend_def_id=None, time_exponent=None, format=None, unit_id=None, color=None, axis_label=None):  # noqa: E501
+    def __init__(self, id=None, name=None, trend_group_id=None, trend_def_id=None, time_exponent=None, format=None, unit=None, color=None, symbol=None):  # noqa: E501
         """Trend - a model defined in OpenAPI
 
         :param id: The id of this Trend.  # noqa: E501
@@ -32,12 +32,12 @@ class Trend(Model):
         :type time_exponent: int
         :param format: The format of this Trend.  # noqa: E501
         :type format: str
-        :param unit_id: The unit_id of this Trend.  # noqa: E501
-        :type unit_id: str
+        :param unit: The unit of this Trend.  # noqa: E501
+        :type unit: str
         :param color: The color of this Trend.  # noqa: E501
         :type color: str
-        :param axis_label: The axis_label of this Trend.  # noqa: E501
-        :type axis_label: str
+        :param symbol: The symbol of this Trend.  # noqa: E501
+        :type symbol: str
         """
         self.openapi_types = {
             'id': int,
@@ -46,9 +46,9 @@ class Trend(Model):
             'trend_def_id': str,
             'time_exponent': int,
             'format': str,
-            'unit_id': str,
+            'unit': str,
             'color': str,
-            'axis_label': str
+            'symbol': str
         }
 
         self.attribute_map = {
@@ -58,9 +58,9 @@ class Trend(Model):
             'trend_def_id': 'TrendDefID',
             'time_exponent': 'TimeExponent',
             'format': 'Format',
-            'unit_id': 'UnitID',
+            'unit': 'Unit',
             'color': 'Color',
-            'axis_label': 'AxisLabel'
+            'symbol': 'Symbol'
         }
 
         self._id = id
@@ -69,9 +69,9 @@ class Trend(Model):
         self._trend_def_id = trend_def_id
         self._time_exponent = time_exponent
         self._format = format
-        self._unit_id = unit_id
+        self._unit = unit
         self._color = color
-        self._axis_label = axis_label
+        self._symbol = symbol
 
     @classmethod
     def from_dict(cls, dikt) -> 'Trend':
@@ -227,27 +227,27 @@ class Trend(Model):
         self._format = format
 
     @property
-    def unit_id(self):
-        """Gets the unit_id of this Trend.
+    def unit(self):
+        """Gets the unit of this Trend.
 
         none  # noqa: E501
 
-        :return: The unit_id of this Trend.
+        :return: The unit of this Trend.
         :rtype: str
         """
-        return self._unit_id
+        return self._unit
 
-    @unit_id.setter
-    def unit_id(self, unit_id):
-        """Sets the unit_id of this Trend.
+    @unit.setter
+    def unit(self, unit):
+        """Sets the unit of this Trend.
 
         none  # noqa: E501
 
-        :param unit_id: The unit_id of this Trend.
-        :type unit_id: str
+        :param unit: The unit of this Trend.
+        :type unit: str
         """
 
-        self._unit_id = unit_id
+        self._unit = unit
 
     @property
     def color(self):
@@ -271,22 +271,22 @@ class Trend(Model):
         self._color = color
 
     @property
-    def axis_label(self):
-        """Gets the axis_label of this Trend.
+    def symbol(self):
+        """Gets the symbol of this Trend.
 
 
-        :return: The axis_label of this Trend.
+        :return: The symbol of this Trend.
         :rtype: str
         """
-        return self._axis_label
+        return self._symbol
 
-    @axis_label.setter
-    def axis_label(self, axis_label):
-        """Sets the axis_label of this Trend.
+    @symbol.setter
+    def symbol(self, symbol):
+        """Sets the symbol of this Trend.
 
 
-        :param axis_label: The axis_label of this Trend.
-        :type axis_label: str
+        :param symbol: The symbol of this Trend.
+        :type symbol: str
         """
 
-        self._axis_label = axis_label
+        self._symbol = symbol

@@ -162,10 +162,12 @@ def list_trends():  # noqa: E501
             api_trend = Trend()
             api_trend.id = db_trend.ID
             api_trend.name = db_trend.Name
+            api_trend.symbol = db_trend.Symbol
             api_trend.trend_group_id = db_trend.TrendGroupID
-            api_trend.trend_def_id = db_trend.TrendDefID
+            api_trend.trend_def_id = db_trend.TrendDefID.strip()
             api_trend.time_exponent = db_trend.TimeExponent
-            api_trend.unit_id = db_trend.UnitID
+            api_trend.unit = db_trend.Unit.Symbol
+            api_trend.color = db_trend.Color
             api_trends.append(api_trend)        
 
         return api_trends, 200

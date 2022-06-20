@@ -4,10 +4,10 @@ info:
   title: Nefryt LDS API
   version: 1.0.0
 servers:
-- description: Optional server description, e.g. Main (production) server
+- description: Test server
+  url: http://192.168.1.231:8080/
+- description: Developer's local server
   url: http://localhost:8080/
-- description: Optional server description, e.g. Internal staging server for testing
-  url: http://localhost:8080/test
 paths:
   /event:
     get:
@@ -589,7 +589,7 @@ paths:
       tags:
       - methods
       x-openapi-router-controller: api.controllers.methods_controller
-  /pipeline/{pipelineId}/method/{methodParaDefId}:
+  /pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}:
     put:
       description: Put  method params
       operationId: update_method_params
@@ -1005,7 +1005,7 @@ components:
       schema:
         type: integer
       style: simple
-    pipelineMethodId:
+    methodId:
       description: The id of the pipeline method to retrieve
       explode: false
       in: path
@@ -1313,12 +1313,12 @@ components:
       example:
         TrendGroupID: 0
         Format: Format
-        UnitID: UnitID
-        AxisLabel: AxisLabel
+        Symbol: Symbol
         Color: Color
         TrendDefID: TrendDefID
         ID: 0
         TimeExponent: 6
+        Unit: Unit
         Name: Name
       properties:
         ID:
@@ -1349,15 +1349,15 @@ components:
           description: none
           title: Format
           type: string
-        UnitID:
+        Unit:
           description: none
-          title: UnitID
+          title: Unit
           type: string
         Color:
           title: Color
           type: string
-        AxisLabel:
-          title: AxisLabel
+        Symbol:
+          title: Symbol
           type: string
       required:
       - ID

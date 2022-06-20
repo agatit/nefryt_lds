@@ -1,4 +1,4 @@
-from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, ForeignKey, Identity, Integer, Numeric, String, text
+from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, ForeignKey, Identity, Integer, Numeric, SmallInteger, String, text
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -43,19 +43,6 @@ class Pipeline(Base):
     BeginPos = Column(Numeric(10, 2))
 
 
-class Trend(Base):
-    __tablename__ = 'Trend'
-    __table_args__ = {'schema': 'lds'}
-
-    ID = Column(Integer, Identity(start=1000, increment=1), primary_key=True)
-    TrendDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-    TrendGroupID = Column(Integer)
-    TimeExponent = Column(Integer)
-    Format = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-    UnitID = Column(CHAR(8, 'SQL_Polish_CP1250_CS_AS'))
-
-
 class TrendData(Base):
     __tablename__ = 'TrendData'
     __table_args__ = {'schema': 'lds'}
@@ -80,6 +67,17 @@ class TrendGroup(Base):
     ID = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     Name = Column(String(100, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
     AnalisisOnly = Column(Boolean, nullable=False, server_default=text('((0))'))
+
+
+class Unit(Base):
+    __tablename__ = 'Unit'
+    __table_args__ = {'schema': 'lds'}
+
+    ID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), primary_key=True)
+    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    Symbol = Column(String(10, 'SQL_Polish_CP1250_CS_AS'))
+    BaseID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
+    Multiplier = Column(Numeric(20, 10))
 
 
 class Link(Base):
@@ -132,15 +130,21 @@ class PipelineNode(Base):
     Node = relationship('Node')
 
 
-class TrendParam(Base):
-    __tablename__ = 'TrendParam'
+class Trend(Base):
+    __tablename__ = 'Trend'
     __table_args__ = {'schema': 'lds'}
 
-    TrendParamDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), primary_key=True, nullable=False)
-    TrendID = Column(ForeignKey('lds.Trend.ID', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
-    Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    ID = Column(Integer, Identity(start=1000, increment=1), primary_key=True)
+    TrendDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
+    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    TrendGroupID = Column(Integer)
+    TimeExponent = Column(Integer)
+    Format = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    UnitID = Column(ForeignKey('lds.Unit.ID'))
+    Color = Column(SmallInteger)
+    Symbol = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
 
-    Trend = relationship('Trend')
+    Unit = relationship('Unit')
 
 
 class TrendParamDef(Base):
@@ -183,3 +187,14 @@ class MethodParam(Base):
     Method = relationship('Method', foreign_keys=[MethodID])
     Method_ = relationship('Method', foreign_keys=[MethodID])
     MethodParamDef = relationship('MethodParamDef')
+
+
+class TrendParam(Base):
+    __tablename__ = 'TrendParam'
+    __table_args__ = {'schema': 'lds'}
+
+    TrendParamDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), primary_key=True, nullable=False)
+    TrendID = Column(ForeignKey('lds.Trend.ID', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
+    Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+
+    Trend = relationship('Trend')
