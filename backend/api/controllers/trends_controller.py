@@ -191,9 +191,20 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
 
     :rtype: List[TrendData]
     """
-    try:                            
-        # start_time = time.time()
+    try:                           
 
+        # readin the trend defnition neccessary for scaling
+        db_trends = session.execute(select(lds.Trend))
+        db_trends_scales = {}
+        for db_trend, in db_trends:
+            db_trends_scales[db_trend.ID] = {
+                "RawMin": db_trend.RawMin, 
+                "RawMax": db_trend.RawMax, 
+                "ScaledMin": db_trend.ScaledMin,
+                "ScaledMax": db_trend.ScaledMax
+                }
+
+        # readin the trend data
         api_data_list = []
 
         if samples <= 0:
@@ -226,31 +237,27 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
             )
             api_iter = itertools.islice(api_data_list, chunk_start, chunk_start + chunk_size)
 
-            try:
-                db_data = next(db_iter)
-                api_data = next(api_iter)
+            db_data = next(db_iter, None)
+            api_data = next(api_iter, None)
                     
-                while True:
-                    try:                
-                        while db_data[0].Time < api_data["Timestamp"]:
-                            db_data = next(db_iter)                
+            while db_data and api_data:              
+                while db_data[0].Time < api_data["Timestamp"]:
+                    db_data = next(db_iter)
 
-                        one_second_data = {}
-                        while db_data[0].Time == api_data["Timestamp"]:    
-                            one_second_data[db_data[0].TrendID] = struct.unpack("H"*100, db_data[0].Data)
-                            db_data = next(db_iter)
+                one_second_data = {}
+                while db_data and db_data[0].Time == api_data["Timestamp"]:
+                    one_second_data[db_data[0].TrendID] = struct.unpack("H"*100, db_data[0].Data)
+                    db_data = next(db_iter, None)
 
-                        current_second = api_data["Timestamp"]
-                        while api_data["Timestamp"] == current_second:
-                            for trend_id in one_second_data.keys():
-                                api_data[str(trend_id)] = one_second_data[trend_id][api_data["TimestampMs"]]
-                            api_data = next(api_iter)    
+                current_second = api_data["Timestamp"]
+                while api_data and api_data["Timestamp"] == current_second:
+                    for trend_id in one_second_data.keys():
+                        api_data[str(trend_id)] = \
+                            (db_trends_scales[trend_id]["ScaledMax"] - db_trends_scales[trend_id]["ScaledMin"]) \
+                            * (one_second_data[trend_id][-api_data["TimestampMs"]] - db_trends_scales[trend_id]["RawMin"]) \
+                            + db_trends_scales[trend_id]["ScaledMin"]
+                    api_data = next(api_iter, None)
                                     
-                    except StopIteration:
-                        break
-            except StopIteration:
-                pass
-
             chunk_start += chunk_size
 
         # print("--- %s seconds ---" % (time.time() - start_time))        

@@ -1,4 +1,4 @@
-from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, ForeignKey, Identity, Integer, Numeric, SmallInteger, String, text
+from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, Float, ForeignKey, Identity, Integer, Numeric, SmallInteger, String, text
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -143,6 +143,10 @@ class Trend(Base):
     UnitID = Column(ForeignKey('lds.Unit.ID'))
     Color = Column(SmallInteger)
     Symbol = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    RawMin = Column(Float(53))
+    RawMax = Column(Float(53))
+    ScaledMin = Column(Float(53))
+    ScaledMax = Column(Float(53))
 
     Unit = relationship('Unit')
 
