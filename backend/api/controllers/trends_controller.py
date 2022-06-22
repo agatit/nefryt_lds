@@ -175,105 +175,6 @@ def list_trends():  # noqa: E501
     except Exception as e:
         return Error(message=str(e), code=500), 500
 
-def get_trend_data_v1(trend_id_list, begin, end, samples):
-    if samples <= 0:
-        samples = 1        
-    api_trend_data = []
-    inc_ms = (100 * (end - begin + 1)) // samples
-    if inc_ms == 0:
-        inc_ms = 1
-    samples = 100 * (end - begin + 1) // inc_ms
-
-    last_timestamp = begin
-    last_timestamp_ms = 0
-    for _ in range(samples):
-        api_trend_data.append({"Timestamp": last_timestamp, "TimestampMs": last_timestamp_ms})
-        last_timestamp += (last_timestamp_ms + inc_ms) // 100
-        last_timestamp_ms = (last_timestamp_ms + inc_ms) % 100
-
-    for trend_id in trend_id_list:
-        cursor = session.execute(
-            select(lds.TrendData)\
-                .where(and_(lds.TrendData.Time >= begin, lds.TrendData.Time <= end, lds.TrendData.TrendID==trend_id))
-        )
-
-        db_data = cursor.fetchone()
-        if db_data is not None:
-            db_data_values = struct.unpack("H"*100, db_data[0].Data)
-            for api_data in api_trend_data: 
-                while db_data is not None and db_data[0].Time < api_data["Timestamp"]:
-                    db_data = cursor.fetchone()
-                if db_data is None:
-                    break                        
-                if db_data[0].Time == api_data["Timestamp"]:
-                    api_data[str(trend_id)] = db_data_values[api_data["TimestampMs"]]
-
-    return api_trend_data    
-
-def get_trend_data_v2(trend_id_list, begin, end, samples):    
-
-    start_time = time.time()
-
-    api_data_list = []
-
-    if samples <= 0:
-        samples = 1        
-    inc_ms = (100 * (end - begin + 1)) // samples
-    if inc_ms == 0:
-        inc_ms = 1
-    samples = 100 * (end - begin + 1) // inc_ms
-
-    last_timestamp = begin
-    last_timestamp_ms = 0
-    for _ in range(samples):
-        api_data_list.append({"Timestamp": last_timestamp, "TimestampMs": last_timestamp_ms})
-        last_timestamp += (last_timestamp_ms + inc_ms) // 100
-        last_timestamp_ms = (last_timestamp_ms + inc_ms) % 100
-
-    chunk_size = 500 # how many trend points to fetch in one query
-    chunk_start = 0
-
-    while chunk_start < len(api_data_list):
-
-        timestamp_list = set()
-        for data in itertools.islice(api_data_list, chunk_start, chunk_start + chunk_size):
-            timestamp_list.add(data["Timestamp"])        
-
-        db_iter = session.execute(
-            select(lds.TrendData) \
-                .where(and_(lds.TrendData.Time.in_(timestamp_list), lds.TrendData.TrendID.in_(trend_id_list))) \
-                .order_by(lds.TrendData.Time) 
-        )
-        api_iter = itertools.islice(api_data_list, chunk_start, chunk_start + chunk_size)
-
-        db_data = next(db_iter)
-        api_data = next(api_iter)
-            
-        while True:
-            try:                
-                while db_data[0].Time < api_data["Timestamp"]:
-                    db_data = next(db_iter)                
-
-                one_second_data = {}
-                while db_data[0].Time == api_data["Timestamp"]:    
-                    one_second_data[db_data[0].TrendID] = struct.unpack("H"*100, db_data[0].Data)
-                    db_data = next(db_iter)
-
-                current_second = api_data["Timestamp"]
-                while api_data["Timestamp"] == current_second:
-                    for trend_id in one_second_data.keys():
-                        api_data[str(trend_id)] = one_second_data[trend_id][api_data["TimestampMs"]]
-                    api_data = next(api_iter)    
-                            
-            except StopIteration:
-                break
-
-        chunk_start += chunk_size
-
-    print("--- %s seconds ---" % (time.time() - start_time))        
-    return api_data_list    
-
-
 def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
     """List trend data
 
@@ -291,7 +192,69 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
     :rtype: List[TrendData]
     """
     try:                            
-        return get_trend_data_v2(trend_id_list, begin, end, samples), 200
+        # start_time = time.time()
+
+        api_data_list = []
+
+        if samples <= 0:
+            samples = 1        
+        inc_ms = (100 * (end - begin + 1)) // samples
+        if inc_ms == 0:
+            inc_ms = 1
+        samples = 100 * (end - begin + 1) // inc_ms
+
+        last_timestamp = begin
+        last_timestamp_ms = 0
+        for _ in range(samples):
+            api_data_list.append({"Timestamp": last_timestamp, "TimestampMs": last_timestamp_ms})
+            last_timestamp += (last_timestamp_ms + inc_ms) // 100
+            last_timestamp_ms = (last_timestamp_ms + inc_ms) % 100
+
+        chunk_size = 500 # how many trend points to fetch in one query
+        chunk_start = 0
+
+        while chunk_start < len(api_data_list):
+
+            timestamp_list = set()
+            for data in itertools.islice(api_data_list, chunk_start, chunk_start + chunk_size):
+                timestamp_list.add(data["Timestamp"])        
+
+            db_iter = session.execute(
+                select(lds.TrendData) \
+                    .where(and_(lds.TrendData.Time.in_(timestamp_list), lds.TrendData.TrendID.in_(trend_id_list))) \
+                    .order_by(lds.TrendData.Time) 
+            )
+            api_iter = itertools.islice(api_data_list, chunk_start, chunk_start + chunk_size)
+
+            try:
+                db_data = next(db_iter)
+                api_data = next(api_iter)
+                    
+                while True:
+                    try:                
+                        while db_data[0].Time < api_data["Timestamp"]:
+                            db_data = next(db_iter)                
+
+                        one_second_data = {}
+                        while db_data[0].Time == api_data["Timestamp"]:    
+                            one_second_data[db_data[0].TrendID] = struct.unpack("H"*100, db_data[0].Data)
+                            db_data = next(db_iter)
+
+                        current_second = api_data["Timestamp"]
+                        while api_data["Timestamp"] == current_second:
+                            for trend_id in one_second_data.keys():
+                                api_data[str(trend_id)] = one_second_data[trend_id][api_data["TimestampMs"]]
+                            api_data = next(api_iter)    
+                                    
+                    except StopIteration:
+                        break
+            except StopIteration:
+                pass
+
+            chunk_start += chunk_size
+
+        # print("--- %s seconds ---" % (time.time() - start_time))        
+        return api_data_list, 200   
 
     except Exception as e:
         return Error(message=str(e), code=500), 500
