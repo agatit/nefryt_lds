@@ -1311,15 +1311,19 @@ components:
       type: object
     Trend:
       example:
-        TrendGroupID: 0
-        Format: Format
+        ScaledMax: 2.3021358869347655
         Symbol: Symbol
         Color: Color
+        RawMax: 5
         TrendDefID: TrendDefID
-        ID: 0
-        TimeExponent: 6
         Unit: Unit
         Name: Name
+        RawMin: 1
+        ScaledMin: 5.637376656633329
+        TrendGroupID: 0
+        Format: Format
+        ID: 0
+        TimeExponent: 6
       properties:
         ID:
           description: none
@@ -1359,8 +1363,27 @@ components:
         Symbol:
           title: Symbol
           type: string
+        RawMin:
+          title: RawMin
+          type: integer
+        RawMax:
+          title: RawMax
+          type: integer
+        ScaledMin:
+          format: double
+          title: ScaledMin
+          type: number
+        ScaledMax:
+          format: double
+          title: ScaledMax
+          type: number
       required:
       - ID
+      - RawMax
+      - RawMin
+      - ScaledMax
+      - ScaledMin
+      - TrendDefID
       title: Trend
       type: object
     TrendData:

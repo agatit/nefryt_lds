@@ -43,6 +43,10 @@ def create_trend(trend=None):  # noqa: E501
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
         db_trend.UnitID = api_trend.unit_id
+        db_trend.RawMin = api_trend.raw_min
+        db_trend.RawMax = api_trend.raw_max
+        db_trend.ScaledMin = api_trend.scaled_min
+        db_trend.ScaledMax = api_trend.scaled_max        
         session.add(db_trend)
         
         session.commit()
@@ -99,7 +103,10 @@ def get_trend_by_id(trend_id):  # noqa: E501
         api_trend.trend_def_id = db_trend.TrendDefID.strip()
         api_trend.time_exponent = db_trend.TimeExponent
         api_trend.unit_id = db_trend.UnitID.strip()
-
+        api_trend.raw_min = db_trend.RawMin
+        api_trend.raw_max = db_trend.RawMax
+        api_trend.scaled_min = db_trend.ScaledMin
+        api_trend.scaled_max = db_trend.ScaledMax
         return api_trend, 200
 
     except Exception as e:
@@ -131,6 +138,10 @@ def update_trend(trend_id, trend=None):  # noqa: E501
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
         db_trend.UnitID = api_trend.unit_id
+        db_trend.RawMin = api_trend.raw_min
+        db_trend.RawMax = api_trend.raw_max
+        db_trend.ScaledMin = api_trend.scaled_min
+        db_trend.ScaledMax = api_trend.scaled_max
         session.add(db_trend)
 
         session.commit()
@@ -168,6 +179,10 @@ def list_trends():  # noqa: E501
             api_trend.time_exponent = db_trend.TimeExponent
             api_trend.unit = db_trend.Unit.Symbol
             api_trend.color = db_trend.Color
+            api_trend.raw_min = db_trend.RawMin
+            api_trend.raw_max = db_trend.RawMax
+            api_trend.scaled_min = db_trend.ScaledMin
+            api_trend.scaled_max = db_trend.ScaledMax
             api_trends.append(api_trend)        
 
         return api_trends, 200
@@ -254,7 +269,8 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
                     for trend_id in one_second_data.keys():
                         api_data[str(trend_id)] = \
                             (db_trends_scales[trend_id]["ScaledMax"] - db_trends_scales[trend_id]["ScaledMin"]) \
-                            * (one_second_data[trend_id][-api_data["TimestampMs"]] - db_trends_scales[trend_id]["RawMin"]) \
+                            * (one_second_data[trend_id][-api_data["TimestampMs"]-1] - db_trends_scales[trend_id]["RawMin"]) \
+                            / (db_trends_scales[trend_id]["RawMax"] - db_trends_scales[trend_id]["RawMin"]) \
                             + db_trends_scales[trend_id]["ScaledMin"]
                     api_data = next(api_iter, None)
                                     
