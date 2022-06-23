@@ -190,6 +190,7 @@ def list_trends():  # noqa: E501
     except Exception as e:
         return Error(message=str(e), code=500), 500
 
+
 def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
     """List trend data
 
@@ -208,7 +209,7 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
     """
     try:                           
 
-        # readin the trend defnition neccessary for scaling
+        # reading trends defnitions neccessary for scaling
         db_trends = session.execute(select(lds.Trend))
         db_trends_scales = {}
         for db_trend, in db_trends:
@@ -224,21 +225,24 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
 
         if samples <= 0:
             samples = 1        
-        inc_ms = (100 * (end - begin + 1)) // samples
-        if inc_ms == 0:
-            inc_ms = 1
-        samples = 100 * (end - begin + 1) // inc_ms
+        inc_samples = (100 * (end - begin + 1)) // samples
+        if inc_samples == 0:
+            inc_samples = 1
+        samples = 100 * (end - begin + 1) // inc_samples
 
+        # preparing result list
         last_timestamp = begin
-        last_timestamp_ms = 0
+        last_timestamp_samples = 0
         for _ in range(samples):
-            api_data_list.append({"Timestamp": last_timestamp, "TimestampMs": last_timestamp_ms})
-            last_timestamp += (last_timestamp_ms + inc_ms) // 100
-            last_timestamp_ms = (last_timestamp_ms + inc_ms) % 100
+            api_data_list.append({"Timestamp": last_timestamp, "TimestampMs": last_timestamp_samples * 10})
+            last_timestamp += (last_timestamp_samples + inc_samples) // 100
+            last_timestamp_samples = (last_timestamp_samples + inc_samples) % 100
 
+        
         chunk_size = 500 # how many trend points to fetch in one query
         chunk_start = 0
-
+    
+        # for every chunk
         while chunk_start < len(api_data_list):
 
             timestamp_list = set()
@@ -269,7 +273,7 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
                     for trend_id in one_second_data.keys():
                         api_data[str(trend_id)] = \
                             (db_trends_scales[trend_id]["ScaledMax"] - db_trends_scales[trend_id]["ScaledMin"]) \
-                            * (one_second_data[trend_id][-api_data["TimestampMs"]-1] - db_trends_scales[trend_id]["RawMin"]) \
+                            * (one_second_data[trend_id][-api_data["TimestampMs"]//10-1] - db_trends_scales[trend_id]["RawMin"]) \
                             / (db_trends_scales[trend_id]["RawMax"] - db_trends_scales[trend_id]["RawMin"]) \
                             + db_trends_scales[trend_id]["ScaledMin"]
                     api_data = next(api_iter, None)
@@ -393,6 +397,7 @@ def update_trend_param(trend_id, trend_param_def_id, trend_param=None):  # noqa:
 
     except Exception as e:
         return Error(message=str(e), code=500), 500          
+
 
 def list_trend_defs():  # noqa: E501
     """List trends
