@@ -14,7 +14,7 @@
 
 import { Meta, OptimisticUpdate, QueryKey, QueryOptions, Rollback, TransformStrategy, Update } from "redux-query";
 
-export const BASE_PATH = "http://localhost:8080".replace(/\/+$/, "");
+export const BASE_PATH = "http://192.168.1.231:8080".replace(/\/+$/, "");
 
 export const Configuration = {
     basePath: '', // This is the value that will be prepended to all endpoints.  For compatibility with

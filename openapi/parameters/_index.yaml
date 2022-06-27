@@ -5,7 +5,7 @@ nodeId:
   $ref: "./path/nodeId.yaml"
 pipelineId:
   $ref: "./path/pipelineId.yaml"
-pipelineMethodId:
+methodId:
   $ref: "./path/methodId.yaml"
 trendId:
   $ref: "./path/trendId.yaml"

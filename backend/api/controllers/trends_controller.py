@@ -418,7 +418,7 @@ def list_trend_defs():  # noqa: E501
         api_trends = []
         for trend, in trends:
             api_trend = TrendDef()
-            api_trend.id = trend.ID
+            api_trend.id = trend.ID.strip()
             api_trend.name = trend.Name
             api_trends.append(api_trend)        
 

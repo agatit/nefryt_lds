@@ -45,7 +45,7 @@ class Writer:
                             INNER JOIN lds.TrendDefType ON (lds.TrendDefParamDef.TrendDefTypeID = lds.TrendDefType.TrendDefTypeID) 
                         ORDER BY 
                             lds.TrendDef.TrendDefID, 
-                            lds.TrendDefParam.TrendDefParamDefID""")   
+                            lds.TrendDefParam.TrendDefParamDefID""")
 
             row = cur.fetchone()
 

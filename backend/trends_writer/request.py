@@ -8,18 +8,14 @@ from umodbus.utils import (get_function_code_from_request_pdu,
                            pack_exception_pdu, pack_mbap, recv_exactly,
                            unpack_mbap)
 
-from .services import service_trend
+from .plant import pipe_plant                           
 
 
 class MyRequestHandler(RequestHandler):
     def __init__(self, request, client_address, server):
-        # pobranie wszystkich trendow "QUICK" i ich dzieci
-        self.quick_trends_const = service_trend.get_quick_trends()
-
-        for quick_trend in self.quick_trends_const:
-            service_trend.find_and_add_childs(quick_trend)
 
         super().__init__(request, client_address, server)
+
 
     def process(self, request_adu):
         """ Process request ADU and return response.
@@ -32,15 +28,8 @@ class MyRequestHandler(RequestHandler):
         request_pdu = self.get_request_pdu(request_adu)
 
         function = create_function_from_request_pdu(request_pdu)
-        for quick_trend in self.quick_trends_const:
-            if int(quick_trend.params['MODBUS_REGISTER']) == function.starting_address:
-                quick_trend.save(function.values)
-                quick_trend.processData(
-                    data=function.values, parent_id=quick_trend.trend.ID)
 
-        # from datetime import datetime
-        # t = datetime.now().time()
-        # print(f"Odpowiedz do modbus: {t}")
+        pipe_plant.update(function.starting_address, function.values)
 
         response_pdu = function.create_response_pdu()
         response_adu = self.create_response_adu(meta_data, response_pdu)

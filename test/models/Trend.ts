@@ -1,4 +1,5 @@
-// tslint:disable
+/* tslint:disable */
+/* eslint-disable */
 /**
  * Nefryt LDS API
  * Database API for Nefryt LDS
@@ -17,7 +18,7 @@ import { exists, mapValues } from '../runtime';
  * @export
  * @interface Trend
  */
-export interface Trend  {
+export interface Trend {
     /**
      * none
      * @type {number}
@@ -41,7 +42,7 @@ export interface Trend  {
      * @type {string}
      * @memberof Trend
      */
-    trendDefID: string;
+    trendDefID?: string;
     /**
      * none
      * @type {number}
@@ -59,7 +60,7 @@ export interface Trend  {
      * @type {string}
      * @memberof Trend
      */
-    unit?: string;
+    unitID?: string;
     /**
      * 
      * @type {string}
@@ -71,69 +72,48 @@ export interface Trend  {
      * @type {string}
      * @memberof Trend
      */
-    symbol?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Trend
-     */
-    rawMin: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Trend
-     */
-    rawMax: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Trend
-     */
-    scaledMin: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Trend
-     */
-    scaledMax: number;
+    axisLabel?: string;
 }
 
 export function TrendFromJSON(json: any): Trend {
+    return TrendFromJSONTyped(json, false);
+}
+
+export function TrendFromJSONTyped(json: any, ignoreDiscriminator: boolean): Trend {
+    if ((json === undefined) || (json === null)) {
+        return json;
+    }
     return {
+        
         'iD': json['ID'],
         'name': !exists(json, 'Name') ? undefined : json['Name'],
         'trendGroupID': !exists(json, 'TrendGroupID') ? undefined : json['TrendGroupID'],
-        'trendDefID': json['TrendDefID'],
+        'trendDefID': !exists(json, 'TrendDefID') ? undefined : json['TrendDefID'],
         'timeExponent': !exists(json, 'TimeExponent') ? undefined : json['TimeExponent'],
         'format': !exists(json, 'Format') ? undefined : json['Format'],
-        'unit': !exists(json, 'Unit') ? undefined : json['Unit'],
+        'unitID': !exists(json, 'UnitID') ? undefined : json['UnitID'],
         'color': !exists(json, 'Color') ? undefined : json['Color'],
-        'symbol': !exists(json, 'Symbol') ? undefined : json['Symbol'],
-        'rawMin': json['RawMin'],
-        'rawMax': json['RawMax'],
-        'scaledMin': json['ScaledMin'],
-        'scaledMax': json['ScaledMax'],
+        'axisLabel': !exists(json, 'AxisLabel') ? undefined : json['AxisLabel'],
     };
 }
 
-export function TrendToJSON(value?: Trend): any {
+export function TrendToJSON(value?: Trend | null): any {
     if (value === undefined) {
         return undefined;
     }
+    if (value === null) {
+        return null;
+    }
     return {
+        
         'Name': value.name,
         'TrendGroupID': value.trendGroupID,
         'TrendDefID': value.trendDefID,
         'TimeExponent': value.timeExponent,
         'Format': value.format,
-        'Unit': value.unit,
+        'UnitID': value.unitID,
         'Color': value.color,
-        'Symbol': value.symbol,
-        'RawMin': value.rawMin,
-        'RawMax': value.rawMax,
-        'ScaledMin': value.scaledMin,
-        'ScaledMax': value.scaledMax,
+        'AxisLabel': value.axisLabel,
     };
 }
-
 

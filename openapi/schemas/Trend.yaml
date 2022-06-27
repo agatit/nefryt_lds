@@ -2,6 +2,11 @@
 type: object
 required:  
   - ID
+  - TrendDefID
+  - RawMin
+  - RawMax
+  - ScaledMin
+  - ScaledMax
 properties:
   ID:
     type: integer
@@ -25,10 +30,20 @@ properties:
   Format:
     type: string
     description: none    
-  UnitID:
+  Unit:
     type: string
     description: none
   Color:
     type: string
-  AxisLabel:
+  Symbol:
     type: string
+  RawMin:
+    type: integer
+  RawMax:
+    type: integer
+  ScaledMin:
+    type: number
+    format: double
+  ScaledMax:
+    type: number
+    format: double   

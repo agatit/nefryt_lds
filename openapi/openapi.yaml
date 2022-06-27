@@ -4,10 +4,10 @@ info:
   description: Database API for Nefryt LDS
   version: 1.0.0
 servers:
+  - url: http://192.168.1.231:8080/
+    description: Test server
   - url: http://localhost:8080/
-    description: Optional server description, e.g. Main (production) server
-  - url: http://localhost:8080/test
-    description: Optional server description, e.g. Internal staging server for testing
+    description: Developer's local server
 paths:
   # ref to files ./paths/endpoint.yaml
   /trend:
@@ -36,7 +36,7 @@ paths:
     $ref: "./paths/method.yaml"     
   /pipeline/{pipelineId}/method/{methodId}/param:
     $ref: "./paths/methodParams.yaml"
-  /pipeline/{pipelineId}/method/{methodParaDefId}:
+  /pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}:
     $ref: "./paths/methodParam.yaml"       
   /event:
     $ref: "./paths/events.yaml"

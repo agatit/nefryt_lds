@@ -5,17 +5,11 @@
 # from . import DerivTrend
 # from . import DiffTrend
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+import logging
+import sys
 
-# SQLALCHEMY_DATABASE_URI = 'mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo?driver=ODBC+Driver+17+for+SQL+Server'
-SQLALCHEMY_DATABASE_URI = \
-    'mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo' \
-    '?driver=ODBC+Driver+18+for+SQL+Server' \
-    '&TrustServerCertificate=Yes' \
-    '&Encrypt=No' 
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, force=True)
 
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
-Session = sessionmaker(engine)
-session = Session()
+
+

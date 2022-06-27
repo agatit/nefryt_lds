@@ -403,7 +403,7 @@ function updateMethodParamsRaw<T>(requestParameters: UpdateMethodParamsRequest, 
     const { meta = {} } = requestConfig;
 
     const config: QueryConfig<T> = {
-        url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method/{methodParaDefId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"methodId"}}`, encodeURIComponent(String(requestParameters.methodId))).replace(`{${"methodParamDefId"}}`, encodeURIComponent(String(requestParameters.methodParamDefId))),
+        url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"methodId"}}`, encodeURIComponent(String(requestParameters.methodId))).replace(`{${"methodParamDefId"}}`, encodeURIComponent(String(requestParameters.methodParamDefId))),
         meta,
         update: requestConfig.update,
         queryKey: requestConfig.queryKey,
