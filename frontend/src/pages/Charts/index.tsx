@@ -14,7 +14,7 @@ import { ChartsState } from "./type";
 import "./style.css";
 
 import { PureComponent, useEffect, useRef } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceArea, Brush } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceArea, Brush, Surface, Symbols } from 'recharts';
 import { verify } from "crypto";
 import { usePreviousProps } from "@mui/utils";
 import { gridColumnsTotalWidthSelector } from "@mui/x-data-grid";
@@ -129,7 +129,7 @@ if (selectedTrends && (selectedTrends.length > 0)) {
   var queryTrendsList = listTrends({
     queryKey: 'trends_list',
      transform: (data) => {
-       //console.log(data);
+      // console.log(data);
          return {
            trends_list: data,
          };
@@ -422,6 +422,43 @@ const formatBrush = (unixTime: any, index: any)  => {
 
 }
 
+var active:boolean=true;
+const renderCusomizedLegend = (payload :any) => {
+  return (
+    <div className="customized-legend">
+      {selectedTrends.map((entry: ITrend) => {
+        
+        //const active = true; //_.includes(this.state.disabled, dataKey);
+        const style = {
+          marginRight: 10,
+          color: entry.color ? entry.color : "#8884d8"
+        };
+      console.log(active);
+        return (
+          <span
+            className="legend-item"
+            onClick={() => { console.log('change acvtive')}} //this.handleClick(dataKey)}
+            style={style}
+          >
+            <Surface width={10} height={10} viewBox={{x:0, y:0, width:10, height:10}} >
+              <Symbols cx={5} cy={5} type="circle" size={50} fill={entry.color ? entry.color:'#8884d8'} />
+              {false && (
+                <Symbols
+                  cx={5}
+                  cy={5}
+                  type="circle"
+                  size={25}
+                  fill={"#FFF"}
+                />
+              )}
+            </Surface>
+            <span>{entry.symbol}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+};
 
 
 //{=> moment(unixTime).format("DD-MM-YYYY HH:mm:ss")} 
@@ -572,8 +609,8 @@ if ((dat) && (dat.length>0)){
                      domain={['dataMin-0.1*dataMin', 'dataMax+0.1*dataMax']}
                      tickFormatter={formatYAxis}
                    >
-                   <Label key={"YAXisLabel"+index} fill={trend.color? trend.color : '#8884d8'}  dx={index % 2==0 ?45 : -30} angle={270} position='top' dy={30}>  
-                     {trend.name}
+                   <Label key={"YAXisLabel"+index} fill={trend.color? trend.color : '#8884d8'}  dx={index % 2==0 ?45 : -30} angle={270} position='center' dy={30}>  
+                     {trend.axislabel}
                    </Label>
                     </YAxis>
                    
@@ -582,7 +619,17 @@ if ((dat) && (dat.length>0)){
 
                   
                  {reducer.chart.mode.tooltip ? <Tooltip labelFormatter={formatBrush} /> : <></>}
-                 <Legend />
+                
+                 <Legend
+              verticalAlign="bottom"
+              height={36}
+              align="left"
+              //payload={_.toPairs(this.state.chartColors).map(pair => ({
+              //  dataKey: pair[0],
+              //  color: pair[1]
+              //}))}
+              content={renderCusomizedLegend}
+            />
                    {selectedTrends.map((trend, index) => (
                      
                      <Line dot={<></>} key={"Line"+index} isAnimationActive={false} yAxisId={trend.iD} type="monotone" dataKey={trend.iD} stroke={trend.color? trend.color : '#8884d8'} activeDot={{ r: 8 }} /> 

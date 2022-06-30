@@ -359,23 +359,21 @@ const chartsReducer = (
           }
         }
         case LOAD_TREND_LIST:{
-         /*var trd : ITrend[] = [];
-         action.data.forEach((element: Trend) => {
-            console.log(element);
-            trd.push({
-              name: element.name? element.name : "",
-              key: element.iD.toLocaleString(),
-              selected: false,
-              color: element.color? element.color : "",
-              label: element.axisLabel? element.axisLabel : "T"+element.iD.toLocaleString(),
+         var trd : ITrend[] = action.data;
+        
+         trd.forEach((element: ITrend) => {
+            var tmp : string =  element.symbol? element.symbol : element.iD.toString(); 
+            tmp += element.unit? ' [' + element.unit + ']' : '';
 
-            })
+            element.axislabel = tmp;
+            //console.log(element);
+           
           });
          // console.log(action.data);
-*/
+
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:action.data, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
 
