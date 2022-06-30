@@ -11,7 +11,7 @@ from umodbus.utils import (get_function_code_from_request_pdu,
 from .plant import pipe_plant                           
 
 
-class MyRequestHandler(RequestHandler):
+class ModbusRequest(RequestHandler):
     def __init__(self, request, client_address, server):
 
         super().__init__(request, client_address, server)

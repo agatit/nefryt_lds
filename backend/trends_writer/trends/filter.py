@@ -33,6 +33,8 @@ class TrendFilter(TrendBase):
             self.initiate_buffer(self.window_size, timestamp, parent_id)
         else:
             self.storage = np.append(self.storage[100:], data)
+        
+        self.storage_timstamp = timestamp        
 
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) calculating...")          
 
@@ -63,7 +65,7 @@ class TrendFilter(TrendBase):
 
         last_valid = 0
         for curr_timestamp in range(timestamp - window_size * 2 - 1, timestamp):
-            if trend_data is not None and trend_data[0].Time == curr_timestamp:       
+            if trend_data is not None and trend_data[0].Time == curr_timestamp:
                 curr_data = struct.unpack('<100h', trend_data[0].Data)
                 for i in range(len(curr_data)):
                     if curr_data[i] != 0xFFFF:
@@ -73,8 +75,6 @@ class TrendFilter(TrendBase):
             else:
                 curr_data = np.full(100, fill_value=last_valid, dtype=np.uint16)
                 trend_data = next(trend_data_iter, None)
-            self.storage = np.append(self.storage, curr_data)
-                                                
-        
-        logging.info(f"{self.__class__.__name__} ({self.id}) buffer read {len(self.storage)} values from {parent_id}")
+            self.storage = np.append(self.storage, curr_data)            
 
+        logging.info(f"{self.__class__.__name__} ({self.id}) buffer read {len(self.storage)} values from {parent_id}")
