@@ -95,6 +95,10 @@ Configuration.basePath = 'http://192.168.1.231:8080';
   
 
 const ChartsPage: React.FC = () => {
+
+  var data_range_from=0;
+  var data_range_to=0;
+
   const queries = useSelector(getQueries) || [];
   const entities = useSelector(getEntities) || [];
 
@@ -244,11 +248,14 @@ if (selectedTrends && (selectedTrends.length > 0)) {
     
     dispatch(areaRef({left:e.activeLabel, right:0}))
   }
-const handleMouseUp = (e: CategoricalChartState) => {
+//const handleMouseUp = (e: CategoricalChartState) => {
+  const handleMouseUp = (e: any) => {
+ // console.log('GGGGGGGGGGG');
+ // console.log(e);
   if (!e || !e.activeLabel) {
     return
   }
-  zoom();
+  //zoom();
 
 }
 
@@ -333,10 +340,21 @@ function zoom() {
 //    top2,
  // }));
 }
- // console.log(dat2);
 
-//const editView = ['hours', 'minutes', 'seconds']
-//const editView = {['days', 'minutes', 'seconds']}
+const handlemouseup  = (e: React.MouseEvent<HTMLElement>) => {
+  //console.log(e.target);
+ // if ((e) && (e.target) && ((e.target as Element).classList.contains('recharts-brush-slide'))){
+      if ((data_range_from > 0) && (data_range_to>0)){
+        dispatch(setTimestampRange(data_range_from, data_range_to));
+        data_range_from=0;
+        data_range_to=0;
+      }
+ // }
+}
+
+const formatYAxis = (item: any) => {
+  return item.toLocaleString(undefined, { maximumFractionDigits: 2 })
+}
 
  const formatXAxis = (tickItem: any) => {
   var range = reducer.chart.currRange.to-reducer.chart.currRange.from;
@@ -404,6 +422,8 @@ const formatBrush = (unixTime: any, index: any)  => {
 
 }
 
+
+
 //{=> moment(unixTime).format("DD-MM-YYYY HH:mm:ss")} 
 
 //console.log(Math.round(dat.length * 0.45));
@@ -418,7 +438,7 @@ if ((dat) && (dat.length>0)){
 
 
   return (   
-    <Layout rPanel={{open:reducer.rpanel_open, visible:true, 
+    <Layout onmouseup={handlemouseup}  rPanel={{open:reducer.rpanel_open, visible:true, 
               content:
               <> 
               
@@ -513,7 +533,7 @@ if ((dat) && (dat.length>0)){
                 </Stack>
               </LocalizationProvider>
               </> 
-            }} content={
+            }} content={ 
               <>
               <Box sx={{ width: '100%', height:'10px'}}>
                
@@ -550,7 +570,7 @@ if ((dat) && (dat.length>0)){
                      axisLine={true}
                      tickLine={false}
                      domain={['dataMin-0.1*dataMin', 'dataMax+0.1*dataMax']}
-                    
+                     tickFormatter={formatYAxis}
                    >
                    <Label key={"YAXisLabel"+index} fill={trend.color? trend.color : '#8884d8'}  dx={index % 2==0 ?45 : -30} angle={270} position='top' dy={30}>  
                      {trend.name}
@@ -582,19 +602,21 @@ if ((dat) && (dat.length>0)){
 
        { !reducer.chart.mode.live.active?
     
-              <Brush dataKey="unixtime" startIndex={reducer.chart.brush.startIndex} endIndex={reducer.chart.brush.endIndex}   
-                  tickFormatter = {formatBrush}    onChange={(a : any)=>{  
-                    setTimeout(()=>{  
-                   
+              <><Brush dataKey="unixtime" startIndex={reducer.chart.brush.startIndex} endIndex={reducer.chart.brush.endIndex}
+                        tickFormatter={formatBrush} onChange={(a: any) => {
+                          //setTimeout(()=>{  
                           var from;
                           var to;
-                            from = dat[a.startIndex].unixtime;  //- range * (Math.round(0.9*DATA_SIZE/2));
-                            to = dat[a.endIndex].unixtime;
-                           
-                              dispatch(setTimestampRange(from, to));
-                        },1000)  
-                    }}
-                /> 
+                          data_range_from = dat[a.startIndex].unixtime;
+                          data_range_to = dat[a.endIndex].unixtime;
+
+                          from = dat[a.startIndex].unixtime; //- range * (Math.round(0.9*DATA_SIZE/2));
+                          to = dat[a.endIndex].unixtime;
+
+                          
+                        } } />
+
+                        </>  
                  : null }
                 </LineChart>
                 

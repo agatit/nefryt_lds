@@ -114,7 +114,8 @@ const useStyles  = makeStyles(theme => ({
 
 type Props={
   content: ReactElement,
-  rPanel:RPanel
+  rPanel:RPanel,
+  onmouseup?:React.MouseEventHandler<HTMLElement>
 }  
 const Layout: React.FC<Props> = (p) => {
   const navigate = useNavigate();  
@@ -144,7 +145,7 @@ const Layout: React.FC<Props> = (p) => {
   }
  
   return (    
-    <div className={styles.root}>
+    <div onMouseUp={p.onmouseup} className={styles.root}>
       <CssBaseline />
       <AppBar      
         position='fixed' className={clsx(styles.appBar, {[styles.appBarShift]:sidebar_open})}>

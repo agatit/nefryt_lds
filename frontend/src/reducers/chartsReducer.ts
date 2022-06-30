@@ -254,10 +254,10 @@ const chartsReducer = (
              // if (step > 0){
              //   console.log(ut - (action.data.data[step-1].timestamp*1000 + action.data.data[step-1].timestampMs))
              // }
-              if (el.timestamp *1000 + el.timestampMs  < state.chart.cfgRange.from + currentTimeZoneOffsetInSeconds*1000){
+              if (el.timestamp *1000 + el.timestampMs  < state.chart.cfgRange.from - currentTimeZoneOffsetInSeconds*1000){
                 brushStartIndex = brushStartIndex+1;
               }
-              if (el.timestamp *1000 + el.timestampMs  < state.chart.cfgRange.to + currentTimeZoneOffsetInSeconds*1000){
+              if (el.timestamp *1000 + el.timestampMs  < state.chart.cfgRange.to - currentTimeZoneOffsetInSeconds*1000){
                 brushEndIndex = brushEndIndex+1;
               }
              // console.log(ut < state.chart.cfgRange.to)

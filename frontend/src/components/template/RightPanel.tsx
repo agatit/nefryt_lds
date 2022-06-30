@@ -29,6 +29,7 @@ export const RightPanel: React.FC<RPanelParams> = (p) => {
 
   const panelclick = (e: React.MouseEvent<HTMLElement>) => {
     // e.preventDefault();
+    console.log('ddd');
   }
 
 
