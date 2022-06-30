@@ -1,7 +1,7 @@
 
 import { TwoMpTwoTone } from "@mui/icons-material";
 import { ChartRange, IChartAction, ITrend } from "../../components/chart/type";
-import { ADD_SERIE, APPEND_DATA, AREA_REF,  H_GRID_LINE,  LOAD_DATA_STATE,  REMOVE_SERIE,  SET_DATA,  SET_FROM_DATE,  SET_TIMER, SET_TO_DATE,  LOAD_TREND_LIST,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE, SET_DATE_RANGE, SET_TIMESTAMP_RANGE} from "./actionType";
+import { ADD_SERIE, APPEND_DATA, AREA_REF,  H_GRID_LINE,  LOAD_DATA_STATE,  REMOVE_SERIE,  SET_DATA,  SET_FROM_DATE,  SET_TIMER, SET_TO_DATE,  LOAD_TREND_LIST,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE, SET_DATE_RANGE, SET_TIMESTAMP_RANGE, ENABLE_TREND, DISABLE_TREND} from "./actionType";
 
 
 
@@ -276,6 +276,21 @@ export function setDrawerZoom(zoom:IZoomData) {
 
 */
 
+export function enableTrend(trendiD:number) {
+  const action: IChartAction = {
+    type: ENABLE_TREND,
+    data : trendiD
+  }
+  return action;
+}
+
+export function disableTrend(trendiD:number) {
+  const action: IChartAction = {
+    type: DISABLE_TREND,
+    data : trendiD
+  }
+  return action;
+}
 export function setTrendList(data:any) {
  
   const action: IChartAction = {

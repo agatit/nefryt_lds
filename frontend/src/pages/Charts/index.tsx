@@ -7,7 +7,7 @@ import * as React from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { RootState } from "../..";
-import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, loadData, setTrendList, setDateRange, setTimestampRange } from "../../actions/charts/actions";
+import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, loadData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend } from "../../actions/charts/actions";
 import { Layout } from "../../components/template/Layout";
 import { RightPanel } from "../../components/template/RightPanel";
 import { ChartsState } from "./type";
@@ -19,7 +19,7 @@ import { verify } from "crypto";
 import { usePreviousProps } from "@mui/utils";
 import { gridColumnsTotalWidthSelector } from "@mui/x-data-grid";
 import { CategoricalChartState } from "recharts/types/chart/generateCategoricalChart";
-import { ITrend } from "../../components/chart/type";
+import { ITrend, ITrendData } from "../../components/chart/type";
 import moment from "moment";
 
 import { useRequest, useRequests } from 'redux-query-react';
@@ -301,11 +301,28 @@ const handleChangeTrend = (event: { target: { name: any; checked: any; }; }) => 
 
   var dat =reducer.chart.data;
 
-  if ((dat) && (dat.length>0)){
-   var dat2 = dat.map((obj: any) => ({...obj}));
+  const activeTrends: any[] =trends.filter((obj: ITrend) => obj.selected &&  !obj.disabled);
+
+  var dat2:any[] = [];
+  dat.forEach((element: ITrendData) => {
+    var tmp:ITrendData={timestamp: element.timestamp, timestampMs: element.timestamp, unixtime: element.timestamp};
+
+    activeTrends.forEach((trd:ITrend)=>{
+      tmp[trd.iD] = element[trd.iD];
+    });
+    
+    dat2.push(tmp);
+    
+
+  });
+  console.log(dat2);
+  
+
+  //if ((dat) && (dat.length>0)){
+  // var dat2 = dat.map((obj: any) => ({...obj}));
     //console.log(dat2.length);
     //console.log(dat2);
-  }
+  //}
 
 
 function zoom() {
@@ -433,16 +450,16 @@ const renderCusomizedLegend = (payload :any) => {
           marginRight: 10,
           color: entry.color ? entry.color : "#8884d8"
         };
-      console.log(active);
+      //console.log(active);
         return (
           <span
             className="legend-item"
-            onClick={() => { console.log('change acvtive')}} //this.handleClick(dataKey)}
+            onClick={() => { entry.disabled? dispatch(enableTrend(entry.iD)) :  dispatch(disableTrend(entry.iD))}} //this.handleClick(dataKey)}
             style={style}
           >
             <Surface width={10} height={10} viewBox={{x:0, y:0, width:10, height:10}} >
               <Symbols cx={5} cy={5} type="circle" size={50} fill={entry.color ? entry.color:'#8884d8'} />
-              {false && (
+              { entry.disabled && (
                 <Symbols
                   cx={5}
                   cy={5}
@@ -452,7 +469,7 @@ const renderCusomizedLegend = (payload :any) => {
                 />
               )}
             </Surface>
-            <span>{entry.symbol}</span>
+            <span>{entry.symbol?entry.symbol:entry.iD}</span>
           </span>
         );
       })}
@@ -582,7 +599,7 @@ if ((dat) && (dat.length>0)){
                 <LineChart
                   width={500}
                   height={300}
-                  data={dat}
+                  data={dat2}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   // eslint-disable-next-line react/jsx-no-bind

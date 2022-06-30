@@ -29,6 +29,7 @@ export type ChartParams = {
     selected:boolean;
     axislabel:string;
     trendname:string;
+    disabled:boolean;
   }
  
  /// export interface ITrend extends Trend {

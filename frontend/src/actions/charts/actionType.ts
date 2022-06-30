@@ -24,6 +24,9 @@ export const SET_TO_DATE = "SET_TO_DATE"
 
 export const TOGGLE_LIVE_MODE = "TOGGLE_LIVE_MODE"
 export const TOGGLE_ZOOM_MODE = "TOGGLE_ZOOM_MODE"
+export const DISABLE_TREND = "DISABLE_TREND"
+export const ENABLE_TREND = "ENABLE_TREND"
+
 
 export const APPEND_DATA = "APPEND_DATA"
 export const SET_TIMER = "SET_TIMER"

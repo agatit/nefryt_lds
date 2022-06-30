@@ -2,7 +2,7 @@ import { getDate } from "date-fns";
 import { stat } from "fs";
 import { ChartsState } from "../pages/Charts/type";
 import { GridLines, IChartAction, ITrend, ITrendData } from "../components/chart/type";
-import { ADD_SERIE, APPEND_DATA, AREA_REF,  DEFAULT_STATE,  H_GRID_LINE,  LOAD_DATA_STATE,  LOAD_TREND_LIST,  REMOVE_SERIE,  SET_DATA,  SET_DATE_RANGE,  SET_FROM_DATE,  SET_TIMER,  SET_TIMESTAMP_RANGE,  SET_TO_DATE,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE } from "../actions/charts/actionType";
+import { ADD_SERIE, APPEND_DATA, AREA_REF,  DEFAULT_STATE,  DISABLE_TREND,  ENABLE_TREND,  H_GRID_LINE,  LOAD_DATA_STATE,  LOAD_TREND_LIST,  REMOVE_SERIE,  SET_DATA,  SET_DATE_RANGE,  SET_FROM_DATE,  SET_TIMER,  SET_TIMESTAMP_RANGE,  SET_TO_DATE,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE } from "../actions/charts/actionType";
 
 import { getTrendData, GetTrendDataRequest } from "../apis/TrendsApi";
 import { Trend, TrendData, TrendDef } from "../models";
@@ -366,6 +366,7 @@ const chartsReducer = (
             tmp += element.unit? ' [' + element.unit + ']' : '';
 
             element.axislabel = tmp;
+            element.disabled = false;
             //console.log(element);
            
           });
@@ -376,6 +377,41 @@ const chartsReducer = (
             chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
+        case DISABLE_TREND:{
+          var trd : ITrend[] = state.chart.trends;
+         
+          trd.forEach((element: ITrend) => {
+            if (element.iD == action.data){
+             element.disabled = true;
+            }
+             //console.log(element);
+            
+           });
+          // console.log(action.data);
+ 
+           return {
+             ...state,
+             chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+           }
+         }
+         case ENABLE_TREND:{
+          var trd : ITrend[] = state.chart.trends;
+         
+          trd.forEach((element: ITrend) => {
+            if (element.iD == action.data){
+             element.disabled = false;
+            }
+             //console.log(element);
+            
+           });
+          // console.log(action.data);
+ 
+           return {
+             ...state,
+             chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+           }
+         }
+ 
 
        
     }
