@@ -7,6 +7,7 @@ import { ADD_SERIE, APPEND_DATA, AREA_REF,  DEFAULT_STATE,  DISABLE_TREND,  ENAB
 import { getTrendData, GetTrendDataRequest } from "../apis/TrendsApi";
 import { Trend, TrendData, TrendDef } from "../models";
 import { TrendDataApiFromJSON } from "../models/TrendDataApi";
+import { color } from "@mui/system";
 
 
 export const PERIOD_EXTENSION = 2;
@@ -14,6 +15,7 @@ export const PERIOD_EXTENSION = 2;
 var x = new Date();
 var currentTimeZoneOffsetInSeconds = x.getTimezoneOffset();
 
+var colorList:string[] = ["#ff00000", "#00ff00", '#0000ff', '#ffffff'];
 
 const initialState: ChartsState = {
     chart: {
@@ -361,16 +363,19 @@ const chartsReducer = (
         case LOAD_TREND_LIST:{
          var trd : ITrend[] = action.data;
         
+         var idx=0;
          trd.forEach((element: ITrend) => {
+         
             var tmp : string =  element.symbol? element.symbol : element.iD.toString(); 
             tmp += element.unit? ' [' + element.unit + ']' : '';
-
+            
             element.axislabel = tmp;
             element.disabled = false;
+            element.color = colorList[idx%colorList.length]
             //console.log(element);
-           
+            idx++;
           });
-         // console.log(action.data);
+          console.log(trd);
 
           return {
             ...state,
