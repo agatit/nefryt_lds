@@ -9,7 +9,7 @@ from umodbus import conf
 from umodbus.server.tcp import get_server
 from umodbus.utils import log_to_stream
 
-from .request import MyRequestHandler
+from .request import ModbusRequest
 
 def main():
 
@@ -20,7 +20,7 @@ def main():
     conf.SIGNED_VALUES = True
 
     TCPServer.allow_reuse_address = True
-    app = get_server(TCPServer, ('', 502), MyRequestHandler)
+    app = get_server(TCPServer, ('', 502), ModbusRequest)
 
     logging.info('Server started\n')
     try:
