@@ -31,27 +31,27 @@ class TrendBase(metaclass=TrendBaseMeta):
         self.id = id
         self.children: List[TrendBase] = []
         self.params = {}
-        self.output_size = 100
+        self.block_size = 100
         
         self._read_params()
         self._read_children()
-        logging.info(f"Trend {self.__class__.__name__} ({self.id}) initialized: params={self.params}")    
+        logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")    
 
 
     def update(self, data: List[int], timestamp: int, parent_id: int = None):
 
         # TODO: threaded implementation
-
-        logging.debug(f"Trend {self.__class__.__name__} ({self.id}) processing...")
         
         self._save(data, timestamp) 
+
+        logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating children...")
 
         # process children
         for child in self.children:
             try:          
                 child.update(data, timestamp, self.id)            
             except Exception as e:
-                logging.exception(f"Trend {self.__class__.__name__} ({self.id}) child {child.__class__.__name__} ({child.id}) update error: {e}", exc_info=True)               
+                logging.exception(f"{timestamp} {self.__class__.__name__} ({self.id}) child {child.__class__.__name__} ({child.id}) update error: {e}", exc_info=True)               
 
 
     def _read_params(self):
@@ -103,7 +103,7 @@ class TrendBase(metaclass=TrendBaseMeta):
             session.execute(insert_stmt)
             session.commit()
 
-            logging.debug(f"Trend {self.__class__.__name__} ({self.id}) saved for {timestamp}") 
+            logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) saved") 
         except Exception as e:            
             session.rollback()
             raise(e)
