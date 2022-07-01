@@ -13,15 +13,12 @@ class TrendDeriv(TrendFilter):
 
     def calculate(self):      
 
-        # if len(self.result) == self.output_size then
-        # kernel size must be (2 * self.output_size * 100) + 1 and
-        # input size must be (2 * self.window_size + 1) * self.output_size
         if len(self.storage) >= (2 * self.window_size + 1) * self.block_size:
             left = int(-self.window_size * self.block_size)
             right = int(self.window_size * self.block_size) + 1
 
             kernel = np.array(range(left, right))
-            norm = 1/(self.window_size*(self.window_size+1)/2)
+            norm = 1/(100*self.window_size*(100*self.window_size+1)/2)
 
             result = signal.convolve(self.storage, kernel, mode='valid') * norm
 

@@ -19,7 +19,7 @@ class TrendMean(TrendFilter):
             right = int(self.window_size * self.block_size) + 1
 
             kernel = [1] * (2 * self.window_size * self.block_size + 1)
-            norm = 1/(self.window_size*(self.window_size+1)/2)
+            norm = 1/(100*(2*self.window_size+1))
 
             result = signal.convolve(self.storage, kernel, mode='valid') * norm
 
