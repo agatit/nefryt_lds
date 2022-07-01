@@ -33,6 +33,7 @@ class TrendFilter(TrendBase):
             self.initiate_buffer(self.window_size, timestamp, parent_id)
         else:
             self.storage = np.append(self.storage[100:], data)
+
         
         self.storage_timstamp = timestamp        
 
@@ -77,4 +78,4 @@ class TrendFilter(TrendBase):
                 trend_data = next(trend_data_iter, None)
             self.storage = np.append(self.storage, curr_data)            
 
-        logging.info(f"{self.__class__.__name__} ({self.id}) buffer read {len(self.storage)} values from {parent_id}")
+        logging.info(f"{self.__class__.__name__} ({self.id}) buffer reads {len(self.storage)} values from {parent_id}")
