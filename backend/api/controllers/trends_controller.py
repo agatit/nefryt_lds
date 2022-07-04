@@ -265,7 +265,10 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
 
                 one_second_data = {}
                 while db_data and db_data[0].Time == api_data["Timestamp"]:
-                    one_second_data[db_data[0].TrendID] = struct.unpack("H"*100, db_data[0].Data)
+                    if db_trends_scales[db_data[0].TrendID]["RawMin"] >= 0:
+                        one_second_data[db_data[0].TrendID] = struct.unpack("H"*100, db_data[0].Data)
+                    else:
+                        one_second_data[db_data[0].TrendID] = struct.unpack("h"*100, db_data[0].Data)
                     db_data = next(db_iter, None)
 
                 current_second = api_data["Timestamp"]

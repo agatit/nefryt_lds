@@ -8,7 +8,7 @@
 import logging
 import sys
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, force=True)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, force=True)
 
 
 
