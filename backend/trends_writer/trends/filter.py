@@ -30,10 +30,10 @@ class TrendFilter(TrendBase):
             return None, None
 
         if timestamp != self.storage_timstamp + 1:
+            logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timstamp}")
             self.initiate_buffer(self.window_size, timestamp, parent_id)
         else:
             self.storage = np.append(self.storage[100:], data)
-
         
         self.storage_timstamp = timestamp        
 
@@ -46,11 +46,13 @@ class TrendFilter(TrendBase):
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
 
 
-    def calculate(self):
+    def calculate(self) -> np.ndarray:
         raise NotImplementedError
 
 
     def initiate_buffer(self, window_size, timestamp, parent_id: int = None):
+
+        # TODO: optymalizacja - ładowanie tylko tych danych których brakuje
 
         self.storage = np.array([], dtype=np.uint16)
 
@@ -68,14 +70,16 @@ class TrendFilter(TrendBase):
         for curr_timestamp in range(timestamp - window_size * 2 - 1, timestamp):
             if trend_data is not None and trend_data[0].Time == curr_timestamp:
                 curr_data = struct.unpack('<100h', trend_data[0].Data)
+                # fix data
                 for i in range(len(curr_data)):
                     if curr_data[i] != 0xFFFF:
-                        last_valid = i
+                        last_valid = curr_data[i]
                     else:
                         curr_data[i] = last_valid
             else:
                 curr_data = np.full(100, fill_value=last_valid, dtype=np.uint16)
                 trend_data = next(trend_data_iter, None)
+                logging.debug(f"{self.__class__.__name__} ({self.id}) empty trend data")
             self.storage = np.append(self.storage, curr_data)            
 
         logging.info(f"{self.__class__.__name__} ({self.id}) buffer reads {len(self.storage)} values from {parent_id}")
