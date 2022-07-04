@@ -27,4 +27,4 @@ class TrendDeriv(TrendFilter):
             result = np.minimum(result, [np.iinfo(np.int16).max] * len(result))
             result = result.astype(np.int16)
 
-            return result.flip()
+            return np.flip(result)
