@@ -22,9 +22,10 @@ class TrendDeriv(TrendFilter):
 
             result = signal.convolve(self.storage, kernel, mode='valid') * norm
 
-            # drivative is signed
+            # drivative is signed - we need to shift it to unsigned range
             result = np.maximum(result, [np.iinfo(np.int16).min] * len(result))
             result = np.minimum(result, [np.iinfo(np.int16).max] * len(result))
+            result = result + np.iinfo(np.int16).min
             result = result.astype(np.int16)
 
             return result
