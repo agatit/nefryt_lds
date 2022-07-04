@@ -30,7 +30,7 @@ class TrendFilter(TrendBase):
             return None, None
 
         if timestamp == self.storage_timstamp + 1:
-            self.storage = np.append(self.storage[100:], data)
+            self.storage = np.append(self.storage[100:], np.flip(data))
         elif timestamp > self.storage_timstamp + 1:
             logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timstamp}")
             self.initiate_buffer(self.window_size, timestamp, parent_id)                    
