@@ -29,11 +29,13 @@ class TrendFilter(TrendBase):
             logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) wrong parent id!")
             return None, None
 
-        if timestamp != self.storage_timstamp + 1:
-            logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timstamp}")
-            self.initiate_buffer(self.window_size, timestamp, parent_id)
-        else:
+        if timestamp == self.storage_timstamp + 1:
             self.storage = np.append(self.storage[100:], data)
+        elif timestamp > self.storage_timstamp + 1:
+            logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timstamp}")
+            self.initiate_buffer(self.window_size, timestamp, parent_id)                    
+        else:
+            logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage alredy exists {self.storage_timstamp}")
         
         self.storage_timstamp = timestamp        
 
