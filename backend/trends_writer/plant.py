@@ -30,6 +30,6 @@ class PipePlant:
         trend: TrendQuick
         for trend in self.trends:
             if trend.register == register:
-                trend.update(np.array(data), int(time.time()))
+                trend.update(np.array(data), round(time.time()))
 
 pipe_plant = PipePlant()
