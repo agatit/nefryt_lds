@@ -75,22 +75,12 @@ const reducer: EventsState = useSelector(
   shallowEqual
 )
 
-//dispatch(getData(null)); 
 
 let data:any =reducer.table.data;
-console.log(data);
 
 
-
-/*const doGet = React.useCallback(async (params:any) => {
-  data= {nodes}; //getData(params);
-  console.log(data);
-}, []);
-
-doGet({});
-*/
 React.useEffect(() => {
-  //doGet({});
+
  
 });
 
@@ -142,39 +132,11 @@ function onSortChange(action:any, state:any) {
       reverse: state.reverse,
     },
   };
-console.log('fffff');
   getData(params);
-  console.log('lllll');
-   // getData(params); 
 }
 
-//console.log('BBBBBB');
-//setTimeout(function() {
-  //getGridData(null);
-//  console.log('AAAAA');
-//}, 3000);
 
- /*
- const sort = useSort(
-  data,
-  {
-    onChange: onSortChange,
-  },
-  {
-    sortFns: {
-      TASK: (array) => array.sort((a, b) => a.name.localeCompare(b.name)),
-      DEADLINE: (array) => array.sort((a, b) => a.deadline - b.deadline),
-      TYPE: (array) => array.sort((a, b) => a.type.localeCompare(b.type)),
-      COMPLETE: (array) => array.sort((a, b) => a.isComplete - b.isComplete),
-      TASKS: (array) => array.sort((a, b) => (a.nodes || []).length - (b.nodes || []).length),
-    },
-  },
-);
-
-function onSortChange(action:any, state:any) {
-  console.log(action, state);
-}
-*/ 
+ 
  const COLUMNS = [
   { label: 'Task', renderCell: (item:any) => item.name,resize: true, sort: { sortKey: 'TASK' } },
   {

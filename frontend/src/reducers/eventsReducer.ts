@@ -32,10 +32,6 @@ function getGridData(params:any): any {
     }
   ];
 
- 
-  //console.log({nodes});
-
-  //dispatch(nodes);
   return {nodes};
 }
 
@@ -49,9 +45,7 @@ const initialState: EventsState = {
     }
   }
 
-//  const initialState: EventsState = {
-//    table: {data  :  getGridData({})}
-//  }
+
 
 const eventsReducer = (
     state: EventsState = initialState,
@@ -61,7 +55,6 @@ const eventsReducer = (
     switch (action.type) {
         case GET_DATA:{
           var data = getGridData(action.data);
-          console.log(data);
           return {
             ...state,
             table: {data: data, pageInfo:state.table.pageInfo}

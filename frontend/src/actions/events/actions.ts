@@ -40,7 +40,6 @@ const dispatch :Dispatch = useDispatch();
 
 
 export const getDataAction=()=>async(dispatch :Dispatch) =>{
-  console.log('hhhhh');
   const data= await getData()
   dispatch({
       type:GET_DATA,
@@ -59,6 +58,5 @@ export function getData(params:any) {
     type: GET_DATA,
     data : params
   }
-  console.log(params);
   return action;
 }

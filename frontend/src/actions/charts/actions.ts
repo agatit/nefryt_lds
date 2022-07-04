@@ -1,7 +1,7 @@
 
 import { TwoMpTwoTone } from "@mui/icons-material";
 import { ChartRange, IChartAction, ITrend } from "../../components/chart/type";
-import { ADD_SERIE, APPEND_DATA, AREA_REF,  H_GRID_LINE,  LOAD_DATA_STATE,  REMOVE_SERIE,  SET_DATA,  SET_FROM_DATE,  SET_TIMER, SET_TO_DATE,  LOAD_TREND_LIST,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE, SET_DATE_RANGE, SET_TIMESTAMP_RANGE, ENABLE_TREND, DISABLE_TREND} from "./actionType";
+import { ADD_SERIE, APPEND_DATA, AREA_REF,  H_GRID_LINE,   REMOVE_SERIE,  SET_DATA,  SET_FROM_DATE,  SET_TIMER, SET_TO_DATE,  LOAD_TREND_LIST,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE, SET_DATE_RANGE, SET_TIMESTAMP_RANGE, ENABLE_TREND, DISABLE_TREND, SET_BRUSH_RANGE} from "./actionType";
 
 
 
@@ -59,9 +59,6 @@ function getData(beginDate : number, endDate:number, DATA_SIZE : number, trends 
       },
     ];
 
-    //var DATA_SIZE=4000;
-    console.log(DATA_SIZE);
-
     var range = Math.round((endDate - beginDate)/DATA_SIZE);
     
     if (range==0){
@@ -76,22 +73,10 @@ function getData(beginDate : number, endDate:number, DATA_SIZE : number, trends 
        data.push(dat);
     }
 
-    console.log(data);
-
   }, 5000);
 
-    //return data;
+    
 }
-
-/*
-export function setSourceMode(liveData:boolean) {
-  const action: IChartAction = {
-    type: SOURCE_MODE,
-    data : liveData
-  }
-  return action;
-}
-*/
 
 export function setHorizontalLine(visible:boolean) {
   const action: IChartAction = {
@@ -308,7 +293,7 @@ export function setData(data:any, lastUpdated:number) {
   }
   return action;
 }
- 
+ /*
 export function loadData(is_load:boolean) {
   const action: IChartAction = {
     type: LOAD_DATA_STATE,
@@ -316,7 +301,7 @@ export function loadData(is_load:boolean) {
   }
   return action;
 }
-
+*/
 export function changeTrend(trendName:string, selected : boolean) {
   const action: IChartAction = {
     type: selected ? ADD_SERIE : REMOVE_SERIE,
@@ -331,6 +316,14 @@ export function setTimestampRange(from:number, to:number) {
   const action: IChartAction = {
     type: SET_TIMESTAMP_RANGE,
     data : {from:from, to:to}
+  }
+  return action;
+}
+
+export function setBrushRange(from:number, to:number, startIndex:number, endIndex:number) {
+  const action: IChartAction = {
+    type: SET_BRUSH_RANGE,
+    data : {from:from, to:to, startIndex:startIndex, endIndex:endIndex}
   }
   return action;
 }
