@@ -7,7 +7,7 @@ import * as React from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { RootState } from "../..";
-import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, loadData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend } from "../../actions/charts/actions";
+import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend, setBrushRange } from "../../actions/charts/actions";
 import { Layout } from "../../components/template/Layout";
 import { RightPanel } from "../../components/template/RightPanel";
 import { ChartsState } from "./type";
@@ -98,7 +98,10 @@ const ChartsPage: React.FC = () => {
 
   var data_range_from=0;
   var data_range_to=0;
+  var brush_startIndex = 0;
+  var brush_endIndex = 0;
 
+ 
   const queries = useSelector(getQueries) || [];
   const entities = useSelector(getEntities) || [];
 
@@ -129,7 +132,6 @@ if (selectedTrends && (selectedTrends.length > 0)) {
   var queryTrendsList = listTrends({
     queryKey: 'trends_list',
      transform: (data) => {
-      // console.log(data);
          return {
            trends_list: data,
          };
@@ -142,12 +144,8 @@ if (selectedTrends && (selectedTrends.length > 0)) {
     }
   );
 
-  //reducer.chart.currRange.to-reducer.chart.currRange.from
-  //var range = Math.round(reducer.chart.currRange.to /1000) - Math.round(reducer.chart.currRange.from /1000);
-
   var x = new Date();
- var currentTimeZoneOffsetInSeconds = x.getTimezoneOffset();
-
+  var currentTimeZoneOffsetInSeconds = x.getTimezoneOffset();
   var queryTrendsData = getTrendData({trendIdList: trdList,
     begin: Math.round(reducer.chart.currRange.from /1000) - currentTimeZoneOffsetInSeconds, //1655796348,
     end: Math.round(reducer.chart.currRange.to /1000) - currentTimeZoneOffsetInSeconds,//1655804041,
@@ -172,23 +170,12 @@ if (selectedTrends && (selectedTrends.length > 0)) {
    const [ TrendsDataState, run] = useRequest(queryTrendsData);
 
    const [TrendsListState] = useRequest(queryTrendsList);
- 
-   //console.log(TrendsDataState);
-   //console.log(queryTrendsData);
-   //console.log(entities.trends_data);
 
    if ((TrendsDataState.isFinished) && (reducer.chart.lastUpdated!=0) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
-       //console.log(entities.trends_data);
        dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
      }
   useEffect(() => {
-    //console.log(reducer.chart.lastUpdated);
-    //console.log(TrendsDataState.lastUpdated); 
-
-    //console.log(TrendsDataState);
-    //console.log(queryTrendsData);   
     if ((TrendsDataState.isFinished) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
-      //console.log(entities.trends_data);
       dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
     }
 
@@ -248,15 +235,11 @@ if (selectedTrends && (selectedTrends.length > 0)) {
     
     dispatch(areaRef({left:e.activeLabel, right:0}))
   }
-//const handleMouseUp = (e: CategoricalChartState) => {
+
   const handleMouseUp = (e: any) => {
- // console.log('GGGGGGGGGGG');
- // console.log(e);
   if (!e || !e.activeLabel) {
     return
   }
-  //zoom();
-
 }
 
 const handleMouseMove = (e: CategoricalChartState) => {
@@ -299,13 +282,13 @@ const handleChangeTrend = (event: { target: { name: any; checked: any; }; }) => 
   };
 
 
-  var dat =reducer.chart.data;
+  var dat1 =reducer.chart.data;
 
   const activeTrends: any[] =trends.filter((obj: ITrend) => obj.selected &&  !obj.disabled);
 
   var dat2:any[] = [];
-  dat.forEach((element: ITrendData) => {
-    var tmp:ITrendData={timestamp: element.timestamp, timestampMs: element.timestamp, unixtime: element.timestamp};
+  dat1.forEach((element: ITrendData) => {
+    var tmp:ITrendData={timestamp: element.timestamp, timestampMs: element.timestamp, unixtime: element.unixtime};
 
     activeTrends.forEach((trd:ITrend)=>{
       tmp[trd.iD] = element[trd.iD];
@@ -313,17 +296,10 @@ const handleChangeTrend = (event: { target: { name: any; checked: any; }; }) => 
     
     dat2.push(tmp);
     
+    
 
   });
-  console.log(dat2);
   
-
-  //if ((dat) && (dat.length>0)){
-  // var dat2 = dat.map((obj: any) => ({...obj}));
-    //console.log(dat2.length);
-    //console.log(dat2);
-  //}
-
 
 function zoom() {
   //console.log('zoom');
@@ -359,14 +335,13 @@ function zoom() {
 }
 
 const handlemouseup  = (e: React.MouseEvent<HTMLElement>) => {
-  //console.log(e.target);
- // if ((e) && (e.target) && ((e.target as Element).classList.contains('recharts-brush-slide'))){
       if ((data_range_from > 0) && (data_range_to>0)){
-        dispatch(setTimestampRange(data_range_from, data_range_to));
+        dispatch(setBrushRange(data_range_from, data_range_to, brush_startIndex, brush_endIndex ));
         data_range_from=0;
         data_range_to=0;
+        brush_startIndex = 0;
+        brush_endIndex = 0;
       }
- // }
 }
 
 const formatYAxis = (item: any) => {
@@ -376,7 +351,6 @@ const formatYAxis = (item: any) => {
  const formatXAxis = (tickItem: any) => {
   var range = reducer.chart.currRange.to-reducer.chart.currRange.from;
   //var range = 1655804041 - 1655796348;
-
   var divMonth = range  /  (30*60*60*24*1000);
   var divWeek = range /  (7*60*60*24*1000);
   var divDay = range /  (60*60*24*1000);
@@ -402,20 +376,21 @@ const formatYAxis = (item: any) => {
  
 
   var tmp =  moment(tickItem).format(format);
-//console.log(divMinutes);
   if (divMinutes <=10){
     ms = tickItem % 1000;
     tmp = tmp + '.' + ms;
  }
- //tmp = tickItem;
   return tmp;
 
 }
 
+
+const formatValue = (value: any, index: any)  => {
+  return value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+}
+
 const formatBrush = (unixTime: any, index: any)  => {
   var range = reducer.chart.currRange.to-reducer.chart.currRange.from;
-  //var range = 1655804041 - 1655796348;
-
   var divMonth = range  /  (30*60*60*24*1000);
   var divWeek = range /  (7*60*60*24*1000);
   var divDay = range /  (60*60*24*1000);
@@ -427,30 +402,29 @@ const formatBrush = (unixTime: any, index: any)  => {
 
   var ms :number = 0;
  
-
-  var tmp =  moment(unixTime).format(format);
+  var aa = new Date( unixTime );
+  var tmp =  moment(aa).format(format);
 
   if (divHour <=1){
     ms = unixTime % 1000;
     tmp = tmp + '.' + ms;
  }
- //tmp = tickItem;
   return tmp ;
 
 }
 
 var active:boolean=true;
+
+
 const renderCusomizedLegend = (payload :any) => {
   return (
     <div className="customized-legend">
       {selectedTrends.map((entry: ITrend) => {
         
-        //const active = true; //_.includes(this.state.disabled, dataKey);
         const style = {
           marginRight: 10,
           color: entry.color ? entry.color : "#8884d8"
         };
-      //console.log(active);
         return (
           <span
             className="legend-item"
@@ -478,16 +452,9 @@ const renderCusomizedLegend = (payload :any) => {
 };
 
 
-//{=> moment(unixTime).format("DD-MM-YYYY HH:mm:ss")} 
 
-//console.log(Math.round(dat.length * 0.45));
-//console.log(Math.round(dat.length * 0.55));
-//console.log(dat);
-if ((dat) && (dat.length>0)){
+if ((dat1) && (dat1.length>0)){
 
-
-//console.log(dat[Math.round(dat.length * 0.45)].timestamp);
-//console.log(dat[Math.round(dat.length * 0.55)].timestamp);
 }
 
 
@@ -635,7 +602,7 @@ if ((dat) && (dat.length>0)){
                  
 
                   
-                 {reducer.chart.mode.tooltip ? <Tooltip labelFormatter={formatBrush} /> : <></>}
+                 {reducer.chart.mode.tooltip ? <Tooltip  labelFormatter={formatBrush} formatter={formatValue}  /> : <></>}
                 
                  <Legend
               verticalAlign="bottom"
@@ -671,11 +638,13 @@ if ((dat) && (dat.length>0)){
                           //setTimeout(()=>{  
                           var from;
                           var to;
-                          data_range_from = dat[a.startIndex].unixtime;
-                          data_range_to = dat[a.endIndex].unixtime;
+                          data_range_from = dat2[a.startIndex].unixtime;
+                          data_range_to = dat2[a.endIndex].unixtime;
+                          brush_startIndex = a.startIndex;
+                          brush_endIndex = a.endIndex;
 
-                          from = dat[a.startIndex].unixtime; //- range * (Math.round(0.9*DATA_SIZE/2));
-                          to = dat[a.endIndex].unixtime;
+                          from = dat2[a.startIndex].unixtime; //- range * (Math.round(0.9*DATA_SIZE/2));
+                          to = dat2[a.endIndex].unixtime;
 
                           
                         } } />
@@ -693,4 +662,8 @@ if ((dat) && (dat.length>0)){
 
 export {ChartsPage}
 
+
+function getIntroOfPage(label: any): React.ReactNode {
+  throw new Error("Function not implemented.");
+}
 

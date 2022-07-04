@@ -16,8 +16,6 @@ export const RightPanel: React.FC<RPanelParams> = (p) => {
 
   var rightpanelClasses="rightpanel"
 
-  //console.log(p.content);
-
   var is_open = p.is_open;
   if (is_open){
     rightpanelClasses = rightpanelClasses + ' open';
@@ -29,7 +27,6 @@ export const RightPanel: React.FC<RPanelParams> = (p) => {
 
   const panelclick = (e: React.MouseEvent<HTMLElement>) => {
     // e.preventDefault();
-    console.log('ddd');
   }
 
 
