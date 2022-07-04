@@ -28,5 +28,5 @@ class TrendMean(TrendFilter):
             result = np.minimum(result, [np.iinfo(np.uint16).max] * len(result))
             result = result.astype(np.int16)
 
-            return result            
+            return np.flip(result)
 
