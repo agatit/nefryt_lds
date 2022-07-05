@@ -13,7 +13,7 @@ from api.models.trend_def import TrendDef  # noqa: E501
 from api import util
 
 from sqlalchemy import alias, select, delete, and_, lambda_stmt
-from api import session
+from ..db import session
 from database.models import lds
 
 
