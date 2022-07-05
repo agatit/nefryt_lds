@@ -4,7 +4,7 @@ import numpy as np
 from scipy import signal
 
 from database import lds
-from .filter import TrendFilter
+from . import TrendFilter
 
 
 class TrendMean(TrendFilter):

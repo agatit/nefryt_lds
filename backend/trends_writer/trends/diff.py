@@ -3,7 +3,7 @@ import logging
 import numpy as np
 
 from database import lds
-from .filter import TrendBase
+from . import TrendBase
 
 
 class TrendDiff(TrendBase):

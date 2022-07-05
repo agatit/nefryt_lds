@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 from sqlalchemy import select, insert, and_
 
-from trends_writer.db import session
+from ..db import session
 from database import lds
 
 # from typing import TYPE_CHECKING

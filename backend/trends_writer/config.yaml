@@ -1,0 +1,5 @@
+--- 
+# db_uri: mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo?driver=ODBC+Driver+17+for+SQL+Server
+db_uri: mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=Yes&Encrypt=No
+verbosity: INFO # DEBUG, WARNING, ERROR, ...
+modbus_port: 502

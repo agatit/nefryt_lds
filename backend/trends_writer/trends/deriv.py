@@ -5,7 +5,7 @@ from scipy import signal
 import time
 
 from database import lds
-from .filter import TrendFilter
+from . import TrendFilter
 
 
 class TrendDeriv(TrendFilter):
