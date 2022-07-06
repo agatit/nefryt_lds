@@ -17,7 +17,8 @@ export type ChartParams = {
     lastUpdated : number,
    // series : ChartSerie[]
     trends :  ITrend[],
-    brush:{startIndex:number, endIndex:number}
+    brush:{startIndex:number, endIndex:number},
+    force_refresh : boolean
    // size : ISize  // chart size
   }
 

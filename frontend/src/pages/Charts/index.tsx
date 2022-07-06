@@ -7,7 +7,7 @@ import * as React from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { RootState } from "../..";
-import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend, setBrushRange } from "../../actions/charts/actions";
+import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend, setBrushRange, forceRefresh } from "../../actions/charts/actions";
 import { Layout } from "../../components/template/Layout";
 import { RightPanel } from "../../components/template/RightPanel";
 import { ChartsState } from "./type";
@@ -91,9 +91,6 @@ const useStyles  = makeStyles(theme => ({
 Configuration.basePath = 'http://192.168.1.231:8080';
 
 
-   
-  
-
 const ChartsPage: React.FC = () => {
 
   var data_range_from=0;
@@ -124,9 +121,8 @@ if (selectedTrends && (selectedTrends.length > 0)) {
   selectedTrends.forEach((obj: ITrend) => {
     trdList.push(obj.iD);
   });
-}//else{
-  //trdList.push();
-//}
+}
+
 
 
   var queryTrendsList = listTrends({
@@ -146,22 +142,28 @@ if (selectedTrends && (selectedTrends.length > 0)) {
 
   var x = new Date();
   var currentTimeZoneOffsetInSeconds = x.getTimezoneOffset();
-  var queryTrendsData = getTrendData({trendIdList: trdList,
-    begin: Math.round(reducer.chart.currRange.from /1000) - currentTimeZoneOffsetInSeconds, //1655796348,
-    end: Math.round(reducer.chart.currRange.to /1000) - currentTimeZoneOffsetInSeconds,//1655804041,
-    samples: SAMPLES_COUNT
-  }, {
-    transform:  (body:any, text:any) => {
-      return {
-        trends_data: body,
-      }
-    },
-    update: {
-      trends_data: (oldValue: any, newValue: any) => {
-        return (newValue);
+  var queryTrendsData;
+    queryTrendsData = getTrendData({trendIdList: trdList,
+      begin: Math.round(reducer.chart.currRange.from /1000) - currentTimeZoneOffsetInSeconds, //1655796348,
+      end: Math.round(reducer.chart.currRange.to /1000) - currentTimeZoneOffsetInSeconds,//1655804041,
+      samples: SAMPLES_COUNT
+    }, {
+      transform:  (body:any, text:any) => {
+        return {
+          trends_data: body,
+        }
       },
-    },
-  });
+      update: {
+        trends_data: (oldValue: any, newValue: any) => {
+          return (newValue);
+        },
+      },
+    });
+
+    if (reducer.chart.force_refresh){
+      queryTrendsData.force =  reducer.chart.force_refresh;
+     // run();
+     }
 
   const dispatch :Dispatch = useDispatch();
 
@@ -171,19 +173,49 @@ if (selectedTrends && (selectedTrends.length > 0)) {
 
    const [TrendsListState] = useRequest(queryTrendsList);
 
-   if ((TrendsDataState.isFinished) && (reducer.chart.lastUpdated!=0) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
-       dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
+   
+
+   var dat1 =reducer.chart.data;
+
+const activeTrends: any[] =trends.filter((obj: ITrend) => obj.selected &&  !obj.disabled);
+
+var dat2:any[] = [];
+
+
+
+dat1.forEach((element: ITrendData) => {
+  var tmp:ITrendData={timestamp: element.timestamp, timestampMs: element.timestamp, unixtime: element.unixtime};
+
+  activeTrends.forEach((trd:ITrend)=>{
+    tmp[trd.iD] = element[trd.iD];
+  });
+  
+  dat2.push(tmp);
+  
+  
+
+});
+
+
+
+   if ((TrendsDataState.isFinished) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
+     
+    dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
+     
      }
   useEffect(() => {
     if ((TrendsDataState.isFinished) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
       dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
     }
 
-  if ((reducer.chart.is_loading_trends) && (TrendsListState.isFinished)){
-    if (queries.trends_list.isFinished){
+  if ((reducer.chart.is_loading_trends) && (TrendsListState.isFinished) && (reducer.chart.trends.length==0)){
+   
+   
       dispatch(setTrendList(entities.trends_list));
-    }
+
   }
+
+
 
 
 
@@ -280,26 +312,6 @@ const handleChangeTrend = (event: { target: { name: any; checked: any; }; }) => 
 
   }
   };
-
-
-  var dat1 =reducer.chart.data;
-
-  const activeTrends: any[] =trends.filter((obj: ITrend) => obj.selected &&  !obj.disabled);
-
-  var dat2:any[] = [];
-  dat1.forEach((element: ITrendData) => {
-    var tmp:ITrendData={timestamp: element.timestamp, timestampMs: element.timestamp, unixtime: element.unixtime};
-
-    activeTrends.forEach((trd:ITrend)=>{
-      tmp[trd.iD] = element[trd.iD];
-    });
-    
-    dat2.push(tmp);
-    
-    
-
-  });
-  
 
 function zoom() {
   //console.log('zoom');
@@ -608,10 +620,7 @@ if ((dat1) && (dat1.length>0)){
               verticalAlign="bottom"
               height={36}
               align="left"
-              //payload={_.toPairs(this.state.chartColors).map(pair => ({
-              //  dataKey: pair[0],
-              //  color: pair[1]
-              //}))}
+
               content={renderCusomizedLegend}
             />
                    {selectedTrends.map((trend, index) => (
@@ -635,7 +644,7 @@ if ((dat1) && (dat1.length>0)){
     
               <><Brush dataKey="unixtime" startIndex={reducer.chart.brush.startIndex} endIndex={reducer.chart.brush.endIndex}
                         tickFormatter={formatBrush} onChange={(a: any) => {
-                          //setTimeout(()=>{  
+
                           var from;
                           var to;
                           data_range_from = dat2[a.startIndex].unixtime;

@@ -2,7 +2,7 @@ import { getDate } from "date-fns";
 import { stat } from "fs";
 import { ChartsState } from "../pages/Charts/type";
 import { GridLines, IChartAction, ITrend, ITrendData } from "../components/chart/type";
-import { ADD_SERIE, APPEND_DATA, AREA_REF,  DEFAULT_STATE,  DISABLE_TREND,  ENABLE_TREND,  H_GRID_LINE,  LOAD_TREND_LIST,  REMOVE_SERIE,  SET_BRUSH_RANGE,  SET_DATA,  SET_DATE_RANGE,  SET_FROM_DATE,  SET_TIMER,  SET_TIMESTAMP_RANGE,  SET_TO_DATE,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE } from "../actions/charts/actionType";
+import { ADD_SERIE, APPEND_DATA, AREA_REF,  DEFAULT_STATE,  DISABLE_TREND,  ENABLE_TREND,  FORCE_REFRESH,  H_GRID_LINE,  LOAD_TREND_LIST,  REMOVE_SERIE,  SET_BRUSH_RANGE,  SET_DATA,  SET_DATE_RANGE,  SET_FROM_DATE,  SET_TIMER,  SET_TIMESTAMP_RANGE,  SET_TO_DATE,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE } from "../actions/charts/actionType";
 
 import { getTrendData, GetTrendDataRequest } from "../apis/TrendsApi";
 import { Trend, TrendData, TrendDef } from "../models";
@@ -44,6 +44,7 @@ const initialState: ChartsState = {
       trends:[],
       data : [],
       lastUpdated:0,
+      force_refresh:false,
     },
     rpanel_open:false
   }
@@ -75,20 +76,20 @@ const chartsReducer = (
 
           return {
             ...state,
-           chart: {brush:state.chart.brush,  lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip, live: {active:!state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:{from: cFrom, to:cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+           chart: {force_refresh:false,brush:state.chart.brush,  lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip, live: {active:!state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:{from: cFrom, to:cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case TOGGLE_TOOLTIP:{
          
           return {
             ...state,
-           chart: {brush:state.chart.brush, lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:!state.chart.mode.tooltip, live: {active:state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+           chart: {force_refresh:false,brush:state.chart.brush, lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:!state.chart.mode.tooltip, live: {active:state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case TOGGLE_ZOOM_MODE:{
           return {
             ...state,
-           chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip, live:state.chart.mode.live, zoom:state.chart.mode.live.active ? false : !state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+           chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip, live:state.chart.mode.live, zoom:state.chart.mode.live.active ? false : !state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
 
@@ -108,7 +109,7 @@ const chartsReducer = (
 
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from:state.chart.cfgRange.from, to:state.chart.cfgRange.to}, currRange:{from:cFrom, to: cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from:state.chart.cfgRange.from, to:state.chart.cfgRange.to}, currRange:{from:cFrom, to: cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         
@@ -117,7 +118,7 @@ const chartsReducer = (
 
             return {
               ...state,
-              chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:!state.rpanel_open
+              chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:!state.rpanel_open
             }
           }
           
@@ -125,7 +126,7 @@ const chartsReducer = (
 
             return {
               ...state,
-              chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : {h : state.chart.grid_lines.h, v:action.data}}, rpanel_open:state.rpanel_open
+              chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : {h : state.chart.grid_lines.h, v:action.data}}, rpanel_open:state.rpanel_open
             }
           }
 
@@ -133,7 +134,7 @@ const chartsReducer = (
 
             return {
               ...state,
-              chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : {v : state.chart.grid_lines.v, h:action.data}}, rpanel_open:state.rpanel_open
+              chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : {v : state.chart.grid_lines.v, h:action.data}}, rpanel_open:state.rpanel_open
             }
           }
         
@@ -148,9 +149,10 @@ const chartsReducer = (
             }
           });
 
+
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:0,is_loading_trends : state.chart.is_loading_trends,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:true,brush:state.chart.brush,lastUpdated:0,is_loading_trends : state.chart.is_loading_trends,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case REMOVE_SERIE:{
@@ -164,19 +166,14 @@ const chartsReducer = (
             if (element.iD == action.data)
             {
               element.selected = false;
-              if ((state.chart.data) && (state.chart.data.length>0)){
-              data.forEach((dat: any) => {
-                delete dat[element.iD];  
-              });
-            }
+
               
             }
           });
-        
 
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends, trends:trds, refArea:state.chart.refArea, data : data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends, trends:trds, refArea:state.chart.refArea, data : data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
 
@@ -188,19 +185,19 @@ const chartsReducer = (
 
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case SET_TIMER:{
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{active:action.data?  true : false, timer:action.data}, zoom: action.data? false : state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{active:action.data?  true : false, timer:action.data}, zoom: action.data? false : state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case AREA_REF:{
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:action.data, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{active:state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:action.data, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{active:state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }case SET_DATA:{
           var dat : ITrendData[]=[];
@@ -227,32 +224,14 @@ const chartsReducer = (
    
           return {
             ...state,
-            chart: {brush:{startIndex:brushStartIndex, endIndex:brushEndIndex},lastUpdated:action.data.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : dat, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:{startIndex:brushStartIndex, endIndex:brushEndIndex},lastUpdated:action.data.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : dat, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
-        /*case LOAD_DATA_STATE:{
-          var dat : ITrendData[]=[];
-
-          var brushStartIndex=0;
-        var brushEndIndex=0;
-
-         
-          if (action.data.data.length > 0){ 
-            
-            action.data.data.forEach((el:TrendData)=>{
-              var ut = el.timestamp *1000 + el.timestampMs;
-             })
-          }
-
-          return {
-            ...state,
-            chart: {brush:{startIndex:brushStartIndex, endIndex:brushEndIndex},lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : dat, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
-          }
-        }*/
+        
         case SET_FROM_DATE:{
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from: action.data, to:state.chart.cfgRange.to}, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from: action.data, to:state.chart.cfgRange.to}, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case SET_TIMESTAMP_RANGE:{
@@ -275,7 +254,7 @@ const chartsReducer = (
 
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from: action.data.from, to:action.data.to}, currRange:{from:cFrom, to:cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from: action.data.from, to:action.data.to}, currRange:{from:cFrom, to:cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case SET_BRUSH_RANGE:{
@@ -296,13 +275,13 @@ const chartsReducer = (
   
           return {
             ...state,
-            chart: {brush:{startIndex:action.data.startIndex, endIndex : action.data.endIndex} ,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from: action.data.from, to:action.data.to}, currRange:{from:cFrom, to:cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:{startIndex:action.data.startIndex, endIndex : action.data.endIndex} ,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from: action.data.from, to:action.data.to}, currRange:{from:cFrom, to:cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case SET_TO_DATE:{
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from: state.chart.cfgRange.from, to:action.data}, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from: state.chart.cfgRange.from, to:action.data}, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case LOAD_TREND_LIST:{
@@ -322,7 +301,7 @@ const chartsReducer = (
 
           return {
             ...state,
-            chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case DISABLE_TREND:{
@@ -336,7 +315,7 @@ const chartsReducer = (
 
            return {
              ...state,
-             chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+             chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
            }
          }
          case ENABLE_TREND:{
@@ -351,9 +330,10 @@ const chartsReducer = (
 
            return {
              ...state,
-             chart: {brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+             chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : false,trends:trd, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
            }
          }
+      
  
 
        
