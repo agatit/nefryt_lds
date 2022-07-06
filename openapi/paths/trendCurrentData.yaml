@@ -1,0 +1,38 @@
+get:
+  summary: List trend currnet data
+  operationId: getTrendCurrentData
+  description: List trend currnet data
+  tags:
+    - trends
+  parameters:
+    - name: trendIdList # Note the name is the same as in the path
+      in: path
+      required: true
+      description: Lost of ids of the trend to retrieve
+      schema:
+        type: array
+        items:
+          type: integer
+    - name: period
+      in: path
+      required: true
+      description: period of data to take since currnet time (timestamp UTC)
+      schema:
+        type: integer
+    - name: samples
+      in: path
+      required: true
+      description: number of data samples to take (resolution)
+      schema:
+        type: integer
+  responses:
+    "200":
+      description: A array of trend data
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/TrendData.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
