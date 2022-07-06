@@ -1,3 +1,2 @@
 @apidevtools/swagger-cli
 @openapitools/openapi-generator-cli
-sqlacodegen == 3.0.0b2

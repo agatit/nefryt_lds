@@ -290,6 +290,12 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
+def get_trend_current_data(trend_id_list, period, samples):  # noqa: E501
+    """List trend current data 
+    """
+
+    return get_trend_data(trend_id_list, int(time.time()) - period, int(time.time()), samples)
+
 
 def get_trend_param_by_id(trend_id, trend_param_def_id):  # noqa: E501
     """Gets trend param detail

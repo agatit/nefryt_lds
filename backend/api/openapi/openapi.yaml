@@ -285,7 +285,15 @@ paths:
     delete:
       description: Deletes specific pipeline
       operationId: delete_pipeline_by_id
-      parameters: []
+      parameters:
+      - description: The id of the pipeline to retrieve
+        explode: false
+        in: path
+        name: pipelineId
+        required: true
+        schema:
+          type: integer
+        style: simple
       responses:
         "204":
           content:
@@ -495,7 +503,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200'
+                $ref: '#/components/schemas/Method'
           description: Expected response to a valid request
         default:
           content:
@@ -687,6 +695,56 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
       summary: Create trend
+      tags:
+      - trends
+      x-openapi-router-controller: api.controllers.trends_controller
+  /trend/{trendIdList}/current_data/{period}/{samples}:
+    get:
+      description: List trend currnet data
+      operationId: get_trend_current_data
+      parameters:
+      - description: Lost of ids of the trend to retrieve
+        explode: false
+        in: path
+        name: trendIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+        style: simple
+      - description: period of data to take since currnet time (timestamp UTC)
+        explode: false
+        in: path
+        name: period
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: number of data samples to take (resolution)
+        explode: false
+        in: path
+        name: samples
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TrendData'
+                type: array
+          description: A array of trend data
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List trend currnet data
       tags:
       - trends
       x-openapi-router-controller: api.controllers.trends_controller
@@ -1127,7 +1185,7 @@ components:
           type: integer
         Name:
           example: Arthur Dent
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
       required:
@@ -1146,7 +1204,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           type: string
       required:
       - ID
@@ -1179,17 +1237,17 @@ components:
           type: integer
         DataType:
           description: none
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: DataType
           type: string
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         Value:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Value
           type: string
       required:
@@ -1210,11 +1268,11 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           type: string
         DataType:
           description: none
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           type: string
       required:
       - ID
@@ -1238,7 +1296,7 @@ components:
         Type:
           description: none
           nullable: false
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: Type
           type: string
         TrendID:
@@ -1248,7 +1306,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,50}
+          pattern: "^.{0,50}"
           title: Name
           type: string
         EditorParams:
@@ -1278,7 +1336,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         BeginPos:
@@ -1334,7 +1392,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         TrendGroupID:
@@ -1419,7 +1477,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         TimeExponent:
@@ -1428,12 +1486,12 @@ components:
           type: integer
         Format:
           description: none
-          pattern: ^.{0,20}
+          pattern: "^.{0,20}"
           title: Format
           type: string
         SIUnitTID:
           description: none
-          pattern: ^.{0,8}
+          pattern: "^.{0,8}"
           title: SIUnitTID
           type: string
       required:
@@ -1454,7 +1512,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,100}
+          pattern: "^.{0,100}"
           type: string
         AnalisisOnly:
           description: none
@@ -1482,17 +1540,17 @@ components:
           title: TrendParamDefID
           type: string
         Name:
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           readOnly: true
           title: Name
           type: string
         DataType:
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           readOnly: true
           title: DataType
           type: string
         Value:
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Value
           type: string
       required:
@@ -1515,11 +1573,11 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           type: string
         DataType:
           description: none
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           type: string
       required:
       - ID
@@ -1606,7 +1664,7 @@ components:
         AreaWidth:
           description: none
           nullable: false
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: AreaWidth
           type: integer
         AreaHeight:
@@ -1639,7 +1697,7 @@ components:
         PosX:
           description: none
           nullable: false
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: PosX
           type: integer
         PosY:
@@ -1691,38 +1749,4 @@ components:
       - message
       - status
       title: Information
-      type: object
-    inline_response_200:
-      example:
-        PipelineID: 0
-        MethodDefID: 0
-        ID: 0
-        Name: Arthur Dent
-      properties:
-        ID:
-          description: none
-          example: 0
-          readOnly: true
-          title: ID
-          type: integer
-        MethodDefID:
-          example: 0
-          nullable: false
-          title: MethodDefID
-          type: integer
-        PipelineID:
-          example: 0
-          nullable: false
-          title: PipelineID
-          type: integer
-        Name:
-          example: Arthur Dent
-          pattern: ^.{0,30}
-          title: Name
-          type: string
-      required:
-      - ID
-      - MethodDefID
-      - PipelineID
-      title: inline_response_200
       type: object

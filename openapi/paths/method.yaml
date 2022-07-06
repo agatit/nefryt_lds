@@ -13,7 +13,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../schemas/method.yaml"
+            $ref: "../schemas/Method.yaml"
     default:
       $ref: "../responses/UnexpectedError.yaml"
 

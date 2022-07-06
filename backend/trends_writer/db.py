@@ -12,4 +12,4 @@ SQLALCHEMY_DATABASE_URI = \
 
 engine = create_engine(config.get("db_uri", SQLALCHEMY_DATABASE_URI), echo=False)
 Session = sessionmaker(engine)
-session = Session()
+global_session = Session()

@@ -1,9 +1,10 @@
 import time
 from sqlalchemy import select, and_
 import numpy as np
+import threading
 
 from database import lds
-from .db import session
+from .db import global_session, Session
 from .trends import TrendQuick
 
 class PipePlant:
@@ -19,7 +20,7 @@ class PipePlant:
         stmt = select([lds.Trend]) \
             .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) \
             .where(lds.TrendDef.ID == 'QUICK')        
-        result = session.execute(stmt).fetchall()
+        result = global_session.execute(stmt).fetchall()
 
         self.trends = []
         for trend in result:
@@ -30,6 +31,7 @@ class PipePlant:
         trend: TrendQuick
         for trend in self.trends:
             if trend.register == register:
-                trend.update(np.array(data), round(time.time()))
+                # trend.update(np.array(data), round(time.time()))
+                threading.Thread(target=trend.update, args=(np.array(data), round(time.time()), Session() )).start()
 
 pipe_plant = PipePlant()

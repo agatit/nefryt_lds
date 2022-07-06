@@ -1,4 +1,5 @@
 import logging
+import threading
 import struct
 import time
 import sys
@@ -7,7 +8,7 @@ from typing import List
 import numpy as np
 from sqlalchemy import select, insert, and_
 
-from ..db import session
+from ..db import global_session, Session
 from database import lds
 
 # from typing import TYPE_CHECKING
@@ -33,24 +34,23 @@ class TrendBase(metaclass=TrendBaseMeta):
         self.children: List[TrendBase] = []
         self.params = {}
         self.block_size = 100
+        self.lock = threading.Lock()
         
         self._read_params()
         self._read_children()
         logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")    
 
 
-    def update(self, data: np.ndarray, timestamp: int, parent_id: int = None):
-
-        # TODO: threaded implementation
+    def update(self, data: np.ndarray, timestamp: int, session: Session, parent_id: int = None):
         
-        self._save(data, timestamp) 
+        self._save(data, timestamp, session) 
 
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating children...")
 
         # process children
         for child in self.children:
             try:          
-                child.update(data, timestamp, self.id)            
+                child.update(data, timestamp, session, self.id)            
             except Exception as e:
                 logging.exception(f"{timestamp} {self.__class__.__name__} ({self.id}) child {child.__class__.__name__} ({child.id}) update error: {e}", exc_info=True)               
 
@@ -64,7 +64,7 @@ class TrendBase(metaclass=TrendBaseMeta):
             .where(lds.Trend.ID == self.id)
 
         self.params = {}
-        for tpd, tp in session.execute(stmt):
+        for tpd, tp in global_session.execute(stmt):
             self.params[tpd.ID.strip()] = tp.Value    
 
 
@@ -83,13 +83,13 @@ class TrendBase(metaclass=TrendBaseMeta):
             .join(lds.TrendParamDef, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID)) \
             .where(and_(lds.TrendParamDef.DataType == 'TREND', lds.TrendParam.Value == self.id))
 
-        for trend, trend_def in session.execute(stmt):
+        for trend, trend_def in global_session.execute(stmt):
             trend_class = getattr(sys.modules["trends_writer.trends"], trend_classes[trend_def.ID.strip()])
             trend = trend_class(trend.ID, self.id)
             self.children.append(trend)
 
 
-    def _save(self, data: np.ndarray, timestamp: int):
+    def _save(self, data: np.ndarray, timestamp: int, session: Session):
         
         try:
             if timestamp is None:

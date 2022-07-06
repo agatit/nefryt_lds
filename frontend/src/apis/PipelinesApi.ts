@@ -27,6 +27,10 @@ export interface CreatePipelineRequest {
     pipeline?: Pipeline;
 }
 
+export interface DeletePipelineByIdRequest {
+    pipelineId: number;
+}
+
 export interface GetPipelineByIdRequest {
     pipelineId: number;
 }
@@ -87,7 +91,11 @@ export function createPipeline<T>(requestParameters: CreatePipelineRequest, requ
  * Deletes specific pipeline
  * Deletes pipeline
  */
-function deletePipelineByIdRaw<T>( requestConfig: runtime.TypedQueryConfig<T, Information> = {}): QueryConfig<T> {
+function deletePipelineByIdRaw<T>(requestParameters: DeletePipelineByIdRequest, requestConfig: runtime.TypedQueryConfig<T, Information> = {}): QueryConfig<T> {
+    if (requestParameters.pipelineId === null || requestParameters.pipelineId === undefined) {
+        throw new runtime.RequiredError('pipelineId','Required parameter requestParameters.pipelineId was null or undefined when calling deletePipelineById.');
+    }
+
     let queryParameters = null;
 
 
@@ -97,7 +105,7 @@ function deletePipelineByIdRaw<T>( requestConfig: runtime.TypedQueryConfig<T, In
     const { meta = {} } = requestConfig;
 
     const config: QueryConfig<T> = {
-        url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}`,
+        url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))),
         meta,
         update: requestConfig.update,
         queryKey: requestConfig.queryKey,
@@ -123,8 +131,8 @@ function deletePipelineByIdRaw<T>( requestConfig: runtime.TypedQueryConfig<T, In
 * Deletes specific pipeline
 * Deletes pipeline
 */
-export function deletePipelineById<T>( requestConfig?: runtime.TypedQueryConfig<T, Information>): QueryConfig<T> {
-    return deletePipelineByIdRaw( requestConfig);
+export function deletePipelineById<T>(requestParameters: DeletePipelineByIdRequest, requestConfig?: runtime.TypedQueryConfig<T, Information>): QueryConfig<T> {
+    return deletePipelineByIdRaw(requestParameters, requestConfig);
 }
 
 /**
