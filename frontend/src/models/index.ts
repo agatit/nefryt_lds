@@ -2,7 +2,6 @@ export * from './EditorNode';
 export * from './EditorPipeline';
 export * from './Event';
 export * from './Information';
-export * from './InlineResponse200';
 export * from './Link';
 export * from './Method';
 export * from './MethodDef';

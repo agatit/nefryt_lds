@@ -20,6 +20,8 @@ paths:
     $ref: "./paths/trendParam.yaml"
   /trend/{trendIdList}/data/{begin}/{end}/{samples}:
     $ref: "./paths/trendData.yaml"
+  /trend/{trendIdList}/current_data/{period}/{samples}:
+    $ref: "./paths/trendCurrentData.yaml"    
   /trend_def:
     $ref: "./paths/trendDefs.yaml"    
   /node:

@@ -10,7 +10,6 @@ src/models/EditorNode.ts
 src/models/EditorPipeline.ts
 src/models/Event.ts
 src/models/Information.ts
-src/models/InlineResponse200.ts
 src/models/Link.ts
 src/models/Method.ts
 src/models/MethodDef.ts

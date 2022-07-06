@@ -23,7 +23,7 @@ put:
   tags:
     - pipelines
   parameters:
-    - $ref: "../parameters/path/PipelineId.yaml"    
+    - $ref: "../parameters/path/pipelineId.yaml"    
   requestBody:
     content:
       application/json:
@@ -46,7 +46,7 @@ delete:
   tags:
     - pipelines
   parameters:
-    - $ref: "../parameters/path/PipelineId.yaml"
+    - $ref: "../parameters/path/pipelineId.yaml"
   responses:
     "204":
       $ref: "../responses/Deleted.yaml"

@@ -8,7 +8,6 @@ from api.models.editor_pipeline import EditorPipeline
 from api.models.error import Error
 from api.models.event import Event
 from api.models.information import Information
-from api.models.inline_response200 import InlineResponse200
 from api.models.link import Link
 from api.models.method import Method
 from api.models.method_def import MethodDef

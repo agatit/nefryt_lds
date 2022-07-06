@@ -44,6 +44,12 @@ export interface GetTrendByIdRequest {
     trendId: number;
 }
 
+export interface GetTrendCurrentDataRequest {
+    trendIdList: Array<number>;
+    period: number;
+    samples: number;
+}
+
 export interface GetTrendDataRequest {
     trendIdList: Array<number>;
     begin: number;
@@ -212,6 +218,62 @@ function getTrendByIdRaw<T>(requestParameters: GetTrendByIdRequest, requestConfi
 */
 export function getTrendById<T>(requestParameters: GetTrendByIdRequest, requestConfig?: runtime.TypedQueryConfig<T, Trend>): QueryConfig<T> {
     return getTrendByIdRaw(requestParameters, requestConfig);
+}
+
+/**
+ * List trend currnet data
+ * List trend currnet data
+ */
+function getTrendCurrentDataRaw<T>(requestParameters: GetTrendCurrentDataRequest, requestConfig: runtime.TypedQueryConfig<T, Array<TrendData>> = {}): QueryConfig<T> {
+    if (requestParameters.trendIdList === null || requestParameters.trendIdList === undefined) {
+        throw new runtime.RequiredError('trendIdList','Required parameter requestParameters.trendIdList was null or undefined when calling getTrendCurrentData.');
+    }
+
+    if (requestParameters.period === null || requestParameters.period === undefined) {
+        throw new runtime.RequiredError('period','Required parameter requestParameters.period was null or undefined when calling getTrendCurrentData.');
+    }
+
+    if (requestParameters.samples === null || requestParameters.samples === undefined) {
+        throw new runtime.RequiredError('samples','Required parameter requestParameters.samples was null or undefined when calling getTrendCurrentData.');
+    }
+
+    let queryParameters = null;
+
+
+    const headerParameters : runtime.HttpHeaders = {};
+
+
+    const { meta = {} } = requestConfig;
+
+    const config: QueryConfig<T> = {
+        url: `${runtime.Configuration.basePath}/trend/{trendIdList}/current_data/{period}/{samples}`.replace(`{${"trendIdList"}}`, encodeURIComponent(String(requestParameters.trendIdList))).replace(`{${"period"}}`, encodeURIComponent(String(requestParameters.period))).replace(`{${"samples"}}`, encodeURIComponent(String(requestParameters.samples))),
+        meta,
+        update: requestConfig.update,
+        queryKey: requestConfig.queryKey,
+        optimisticUpdate: requestConfig.optimisticUpdate,
+        force: requestConfig.force,
+        rollback: requestConfig.rollback,
+        options: {
+            method: 'GET',
+            headers: headerParameters,
+        },
+        body: queryParameters,
+    };
+
+    const { transform: requestTransform } = requestConfig;
+    if (requestTransform) {
+        config.transform = (body: ResponseBody, text: ResponseBody) => requestTransform(body.map(TrendDataFromJSON), text);
+    }
+
+    return config;
+}
+
+/**
+* List trend currnet data
+* List trend currnet data
+*/
+export function getTrendCurrentData<T>(requestParameters: GetTrendCurrentDataRequest, requestConfig?: runtime.TypedQueryConfig<T, Array<TrendData>>): QueryConfig<T> {
+    return getTrendCurrentDataRaw(requestParameters, requestConfig);
 }
 
 /**

@@ -18,9 +18,6 @@ import {
     Information,
     InformationFromJSON,
     InformationToJSON,
-    InlineResponse200,
-    InlineResponse200FromJSON,
-    InlineResponse200ToJSON,
     Method,
     MethodFromJSON,
     MethodToJSON,
@@ -173,7 +170,7 @@ export function deleteMethodById<T>(requestParameters: DeleteMethodByIdRequest, 
  * Info for specific  method
  * Gets  method details
  */
-function getMethodByIdRaw<T>(requestParameters: GetMethodByIdRequest, requestConfig: runtime.TypedQueryConfig<T, InlineResponse200> = {}): QueryConfig<T> {
+function getMethodByIdRaw<T>(requestParameters: GetMethodByIdRequest, requestConfig: runtime.TypedQueryConfig<T, Method> = {}): QueryConfig<T> {
     if (requestParameters.pipelineId === null || requestParameters.pipelineId === undefined) {
         throw new runtime.RequiredError('pipelineId','Required parameter requestParameters.pipelineId was null or undefined when calling getMethodById.');
     }
@@ -207,7 +204,7 @@ function getMethodByIdRaw<T>(requestParameters: GetMethodByIdRequest, requestCon
 
     const { transform: requestTransform } = requestConfig;
     if (requestTransform) {
-        config.transform = (body: ResponseBody, text: ResponseBody) => requestTransform(InlineResponse200FromJSON(body), text);
+        config.transform = (body: ResponseBody, text: ResponseBody) => requestTransform(MethodFromJSON(body), text);
     }
 
     return config;
@@ -217,7 +214,7 @@ function getMethodByIdRaw<T>(requestParameters: GetMethodByIdRequest, requestCon
 * Info for specific  method
 * Gets  method details
 */
-export function getMethodById<T>(requestParameters: GetMethodByIdRequest, requestConfig?: runtime.TypedQueryConfig<T, InlineResponse200>): QueryConfig<T> {
+export function getMethodById<T>(requestParameters: GetMethodByIdRequest, requestConfig?: runtime.TypedQueryConfig<T, Method>): QueryConfig<T> {
     return getMethodByIdRaw(requestParameters, requestConfig);
 }
 
