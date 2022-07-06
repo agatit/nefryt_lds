@@ -1,12 +1,14 @@
 import struct
 from typing import List
+import threading
 import numpy as np
 import logging
 from datetime import datetime
+
 from sqlalchemy import select, and_
 
 from database import lds
-from ..db import session
+from ..db import Session
 from . import TrendBase
 import time
 
@@ -18,10 +20,10 @@ class TrendFilter(TrendBase):
         self.parent_id = parent_id
         self.window_size = int(self.params['FILTER_WINDOW'])
         self.storage_timstamp = 0
-        self.storage = np.array([], dtype=np.uint16)
+        self.storage = np.array([], dtype=np.uint16)        
 
 
-    def update(self, data: List[int], timestamp: int, parent_id: int = None):
+    def update(self, data: List[int], timestamp: int, session: Session, parent_id: int = None):
 
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating...")
 
@@ -29,22 +31,23 @@ class TrendFilter(TrendBase):
             logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) wrong parent id!")
             return None, None
 
-        if timestamp == self.storage_timstamp + 1:
-            self.storage = np.append(self.storage[100:], np.flip(data))
-        elif timestamp > self.storage_timstamp + 1:
-            logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timstamp}")
-            self.initiate_buffer(self.window_size, timestamp, parent_id)                    
-        else:
-            logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage alredy exists {self.storage_timstamp}")
-            return
+        with self.lock:
+            if timestamp == self.storage_timstamp + 1:
+                self.storage = np.append(self.storage[100:], np.flip(data))
+            elif timestamp > self.storage_timstamp + 1:
+                logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timstamp}")
+                self.initiate_buffer(self.window_size, timestamp, session, parent_id)                    
+            else:
+                logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage alredy exists {self.storage_timstamp}")
+                self.storage = np.append(self.storage[:-100], np.flip(data))
         
-        self.storage_timstamp = timestamp        
+            self.storage_timstamp = timestamp        
 
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) calculating...")          
 
         calculated_data = self.calculate()
         if calculated_data is not None:
-            super().update(calculated_data, timestamp-self.window_size, parent_id)
+            super().update(calculated_data, timestamp-self.window_size, session, parent_id)
         else:
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
 
@@ -53,7 +56,7 @@ class TrendFilter(TrendBase):
         raise NotImplementedError
 
 
-    def initiate_buffer(self, window_size, timestamp, parent_id: int = None):
+    def initiate_buffer(self, window_size: int, timestamp: int, session: Session, parent_id: int = None):
 
         # TODO: optymalizacja - ładowanie tylko tych danych których brakuje
 
