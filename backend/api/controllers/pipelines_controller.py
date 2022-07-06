@@ -8,7 +8,7 @@ from api.models.editor_pipeline import EditorPipeline  # noqa: E501
 from api import util
 
 from sqlalchemy import alias, select, delete
-from api import session
+from ..db import session
 from database.models import editor, lds
 
 

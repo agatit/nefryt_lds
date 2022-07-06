@@ -9,7 +9,7 @@ from api.models.information import Information  # noqa: E501
 from api import util
 
 from sqlalchemy import alias, select, delete, and_
-from api import session
+from ..db import session
 from database.models import lds
 
 def ack_event(event_id):  # noqa: E501

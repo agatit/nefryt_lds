@@ -1,5 +1,6 @@
 import time
 from sqlalchemy import select, and_
+import numpy as np
 
 from database import lds
 from .db import session
@@ -29,6 +30,6 @@ class PipePlant:
         trend: TrendQuick
         for trend in self.trends:
             if trend.register == register:
-                trend.update(data, int(time.time()))
+                trend.update(np.array(data), round(time.time()))
 
 pipe_plant = PipePlant()

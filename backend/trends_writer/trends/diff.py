@@ -3,7 +3,7 @@ import logging
 import numpy as np
 
 from database import lds
-from .filter import TrendBase
+from . import TrendBase
 
 
 class TrendDiff(TrendBase):
@@ -33,11 +33,11 @@ class TrendDiff(TrendBase):
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
 
 
-    def calculate(self, data: List[int], timestamp: int, parent_id: int = None):
+    def calculate(self, data: List[int], timestamp: int, parent_id: int = None) -> np.ndarray:
 
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) checking pair...")
 
-        diff = None
+        result = None
 
         if parent_id in self.parent_data.keys():
             self.parent_data[parent_id]["data"] = np.array(data)
@@ -45,6 +45,10 @@ class TrendDiff(TrendBase):
             
             if list(self.parent_data.values())[0]["timestamp"] == list(self.parent_data.values())[1]["timestamp"]:
                 logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) calculating...")
-                diff = list(self.parent_data.values())[0]["data"] - list(self.parent_data.values())[1]["data"]
+                result = list(self.parent_data.values())[0]["data"] - list(self.parent_data.values())[1]["data"]
 
-        return diff
+                result = np.maximum(result, [np.iinfo(np.int16).min+1] * len(result)) # FFFF reserved for error
+                result = np.minimum(result, [np.iinfo(np.int16).max] * len(result))
+                result = result.astype(np.int16)
+
+        return result

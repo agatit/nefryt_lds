@@ -4,9 +4,10 @@ import time
 import sys
 from typing import List
 
+import numpy as np
 from sqlalchemy import select, insert, and_
 
-from trends_writer.db import session
+from ..db import session
 from database import lds
 
 # from typing import TYPE_CHECKING
@@ -38,7 +39,7 @@ class TrendBase(metaclass=TrendBaseMeta):
         logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")    
 
 
-    def update(self, data: List[int], timestamp: int, parent_id: int = None):
+    def update(self, data: np.ndarray, timestamp: int, parent_id: int = None):
 
         # TODO: threaded implementation
         
@@ -88,12 +89,15 @@ class TrendBase(metaclass=TrendBaseMeta):
             self.children.append(trend)
 
 
-    def _save(self, data, timestamp):
+    def _save(self, data: np.ndarray, timestamp: int):
         
         try:
             if timestamp is None:
                 timestamp = int(time.time())
-            packed_data = struct.pack('<100h', *data)
+
+            data = data.astype(np.uint16)
+            data = np.minimum(data, [np.iinfo(np.uint16).max-1] * len(data))  # FFFF reserved for error
+            packed_data = struct.pack('<100H', *data)
 
             insert_stmt = insert(lds.TrendData).values(
                 TrendID=self.id,
