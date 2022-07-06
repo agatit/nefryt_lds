@@ -15,7 +15,7 @@ export const PERIOD_EXTENSION = 2;
 var x = new Date();
 var currentTimeZoneOffsetInSeconds = x.getTimezoneOffset();
 
-var colorList:string[] = ["#ff0000", "#00ff00", '#0000ff', '#ffffff'];
+var colorList:string[] = ["#ff0000", "#00ff00", '#0000ff', '#000000'];
 
 const initialState: ChartsState = {
     chart: {
@@ -143,10 +143,48 @@ const chartsReducer = (
         case ADD_SERIE:{
 
          var trd : ITrend[] = state.chart.trends.map((obj: ITrend) => ({...obj}));
-          trd.forEach(element => {
+
+         var idx=0; 
+         const selectedTrends: ITrend[] =trd.filter((obj: ITrend) => obj.selected);
+
+         idx = selectedTrends.length;
+         trd.forEach(element => {
             if (element.iD == action.data)
             {
               element.selected = true;  
+              //if (element.color==undefined){
+                if (selectedTrends.length < colorList.length){
+                  var selectedColorList: ITrend[] =trd.filter((obj: ITrend) => obj.color==colorList[idx%colorList.length]);
+                  if (selectedColorList.length>0){
+                    try{
+                      colorList.forEach(color => {
+                        selectedColorList =selectedTrends.filter((obj: ITrend) => obj.color==color);
+                        if (selectedColorList.length==0){
+                          element.color =color;
+                        }
+                      });
+
+                    }catch{
+
+                    }
+
+
+                  }else{
+                    element.color =colorList[idx%colorList.length];
+                  }
+                }else{
+                  var count = selectedTrends.length;
+                  var mincolor = colorList[idx%colorList.length];
+                  colorList.forEach(color => {
+                    selectedColorList =selectedTrends.filter((obj: ITrend) => obj.color==color);
+                    if (count > selectedColorList.length){
+                      count = selectedColorList.length;
+                      element.color =color;
+                    }
+                  });
+                  
+                }
+              //}
             }
           });
 
@@ -167,7 +205,7 @@ const chartsReducer = (
             if (element.iD == action.data)
             {
               element.selected = false;
-
+              element.color = undefined;
               
             }
           });
@@ -296,7 +334,7 @@ const chartsReducer = (
             
             element.axislabel = tmp;
             element.disabled = false;
-            element.color = colorList[idx%colorList.length];
+            element.color = undefined; //colorList[idx%colorList.length];
             //console.log(idx%colorList.length);
             //console.log(colorList[idx%colorList.length]);
             idx++;
