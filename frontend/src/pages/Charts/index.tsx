@@ -469,6 +469,13 @@ if ((dat1) && (dat1.length>0)){
 
 }
 
+const CustomizedLabelB = () => {
+  return (
+    <div>
+          This_is_a_very_very_very_long_long_long_label_what_can_we_do_about_it?
+      </div>
+  );
+};
 
   return (   
     <Layout onmouseup={handlemouseup}  rPanel={{open:reducer.rpanel_open, visible:true, 
@@ -535,12 +542,14 @@ if ((dat1) && (dat1.length>0)){
                     <FormControl component="fieldset" variant="standard">
                       <FormLabel component="legend">Parametry wykresów</FormLabel>
                       <FormGroup>
-                        <FormControlLabel
+                       { /*<FormControlLabel
                           control={
                            <Switch checked={reducer.chart.mode.zoom} disabled={reducer.chart.mode.live.active? true : false}   onChange={handleSwitch} name="zoomMode" />
                           }
                           label="Tryb zoom"
                         />
+                        */
+                       }
                         <FormControlLabel
                           control={
                            <Switch checked={reducer.chart.mode.tooltip} onChange={handleSwitch} name="tooltipMode" />
@@ -603,6 +612,7 @@ if ((dat1) && (dat1.length>0)){
                      axisLine={true}
                      tickLine={false}
                      domain={['dataMin-0.1*dataMin', 'dataMax+0.1*dataMax']}
+                     label={<CustomizedLabelB />}
                      tickFormatter={formatYAxis}
                    >
                    <Label key={"YAXisLabel"+index} fill={trend.color? trend.color : '#8884d8'}  dx={index % 2==0 ?45 : -30} angle={270} position='center' dy={30}>  
