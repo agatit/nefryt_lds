@@ -15,7 +15,7 @@ export const PERIOD_EXTENSION = 2;
 var x = new Date();
 var currentTimeZoneOffsetInSeconds = x.getTimezoneOffset();
 
-var colorList:string[] = ["#ff00000", "#00ff00", '#0000ff', '#ffffff'];
+var colorList:string[] = ["#ff0000", "#00ff00", '#0000ff', '#ffffff'];
 
 const initialState: ChartsState = {
     chart: {
@@ -53,6 +53,7 @@ const chartsReducer = (
     state: ChartsState = initialState,
     action: IChartAction
   ): ChartsState => {
+    
     switch (action.type) {
         case DEFAULT_STATE:{
           return {
@@ -295,7 +296,9 @@ const chartsReducer = (
             
             element.axislabel = tmp;
             element.disabled = false;
-            element.color = colorList[idx%colorList.length]
+            element.color = colorList[idx%colorList.length];
+            //console.log(idx%colorList.length);
+            //console.log(colorList[idx%colorList.length]);
             idx++;
           });
 
