@@ -1,7 +1,7 @@
 
 import { TwoMpTwoTone } from "@mui/icons-material";
 import { ChartRange, IChartAction, ITrend } from "../../components/chart/type";
-import { ADD_SERIE, APPEND_DATA, AREA_REF,  H_GRID_LINE,   REMOVE_SERIE,  SET_DATA,  SET_FROM_DATE,  SET_TIMER, SET_TO_DATE,  LOAD_TREND_LIST,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE, SET_DATE_RANGE, SET_TIMESTAMP_RANGE, ENABLE_TREND, DISABLE_TREND, SET_BRUSH_RANGE, FORCE_REFRESH} from "./actionType";
+import { ADD_SERIE, APPEND_DATA, AREA_REF,  H_GRID_LINE,   REMOVE_SERIE,  SET_DATA,  SET_FROM_DATE,  SET_TIMER, SET_TO_DATE,  LOAD_TREND_LIST,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE, SET_DATE_RANGE, SET_TIMESTAMP_RANGE, ENABLE_TREND, DISABLE_TREND, SET_BRUSH_RANGE, FORCE_REFRESH, CLEAR_TIMER} from "./actionType";
 
 
 
@@ -160,6 +160,15 @@ export function setTimer(data:NodeJS.Timer | undefined) {
   const action: IChartAction = {
     type: SET_TIMER,
     data : data
+  }
+  return action;
+}
+
+export function clearTimer() {
+ 
+  const action: IChartAction = {
+    type: CLEAR_TIMER,
+    data : undefined
   }
   return action;
 }

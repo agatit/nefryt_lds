@@ -51,6 +51,7 @@ const root =ReactDOM.createRoot(container==null?new Element() : container);
 
 const queryClient = new QueryClient();
 
+
 root.render( <Provider store={store}>
   {/*<QueryClientProvider client={queryClient}>*/}
   <ReduxQueryProvider queriesSelector={getQueries}>

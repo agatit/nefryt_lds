@@ -2,7 +2,7 @@ import { getDate } from "date-fns";
 import { stat } from "fs";
 import { ChartsState } from "../pages/Charts/type";
 import { GridLines, IChartAction, ITrend, ITrendData } from "../components/chart/type";
-import { ADD_SERIE, APPEND_DATA, AREA_REF,  DEFAULT_STATE,  DISABLE_TREND,  ENABLE_TREND,  FORCE_REFRESH,  H_GRID_LINE,  LOAD_TREND_LIST,  REMOVE_SERIE,  SET_BRUSH_RANGE,  SET_DATA,  SET_DATE_RANGE,  SET_FROM_DATE,  SET_TIMER,  SET_TIMESTAMP_RANGE,  SET_TO_DATE,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE } from "../actions/charts/actionType";
+import { ADD_SERIE, APPEND_DATA, AREA_REF,  CLEAR_TIMER,  DEFAULT_STATE,  DISABLE_TREND,  ENABLE_TREND,  FORCE_REFRESH,  H_GRID_LINE,  LOAD_TREND_LIST,  REMOVE_SERIE,  SET_BRUSH_RANGE,  SET_DATA,  SET_DATE_RANGE,  SET_FROM_DATE,  SET_TIMER,  SET_TIMESTAMP_RANGE,  SET_TO_DATE,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE } from "../actions/charts/actionType";
 
 import { getTrendData, GetTrendDataRequest } from "../apis/TrendsApi";
 import { Trend, TrendData, TrendDef } from "../models";
@@ -234,6 +234,12 @@ const chartsReducer = (
           return {
             ...state,
             chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{period : state.chart.mode.live.period,active:action.data?  true : false, timer:action.data}, zoom: action.data? false : state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+          }
+        }
+        case CLEAR_TIMER:{
+          return {
+            ...state,
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{period : state.chart.mode.live.period,active:state.chart.mode.live.active, timer:undefined}, zoom: action.data? false : state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case AREA_REF:{

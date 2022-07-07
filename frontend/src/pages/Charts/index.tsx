@@ -7,7 +7,7 @@ import * as React from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { RootState } from "../..";
-import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend, setBrushRange, forceRefresh } from "../../actions/charts/actions";
+import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend, setBrushRange, forceRefresh, clearTimer } from "../../actions/charts/actions";
 import { Layout } from "../../components/template/Layout";
 import { RightPanel } from "../../components/template/RightPanel";
 import { ChartsState } from "./type";
@@ -22,7 +22,7 @@ import { CategoricalChartState } from "recharts/types/chart/generateCategoricalC
 import { ITrend, ITrendData } from "../../components/chart/type";
 import moment from "moment";
 
-import { ForceRequestsCallback, useRequest, useRequests } from 'redux-query-react';
+import { ForceRequestCallback, ForceRequestsCallback, useRequest, useRequests } from 'redux-query-react';
 import { BASE_PATH, Configuration, TypedQueryConfig } from "../../runtime";
 import { Method, Trend, TrendData, TrendDataFromJSON, TrendFromJSON } from "../../models";
 import { listMethods } from "../../apis/MethodApi";
@@ -39,6 +39,7 @@ import { getLogger } from "react-query/types/core/logger";
 
 import { straightLine } from "../../components/chart/StraightLine";
 
+import { cancelQuery } from 'redux-query';
 
 import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider';
 import {
@@ -176,6 +177,9 @@ export const Track: React.FC<TrackProps> = ({
   );
 };
 
+
+var runLive : ForceRequestCallback;
+
 const railOuterStyle = {
   position: 'absolute' as 'absolute',
   height: '100%',
@@ -268,8 +272,8 @@ const ChartsPage: React.FC = () => {
   const queries = useSelector(getQueries) || [];
   const entities = useSelector(getEntities) || [];
 
-  //console.log(queries);
-  //console.log(entities);
+  console.log(queries);
+  console.log(entities);
 
   const reducer: ChartsState = useSelector(
     (state: RootState) => state.chartsReducer,
@@ -322,15 +326,19 @@ if (selectedTrends && (selectedTrends.length > 0)) {
     var currTimerange = Math.round((reducer.chart.cfgRange.to - reducer.chart.cfgRange.from)/1000);
   //  console.log(currTimerange);
 
-    queryTrendsLiveData = getTrendCurrentData({trendIdList: trdList,period:currTimerange,samples: SAMPLES_COUNT},
+    queryTrendsLiveData = getTrendCurrentData({ trendIdList: trdList,period:currTimerange,samples: SAMPLES_COUNT},
        {
+        //queryKey:'timestamp',
         transform:  (body:any, text:any) => {
+          console.log(body);
           return {
+            
             trends_live_data: body,
           }
         },
         update: {
           trends_live_data: (oldValue: any, newValue: any) => {
+            
             return (newValue);
           },
         },
@@ -339,12 +347,14 @@ if (selectedTrends && (selectedTrends.length > 0)) {
  // }else{
    // console.log('BBBBBB');
    // SAMPLES_COUNT=4000;
+   //console.log(trdList);
     if ( !reducer.chart.mode.live.active){
     queryTrendsData = getTrendData({trendIdList: trdList,
       begin: Math.round(reducer.chart.currRange.from /1000) - currentTimeZoneOffsetInSeconds, //1655796348,
       end: Math.round(reducer.chart.currRange.to /1000) - currentTimeZoneOffsetInSeconds,//1655804041,
       samples: SAMPLES_COUNT
     }, {
+      
       transform:  (body:any, text:any) => {
         return {
           trends_data: body,
@@ -363,11 +373,36 @@ if (selectedTrends && (selectedTrends.length > 0)) {
 //    if ((reducer.chart.force_refresh) || (reducer.chart.mode.live.active)){
    //   console.log('force');
      // queryTrendsData.force =  reducer.chart.force_refresh || reducer.chart.mode.live.active;
+    // console.log(reducer.chart.mode.live.active);
     if ( reducer.chart.mode.live.active){
+
+     // console.log(entities);
+
+      
+//queries.forEach((element:any) => {
+  //for (var i=0; i<(queries.length) ; i++){
+  //cancelQuery(queries[i].url);
+ // }
+
+ //console.log(queries);
+//});
+
+//Object.keys(queries).forEach(function(key,index) {
+//  console.log(key);
+//  console.log(index) ;
+//  cancelQuery(key);
+//});
+
+
+
+      
      queryTrendsLiveData.force = reducer.chart.mode.live.active || reducer.chart.force_refresh;
+
+    // console.log(queryTrendsLiveData.url);
     }
     if (( !reducer.chart.mode.live.active) && queryTrendsData){
      queryTrendsData.force = reducer.chart.force_refresh;
+    
     }
     
 
@@ -386,7 +421,21 @@ if (selectedTrends && (selectedTrends.length > 0)) {
      [TrendsDataState, run] = useRequest(queryTrendsData);
   //}
 
-   const [ TrendsLiveDataState, runLive] = useRequest(queryTrendsLiveData);
+  //connectRequest(queryTrendsLiveData);
+
+   //const [{ isPendingAA }, reactToComment] = useMutation(queryTrendsLiveData);
+
+  
+   //var aa = useMutation(queryTrendsLiveData);
+
+   //const aa = useSelector(getEntities) || [];
+   //console.log(aa);
+   var TrendsLiveDataState: QueryState;
+   [ TrendsLiveDataState, runLive]= useRequest(queryTrendsLiveData);
+
+  //if (reducer.chart.force_refresh) {
+  //  TrendsLiveDataState = {isFinished:false,isPending:false, lastUpdated:0};
+ //}
 
    const [TrendsListState] = useRequest(queryTrendsList);
 
@@ -420,14 +469,19 @@ dat1.forEach((element: ITrendData) => {
     dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
      
      }
-
+   //  console.log(entities);
+   //  console.log(reducer.chart.lastUpdated);
+   //  console.log(TrendsLiveDataState.lastUpdated);
+   //  console.log(TrendsLiveDataState);
      if ((reducer.chart.mode.live.active)&&(TrendsLiveDataState.isFinished) && (reducer.chart.lastUpdated != TrendsLiveDataState.lastUpdated)){
-     
+       
       dispatch(setData(entities.trends_live_data, TrendsLiveDataState.lastUpdated ? TrendsLiveDataState.lastUpdated : 0 ));
        
        }
 
   useEffect(() => {
+    //var runLive: 
+    //alert('effect');
     if ((!reducer.chart.mode.live.active)&& (TrendsDataState.isFinished) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
       dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
     }
@@ -456,7 +510,10 @@ dat1.forEach((element: ITrendData) => {
     const selectedTrends: any[] =trends.filter((obj: ITrend) => obj.selected);
 
    var selCount = selectedTrends.length;
+   //console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+   //console.log(!reducer.chart.mode.live.timer);
     if (!reducer.chart.mode.live.timer && reducer.chart.mode.live.active && (selCount > 0)) {
+      console.log('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK');
       interval = setInterval(function() { 
       
         var from;
@@ -466,13 +523,27 @@ dat1.forEach((element: ITrendData) => {
           to = Date.now() ;
           from = Date.now()-currTimerange;
           //console.log(queryTrendsData);
-            runLive();
+        //  console.log('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC');
+            console.log(runLive);
+          runLive();
+          
+            //dispatch(setData(entities.trends_live_data, 0));
            //dispatch(setTimestampRange(from, to));
       }, 3000);
       dispatch(setTimer(interval));
-    }else if (reducer.chart.mode.live.timer && !reducer.chart.mode.live.active){
+    }else if ((reducer.chart.mode.live.timer && !reducer.chart.mode.live.active)){
+      
+      
       clearInterval(reducer.chart.mode.live.timer);
+
       dispatch(setTimer(undefined));
+   }else if (reducer.chart.force_refresh){
+    //console.log('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH');
+    clearInterval(reducer.chart.mode.live.timer);
+    dispatch(clearTimer());
+   // dispatch(toggleLiveMode());
+   // dispatch(toggleLiveMode());
+   // runLive();
    }
   
 
@@ -931,11 +1002,12 @@ const CustomizedLabelB = (props: any) => {
                      dataKey={trend.iD}
                      axisLine={true}
                      tickLine={false}
+                     tickCount={20}
                      domain={['dataMin-0.1*dataMin', 'dataMax+0.1*dataMax']}
                      //label={<CustomizedLabelB />}
                      tickFormatter={formatYAxis}
                    >
-                   <Label key={"YAXisLabel"+index} fill={trend.color? trend.color : '#8884d8'}  dx={index % 2==0 ?45 : -30} angle={270} position='center' dy={30}>  
+                   <Label key={"YAXisLabel"+index}  fill={trend.color? trend.color : '#8884d8'}  dx={index % 2==0 ?40 : -20} angle={270} position='center' dy={30}>  
                      {trend.axislabel}
                    </Label>
                     </YAxis>
