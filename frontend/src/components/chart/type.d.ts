@@ -43,6 +43,7 @@ export type ChartParams = {
      live: {
          active:boolean,
          timer:NodeJS.Timer | undefined,
+         period : number
         }
  } 
 

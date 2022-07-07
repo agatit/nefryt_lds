@@ -24,7 +24,8 @@ const initialState: ChartsState = {
         zoom : false,
         tooltip:false,
         live : {active:false,
-                timer:undefined
+                timer:undefined,
+                period:100
               }
       },
       is_loading_trends:true,
@@ -63,6 +64,7 @@ const chartsReducer = (
         }
         case TOGGLE_LIVE_MODE:{
           var currTimerange = state.chart.cfgRange.to - state.chart.cfgRange.from;
+          var period = currTimerange; //Math.round(currTimerange/1000);
 
          if (state.chart.mode.live.active){
             var cFrom =  state.chart.cfgRange.from - (PERIOD_EXTENSION*currTimerange);
@@ -77,14 +79,14 @@ const chartsReducer = (
 
           return {
             ...state,
-           chart: {force_refresh:false,brush:state.chart.brush,  lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip, live: {active:!state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:{from: cFrom, to:cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+           chart: {force_refresh:false,brush:state.chart.brush,  lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip, live: {period:period, active:!state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:{from: cFrom, to:cTo}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case TOGGLE_TOOLTIP:{
          
           return {
             ...state,
-           chart: {force_refresh:false,brush:state.chart.brush, lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:!state.chart.mode.tooltip, live: {active:state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+           chart: {force_refresh:false,brush:state.chart.brush, lastUpdated:state.chart.lastUpdated, is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:!state.chart.mode.tooltip, live: {period : state.chart.mode.live.period, active:state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case TOGGLE_ZOOM_MODE:{
@@ -151,7 +153,8 @@ const chartsReducer = (
          trd.forEach(element => {
             if (element.iD == action.data)
             {
-              element.selected = true;  
+              element.selected = true; 
+              element.disabled = false; 
               //if (element.color==undefined){
                 if (selectedTrends.length < colorList.length){
                   var selectedColorList: ITrend[] =trd.filter((obj: ITrend) => obj.color==colorList[idx%colorList.length]);
@@ -230,22 +233,27 @@ const chartsReducer = (
         case SET_TIMER:{
           return {
             ...state,
-            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{active:action.data?  true : false, timer:action.data}, zoom: action.data? false : state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{period : state.chart.mode.live.period,active:action.data?  true : false, timer:action.data}, zoom: action.data? false : state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         case AREA_REF:{
           return {
             ...state,
-            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:action.data, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{active:state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:state.chart.brush,lastUpdated:state.chart.lastUpdated,is_loading_trends : state.chart.is_loading_trends, trends:state.chart.trends, refArea:action.data, data : state.chart.data, mode: {tooltip:state.chart.mode.tooltip,live:{period : state.chart.mode.live.period,active:state.chart.mode.live.active, timer:state.chart.mode.live.timer}, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }case SET_DATA:{
           var dat : ITrendData[]=[];
 
           var brushStartIndex=0;
           var brushEndIndex=0;
-
+          var timeTo=state.chart.cfgRange.to;
+          var timeFrom=state.chart.cfgRange.from;
           if ((action.data) && (action.data.data) && (action.data.data.length > 0)){ 
-          
+            
+            timeTo = action.data.data[action.data.data.length-1].timestamp * 1000 + action.data.data[action.data.data.length-1].timestampMs;
+            timeFrom = timeTo - state.chart.mode.live.period;
+         //console.log(timeFrom);
+         //console.log(timeTo);
             action.data.data.forEach((el:TrendData)=>{
               var ut = el.timestamp *1000 + el.timestampMs + currentTimeZoneOffsetInSeconds*1000;
               dat.push({...el, unixtime:ut});
@@ -260,10 +268,11 @@ const chartsReducer = (
              });
           }
 
+
    
           return {
             ...state,
-            chart: {force_refresh:false,brush:{startIndex:brushStartIndex, endIndex:brushEndIndex},lastUpdated:action.data.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : dat, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:state.chart.cfgRange, currRange:state.chart.currRange, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
+            chart: {force_refresh:false,brush:{startIndex:brushStartIndex, endIndex:brushEndIndex},lastUpdated:action.data.lastUpdated,is_loading_trends : state.chart.is_loading_trends,trends:state.chart.trends, refArea:state.chart.refArea, data : dat, mode: {tooltip:state.chart.mode.tooltip,live:state.chart.mode.live, zoom:state.chart.mode.zoom}, cfgRange:{from : state.chart.mode.live.active? timeFrom : state.chart.cfgRange.from, to : state.chart.mode.live.active? timeTo : state.chart.cfgRange.to}, currRange:{from : state.chart.mode.live.active? timeFrom : state.chart.currRange.from, to : state.chart.mode.live.active? timeTo : state.chart.currRange.to}, grid_lines : state.chart.grid_lines}, rpanel_open:state.rpanel_open
           }
         }
         

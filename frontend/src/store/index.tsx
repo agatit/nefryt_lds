@@ -8,6 +8,7 @@ import { Trend, TrendData } from '../models';
 
 export type EntitiesState = {
   trends_data: TrendData[],
+  trends_live_data: TrendData[],
   trends_list:Trend[]
 }
 

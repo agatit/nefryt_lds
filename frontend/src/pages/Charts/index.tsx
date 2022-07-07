@@ -22,11 +22,11 @@ import { CategoricalChartState } from "recharts/types/chart/generateCategoricalC
 import { ITrend, ITrendData } from "../../components/chart/type";
 import moment from "moment";
 
-import { useRequest, useRequests } from 'redux-query-react';
+import { ForceRequestsCallback, useRequest, useRequests } from 'redux-query-react';
 import { BASE_PATH, Configuration, TypedQueryConfig } from "../../runtime";
 import { Method, Trend, TrendData, TrendDataFromJSON, TrendFromJSON } from "../../models";
 import { listMethods } from "../../apis/MethodApi";
-import { getTrendData, listTrendDefs, listTrends } from "../../apis/TrendsApi";
+import { getTrendData, getTrendCurrentData, listTrendDefs, listTrends } from "../../apis/TrendsApi";
 import store, {  getEntities, getQueries } from "../../store";
 import { Entities, QueriesState, QueryConfig, QueryState, requestAsync, ResponseBody, updateEntities, UpdateStrategy } from "redux-query";
 import { connectRequest } from 'redux-query-react';
@@ -37,6 +37,169 @@ import { CollectionsOutlined } from "@mui/icons-material";
 import { request } from "http";
 import { getLogger } from "react-query/types/core/logger";
 
+import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider';
+import {
+  GetRailProps,
+  GetHandleProps,
+  GetTrackProps,
+  SliderItem,
+} from 'react-compound-slider';
+
+interface SliderRailProps {
+  getRailProps: GetRailProps;
+}
+
+
+
+// *******************************************************
+// HANDLE COMPONENT
+// *******************************************************
+interface HandleProps {
+  domain: number[];
+  handle: SliderItem;
+  getHandleProps: GetHandleProps;
+}
+
+export const Handle: React.FC<HandleProps> = ({
+  domain: [min, max],
+  handle: { id, value, percent },
+  getHandleProps,
+}) => {
+  return (
+    <>
+      <div
+        style={{
+          top: `${percent}%`,
+          position: 'absolute',
+          transform: 'translate(-50%, -50%)',
+          WebkitTapHighlightColor: 'rgba(0,0,0,0)',
+          zIndex: 5,
+          width: 42,
+          height: 28,
+          cursor: 'pointer',
+          backgroundColor: 'none',
+        }}
+        {...getHandleProps(id)}
+      />
+      <div
+        role="slider"
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        style={{
+          top: `${percent}%`,
+          position: 'absolute',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 2,
+          width: 24,
+          height: 24,
+          borderRadius: '50%',
+          boxShadow: '1px 1px 1px 1px rgba(0, 0, 0, 0.3)',
+          backgroundColor: '#D7897E',
+        }}
+      />
+    </>
+  );
+};
+
+// *******************************************************
+// TICK COMPONENT
+// *******************************************************
+interface TickProps {
+  tick: SliderItem;
+  format?: (val: number) => string;
+}
+
+export const Tick: React.FC<TickProps> = ({ tick, format = d => d }) => {
+  return (
+    <div>
+      <div
+        style={{
+          position: 'absolute',
+          marginTop: -0.5,
+          marginLeft: 10,
+          height: 1,
+          width: 6,
+          backgroundColor: 'rgb(200,200,200)',
+          top: `${tick.percent}%`,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          marginTop: -5,
+          marginLeft: 20,
+          fontSize: 10,
+          top: `${tick.percent}%`,
+        }}
+      >
+        {format(tick.value)}
+      </div>
+    </div>
+  );
+};
+
+
+// *******************************************************
+// TRACK COMPONENT
+// *******************************************************
+interface TrackProps {
+  source: SliderItem;
+  target: SliderItem;
+  getTrackProps: GetTrackProps;
+  disabled?: boolean;
+}
+
+export const Track: React.FC<TrackProps> = ({
+  source,
+  target,
+  getTrackProps,
+}) => {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        zIndex: 1,
+        backgroundColor: '#C55F4E',
+        borderRadius: 7,
+        cursor: 'pointer',
+        width: 14,
+        transform: 'translate(-50%, 0%)',
+        top: `${source.percent}%`,
+        height: `${target.percent - source.percent}%`,
+      }}
+      {...getTrackProps()}
+    />
+  );
+};
+
+const railOuterStyle = {
+  position: 'absolute' as 'absolute',
+  height: '100%',
+  width: 42,
+  transform: 'translate(-50%, 0%)',
+  borderRadius: 7,
+  cursor: 'pointer',
+};
+
+const railInnerStyle = {
+  position: 'absolute' as 'absolute',
+  height: '100%',
+  width: 14,
+  transform: 'translate(-50%, 0%)',
+  borderRadius: 7,
+  pointerEvents: 'none' as 'none',
+  backgroundColor: 'rgb(155,155,155)',
+};
+
+export const SliderRail: React.FC<SliderRailProps> = ({ getRailProps }) => {
+  return (
+    <>
+      <div style={railOuterStyle} {...getRailProps()} />
+      <div style={railInnerStyle} />
+    </>
+  );
+};
 
 const useStyles  = makeStyles(theme => ({
   root:{
@@ -102,13 +265,16 @@ const ChartsPage: React.FC = () => {
   const queries = useSelector(getQueries) || [];
   const entities = useSelector(getEntities) || [];
 
+  //console.log(queries);
+  //console.log(entities);
+
   const reducer: ChartsState = useSelector(
     (state: RootState) => state.chartsReducer,
     shallowEqual
   )
 
 
-  const SAMPLES_COUNT = reducer.chart.mode.live.active ? 1000 : 4000;
+  var SAMPLES_COUNT;// = reducer.chart.mode.live.active ? 1000 : 4000;
 
 
   var trends :ITrend[]= reducer.chart.trends.map((obj: ITrend) => ({...obj}));
@@ -143,6 +309,34 @@ if (selectedTrends && (selectedTrends.length > 0)) {
   var x = new Date();
   var currentTimeZoneOffsetInSeconds = x.getTimezoneOffset();
   var queryTrendsData;
+  var queryTrendsLiveData;
+
+ // if (reducer.chart.mode.live.active){
+   // console.log('AAAAAA');
+   // console.log(SAMPLES_COUNT);
+    SAMPLES_COUNT=1000;
+
+    var currTimerange = Math.round((reducer.chart.cfgRange.to - reducer.chart.cfgRange.from)/1000);
+  //  console.log(currTimerange);
+
+    queryTrendsLiveData = getTrendCurrentData({trendIdList: trdList,period:currTimerange,samples: SAMPLES_COUNT},
+       {
+        transform:  (body:any, text:any) => {
+          return {
+            trends_live_data: body,
+          }
+        },
+        update: {
+          trends_live_data: (oldValue: any, newValue: any) => {
+            return (newValue);
+          },
+        },
+      });
+      
+ // }else{
+   // console.log('BBBBBB');
+   // SAMPLES_COUNT=4000;
+    if ( !reducer.chart.mode.live.active){
     queryTrendsData = getTrendData({trendIdList: trdList,
       begin: Math.round(reducer.chart.currRange.from /1000) - currentTimeZoneOffsetInSeconds, //1655796348,
       end: Math.round(reducer.chart.currRange.to /1000) - currentTimeZoneOffsetInSeconds,//1655804041,
@@ -159,17 +353,37 @@ if (selectedTrends && (selectedTrends.length > 0)) {
         },
       },
     });
+  }
+ // }
 
-    if (reducer.chart.force_refresh){
-      queryTrendsData.force =  reducer.chart.force_refresh;
+
+//    if ((reducer.chart.force_refresh) || (reducer.chart.mode.live.active)){
+   //   console.log('force');
+     // queryTrendsData.force =  reducer.chart.force_refresh || reducer.chart.mode.live.active;
+    if ( reducer.chart.mode.live.active){
+     queryTrendsLiveData.force = reducer.chart.mode.live.active || reducer.chart.force_refresh;
+    }
+    if (( !reducer.chart.mode.live.active) && queryTrendsData){
+     queryTrendsData.force = reducer.chart.force_refresh;
+    }
+    
+
+      //queryTrendsData.retry = true;
+      //console.log(queryTrendsData.force);
+     // queryTrendsData.retry = true;
      // run();
-     }
+  //   }
 
   const dispatch :Dispatch = useDispatch();
 
+  var TrendsDataState: QueryState={isFinished:false,isPending:false, lastUpdated:0};
+  var run : ForceRequestsCallback;
   const styles = useStyles(); 
+  //if (( !reducer.chart.mode.live.active) && queryTrendsData){
+     [TrendsDataState, run] = useRequest(queryTrendsData);
+  //}
 
-   const [ TrendsDataState, run] = useRequest(queryTrendsData);
+   const [ TrendsLiveDataState, runLive] = useRequest(queryTrendsLiveData);
 
    const [TrendsListState] = useRequest(queryTrendsList);
 
@@ -198,15 +412,29 @@ dat1.forEach((element: ITrendData) => {
 
 
 
-   if ((TrendsDataState.isFinished) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
+   if ((!reducer.chart.mode.live.active)&& (TrendsDataState.isFinished) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
      
     dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
      
      }
+
+     if ((reducer.chart.mode.live.active)&&(TrendsLiveDataState.isFinished) && (reducer.chart.lastUpdated != TrendsLiveDataState.lastUpdated)){
+     
+      dispatch(setData(entities.trends_live_data, TrendsLiveDataState.lastUpdated ? TrendsLiveDataState.lastUpdated : 0 ));
+       
+       }
+
   useEffect(() => {
-    if ((TrendsDataState.isFinished) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
+    if ((!reducer.chart.mode.live.active)&& (TrendsDataState.isFinished) && (reducer.chart.lastUpdated != TrendsDataState.lastUpdated)){
       dispatch(setData(entities.trends_data, TrendsDataState.lastUpdated ? TrendsDataState.lastUpdated : 0 ));
     }
+
+    if ((reducer.chart.mode.live.active)&&(TrendsLiveDataState.isFinished) && (reducer.chart.lastUpdated != TrendsLiveDataState.lastUpdated)){
+     
+      dispatch(setData(entities.trends_live_data, TrendsLiveDataState.lastUpdated ? TrendsLiveDataState.lastUpdated : 0 ));
+       
+       }
+
 
   if ((reducer.chart.is_loading_trends) && (TrendsListState.isFinished) && (reducer.chart.trends.length==0)){
    
@@ -234,8 +462,9 @@ dat1.forEach((element: ITrendData) => {
 
           to = Date.now() ;
           from = Date.now()-currTimerange;
-            
-            dispatch(setTimestampRange(from, to));
+          //console.log(queryTrendsData);
+            runLive();
+           //dispatch(setTimestampRange(from, to));
       }, 3000);
       dispatch(setTimer(interval));
     }else if (reducer.chart.mode.live.timer && !reducer.chart.mode.live.active){
@@ -469,11 +698,97 @@ if ((dat1) && (dat1.length>0)){
 
 }
 
-const CustomizedLabelB = () => {
+
+const sliderStyle: React.CSSProperties = {
+  position: 'relative',
+  height: '400px',
+  marginLeft: '45%',
+  touchAction: 'none',
+};
+
+const domain = [100, 500];
+const defaultValues = [150, 300, 400, 450];
+const  values = defaultValues.slice();
+
+
+//const makeDraggable :React.ReactEventHandler<SVGRectElement> = {  (evt) => {
+
+  const makeDraggable:React.ReactEventHandler<SVGRectElement> = (evt) => {
+    //alert();
+    //console.log(evt);
+    var svg = evt.target;
+
+  //alert('hhh');
+  svg.addEventListener('mousedown', startDrag);
+  svg.addEventListener('mousemove', drag);
+  svg.addEventListener('mouseup', endDrag);
+  svg.addEventListener('mouseleave', endDrag);
+  function startDrag(evt:any) {
+    alert('aaaa');
+  }
+  function drag(evt:any) {
+  }
+  function endDrag(evt:any) {
+  }
+}
+
+const CustomizedLabelB = (props: any) => {
   return (
-    <div>
-          This_is_a_very_very_very_long_long_long_label_what_can_we_do_about_it?
-      </div>
+    <rect width="30" height="30" x="65" y="380"  />
+  /*  <Slider
+          vertical
+          mode={1}
+          step={5}
+          domain={domain}
+          rootStyle={sliderStyle}
+          component="rect"
+          //onUpdate={}
+          //onChange={}
+          values={values}
+        >
+          <Rail>
+            {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
+          </Rail>
+          <Handles>
+            {({ handles, getHandleProps }) => (
+              <div className="slider-handles">
+                {handles.map(handle => (
+                  <Handle
+                    key={handle.id}
+                    handle={handle}
+                    domain={domain}
+                    getHandleProps={getHandleProps}
+                  />
+                ))}
+              </div>
+            )}
+          </Handles>
+          <Tracks left={false} right={false}>
+            {({ tracks, getTrackProps }) => (
+              <div className="slider-tracks">
+                {tracks.map(({ id, source, target }) => (
+                  <Track
+                    key={id}
+                    source={source}
+                    target={target}
+                    getTrackProps={getTrackProps}
+                  />
+                ))}
+              </div>
+            )}
+          </Tracks>
+          <Ticks count={10}>
+            {({ ticks }) => (
+              <div className="slider-ticks">
+                {ticks.map(tick => (
+                  <Tick key={tick.id} tick={tick} />
+                ))}
+              </div>
+            )}
+          </Ticks>
+        </Slider>
+
+                */ 
   );
 };
 
@@ -593,6 +908,7 @@ const CustomizedLabelB = () => {
                   // eslint-disable-next-line react/jsx-no-bind
                   onMouseUp={handleMouseUp}
 
+                   
                   margin={{
                     top: 5,
                     right: 30,
@@ -612,7 +928,7 @@ const CustomizedLabelB = () => {
                      axisLine={true}
                      tickLine={false}
                      domain={['dataMin-0.1*dataMin', 'dataMax+0.1*dataMax']}
-                     label={<CustomizedLabelB />}
+                     //label={<CustomizedLabelB />}
                      tickFormatter={formatYAxis}
                    >
                    <Label key={"YAXisLabel"+index} fill={trend.color? trend.color : '#8884d8'}  dx={index % 2==0 ?45 : -30} angle={270} position='center' dy={30}>  
