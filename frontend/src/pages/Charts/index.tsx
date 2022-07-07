@@ -37,6 +37,9 @@ import { CollectionsOutlined } from "@mui/icons-material";
 import { request } from "http";
 import { getLogger } from "react-query/types/core/logger";
 
+import { straightLine } from "../../components/chart/StraightLine";
+
+
 import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider';
 import {
   GetRailProps,
@@ -916,6 +919,7 @@ const CustomizedLabelB = (props: any) => {
                     bottom: 5,
                   }}
                 >
+                  
                   <CartesianGrid horizontal={reducer.chart.grid_lines.h} vertical={reducer.chart.grid_lines.v} strokeDasharray="3 3" />
                   <XAxis dataKey="unixtime" padding={{ left: 20, right: 20 }} tickFormatter =  {formatXAxis} />
                   {selectedTrends.map((trend, index) => (
@@ -951,7 +955,7 @@ const CustomizedLabelB = (props: any) => {
             />
                    {selectedTrends.map((trend, index) => (
                      
-                     <Line dot={<></>} key={"Line"+index} isAnimationActive={false} yAxisId={trend.iD} type="monotone" dataKey={trend.iD} stroke={trend.color? trend.color : '#8884d8'} activeDot={{ r: 8 }} /> 
+                     <Line dot={<></>} key={"Line"+index} isAnimationActive={false} yAxisId={trend.iD} type={straightLine} dataKey={trend.iD} stroke={trend.color? trend.color : '#8884d8'} activeDot={{ r: 8 }} /> 
                       
                     ))}
                  
