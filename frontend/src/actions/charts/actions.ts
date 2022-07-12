@@ -1,7 +1,7 @@
 
 import { TwoMpTwoTone } from "@mui/icons-material";
 import { ChartRange, IChartAction, ITrend } from "../../components/chart/type";
-import { ADD_SERIE, APPEND_DATA, AREA_REF,  H_GRID_LINE,   REMOVE_SERIE,  SET_DATA,  SET_FROM_DATE,  SET_TIMER, SET_TO_DATE,  LOAD_TREND_LIST,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE, SET_DATE_RANGE, SET_TIMESTAMP_RANGE, ENABLE_TREND, DISABLE_TREND, SET_BRUSH_RANGE, FORCE_REFRESH, CLEAR_TIMER} from "./actionType";
+import { ADD_SERIE, APPEND_DATA, AREA_REF,  H_GRID_LINE,   REMOVE_SERIE,  SET_DATA,  SET_FROM_DATE,  SET_TIMER, SET_TO_DATE,  LOAD_TREND_LIST,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE, SET_DATE_RANGE, SET_TIMESTAMP_RANGE, ENABLE_TREND, DISABLE_TREND, SET_BRUSH_RANGE, FORCE_REFRESH, CLEAR_TIMER, ONLY_SELECTED, AUTOSCALE, SET_TREND_SCALE} from "./actionType";
 
 
 
@@ -82,6 +82,35 @@ export function setHorizontalLine(visible:boolean) {
   const action: IChartAction = {
     type: H_GRID_LINE,
     data : visible
+  }
+  return action;
+}
+
+
+
+export function setAutoscale(trendiD:string, autoscale : boolean) {
+  const action: IChartAction = {
+    type: AUTOSCALE,
+    data : {trendiD : trendiD, autoscale:autoscale}
+  }
+  return action;
+}
+
+export function setTrendScale(trendiD:string, scale : number | number[]) {
+  console.log(scale);
+  const action: IChartAction = {
+    type: SET_TREND_SCALE,
+    data : {trendiD : trendiD, scale:scale}
+  }
+  return action;
+}
+
+
+
+export function setOnlySelected(onlySelected:boolean) {
+  const action: IChartAction = {
+    type: ONLY_SELECTED,
+    data : onlySelected
   }
   return action;
 }

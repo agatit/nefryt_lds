@@ -16,6 +16,7 @@ export type ChartParams = {
     data : ITrendData[],
     lastUpdated : number,
    // series : ChartSerie[]
+    onlySelected : boolean,
     trends :  ITrend[],
     brush:{startIndex:number, endIndex:number},
     force_refresh : boolean
@@ -31,6 +32,10 @@ export type ChartParams = {
     axislabel:string;
     trendname:string;
     disabled:boolean;
+    autoscale:boolean;
+    scale:{min:number, max:number};
+    marks:{value:number, label:string}[];
+    step:number;
   }
  
  /// export interface ITrend extends Trend {

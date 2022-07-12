@@ -1,5 +1,5 @@
 import { FormControl, FormControlLabel,  FormGroup,  FormHelperText,  FormLabel,  Stack, Switch, TextField } from "@mui/material";
-import {Box, Button, Checkbox, LinearProgress, makeStyles} from '@material-ui/core';
+import {Accordion, AccordionDetails, AccordionSummary, Badge, Box, Button, Checkbox, IconButton, LinearProgress, makeStyles, Slider} from '@material-ui/core';
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Dispatch, Store } from "@reduxjs/toolkit";
@@ -7,7 +7,7 @@ import * as React from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { RootState } from "../..";
-import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend, setBrushRange, forceRefresh, clearTimer } from "../../actions/charts/actions";
+import { appendData, setFromDate, setToDate,  toggleLiveMode, toggleZoomMode, areaRef, toggleTooltip, setTimer, changeTrend, setHorizontalLine, setVerticalLine, setData, setTrendList, setDateRange, setTimestampRange, enableTrend, disableTrend, setBrushRange, forceRefresh, clearTimer, setOnlySelected, setAutoscale, setTrendScale } from "../../actions/charts/actions";
 import { Layout } from "../../components/template/Layout";
 import { RightPanel } from "../../components/template/RightPanel";
 import { ChartsState } from "./type";
@@ -41,172 +41,14 @@ import { straightLine } from "../../components/chart/StraightLine";
 
 import { cancelQuery } from 'redux-query';
 
-import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider';
-import {
-  GetRailProps,
-  GetHandleProps,
-  GetTrackProps,
-  SliderItem,
-} from 'react-compound-slider';
 
-interface SliderRailProps {
-  getRailProps: GetRailProps;
-}
-
-
-
-// *******************************************************
-// HANDLE COMPONENT
-// *******************************************************
-interface HandleProps {
-  domain: number[];
-  handle: SliderItem;
-  getHandleProps: GetHandleProps;
-}
-
-export const Handle: React.FC<HandleProps> = ({
-  domain: [min, max],
-  handle: { id, value, percent },
-  getHandleProps,
-}) => {
-  return (
-    <>
-      <div
-        style={{
-          top: `${percent}%`,
-          position: 'absolute',
-          transform: 'translate(-50%, -50%)',
-          WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-          zIndex: 5,
-          width: 42,
-          height: 28,
-          cursor: 'pointer',
-          backgroundColor: 'none',
-        }}
-        {...getHandleProps(id)}
-      />
-      <div
-        role="slider"
-        aria-valuemin={min}
-        aria-valuemax={max}
-        aria-valuenow={value}
-        style={{
-          top: `${percent}%`,
-          position: 'absolute',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 2,
-          width: 24,
-          height: 24,
-          borderRadius: '50%',
-          boxShadow: '1px 1px 1px 1px rgba(0, 0, 0, 0.3)',
-          backgroundColor: '#D7897E',
-        }}
-      />
-    </>
-  );
-};
-
-// *******************************************************
-// TICK COMPONENT
-// *******************************************************
-interface TickProps {
-  tick: SliderItem;
-  format?: (val: number) => string;
-}
-
-export const Tick: React.FC<TickProps> = ({ tick, format = d => d }) => {
-  return (
-    <div>
-      <div
-        style={{
-          position: 'absolute',
-          marginTop: -0.5,
-          marginLeft: 10,
-          height: 1,
-          width: 6,
-          backgroundColor: 'rgb(200,200,200)',
-          top: `${tick.percent}%`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          marginTop: -5,
-          marginLeft: 20,
-          fontSize: 10,
-          top: `${tick.percent}%`,
-        }}
-      >
-        {format(tick.value)}
-      </div>
-    </div>
-  );
-};
-
-
-// *******************************************************
-// TRACK COMPONENT
-// *******************************************************
-interface TrackProps {
-  source: SliderItem;
-  target: SliderItem;
-  getTrackProps: GetTrackProps;
-  disabled?: boolean;
-}
-
-export const Track: React.FC<TrackProps> = ({
-  source,
-  target,
-  getTrackProps,
-}) => {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        zIndex: 1,
-        backgroundColor: '#C55F4E',
-        borderRadius: 7,
-        cursor: 'pointer',
-        width: 14,
-        transform: 'translate(-50%, 0%)',
-        top: `${source.percent}%`,
-        height: `${target.percent - source.percent}%`,
-      }}
-      {...getTrackProps()}
-    />
-  );
-};
-
+import CustomSurface from "../../components/chart/CustomSurface";
+import { ExpandMore} from '@material-ui/icons'
+import Typography from '@mui/material/Typography';
 
 var runLive : ForceRequestCallback;
 
-const railOuterStyle = {
-  position: 'absolute' as 'absolute',
-  height: '100%',
-  width: 42,
-  transform: 'translate(-50%, 0%)',
-  borderRadius: 7,
-  cursor: 'pointer',
-};
 
-const railInnerStyle = {
-  position: 'absolute' as 'absolute',
-  height: '100%',
-  width: 14,
-  transform: 'translate(-50%, 0%)',
-  borderRadius: 7,
-  pointerEvents: 'none' as 'none',
-  backgroundColor: 'rgb(155,155,155)',
-};
-
-export const SliderRail: React.FC<SliderRailProps> = ({ getRailProps }) => {
-  return (
-    <>
-      <div style={railOuterStyle} {...getRailProps()} />
-      <div style={railInnerStyle} />
-    </>
-  );
-};
 
 const useStyles  = makeStyles(theme => ({
   root:{
@@ -260,8 +102,26 @@ const useStyles  = makeStyles(theme => ({
 
 Configuration.basePath = 'http://192.168.1.231:8080';
 
+function valuetext(value:any) {
+  return `${value}°C`;
+}
 
 const ChartsPage: React.FC = () => {
+
+  const [expanded, setExpanded] = React.useState('false');
+
+  const handleSwitchOnlySelected = (event: any) => {
+    dispatch(setOnlySelected(event.target.checked));
+  }
+
+  const handleChange = (panel: string) => (event: any, isExpanded: any) => {
+   // console.log(event.target );
+   // console.log(event.target.parentElement );
+     console.log(event.target.classList.contains("changeAccordionState") );
+    if ((event.target.classList.contains("changeAccordionState")) || ((event.target.parentElement) && (event.target.parentElement.classList.contains("changeAccordionState")))){
+        setExpanded(isExpanded ? panel : 'false');
+    }
+  };
 
   var data_range_from=0;
   var data_range_to=0;
@@ -513,7 +373,7 @@ dat1.forEach((element: ITrendData) => {
    //console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
    //console.log(!reducer.chart.mode.live.timer);
     if (!reducer.chart.mode.live.timer && reducer.chart.mode.live.active && (selCount > 0)) {
-      console.log('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK');
+      //console.log('KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK');
       interval = setInterval(function() { 
       
         var from;
@@ -592,10 +452,16 @@ const changeBrush = (e: any) => {
 
 }
 
-const handleChangeTrend = (event: { target: { name: any; checked: any; }; }) => {
-
+const handleChangeTrend = (event: any) => {
+  event.preventDefault();
   dispatch(changeTrend(event.target.name.replace('trd_', ''), event.target.checked));
+  if (!event.target.checked){
+    setExpanded('false');
+  }
   
+}
+const toggleAutoscale = (event:any) => {
+  dispatch(setAutoscale(event.target.name.replace('trd_manual_scale_', ''), !event.target.checked));
 }
 
 
@@ -773,18 +639,6 @@ if ((dat1) && (dat1.length>0)){
 }
 
 
-const sliderStyle: React.CSSProperties = {
-  position: 'relative',
-  height: '400px',
-  marginLeft: '45%',
-  touchAction: 'none',
-};
-
-const domain = [100, 500];
-const defaultValues = [150, 300, 400, 450];
-const  values = defaultValues.slice();
-
-
 //const makeDraggable :React.ReactEventHandler<SVGRectElement> = {  (evt) => {
 
   const makeDraggable:React.ReactEventHandler<SVGRectElement> = (evt) => {
@@ -806,65 +660,36 @@ const  values = defaultValues.slice();
   }
 }
 
+
+
+
+
 const CustomizedLabelB = (props: any) => {
   return (
-    <rect width="30" height="30" x="65" y="380"  />
-  /*  <Slider
-          vertical
-          mode={1}
-          step={5}
-          domain={domain}
-          rootStyle={sliderStyle}
-          component="rect"
-          //onUpdate={}
-          //onChange={}
-          values={values}
-        >
-          <Rail>
-            {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
-          </Rail>
-          <Handles>
-            {({ handles, getHandleProps }) => (
-              <div className="slider-handles">
-                {handles.map(handle => (
-                  <Handle
-                    key={handle.id}
-                    handle={handle}
-                    domain={domain}
-                    getHandleProps={getHandleProps}
-                  />
-                ))}
-              </div>
-            )}
-          </Handles>
-          <Tracks left={false} right={false}>
-            {({ tracks, getTrackProps }) => (
-              <div className="slider-tracks">
-                {tracks.map(({ id, source, target }) => (
-                  <Track
-                    key={id}
-                    source={source}
-                    target={target}
-                    getTrackProps={getTrackProps}
-                  />
-                ))}
-              </div>
-            )}
-          </Tracks>
-          <Ticks count={10}>
-            {({ ticks }) => (
-              <div className="slider-ticks">
-                {ticks.map(tick => (
-                  <Tick key={tick.id} tick={tick} />
-                ))}
-              </div>
-            )}
-          </Ticks>
-        </Slider>
-
-                */ 
+    <></>
   );
 };
+
+//vertical range slider
+
+//const [value2, setValue2] = React.useState([20, 37]);
+
+const minDistance=5;
+//React.ChangeEvent<{}>
+//const handleChange2 = (event:any, newValue:any, activeThumb:any) => {
+
+
+const handleChange2 = (event: any, newValue: number | number[]) => {
+if (!Array.isArray(newValue)) {
+    return;
+  }
+//  console.log(event.target.parentElement.querySelector('input').name);
+ var trd = event.target.parentElement.querySelector('input').name.replace('trd_slider_', '');
+console.log(newValue);
+    dispatch(setTrendScale(trd,newValue));
+};
+
+
 
   return (   
     <Layout onmouseup={handlemouseup}  rPanel={{open:reducer.rpanel_open, visible:true, 
@@ -908,21 +733,82 @@ const CustomizedLabelB = (props: any) => {
                   
                     
                  
-
-                  <div style={{border: 'solid 1px white' , maxHeight: 250, overflow:'auto'}}>
-                    <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
-                      <FormLabel component="legend">Wybór trendów (Wybrano: {selectedTrendCount})</FormLabel>
-                      <FormGroup>
-                          {reducer.chart.trends.map((trend : ITrend, index) => (
-                            <FormControlLabel key={index}
+                   <FormControlLabel  
                               control={
-                              <Checkbox key={trend.iD } checked={trend.selected ? trend.selected : false} onChange={handleChangeTrend} name={"trd_" + trend.iD.toLocaleString()} />
+                              <Checkbox checked={reducer.chart.onlySelected}  onChange={handleSwitchOnlySelected}/>
+                           }
+                              label="Pokaż tylko wybrane"
+                              
+                            />
+                  <div style={{border: 'solid 1px white' , marginTop:0, maxHeight: 300, overflowY:'hidden', overflowX:'hidden'}}>
+                    <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
+                      <FormLabel component="legend">Wybór trendów (Wybrano: {selectedTrendCount})
+                      
+                      </FormLabel>
+                     
+                      <FormGroup style={{ width:'410px',  }}>
+                          <div style={{ maxHeight: 230, overflowY:'auto', overflowX:'hidden'}}>
+                          {reducer.chart.trends.map((trend : ITrend, index) => (
+                            //var aa = document.getElementById("trd_manual_scale_" + trend.iD.toLocaleString());
+                           ((!reducer.chart.onlySelected) || ((reducer.chart.onlySelected) && (trend.selected))) ?
+                            <Accordion expanded={expanded === "trd_" + trend.iD.toLocaleString()} onChange={handleChange("trd_" + trend.iD.toLocaleString())}>
+                            <AccordionSummary 
+                              expandIcon={trend.selected?<ExpandMore className="changeAccordionState" /> : null}
+                              aria-controls={"panel_trd_" + trend.iD.toLocaleString() + "-content"}
+                              id={"panel_trd_" + trend.iD.toLocaleString() + "-header"}
+                              className={trend.selected?"changeAccordionState":""}
+                            >
+                              <Typography sx={{flexShrink: 0 }}>
+                              <FormControlLabel  key={index}
+                              control={
+                              <Checkbox className="select-trend" key={trend.iD } checked={trend.selected ? trend.selected : false}  onChange={handleChangeTrend} name={"trd_" + trend.iD.toLocaleString()} />
                            }
                               label={trend.name}
+                              
                             />
+                              </Typography>
+                             
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <Typography width="300px" marginLeft={4}>
+                              <FormControlLabel  key={index}
+                              control={
+                               <Checkbox className="select-trend" checked={!trend.autoscale} onChange={toggleAutoscale} key={trend.iD }  name={"trd_manual_scale_" + trend.iD.toLocaleString()} />
+                              }
+                              label="Ustaw ręcznie zakres wartości"
+                              
+                            />
+
+                      
+                                <Slider name={"trd_slider_" + trend.iD.toLocaleString()} disabled={trend.autoscale}
+                                  //aria-label="Minimum distance shift"
+                                  getAriaLabel={() => 'Minimum distance shift'}
+                                  value={[trend.scale.min, trend.scale.max]}
+                                  
+                                  onChange={handleChange2}
+                                  
+                                  getAriaValueText={valuetext}
+                                  //disableSwap
+                                  //defaultValue={0.00000005}
+                                  //getAriaValueText={valuetext}
+                                  step={trend.step}
+                                  //marks
+                                  min={trend.scaledMin}
+                                  max={trend.scaledMax}
+                                  valueLabelDisplay="auto"
+                                  marks={trend.marks}
+                                />
+                              </Typography>
+                            </AccordionDetails>
+                            
+                          </Accordion> : null
+                            
+                           
                           ))
                           }
+                          </div> 
                       </FormGroup>
+                      
                       <FormHelperText> </FormHelperText>
                     </FormControl>
                   </div>
@@ -1003,8 +889,8 @@ const CustomizedLabelB = (props: any) => {
                      axisLine={true}
                      tickLine={false}
                      tickCount={20}
-                     domain={['dataMin-0.1*dataMin', 'dataMax+0.1*dataMax']}
-                     //label={<CustomizedLabelB />}
+                     domain={trend.autoscale? ['dataMin-0.1*dataMin', 'dataMax+0.1*dataMax'] : [trend.scale.min, trend.scale.max]}
+                     label={<CustomizedLabelB />}
                      tickFormatter={formatYAxis}
                    >
                    <Label key={"YAXisLabel"+index}  fill={trend.color? trend.color : '#8884d8'}  dx={index % 2==0 ?40 : -20} angle={270} position='center' dy={30}>  
@@ -1066,6 +952,7 @@ const CustomizedLabelB = (props: any) => {
                 
                
               </ResponsiveContainer>
+
               </>
       }/>
   )

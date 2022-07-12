@@ -1,0 +1,143 @@
+@charset "utf-8";
+
+
+/* ---------------------------------------------------------------------- */
+/*układ tabelaryczny*/
+.table                                              {display: table-row-group;}
+.table-row                                          {display: table-row;}
+.table-cell                                         {display: table-cell;vertical-align: top;}
+
+#editor {display: flex;
+  flex-flow: column;
+  padding-top: 60px;
+  height: 100%;}
+
+#editor-body                                       { display: flex; width:100%; height:100%}
+
+
+#editor-draw-area { /*max-width: 400px;max-height: 400px;*/ overflow: auto;}
+
+
+
+
+
+/*#editor-body                                        { }
+*/
+.ruler-top						                    {height: 40px; /*width: 40px;*/  background-image: url('./img/editor-grid-40.gif'); background-color: #f5f5f5;}
+.ruler-bottom				                        {height: 40px; width: 40px;  background-image: url('./img/editor-grid-40.gif'); background-color: #f5f5f5;}
+.ruler-left					                        {width: 40px;  background-image: url('./img/editor-grid-40.gif'); background-color: #f5f5f5;}
+.ruler-right					                    {width: 40px;  background-image: url('./img/editor-grid-40.gif'); background-color: #f5f5f5;}
+.editor-content								        {background-image: url('./img/editor-grid-20.gif'); position: relative;}
+
+.ruler-horizontal-item							    {/*position: absolute;*/ height: 40px; overflow: hidden; background-color: #f5f5f5; background-image: url('./img/editor-grid-40.gif'); z-index: 999;}
+.ruler-horizontal-item p						    {display: inline-block; width: 40px; height: 40px; text-align: center; color: #969696; font-size: 11px;}
+.ruler-horizontal-item p span				        {display: block; padding-top: 4px;}
+.ruler-vertical-item								{/*position: absolute;*/width: 40px; overflow: hidden; background-color: #f5f5f5; background-image: url('./img/editor-grid-40.gif'); z-index: 999;}
+.ruler-vertical-item p							    {margin-bottom: 0!important; width: 40px; height: 40px; text-align: center; color: #969696; font-size: 11px;}
+.ruler-vertical-item p span					        {display: block; padding-top: 4px;}
+.ruler-item										    {position: relative; height: 40px; width: 40px; background-color: #f5f5f5; background-image: url('./img/editor-grid-40.gif'); z-index: 1000;}
+
+#editor-horizontal-indicator					    {position: absolute; height: 19px; width: 100%; z-index: 10; background-color: rgba(176, 224, 230, 0.3);; pointer-events: none; display: none;}  
+#editor-vertical-indicator					        {position: absolute; height: 100%; width: 19px; z-index: 20; background-color: rgba(176, 224, 230, 0.3);; pointer-events: none; display: none;}
+
+
+
+#editor-menu							            { width:150px; /*max-height: 400px;*/ overflow:auto;  background-color: rgba(245, 245, 245, 0.1);}
+#editor-menu-containetr                             { width:150px; padding-left:10px!important;padding-right:10px!important}
+#editor-menu .node                                  {/*border-radius: 5px;*/ text-align: center;padding: 8px 0px; border-bottom: 1px solid silver; font-size: 9px; font-weight: bold;text-transform: uppercase; line-height: 14px;}
+#editor-menu .node:hover						    {background-color: rgba(176, 224, 230, 1); cursor: pointer;}
+
+#editor-menu .node.active						    {background-color: rgba(176, 224, 230, 1)}
+
+
+#editor-body .table>:not(caption)>*>*  {padding:0!important;}
+#editor-body.table >:not(:first-child) {border-top: 0!important;}
+#editor-body .table>:not(:first-child) {border-top: 0!important;}
+
+#editor-menu .node-new span                         {background-image: url(./img/node-new.png)}
+#editor-menu .node-edit span                        {background-image: url(./img/node-edit.png)}
+#editor-menu .node-delete span                      {background-image: url(./img/node-delete.png)}
+#editor-menu .node-move span                        {background-image: url(./img/node-move.png)}
+#editor-menu .node-clone span                       {background-image: url(./img/node-clone.png)}
+#editor-menu .link-new span                         {background-image: url(./img/link-new.png)}
+#editor-menu .link-delete span                      {background-image: url(./img/link-delete.png)}
+
+#editor-menu span                                   {opacity: 0.5; filter: alpha(opacity=5); display: block; width: 100%; height: 25px; background-position: center center; background-repeat: no-repeat; margin-bottom: 7px;}
+
+
+
+/*select editor style*/
+select:required:invalid         {color: gray;}
+option[value=""][disabled]      {display: none;}
+option                          {color: black;}
+
+div.node {text-align: initial;}
+
+#tmp-Node												{position: absolute; z-index: 100; pointer-events: none; opacity: 0.4; filter: alpha(opacity=4);}
+div.node span			              {position: absolute; z-index: 100; cursor: pointer; background-image:url(./img/unknown.png);background-repeat: no-repeat;background-size: 100%; width:40px;height:40px; border: solid 1px}
+
+div.node .VALVE									{position: absolute; z-index: 100; cursor: pointer; background-image:url(./img/valve.png);background-repeat: no-repeat;background-size: 100%; width:40px;height:40px; border: solid 1px}
+div.node .TANK									{position: absolute; z-index: 100; cursor: pointer; background-image:url(./img/tank.png);background-repeat: no-repeat;background-size: 100%; width:40px;height:40px; border: solid 1px}
+div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; background-image:url(./img/press.png);background-repeat: no-repeat;background-size: 100%; width:40px;height:40px; border: solid 1px}
+
+.link_horizontal {border-bottom: 2px solid  black !important;}
+
+.link_vertical {border-right: 2px solid black!important;}
+
+.modal-dialog {
+    margin-top: 10%;
+  }
+
+.node.selected{
+  border-color: red!important;
+
+}
+
+  .sidepanel  {
+    width: 0;
+    position: absolute;
+    z-index: 1000;
+    height: 100%;
+    top: 0;
+    right: 0;
+    background-color: #0f5295;
+    overflow-x: hidden;
+    transition: 0.3s;
+   /* margin-right: 15px;*/
+    padding-top: 60px;
+   
+  }
+
+  .sidepanel.open{
+    width:500px;
+    border-left: 1px solid #0f5295;
+  }
+  
+  .sidepanel a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+  }
+  
+  .sidepanel a:hover {
+    color: #f1f1f1;
+  }
+  
+  .sidepanel .closebtn {
+    position: absolute;
+    top: 65;
+    left: 5px;
+    font-size: 36px;
+  }
+
+  .floatcontainer {
+    float: right;
+}
+
+
+
+
+  

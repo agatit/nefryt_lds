@@ -1,0 +1,8 @@
+.Node {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 10px;
+}

@@ -2,6 +2,8 @@ import { combineReducers } from 'redux'
 import templateReducer from '../reducers/templateReducer'
 import chartsReducer from '../reducers/chartsReducer'
 import eventsReducer from '../reducers/eventsReducer'
+import pipelineEditorReducer from '../reducers/pipelineEditorReducer'
+import propertyEditorReducer from '../reducers/propertyEditorReducer'
 
 import { entitiesReducer, EntitiesSelector, queriesReducer, QueriesState } from "redux-query";
 import { Trend, TrendData } from '../models';
@@ -22,10 +24,9 @@ const reducer = combineReducers({
     chartsReducer,
     eventsReducer,
     entities: entitiesReducer,
-    queries: queriesReducer
-
-    //pipelineEditorReducer,
-    //propertyEditorReducer,
+    queries: queriesReducer,
+    pipelineEditorReducer,
+    propertyEditorReducer,
     //form:forms,
     //
     //dashboardReducer,

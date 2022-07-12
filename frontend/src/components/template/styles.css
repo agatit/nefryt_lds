@@ -14,6 +14,8 @@ a {cursor: pointer}
   right:0;
   bottom:0;
   left:0; 
+  width:100%;
+  height:100%;
   /*display: flex;*/
 }
 
@@ -85,6 +87,8 @@ body {
   font-size: 36px;
 }
 
+
+
 .MuiOutlinedInput-root {
   color: white!important;
 }
@@ -105,4 +109,16 @@ body {
 
 .MuiFormLabel-root{
   color: white!important;
+}
+
+.MuiAccordionSummary-expandIcon{
+  color: black!important;
+}
+
+.MuiAccordionSummary-content{
+  margin:0!important;
+}
+
+.select-trend{
+  color:black!important;
 }
