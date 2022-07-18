@@ -2,7 +2,7 @@ import * as React from "react"
 import { Dispatch } from "redux"
 import { shallowEqual, useDispatch, useSelector } from "react-redux"
 import { RootState } from "../../../.."
-import { IEditorAction, INode, IPipeline, ITrendDef } from "../../type"
+import { EditorState, IEditorAction, INode, IPipelinesArea, ITrendDef } from "../../type"
 import { dragNode, setActiveNode } from "../../../../actions/editor/actions"
 
 type Props = {
@@ -12,29 +12,27 @@ type Props = {
 }
 
 
-export const Node: React.FC<Props> = (p) => {
+export const NodeElm: React.FC<Props> = (p) => {
   const dispatch: Dispatch<any> = useDispatch()
 
   function deleteNode(n : INode | {}){
     p.removeNode(n);
   }
 
-  const action: IEditorAction = useSelector(
-    (state: RootState) => state.pipelineEditorReducer.action,
+ 
+  const reducer: EditorState = useSelector(
+    (state: RootState) => state.pipelineEditorReducer,
     shallowEqual
   )
 
-  const pipeline: IPipeline = useSelector(
-    (state: RootState) => state.pipelineEditorReducer.pipeline,
-    shallowEqual
-  )
 
   const onDragStart = (e: React.MouseEvent<HTMLElement>) => {
     var id :string  = (e.currentTarget as HTMLElement).parentElement?  ((e.currentTarget as HTMLElement).parentElement as HTMLElement).id : '';
     var nodeID : RegExpMatchArray | null = id.match(/\d+/g);
     if (nodeID && (nodeID as RegExpMatchArray).length==1){
       var ID : number = parseInt((nodeID as RegExpMatchArray)[0]);
-      var tmpNode : INode[] = pipeline.Nodes.filter(node => node.NodeID==ID);
+      
+      var tmpNode : INode[] = reducer.Nodes.filter(node => node.NodeID==ID);
       
       dispatch(dragNode(tmpNode[0] as INode));
     }
@@ -47,7 +45,7 @@ export const Node: React.FC<Props> = (p) => {
     var nodeID : RegExpMatchArray | null = id.match(/\d+/g);
     if (nodeID && (nodeID as RegExpMatchArray).length==1){
       var ID : number = parseInt((nodeID as RegExpMatchArray)[0]);
-      var tmpNode : INode[] = pipeline.Nodes.filter(node => node.NodeID==ID);
+      var tmpNode : INode[] = reducer.Nodes.filter(node => node.NodeID==ID);
     
       dispatch(setActiveNode(tmpNode[0] as INode));
     }

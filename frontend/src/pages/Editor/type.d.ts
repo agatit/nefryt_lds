@@ -52,18 +52,18 @@ import { InjectedFormProps } from "redux-form"
     TrendDef : ITrendDef | {}
   }
 
-
-  interface IPipeline{
-    PipelineID : number
-    Name : string
+  interface IPipelinesArea{
     Width : number
     ScaleWidth : number
     Height : number
     ScaleHeight : number
     SIUnit : ISIUnit
-    Nodes : INode[] = []
-    Links : ILink[] = []
   }
+
+  /*interface IPipeline{
+    PipelineID : number
+    Name : string
+  }*/
 
 
 
@@ -79,7 +79,17 @@ import { InjectedFormProps } from "redux-form"
 
 
    export type EditorState = {
-    pipeline : IPipeline
+    //pipeline : IPipeline
+    pipelines : Pipeline[]
+    loaded : {
+     pipeline: boolean;
+     nodes : boolean,
+     links : booelan
+    }
+    forceRefresh : boolean,
+    Nodes : INode[] = []
+    Links : ILink[] = []
+    area : IPipelinesArea
     action : IEditorAction
     activeEditor: string 
     activeNode : INode | {}
@@ -98,8 +108,14 @@ import { InjectedFormProps } from "redux-form"
 
    export interface IEditorAction {
     type: string
-    nodes: INode[]
+    data:any
+    //nodes: INode[]
   }
+
+  //export interface IEditorAction {
+  //  type: string
+  //  data: any
+  //}
 
   export interface ILink {
     BeginNodeID : number

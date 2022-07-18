@@ -1,15 +1,21 @@
 import * as React from "react"
 import { Dispatch } from "redux"
 import { useDispatch } from "react-redux"
-import {Node} from "./Node/node" 
+import {NodeElm} from "./Node/node" 
 import { MOVE_NODE } from "../../../actions/editor/actionType";
-import { dropNode, removeNode, setActiveNode } from "../../../actions/editor/actions";
+import { dropNode, refreshData, removeNode, saveNode, setActiveNode } from "../../../actions/editor/actions";
 import { useEffect } from "react";
-import { IEditorAction, INode, IPipeline } from "../type"
+import { EditorState, IEditorAction, INode } from "../type"
 import $ from "jquery"
+import { mutateAsync, updateEntities } from "redux-query";
+import { createNode, updateNode, UpdateNodeRequest } from "../../../apis";
+import {Node} from "../../../models/Node"
+import { CropLandscapeOutlined } from "@material-ui/icons";
+import { useMutation } from "redux-query-react";
+import { EditorNode } from "../../../models";
 
   type Props = {
-    pipeline : IPipeline;
+    editorState : EditorState;
     action : IEditorAction;
     acctiveNode:INode | {};
   }
@@ -76,9 +82,48 @@ import $ from "jquery"
         var id :string = (e.target as HTMLElement).id;
           var position : RegExpMatchArray | null = id.match(/\d+/g);
         if ((position as RegExpMatchArray).length==2){
-          (p.acctiveNode as INode).positionX = Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.pipeline.ScaleHeight;
-          (p.acctiveNode as INode).positionY = Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.pipeline.ScaleWidth;
-          dispatch(dropNode())
+          (p.acctiveNode as INode).positionX = Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.editorState.area.ScaleHeight;
+          (p.acctiveNode as INode).positionY = Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.editorState.area.ScaleWidth;
+           var aa : UpdateNodeRequest = {
+             nodeId: 0
+           }
+           var nodeA : Node = {
+             iD: (p.acctiveNode as INode).NodeID,
+             editorParams: {
+               posX: (p.acctiveNode as INode).positionX,
+               posY: (p.acctiveNode as INode).positionY
+             },
+             type: (p.acctiveNode as INode).type
+           }
+          var queryUpdateNode = updateNode(
+            {
+              nodeId: (p.acctiveNode as INode).NodeID,
+              node: nodeA
+           });
+//console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+//console.log((p.acctiveNode as INode).positionX);
+//console.log((p.acctiveNode as INode).positionY);
+           queryUpdateNode.optimisticUpdate = true;
+          dispatch( mutateAsync (queryUpdateNode));
+           
+         // updateNode().optimisticUpdate = {
+         //   name: () => name
+         // };
+          
+        /*  React.useCallback(
+            (            optimistic: UpdateNodeRequest) => {
+              updateNode(optimistic).then((result: number) => {
+                if (result !== 200) {
+                  //setError(result.text);
+                }
+        
+                //setStatus(result.status);
+              });
+            },
+            [updateNode]
+          );
+          */
+          dispatch(dropNode());
         }
       }
     }
@@ -86,21 +131,66 @@ import $ from "jquery"
       e.preventDefault();
     }
 
-    const editorMouseClick  = (e: React.MouseEvent<HTMLElement>) => {
+    const editorMouseClick  = async (e: React.MouseEvent<HTMLElement>) => {
       var id :string = (e.target as HTMLElement).id;
       var position : RegExpMatchArray | null = id.match(/\d+/g);
       if (position && (position as RegExpMatchArray).length==2){
-        dispatch(setActiveNode({}));
+        
+        if (p.editorState.action.type=='MOVE_NODE'){
+          console.log('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD');
+          if ((p.editorState.action.data) && (p.editorState.action.data.length > 0)){
+          var nodeA : Node = {
+            editorParams: {
+              posX: Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.editorState.area.ScaleHeight,
+              posY: Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.editorState.area.ScaleHeight
+            },
+            type: (p.editorState.action.data[0] as INode).type,
+            name: (p.editorState.action.data[0] as INode).Name,
+            iD: 0
+          }
+         var queryCreateNode = createNode(
+           {
+             node: nodeA
+          });
+console.log(nodeA);
+          queryCreateNode.optimisticUpdate = true;
+          //useMutation(queryCreateNode);
+          try{
+            var todo = await mutateAsync (queryCreateNode);
+            dispatch(todo);
+            dispatch(refreshData());
+            //console.log(todo);
+            //var name : any = ((todo.body as Node).name) ? (todo.body as Node).name : "";
+            //var posX :any = (todo.body as Node).editorParams? ((todo.body as Node).editorParams as EditorNode).posX : 100;
+            //var posY :any = (todo.body as Node).editorParams? ((todo.body as Node).editorParams as EditorNode).posY : 100;
+           // var tmp :INode = {
+           //   NodeID: (todo.body as Node).iD,
+           //   type:  (todo.body as Node).type,
+           //   Name: name,
+           //   positionX: posX,
+           //   positionY: posY,
+           //   TrendDef: {}
+           // }
+           // console.log(tmp);
+
+           // dispatch(saveNode(tmp));
+          }catch(error){
+            console.log(error);
+          }
+        }
+
+        }
+       // dispatch(setActiveNode({}));
       }
     }
 
 
     const clearLink = (i: number) => {
-      var beginPosX = p.pipeline.Links[i].beginPointX;
-      var beginPosY = p.pipeline.Links[i].beginPointY;
+      var beginPosX = p.editorState.Links[i].beginPointX;
+      var beginPosY = p.editorState.Links[i].beginPointY;
 
-      var lengthX  = p.pipeline.Links[i].endPointX - p.pipeline.Links[i].beginPointX;
-      var lengthY  = p.pipeline.Links[i].endPointY - p.pipeline.Links[i].beginPointY;
+      var lengthX  = p.editorState.Links[i].endPointX - p.editorState.Links[i].beginPointX;
+      var lengthY  = p.editorState.Links[i].endPointY - p.editorState.Links[i].beginPointY;
 
       var markY : number=1;
       var lenY : number =1;
@@ -148,29 +238,29 @@ import $ from "jquery"
       var lengthY : number = 0;
       $('.table-cell').removeClass('link_horizontal');
       $('.table-cell').removeClass('link_vertical');
-      for (let i=0; i<p.pipeline.Links.length;i++){  
-        var BeginNode : INode = p.pipeline.Nodes.find((x: { NodeID: any }) => x.NodeID === p.pipeline.Links[i].BeginNodeID) as INode;
-        var EndNode : INode = p.pipeline.Nodes.find((x: { NodeID: any }) => x.NodeID === p.pipeline.Links[i].EndNodeID) as INode;
+      for (let i=0; i<p.editorState.Links.length;i++){  
+        var BeginNode : INode = p.editorState.Nodes.find((x: { NodeID: any }) => x.NodeID === p.editorState.Links[i].BeginNodeID) as INode;
+        var EndNode : INode = p.editorState.Nodes.find((x: { NodeID: any }) => x.NodeID === p.editorState.Links[i].EndNodeID) as INode;
         if (BeginNode && EndNode && (BeginNode.positionX) && (BeginNode.positionY)){
-          beginPosX  = (BeginNode.positionX % p.pipeline.ScaleWidth) == 0 ?  Math.floor(BeginNode.positionX / p.pipeline.ScaleWidth) : Math.floor(BeginNode.positionX / p.pipeline.ScaleWidth) + 1;
-          beginPosY = (BeginNode.positionY % p.pipeline.ScaleHeight) == 0 ?  Math.floor(BeginNode.positionY / p.pipeline.ScaleHeight) : Math.floor(BeginNode.positionY / p.pipeline.ScaleHeight) + 1;
+          beginPosX  = (BeginNode.positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(BeginNode.positionX / p.editorState.area.ScaleWidth) : Math.floor(BeginNode.positionX / p.editorState.area.ScaleWidth) + 1;
+          beginPosY = (BeginNode.positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(BeginNode.positionY / p.editorState.area.ScaleHeight) : Math.floor(BeginNode.positionY / p.editorState.area.ScaleHeight) + 1;
         
-          endPosX  = (EndNode.positionX % p.pipeline.ScaleWidth) == 0 ?  Math.floor(EndNode.positionX / p.pipeline.ScaleWidth) : Math.floor(EndNode.positionX / p.pipeline.ScaleWidth) + 1;
-          endPosY = (EndNode.positionY % p.pipeline.ScaleHeight) == 0 ?  Math.floor(EndNode.positionY / p.pipeline.ScaleHeight) : Math.floor(EndNode.positionY / p.pipeline.ScaleHeight) + 1;
+          endPosX  = (EndNode.positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(EndNode.positionX / p.editorState.area.ScaleWidth) : Math.floor(EndNode.positionX / p.editorState.area.ScaleWidth) + 1;
+          endPosY = (EndNode.positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(EndNode.positionY / p.editorState.area.ScaleHeight) : Math.floor(EndNode.positionY / p.editorState.area.ScaleHeight) + 1;
             
           lengthX  = endPosX - beginPosX;
           lengthY  = endPosY - beginPosY;
 
-          if ((beginPosX !=  p.pipeline.Links[i].beginPointX) || (beginPosY !=  p.pipeline.Links[i].beginPointY)
-            ||  (endPosX !=  p.pipeline.Links[i].endPointX) || (endPosY !=  p.pipeline.Links[i].endPointY)){
+          if ((beginPosX !=  p.editorState.Links[i].beginPointX) || (beginPosY !=  p.editorState.Links[i].beginPointY)
+            ||  (endPosX !=  p.editorState.Links[i].endPointX) || (endPosY !=  p.editorState.Links[i].endPointY)){
           
           }
           
-          p.pipeline.Links[i].beginPointX = beginPosX;
-          p.pipeline.Links[i].beginPointY = beginPosY;
+          p.editorState.Links[i].beginPointX = beginPosX;
+          p.editorState.Links[i].beginPointY = beginPosY;
 
-          p.pipeline.Links[i].endPointX = endPosY;
-          p.pipeline.Links[i].endPointY = endPosY;
+          p.editorState.Links[i].endPointX = endPosY;
+          p.editorState.Links[i].endPointY = endPosY;
                 
           var markY : number=1;
           var lenY : number =1;
@@ -210,29 +300,29 @@ import $ from "jquery"
   });
 
 
-  if (p.pipeline){
+  if (p.editorState){
     let nodes = [];
-    for (let i=0;i<p.pipeline.Nodes.length;i++){
-        var posX :number = (p.pipeline.Nodes[i].positionX % p.pipeline.ScaleWidth) == 0 ?  Math.floor(p.pipeline.Nodes[i].positionX / p.pipeline.ScaleWidth) : Math.floor(p.pipeline.Nodes[i].positionX / p.pipeline.ScaleWidth) + 1;
-        var posY : number = (p.pipeline.Nodes[i].positionY % p.pipeline.ScaleHeight) == 0 ?  Math.floor(p.pipeline.Nodes[i].positionY / p.pipeline.ScaleHeight) : Math.floor(p.pipeline.Nodes[i].positionY / p.pipeline.ScaleHeight) + 1;
+    for (let i=0;i<p.editorState.Nodes.length;i++){
+        var posX :number = (p.editorState.Nodes[i].positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(p.editorState.Nodes[i].positionX / p.editorState.area.ScaleWidth) : Math.floor(p.editorState.Nodes[i].positionX / p.editorState.area.ScaleWidth) + 1;
+        var posY : number = (p.editorState.Nodes[i].positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.Nodes[i].positionY / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.Nodes[i].positionY / p.editorState.area.ScaleHeight) + 1;
     
         var strPosX : string = (posX * 2).toString();
         var strPosY : string = (posY *2).toString(); 
         var cellid : string = 'cell_' + strPosY + '_'+ strPosX;
 
-        var selected=(p.acctiveNode) && ((p.acctiveNode as INode).NodeID == p.pipeline.Nodes[i].NodeID);
-        nodes.push({cell_id :cellid, node:<Node key={i} node={p.pipeline.Nodes[i]} removeNode={()=>removeNode(p.pipeline.Nodes[i]) } selected={selected} ></Node>})
+        var selected=(p.acctiveNode) && ((p.acctiveNode as INode).NodeID == p.editorState.Nodes[i].NodeID);
+        nodes.push({cell_id :cellid, node:<NodeElm key={i} node={p.editorState.Nodes[i]} removeNode={()=>removeNode(p.editorState.Nodes[i]) } selected={selected} ></NodeElm>})
     }
 
-    width = (p.pipeline.Width % p.pipeline.ScaleWidth) == 0 ?  Math.floor(p.pipeline.Width / p.pipeline.ScaleWidth) : Math.floor(p.pipeline.Width / p.pipeline.ScaleWidth) + 1;
-    height = (p.pipeline.Height % p.pipeline.ScaleHeight) == 0 ?  Math.floor(p.pipeline.Height / p.pipeline.ScaleHeight) : Math.floor(p.pipeline.Height / p.pipeline.ScaleHeight) + 1;
+    width = (p.editorState.area.Width % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(p.editorState.area.Width / p.editorState.area.ScaleWidth) : Math.floor(p.editorState.area.Width / p.editorState.area.ScaleWidth) + 1;
+    height = (p.editorState.area.Height % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) + 1;
     
     for(let iW = 0; iW <= (width *2) + 1 ; iW++)	{
       row.push(<div className="table-cell" key={iW} style={{height:20, width:20, left:20*iW }}  onMouseLeave={editorMouseLeave}  onMouseEnter={editorMouseEntere}></div>);
     }
     
     for(let iW = 0; iW <= width ; iW++)	{
-      positionsHorizontal.push(<p key={iW}><span>{iW*p.pipeline.ScaleWidth}<br/>[{p.pipeline.SIUnit.SIUnitTID}]</span></p>);
+      positionsHorizontal.push(<p key={iW}><span>{iW*p.editorState.area.ScaleWidth}<br/>[{p.editorState.area.SIUnit.SIUnitTID}]</span></p>);
     }
     for (let i = 0; i <= (height *2)+1; i++) {
       row=[];
@@ -245,7 +335,7 @@ import $ from "jquery"
     }
     
     for (let i = 0; i <= height; i++) {
-      positionsVertical.push(<p key={i}><span>{i*p.pipeline.ScaleHeight}<br/>[{p.pipeline.SIUnit.SIUnitTID}]</span></p>);
+      positionsVertical.push(<p key={i}><span>{i*p.editorState.area.ScaleHeight}<br/>[{p.editorState.area.SIUnit.SIUnitTID}]</span></p>);
     }
   }
   return (
@@ -259,7 +349,7 @@ import $ from "jquery"
         <div className="table-row">
           <div className="ruler-left table-cell"><div className="ruler-vertical-item">{positionsVertical}</div></div>
           <div className="editor-content table-cell">
-            {(p.action.type==MOVE_NODE) && (p.action.nodes &&(p.action.nodes).length>0) && <div id="tmp-Node"><Node node={p.action.nodes[0]} removeNode={() => removeNode(p.action.nodes[0])} selected={false}></Node></div>}
+            {(p.action.type==MOVE_NODE) && (p.action.data &&(p.action.data).length>0) && <div id="tmp-Node"><NodeElm node={p.action.data[0]} removeNode={() => removeNode(p.action.data[0])} selected={false}></NodeElm></div>}
             <p id="editor-horizontal-indicator">&nbsp;</p>
             <p id="editor-vertical-indicator">&nbsp;</p>
             <div style={{width: (width+1)*40, height: (height+1)*40}}><div className="table">{content}</div></div>

@@ -6,12 +6,16 @@ import pipelineEditorReducer from '../reducers/pipelineEditorReducer'
 import propertyEditorReducer from '../reducers/propertyEditorReducer'
 
 import { entitiesReducer, EntitiesSelector, queriesReducer, QueriesState } from "redux-query";
-import { Trend, TrendData } from '../models';
+import { Pipeline, Trend, TrendData } from '../models';
+
+import { reducer as forms  } from 'redux-form';
 
 export type EntitiesState = {
   trends_data: TrendData[],
   trends_live_data: TrendData[],
-  trends_list:Trend[]
+  trends_list:Trend[],
+  pipeline_list:Pipeline[],
+  node_list : Array<Node>
 }
 
 export const getQueries = (state: { queries: QueriesState; }) => state.queries;
@@ -27,7 +31,7 @@ const reducer = combineReducers({
     queries: queriesReducer,
     pipelineEditorReducer,
     propertyEditorReducer,
-    //form:forms,
+    form:forms,
     //
     //dashboardReducer,
     

@@ -3,9 +3,9 @@ import { useSelector, shallowEqual, useDispatch } from "react-redux"
 import { Dispatch } from "redux"
 import { RootState } from "../..";
 import { useEffect } from "react";
-import { IEditorAction, INode, IPipeline } from "./type";
+import { EditorState, IEditorAction, INode } from "./type";
 import {Layout} from '../../components/template/Layout'
-import { cancelNodeAction, setActiveNode } from "../../actions/editor/actions";
+import { cancelNodeAction, setActiveNode, setNodeList, setPipelineList } from "../../actions/editor/actions";
 import NewNodeForm from "./NewNodeForm";
 import { NodePropertyEditor } from "./Components/nodePropertyEditor";
 import { NodeToolbox } from "./Components/Node/Toolbox";
@@ -15,17 +15,96 @@ import { DRAG_NODE, NEW_NODE } from "../../actions/editor/actionType";
 import "../../index.css"
 import "./Components/Node/nodestyle.css"
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "./editor.css";
+import "./style.css";
+import { listNodes, listPipelines } from "../../apis";
+import { ForceRequestsCallback, useRequest } from "redux-query-react";
+import reducer, { getEntities, getQueries } from "../../store";
+import EditorAreaSettings from "./EditorAreaSettings";
+import {reset} from 'redux-form';
+import {updateEntities} from "redux-query"
 
 const drawerWidth = 240;
-
+var refreshNodes : ForceRequestsCallback;
 
 const EditorPage: React.FC = () => {
   const dispatch: Dispatch= useDispatch();
 
+  const queries = useSelector(getQueries) || [];
+  const entities = useSelector(getEntities) || [];
+  
 
-  const pipeline: IPipeline = useSelector(
-    (state: RootState) => state.pipelineEditorReducer.pipeline,
+  var queryPipelineList;
+  var queryNodeList;
+  var queryLinkList;
+
+  queryPipelineList = listPipelines(
+    {
+     //queryKey:'pipeline_list',
+     transform: (body:any, text:any) => {
+    //  console.log(body);
+       return {
+         
+         pipeline_list: body,
+       }
+     },
+     update:{
+      pipeline_list: (oldValue: any, newValue: any) => {
+         
+         return (newValue);
+       },
+     },
+   });
+
+   
+
+   const [PipelineListState] = useRequest(queryPipelineList);
+
+
+   
+
+   queryNodeList = listNodes(
+    {
+     transform: (body:any, text:any) => {
+       return {
+
+         node_list: body,
+       }
+     },
+     update:{
+      node_list: (oldValue: any, newValue: any) => {
+         
+         return (newValue);
+       },
+     },
+   });
+
+
+   const [NodeListState, refreshNodes] = useRequest(queryNodeList);
+
+   
+   /*queryLinkList = listLinks(
+    {
+     transform: (body:any, text:any) => {
+       return {
+
+         node_list: body,
+       }
+     },
+     update:{
+      node_list: (oldValue: any, newValue: any) => {
+         
+         return (newValue);
+       },
+     },
+   });
+
+
+   const [LinkListState] = useRequest(queryLinkList);
+
+   */
+
+  const state: EditorState = useSelector(
+    (state: RootState) => state.pipelineEditorReducer,
     shallowEqual
   )
   const activeEditor: string = useSelector(
@@ -41,12 +120,29 @@ const EditorPage: React.FC = () => {
     shallowEqual
   )
 
+  if (state.forceRefresh){
+    refreshNodes();
+  }
+
  
   const closePropertyEditor = (e: React.MouseEvent<HTMLElement>) => {
     dispatch(setActiveNode({}));
   }
 
+  if ((PipelineListState.isFinished) && (!state.loaded.pipeline)) {
+    //console.log(entities.pipeline_list);
+    dispatch(setPipelineList(entities.pipeline_list));
+  }
+
+  //console.log(state.Nodes);
   
+  if ((NodeListState.isFinished) && (!state.loaded.nodes) && (!state.forceRefresh)) {
+    //console.log(entities.node_list);
+    dispatch(setNodeList(entities.node_list));
+  }
+
+
+  //console.log(state.pipelines);
   
   const modal: boolean = useSelector(
        (state: RootState) => state.pipelineEditorReducer.action.type == NEW_NODE,
@@ -57,9 +153,9 @@ const EditorPage: React.FC = () => {
   var width : number=0;
   var height : number=0;
   
-  if (pipeline){
-    width = (pipeline.Width % pipeline.ScaleWidth) == 0 ?  Math.floor(pipeline.Width / pipeline.ScaleWidth) : Math.floor(pipeline.Width / pipeline.ScaleWidth) + 1;
-    height = (pipeline.Height % pipeline.ScaleHeight) == 0 ?  Math.floor(pipeline.Height / pipeline.ScaleHeight) : Math.floor(pipeline.Height / pipeline.ScaleHeight) + 1;
+  if (state.area){
+    width = (state.area.Width % state.area.ScaleWidth) == 0 ?  Math.floor(state.area.Width / state.area.ScaleWidth) : Math.floor(state.area.Width / state.area.ScaleWidth) + 1;
+    height = (state.area.Height % state.area.ScaleHeight) == 0 ?  Math.floor(state.area.Height / state.area.ScaleHeight) : Math.floor(state.area.Height / state.area.ScaleHeight) + 1;
   }
  
 
@@ -80,6 +176,19 @@ const EditorPage: React.FC = () => {
     sidepanelClasses = sidepanelClasses + ' open';
   }
 
+  
+const handleSubmitAreaEditor  = (e: any ) => {
+  //e.preventDefault();
+ // const form = e.currentTarget;
+ //e.preventDefault();
+
+  //console.log(document.forms[0]);
+  console.log(e);
+  dispatch(reset('EditorAreaSettings'));  // requires form name
+  dispatch(cancelNodeAction());
+
+}
+  
   return (
     <div className={'root'}>
       <Layout onmouseup={undefined}  rPanel={{open:false, visible:false, 
@@ -89,12 +198,13 @@ const EditorPage: React.FC = () => {
         <React.Fragment>
           <div id='editor-body' className="table">
             <div className="table-row">
-              <NodeToolbox pipeline={pipeline} action={action} activeEditor={activeEditor} ></NodeToolbox>
+              <NodeToolbox editorState={state} action={action} activeEditor={activeEditor} ></NodeToolbox>
             </div>
-            <PipelineEditorWorkspace pipeline={pipeline} action={action} acctiveNode={activeNode} ></PipelineEditorWorkspace>
+            <PipelineEditorWorkspace editorState={state} action={action} acctiveNode={activeNode} ></PipelineEditorWorkspace>
           
           </div>
           <NewNodeForm ></NewNodeForm>
+          <EditorAreaSettings onSubmit={handleSubmitAreaEditor} ></EditorAreaSettings>
           <div id="mySidepanel" className={sidepanelClasses}>
           <NodePropertyEditor  ></NodePropertyEditor>
         </div>

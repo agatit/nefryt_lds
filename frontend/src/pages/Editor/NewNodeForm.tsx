@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux"
 import { useSelector, shallowEqual } from "react-redux"
 import { actionTypes, Field, reduxForm } from 'redux-form';
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
-import { cancelNodeAction, newNode, saveNode } from "../../actions/editor/actions";
+import { cancelNodeAction, createNode, newNode, saveNode } from "../../actions/editor/actions";
 import { RootState } from "../..";
 import {NEW_NODE, NodeType as NodeType}  from "../../actions/editor/actionType";
 import { INode } from "./type";
@@ -45,7 +45,7 @@ const handleSubmit  = (e: any ) => {
     TrendDef : { } 
   }
 
-  dispatch(saveNode(node));
+  dispatch(createNode(node));
 }
 
   return (

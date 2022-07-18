@@ -18,5 +18,11 @@ export const USE_EDITOR_NODES = "USE_EDITOR_NODES"
 export const USE_EDITOR_MONITORING = "USE_EDITOR_MONITORING"
 export const NodeType = [{name:"Zbiornik", value:"TANK"}, {name:"Zawór", value:"VALVE"},{name:"Manometr", value: "PRESS"}];
 
+export const CREATE_NODE = "CREATE_NODE"
+export const REFRESH_DATA = "REFRESH_DATA"
 
 export const CHANGE_TAB = "CHANGE_TAB"
+
+export const LOAD_PIPELINE_LIST = "LOAD_PIPELINE_LIST"
+export const EDITOR_AREA_SETTINGS = "EDITOR_AREA_SETTINGS"
+export const LOAD_NODE_LIST = "LOAD_NODE_LIST"

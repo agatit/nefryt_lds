@@ -1,11 +1,12 @@
 import * as React from "react"
 import { Dispatch } from "redux"
 import { useDispatch } from "react-redux"
-import {  newNode, cloneNode, removeNode, linkNodes, unlinkNodes } from "../../../../actions/editor/actions";
+import {  newNode, cloneNode, removeNode, linkNodes, unlinkNodes, setEditorArea, refreshData } from "../../../../actions/editor/actions";
 import * as editorAction from "../../../../actions/editor/actionType";
-import { IEditorAction, IPipeline } from "../../type";
+import { EditorState, IEditorAction } from "../../type";
 import { ExpandMore } from '@material-ui/icons';
 import { Accordion, AccordionSummary, AccordionDetails, createTheme, withStyles, makeStyles, FormControl, Select, InputLabel, MenuItem } from '@material-ui/core';
+import { Button, TextField } from "@mui/material";
 
 
 
@@ -102,7 +103,7 @@ const MuiSelect = withStyles((theme) =>({
 
 
 type Props = {
-  pipeline : IPipeline;
+  editorState : EditorState;
   action : IEditorAction;
   activeEditor : string;
 }
@@ -135,11 +136,18 @@ export const NodeToolbox: React.FC<Props> = (p) => {
       dispatch(linkNodes({}));
     }else if (e.currentTarget.classList.contains('link-delete')){	
       dispatch(unlinkNodes({}));
+    }else if (e.currentTarget.classList.contains('settings')){	
+      dispatch(setEditorArea());
+    }else if (e.currentTarget.classList.contains('refresh')){	
+      
+      dispatch(refreshData());
+      //console.log('RRRRRRRRRRRRRRRRRRRRRRRRRRR');
+      //dispatch(setEditorArea());
     }
   }
 
-  if (p.pipeline){
-    editorHeight = (p.pipeline.Height % p.pipeline.ScaleHeight) == 0 ?  Math.floor(p.pipeline.Height / p.pipeline.ScaleHeight) : Math.floor(p.pipeline.Height / p.pipeline.ScaleHeight) + 1;
+  if (p.editorState){
+    editorHeight = (p.editorState.area.Height % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) + 1;
   }
   var activeMoveNode = p.action.type == editorAction.MOVE_NODE ? 'active' : '';
   var moveNodeClasses = "node node-move " + activeMoveNode;
@@ -161,6 +169,8 @@ export const NodeToolbox: React.FC<Props> = (p) => {
   var activeUnlinkNodes = p.action.type == editorAction.UNLINK_NODES ? 'active' : '';
   var unlinkNodesClasses = "node link-delete " + activeUnlinkNodes;
       
+  var settiongsClasses = "node settings ";
+  var refreshClasses = "node refresh ";
 
   const handleChange  = (e: React.ChangeEvent<{}>) => {
     // setSelectedOption(e.target.value)
@@ -168,9 +178,33 @@ export const NodeToolbox: React.FC<Props> = (p) => {
 
   let pipeline_id = 1;
 
-    
+  var SelValues : any[] = [];  
+  p.editorState.pipelines.forEach((pipeline) => {
+    SelValues.push(<MenuItem value={pipeline.iD}>pipeline.name</MenuItem>);
+  }) 
+    console.log(p.editorState.pipelines);
   return (
     <div style={{maxHeight: '100%', overflowY: 'auto', overflowX:'hidden'}} id="editor-menu" >
+       
+       <MuiAccordion >
+        <MuiAccordionSummary
+          expandIcon={<ExpandMore />}
+          aria-label="Expand"
+          aria-controls="additional-actions1-content"
+          id="additional-actions1-header"
+        >Edytor
+        </MuiAccordionSummary>
+        <MuiAccordionDetails>
+
+       <div id="editor-menu-containetr" className="table-cell">
+            <p onClick={menuItemClick} className={refreshClasses}><span>&nbsp;</span>Załaduj z DB</p>
+            <p onClick={menuItemClick} className={settiongsClasses}><span>&nbsp;</span>Ustawienia Obszaru</p>
+           
+       </div>     
+
+      
+          </MuiAccordionDetails>
+      </MuiAccordion>
       <MuiAccordion >
         <MuiAccordionSummary
           expandIcon={<ExpandMore />}
@@ -212,11 +246,15 @@ export const NodeToolbox: React.FC<Props> = (p) => {
               <MuiSelect
                 labelId="demo-simple-select-label"
                 id="select-pipeline"
-                value={pipeline_id}
+               // value={pipeline_id}
                 label="Odcinek"
                 onChange={handleChange}
               >
-                <MenuItem value={1}>Ten</MenuItem>
+                 {p.editorState.pipelines.map((pipeline) => {
+                   return <MenuItem key={"pid" + pipeline.iD} value={pipeline.iD}>{pipeline.name}</MenuItem>
+                  })
+                } 
+              {/*  <MenuItem value={1}>Ten</MenuItem>
                 <MenuItem value={2}>Twenty</MenuItem>
                 <MenuItem value={3}>Thirty</MenuItem>
                 <MenuItem value={4}>Ten</MenuItem>
@@ -231,6 +269,8 @@ export const NodeToolbox: React.FC<Props> = (p) => {
                 <MenuItem value={13}>Ten</MenuItem>
                 <MenuItem value={14}>Twenty</MenuItem>
                 <MenuItem value={15}>Thirty</MenuItem>
+
+              */}
               </MuiSelect>
 
 
