@@ -28,6 +28,15 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "cwd": "${workspaceFolder}/backend"
-        }        
+        },
+        {
+            "name": "CONTROL",
+            "type": "python",
+            "request": "launch",
+            "module": "control",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend"
+        }                      
     ]
 }
