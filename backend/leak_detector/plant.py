@@ -4,10 +4,12 @@ from typing import List
 
 from sqlalchemy import select
 from .db import global_session
+from .trend import Trend
 from database import lds
-from .method import base, wave
 
-# klasy zapisane stringiem, aby uniknąć cyklicznych importów 
+from . import method
+# from .method import MethodBalance, MethodWave, MethodMask, MethodCombine
+# klasy zapisane stringiem, aby uniknąć cyklicznych importów - jak nie będzie to potrzebne to zminić na klasy
 METHOD_CLASSES = {
     'WAVE': 'MethodWave',
     'BALANCE': 'MethodBalance',
@@ -50,11 +52,11 @@ class Pipeline:
         stmt = select(lds.Method).where(lds.Method.PipelineID == self.id)
         for method, in global_session.execute(stmt):            
             method_class = getattr(sys.modules["leak_detector.method"], METHOD_CLASSES[method.MethodDefID.strip()])
-            self._methods[method.ID] = method_class(self.id, method.ID, method.Name)
+            self._methods[method.ID] = method_class(self, method.ID, method.Name)
 
     @property
-    def plants(self) -> dict:
-        return self._plants
+    def plant(self) -> dict:
+        return self._plant
 
 
     def get_probablity(self, timestamp, step) -> List[float]:
@@ -99,6 +101,7 @@ class Plant:
         self._nodes = {}
         self._links = {}
         self._pipelines = {}
+        self._trends = {}
         self._build_mesh()
         self._build_pipelines()
 
@@ -112,6 +115,10 @@ class Plant:
         stmt = select(lds.Link)
         for link, in global_session.execute(stmt):
             self._links[link.ID] = Link(link.ID, link.Length, self.nodes[link.BeginNodeID], self.nodes[link.EndNodeID])
+
+        stmt = select(lds.Trend)
+        for trend, in global_session.execute(stmt):
+            self._trends[trend.ID] = Trend(trend.ID)            
 
 
     def _build_pipelines(self) -> None:
@@ -134,6 +141,10 @@ class Plant:
     @property
     def links(self) -> dict:
         return self._links
+
+    @property
+    def trends(self) -> dict:
+        return self._trends
 
 
     def get_distances(self, node1: Node, node2: Node) -> List[int]:
