@@ -1,16 +1,13 @@
 import struct
 from typing import List
-import threading
 import numpy as np
 import logging
-from datetime import datetime
 
 from sqlalchemy import select, and_
 
 from database import lds
 from ..db import Session
 from . import TrendBase
-import time
 
 
 class TrendFilter(TrendBase):

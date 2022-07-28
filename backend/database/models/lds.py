@@ -159,18 +159,18 @@ class MethodParamDef(Base):
 class PipelineNode(Base):
     __tablename__ = 'PipelineNode'
     __table_args__ = (
-        ForeignKeyConstraint(['ID'], ['lds.Pipeline.ID'], ondelete='CASCADE', onupdate='CASCADE', name='PipelineNodePipeline_fk'),
         ForeignKeyConstraint(['NodeID'], ['lds.Node.ID'], ondelete='CASCADE', onupdate='CASCADE', name='PipelineNodeNode_fk'),
-        PrimaryKeyConstraint('ID', 'NodeID', name='PipelineNode_pk'),
+        ForeignKeyConstraint(['PipelineID'], ['lds.Pipeline.ID'], ondelete='CASCADE', onupdate='CASCADE', name='PipelineNodePipeline_fk'),
+        PrimaryKeyConstraint('PipelineID', 'NodeID', name='PipelineNode_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(Integer, nullable=False, unique=True)
+    PipelineID = Column(Integer, nullable=False)
     NodeID = Column(Integer, nullable=False)
     First = Column(Boolean, nullable=False, server_default=text('((0))'))
 
-    Pipeline_ = relationship('Pipeline')
     Node_ = relationship('Node')
+    Pipeline_ = relationship('Pipeline')
 
 
 class Trend(Base):
@@ -239,8 +239,8 @@ class Event(Base):
 class MethodParam(Base):
     __tablename__ = 'MethodParam'
     __table_args__ = (
-        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], ondelete='CASCADE', onupdate='CASCADE', name='MethodParamMethod_fk'),
         ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], name='MethodParam_fk'),
+        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], ondelete='CASCADE', onupdate='CASCADE', name='MethodParamMethod_fk'),
         ForeignKeyConstraint(['MethodParamDefID'], ['lds.MethodParamDef.ID'], name='MethodParam_fk2'),
         PrimaryKeyConstraint('MethodParamDefID', 'MethodID', name='MethodParam_pk'),
         {'schema': 'lds'}

@@ -5,7 +5,7 @@ import threading
 
 from database import lds
 from .db import global_session, Session
-from .trends import TrendQuick
+from .trend import TrendQuick
 
 class PipePlant:
     __list = []

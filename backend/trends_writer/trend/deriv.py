@@ -4,7 +4,6 @@ import numpy as np
 from scipy import signal
 import time
 
-from database import lds
 from . import TrendFilter
 
 

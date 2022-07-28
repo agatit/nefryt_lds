@@ -3,7 +3,7 @@ from sqlalchemy import select
 from .db import global_session
 from database import obj
 
-from .driver import DriverModbus
+from .drivers import DriverModbus
 
 # TODO: dodać driver Snap7 zamiast AGLink
 DRIVER_CLASSES = {
