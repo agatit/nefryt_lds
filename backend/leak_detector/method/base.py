@@ -39,6 +39,20 @@ class MethodBase:
     def get_probablity(self, timestamp) -> List[float]:
         pass
 
+
+    def find_leaks_in_range(self, begin, end) -> List[Event]:
+        """ Po przemyśleniu wydaje mi się, że cały mechanizm powinien być zaimplementowany
+            na poziomie metody, gdyż lokalizacja zdarzenia będzie nieco inna dla róznych metod.
+            Implementacja na poziomie pipelinu powinna tylko skaładać wyniki z metod w jeden
+        """
+        pass
+
+
+    def find_leaks_to(self, end) -> List[Event]:
+        """ j.w.
+        """
+        pass  
+
     @property
     def calc_time(self) -> int:
         return self._calc_time
