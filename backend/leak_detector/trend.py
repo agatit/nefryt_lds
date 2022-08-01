@@ -18,8 +18,8 @@ class Trend:
         # kod skopiowany z api trends_controller.py z drobnymi zmianami
         # TODO: do poprawy !!!         
         # funkcja ma zawracać wszyskie próbki zdanego zakresu  
-        # nie ma potrzeby budowania listy i robienia selectów a "in"          
-        # reszta, np podział na chunki, przeliczeni, itp powinny zostać
+        # nie ma potrzeby budowania listy i robienia selectów z "in"          
+        # reszta, np podział na chunki, przeliczenia, itp. powinny zostać
 
         # reading trends defnitions neccessary for scaling
         db_trends = global_session.execute(select(lds.Trend))
@@ -94,5 +94,5 @@ class Trend:
                     api_data = next(api_iter, None)
                                     
             chunk_start += chunk_size
-                
+
         return api_data_list

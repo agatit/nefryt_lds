@@ -30,6 +30,19 @@ class MethodDef(Base):
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
 
 
+class MethodParamDef(Base):
+    __tablename__ = 'MethodParamDef'
+    __table_args__ = (
+        PrimaryKeyConstraint('ID', 'MethodDefID', name='MethodParamDef_pk'),
+        {'schema': 'lds'}
+    )
+
+    ID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False, index=True)
+    MethodDefID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
+    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    DataType = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'))
+
+
 class Node(Base):
     __tablename__ = 'Node'
     __table_args__ = (
@@ -39,7 +52,6 @@ class Node(Base):
 
     ID = Column(Integer, Identity(start=1000, increment=1))
     Type = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    TrendID = Column(Integer)
     Name = Column(String(50, 'SQL_Polish_CP1250_CS_AS'))
 
 
@@ -140,22 +152,6 @@ class Method(Base):
     Pipeline_ = relationship('Pipeline')
 
 
-class MethodParamDef(Base):
-    __tablename__ = 'MethodParamDef'
-    __table_args__ = (
-        ForeignKeyConstraint(['MethodDefID'], ['lds.MethodDef.ID'], ondelete='CASCADE', onupdate='CASCADE', name='MethodParamDef_MethodDef_fk'),
-        PrimaryKeyConstraint('ID', name='MethodParamDef_pk'),
-        {'schema': 'lds'}
-    )
-
-    ID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'))
-    MethodDefID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
-    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-    DataType = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'))
-
-    MethodDef_ = relationship('MethodDef')
-
-
 class PipelineNode(Base):
     __tablename__ = 'PipelineNode'
     __table_args__ = (
@@ -176,6 +172,7 @@ class PipelineNode(Base):
 class Trend(Base):
     __tablename__ = 'Trend'
     __table_args__ = (
+        ForeignKeyConstraint(['NodeID'], ['lds.Node.ID'], ondelete='SET NULL', name='Trend_fk'),
         ForeignKeyConstraint(['UnitID'], ['lds.Unit.ID'], name='Trend_Unit_fk'),
         PrimaryKeyConstraint('ID', name='Trend_pk'),
         {'schema': 'lds'}
@@ -194,7 +191,9 @@ class Trend(Base):
     UnitID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
     Color = Column(SmallInteger)
     Symbol = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    NodeID = Column(Integer)
 
+    Node_ = relationship('Node')
     Unit_ = relationship('Unit')
 
 
@@ -239,9 +238,7 @@ class Event(Base):
 class MethodParam(Base):
     __tablename__ = 'MethodParam'
     __table_args__ = (
-        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], name='MethodParam_fk'),
-        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], ondelete='CASCADE', onupdate='CASCADE', name='MethodParamMethod_fk'),
-        ForeignKeyConstraint(['MethodParamDefID'], ['lds.MethodParamDef.ID'], name='MethodParam_fk2'),
+        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], name='MethodParamMethod_fk'),
         PrimaryKeyConstraint('MethodParamDefID', 'MethodID', name='MethodParam_pk'),
         {'schema': 'lds'}
     )
@@ -250,9 +247,7 @@ class MethodParam(Base):
     MethodID = Column(Integer, nullable=False)
     Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
 
-    Method_ = relationship('Method', foreign_keys=[MethodID])
-    Method1 = relationship('Method', foreign_keys=[MethodID])
-    MethodParamDef_ = relationship('MethodParamDef')
+    Method_ = relationship('Method')
 
 
 class TrendParam(Base):
