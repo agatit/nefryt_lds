@@ -1,3 +1,4 @@
+import copy
 import sys
 import logging
 from typing import List
@@ -147,8 +148,19 @@ class Plant:
         return self._trends
 
 
-    def get_distances(self, node1: Node, node2: Node) -> List[int]:
+    def get_distances(self, node1: Node, node2: Node, visited) -> List[int]:
         """ Zwraca listę odległości między dwoma węzłami, różnymi drogami
             implementacja rekursywna
         """
-        pass
+        if (node1 == node2):
+            return [0]
+
+        distances = []
+        visited.add(node1)
+        for link in self.links.values():
+            if (link.begin_node == node1 and link.end_node not in visited):
+                distances.extend([link.length + dist for dist in self.get_distances(link.end_node, node2, copy.copy(visited))])
+                
+            if (link.end_node == node1 and link.begin_node not in visited):
+                distances.extend([link.length + dist for dist in self.get_distances(link.begin_node, node2, copy.copy(visited))])        
+        return distances
