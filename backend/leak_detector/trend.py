@@ -1,7 +1,6 @@
 from typing import List
 import logging
 import struct
-import itertools
 
 from sqlalchemy import select, insert, and_
 
@@ -17,67 +16,47 @@ class Trend:
 
     def get_trend_data(self, begin, end) -> List[float]:
 
-        # kod skopiowany z api trends_controller.py z drobnymi zmianami
-        # TODO: do poprawy !!!
-        # funkcja ma zawracać wszyskie próbki z danego zakresu
-        # nie ma potrzeby budowania listy i robienia selectów z "in"
-        # reszta, np podział na chunki, przeliczenia, itp powinny zostać
-
         # reading trends definitions neccessary for scaling
-        db_trends = global_session.execute(select(lds.Trend))
-        db_trends_scales = {}
-        for db_trend, in db_trends:
-            db_trends_scales[db_trend.ID] = {
-                "RawMin": db_trend.RawMin, 
-                "RawMax": db_trend.RawMax, 
-                "ScaledMin": db_trend.ScaledMin,
-                "ScaledMax": db_trend.ScaledMax
-            }
+        trend_def = global_session.execute(select(lds.Trend).where(lds.Trend.ID == self.id)).fetchone()
 
-        timestamps = list(range(begin, end + 1))            
+        last_valid = 0 # ostatnia prawidłowa wartość - do wypełniania pól z wartościami nieprawidływmi 
         chunk_size = 500 # how many trend points to fetch in one query
-        chunk_start = 0
+        chunk_start = begin
     
         data_list = []
 
         # for every chunk
-        while chunk_start < len(timestamps):
-
-            timestamp_list = set()
-            for data in itertools.islice(timestamps, chunk_start, chunk_start + chunk_size):
-                timestamp_list.add(data)        
-
+        while chunk_start <= end:
+     
             db_iter = global_session.execute(
                 select(lds.TrendData) \
-                    .where(and_(lds.TrendData.Time.in_(timestamp_list), lds.TrendData.TrendID == self.id)) \
+                    .where(and_(lds.TrendData.Time >= chunk_start, lds.TrendData.Time < chunk_start+chunk_size , lds.TrendData.TrendID == self.id)) \
                     .order_by(lds.TrendData.Time) 
-            )
-            timestamp_iter = itertools.islice(timestamps, chunk_start, chunk_start + chunk_size)
-
-            db_data = next(db_iter, None)
-            timestamp_data = next(timestamp_iter, None)
+            )            
                     
-            while db_data and timestamp_data:              
-                while db_data[0].Time < timestamp_data:
-                    db_data = next(db_iter)
+            current_timestamp = chunk_start
 
-                one_second_data = {}
-                while db_data and db_data[0].Time == timestamp_data:
-                    if db_trends_scales[db_data[0].TrendID]["RawMin"] >= 0:
-                        one_second_data[db_data[0].TrendID] = struct.unpack("H"*100, db_data[0].Data)
-                    else:
-                        one_second_data[db_data[0].TrendID] = struct.unpack("h"*100, db_data[0].Data)
-                    db_data = next(db_iter, None)
+            for db_data in db_iter:
 
-                current_second = timestamp_data
-                while timestamp_data and timestamp_data == current_second:
-                    for trend_id in one_second_data.keys():
-                        data_list.append(
-                            (db_trends_scales[trend_id]["ScaledMax"] - db_trends_scales[trend_id]["ScaledMin"]) \
-                            * (one_second_data[trend_id][-1] - db_trends_scales[trend_id]["RawMin"]) \
-                            / (db_trends_scales[trend_id]["RawMax"] - db_trends_scales[trend_id]["RawMin"]) \
-                            + db_trends_scales[trend_id]["ScaledMin"])
-                    timestamp_data = next(timestamp_iter, None)
+                while current_timestamp < db_data.Time:
+                    data_list += [last_valid] * 100
+                    current_timestamp += 1
+
+                # rozpoznajemy czy dane sa signed czy unsigned
+                if trend_def.RawMin >= 0:
+                    one_second_data = struct.unpack("H"*100, db_data[0].Data)
+                else:
+                    one_second_data = struct.unpack("h"*100, db_data[0].Data)
+
+                # skalowanie
+                for raw_value in one_second_data: 
+                    last_valid = (trend_def.ScaledMax - trend_def.ScaledMin \
+                                * (raw_value - trend_def.RawMin) \
+                                / (trend_def.RawMax - trend_def.RawMin) \
+                                + trend_def.ScaledMin)
+                    data_list.append(last_valid)
+
+                current_timestamp += 1
                                     
             chunk_start += chunk_size
                 
