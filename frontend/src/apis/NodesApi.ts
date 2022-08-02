@@ -105,7 +105,7 @@ function deleteNodeByIdRaw<T>(requestParameters: DeleteNodeByIdRequest, requestC
     const { meta = {} } = requestConfig;
 
     const config: QueryConfig<T> = {
-        url: `${runtime.Configuration.basePath}/node/{nodeId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
+        url: `${runtime.Configuration.basePath}/node/{linkId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
         meta,
         update: requestConfig.update,
         queryKey: requestConfig.queryKey,
@@ -153,7 +153,7 @@ function getNodeByIdRaw<T>(requestParameters: GetNodeByIdRequest, requestConfig:
     const { meta = {} } = requestConfig;
 
     const config: QueryConfig<T> = {
-        url: `${runtime.Configuration.basePath}/node/{nodeId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
+        url: `${runtime.Configuration.basePath}/node/{linkId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
         meta,
         update: requestConfig.update,
         queryKey: requestConfig.queryKey,
@@ -247,7 +247,7 @@ function updateNodeRaw<T>(requestParameters: UpdateNodeRequest, requestConfig: r
     const { meta = {} } = requestConfig;
 
     const config: QueryConfig<T> = {
-        url: `${runtime.Configuration.basePath}/node/{nodeId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
+        url: `${runtime.Configuration.basePath}/node/{linkId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
         meta,
         update: requestConfig.update,
         queryKey: requestConfig.queryKey,

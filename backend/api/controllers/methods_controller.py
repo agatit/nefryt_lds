@@ -1,8 +1,5 @@
 import connexion
 import six
-from typing import Dict
-from typing import Tuple
-from typing import Union
 
 from api.models.error import Error  # noqa: E501
 from api.models.information import Information  # noqa: E501
@@ -21,7 +18,7 @@ def create_method(pipeline_id, method=None):  # noqa: E501
     :param method: 
     :type method: dict | bytes
 
-    :rtype: Union[Method, Tuple[Method, int], Tuple[Method, int, Dict[str, str]]
+    :rtype: Method
     """
     if connexion.request.is_json:
         method = Method.from_dict(connexion.request.get_json())  # noqa: E501
@@ -38,7 +35,7 @@ def delete_method_by_id(pipeline_id, method_id):  # noqa: E501
     :param method_id: The id of the pipeline method to retrieve
     :type method_id: int
 
-    :rtype: Union[Information, Tuple[Information, int], Tuple[Information, int, Dict[str, str]]
+    :rtype: Information
     """
     return 'do some magic!'
 
@@ -53,7 +50,7 @@ def get_method_by_id(pipeline_id, method_id):  # noqa: E501
     :param method_id: The id of the pipeline method to retrieve
     :type method_id: int
 
-    :rtype: Union[Method, Tuple[Method, int], Tuple[Method, int, Dict[str, str]]
+    :rtype: Method
     """
     return 'do some magic!'
 
@@ -68,7 +65,7 @@ def list_method_params(pipeline_id, method_id):  # noqa: E501
     :param method_id: The id of the pipeline method to retrieve
     :type method_id: int
 
-    :rtype: Union[List[MethodParam], Tuple[List[MethodParam], int], Tuple[List[MethodParam], int, Dict[str, str]]
+    :rtype: List[MethodParam]
     """
     return 'do some magic!'
 
@@ -81,7 +78,7 @@ def list_methods(pipeline_id):  # noqa: E501
     :param pipeline_id: The id of the pipeline to retrieve
     :type pipeline_id: int
 
-    :rtype: Union[List[Method], Tuple[List[Method], int], Tuple[List[Method], int, Dict[str, str]]
+    :rtype: List[Method]
     """
     return 'do some magic!'
 
@@ -98,7 +95,7 @@ def update_method(pipeline_id, method_id, method=None):  # noqa: E501
     :param method: 
     :type method: dict | bytes
 
-    :rtype: Union[Method, Tuple[Method, int], Tuple[Method, int, Dict[str, str]]
+    :rtype: Method
     """
     if connexion.request.is_json:
         method = Method.from_dict(connexion.request.get_json())  # noqa: E501
@@ -119,7 +116,7 @@ def update_method_params(pipeline_id, method_id, method_param_def_id, method_par
     :param method_param: 
     :type method_param: list | bytes
 
-    :rtype: Union[Information, Tuple[Information, int], Tuple[Information, int, Dict[str, str]]
+    :rtype: Information
     """
     if connexion.request.is_json:
         method_param = [MethodParam.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501

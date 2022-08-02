@@ -1,5 +1,6 @@
 .gitignore
 src/apis/EventsApi.ts
+src/apis/LinksApi.ts
 src/apis/MethodsApi.ts
 src/apis/NodesApi.ts
 src/apis/PipelinesApi.ts
@@ -27,4 +28,3 @@ src/models/TrendParam.ts
 src/models/TrendParamDef.ts
 src/models/index.ts
 src/runtime.ts
-tsconfig.json

@@ -26,8 +26,12 @@ paths:
     $ref: "./paths/trendDefs.yaml"    
   /node:
     $ref: "./paths/nodes.yaml"
-  /node/{nodeId}:
+  /node/{linkId}:
     $ref: "./paths/node.yaml"
+  /link:
+    $ref: "./paths/links.yaml"
+  /link/{linkId}:
+    $ref: "./paths/link.yaml"    
   /pipeline:
     $ref: "./paths/pipelines.yaml"
   /pipeline/{pipelineId}:
