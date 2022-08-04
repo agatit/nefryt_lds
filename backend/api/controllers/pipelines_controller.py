@@ -4,10 +4,12 @@ import six
 from api.models.error import Error  # noqa: E501
 from api.models.information import Information  # noqa: E501
 from api.models.pipeline import Pipeline  # noqa: E501
+from api.models.pipeline_param import PipelineParam  # noqa: E501
+from api.models.pipeline_param_def import PipelineParamDef  # noqa: E501
 from api.models.editor_pipeline import EditorPipeline  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, delete
+from sqlalchemy import alias, select, delete, and_
 from ..db import session
 from database.models import editor, lds
 
@@ -186,3 +188,101 @@ def list_pipelines():  # noqa: E501
 
     except Exception as e:
         return Error(message=str(e), code=500), 500
+
+
+def get_pipeline_param_by_id(pipeline_id, pipeline_param_def_id):  # noqa: E501
+    """Gets pipeline param detail
+
+    Info for specific pipeline param # noqa: E501
+
+    :param pipeline_id: The id of the pipeline to retrieve
+    :type pipeline_id: int
+    :param param_id: The id of the param to retrieve
+    :type param_id: int
+
+    :rtype: PipelineParam
+    """
+    try:
+        db_pipeline_param = session.get(lds.PipelineParam, (pipeline_param_def_id, pipeline_id))
+        if db_pipeline_param is None:
+            return Error(message="Not Found", code=404), 404
+
+        api_pipeline_param = PipelineParam()
+        api_pipeline_param.pipeline_id = db_pipeline_param.PipelineID
+        api_pipeline_param.pipeline_param_def_id = db_pipeline_param.PipelineParamDefID.strip()
+        api_pipeline_param.value = db_pipeline_param.Value
+
+        return api_pipeline_param, 200
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500
+
+
+def list_pipeline_params(pipeline_id):  # noqa: E501
+    """List pipeline params
+
+    List all pipeline params # noqa: E501
+
+    :param pipeline_id: The id of the pipeline to retrieve
+    :type pipeline_id: int
+
+    :rtype: List[PipelineParam]
+    """
+
+    try:
+
+        stmt = select([lds.PipelineParam, lds.PipelineParamDef]) \
+            .select_from(lds.PipelineParamDef) \
+            .outerjoin(lds.PipelineParam, \
+                    and_(lds.PipelineParamDef.ID == lds.PipelineParam.PipelineParamDefID, lds.PipelineParam.PipelineID == pipeline_id) \
+                )  
+
+        db_pipeline_params = session.execute(stmt)
+
+        api_pipeline_params = []
+        for db_pipeline_param, db_pipeline_param_def in db_pipeline_params:
+            api_pipeline_param = PipelineParam()
+            api_pipeline_param.pipeline_id = pipeline_id
+            api_pipeline_param.pipeline_param_def_id = db_pipeline_param_def.ID.strip()            
+            api_pipeline_param.name = db_pipeline_param_def.Name
+            api_pipeline_param.data_type = db_pipeline_param_def.DataType.strip()
+            if db_pipeline_param is not None:
+                api_pipeline_param.value = db_pipeline_param.Value
+            api_pipeline_params.append(api_pipeline_param)
+
+        return api_pipeline_params, 200
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500
+
+
+def update_pipeline_param(pipeline_id, pipeline_param_def_id, pipeline_param=None):  # noqa: E501
+    """Update pipeline params
+
+    Updates pipeline param # noqa: E501
+
+    :param pipeline_id: The id of the pipeline to retrieve
+    :type pipeline_id: int
+    :param pipeline_param: 
+    :type pipeline_param: dict | bytes
+
+    :rtype: Information
+    """
+    try:
+        if connexion.request.is_json:
+            api_pipeline_param = PipelineParam.from_dict(connexion.request.get_json())  # noqa: E501
+
+        db_pipeline_param = session.get(lds.PipelineParam, (pipeline_param_def_id, pipeline_id))
+        if db_pipeline_param is None:
+            return Error(message="Not Found", code=404), 404
+
+        
+        db_pipeline_param.Value = api_pipeline_param.value
+        session.add(db_pipeline_param)
+
+        session.commit()
+
+        return get_pipeline_param_by_id(db_pipeline_param.PipelineID, db_pipeline_param.PipelineParamDefID)
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500          

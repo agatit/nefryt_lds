@@ -725,7 +725,7 @@ paths:
   /pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}:
     put:
       description: Put  method params
-      operationId: update_method_params
+      operationId: update_method_param
       parameters:
       - description: The id of the pipeline to retrieve
         explode: false
@@ -775,6 +775,83 @@ paths:
       tags:
       - methods
       x-openapi-router-controller: api.controllers.methods_controller
+  /pipeline/{pipelineId}/param:
+    get:
+      description: List all  pipeline params
+      operationId: list_pipeline_params
+      parameters:
+      - description: The id of the pipeline to retrieve
+        explode: false
+        in: path
+        name: pipelineId
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PipelineParam'
+                type: array
+          description: A array of  pipelines params
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List pipelnie pipeline params
+      tags:
+      - pipelines
+      x-openapi-router-controller: api.controllers.pipelines_controller
+  /pipeline/{pipelineId}/param/{methodParamDefId}:
+    put:
+      description: Put  pipeline params
+      operationId: update_pipeline_param
+      parameters:
+      - description: The id of the pipeline to retrieve
+        explode: false
+        in: path
+        name: pipelineId
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: The id of the param to retrieve
+        explode: false
+        in: path
+        name: pipelineParamDefId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/PipelineParam'
+              type: array
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Information'
+          description: Updated
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Put pipelnie pipeline params
+      tags:
+      - pipelines
+      x-openapi-router-controller: api.controllers.pipelines_controller
   /trend:
     get:
       description: List all trends
@@ -1483,6 +1560,67 @@ components:
       required:
       - ID
       title: Pipeline
+      type: object
+    PipelineParam:
+      example:
+        PipelineParamDefID: 0
+        Value: Value
+        PipelineID: 0
+        DataType: DataType
+        Name: Name
+      properties:
+        PipelineID:
+          description: none
+          example: 0
+          nullable: false
+          title: PipelineID
+          type: integer
+        PipelineParamDefID:
+          description: none
+          example: 0
+          nullable: false
+          title: PipelineParamDefID
+          type: integer
+        DataType:
+          description: none
+          pattern: ^.{0,6}
+          title: DataType
+          type: string
+        Name:
+          description: none
+          pattern: ^.{0,30}
+          title: Name
+          type: string
+        Value:
+          description: none
+          pattern: ^.{0,30}
+          title: Value
+          type: string
+      required:
+      - PipelineID
+      title: PipelineParam
+      type: object
+    PipelineParamDef:
+      properties:
+        ID:
+          description: none
+          example: 0
+          nullable: false
+          readOnly: true
+          type: integer
+        PipelineDefID:
+          description: none
+          type: integer
+        Name:
+          description: none
+          pattern: ^.{0,30}
+          type: string
+        DataType:
+          description: none
+          pattern: ^.{0,6}
+          type: string
+      required:
+      - ID
       type: object
     PipelineNode:
       properties:

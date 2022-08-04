@@ -5,6 +5,7 @@ from sqlalchemy import select, insert, and_
 
 from ..db import global_session, Session
 from database import lds
+from ..plant import Event
 
 class MethodBase:
     def __init__(self, pipeline, id, name):

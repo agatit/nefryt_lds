@@ -1,20 +1,19 @@
 put:
-  summary: Put pipelnie method params
-  operationId: updateMethodParam
-  description: Put  method params
+  summary: Put pipelnie pipeline params
+  operationId: updatePipelineParam
+  description: Put  pipeline params
   tags:
-    - methods
+    - pipelines
   parameters:
     - $ref: "../parameters/path/pipelineId.yaml"
-    - $ref: "../parameters/path/methodId.yaml"
-    - $ref: "../parameters/path/methodParamDefId.yaml"
+    - $ref: "../parameters/path/pipelineParamDefId.yaml"
   requestBody:
     content:
       application/json:
         schema:
           type: array
           items:
-            $ref: "../schemas/MethodParam.yaml"
+            $ref: "../schemas/PipelineParam.yaml"
   responses:
     "201":
       $ref: "../responses/Updated.yaml"

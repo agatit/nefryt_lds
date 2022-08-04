@@ -30,3 +30,4 @@ api/controllers/links_controller.py
 api/controllers/pipelines_controller.py
 api/controllers/events_controller.py
 api/controllers/trends_controller.py
+api/controllers/methodss_controller.py

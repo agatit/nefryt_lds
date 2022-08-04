@@ -11,8 +11,10 @@ class MethodWave(MethodBase):
         super().__init__(pipeline, id, name)
         # skopiowanie specyficznych parametrów metody:
         # TODO: rozważyć obsługe błedów przy czytaniu parmatrów, np. przypisanie nieistnijącego trendu
-        self._pressure_deriv_trend_1 = pipeline.plant.trends[int(self._params['PRESSURE_DERIV_TREND_1'])]
-        self._pressure_deriv_trend_2 = pipeline.plant.trends[int(self._params['PRESSURE_DERIV_TREND_2'])]
+
+        self._pressure_deriv_trends = []
+        for trend_id in self._params['PRESSURE_DERIV_TRENDS'].split(','):
+            self._pressure_deriv_trends.append(pipeline.plant.trends[int(trend_id)])
         # etc.
 
         # podział na segmenty (jeśli zaimplementujemy więcej niż dwa trendy na metodę)

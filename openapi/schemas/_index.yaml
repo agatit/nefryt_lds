@@ -12,6 +12,10 @@ Node:
   $ref: "./Node.yaml"
 Pipeline:
   $ref: "./Pipeline.yaml"
+PipelineParam:
+  $ref: "./PipelineParam.yaml"
+PipelineParamDef:
+  $ref: "./PipelineParamDef.yaml"  
 PipelineNode:
   $ref: "./PipelineNode.yaml"
 Trend:

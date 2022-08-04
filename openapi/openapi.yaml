@@ -36,6 +36,10 @@ paths:
     $ref: "./paths/pipelines.yaml"
   /pipeline/{pipelineId}:
     $ref: "./paths/pipeline.yaml"
+  /pipeline/{pipelineId}/param:
+    $ref: "./paths/pipelineParams.yaml"
+  /pipeline/{pipelineId}/param/{methodParamDefId}:
+    $ref: "./paths/pipelineParam.yaml"   
   /pipeline/{pipelineId}/method:
     $ref: "./paths/methods.yaml" 
   /pipeline/{pipelineId}/method/{methodId}:

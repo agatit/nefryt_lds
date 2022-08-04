@@ -1,0 +1,19 @@
+get:
+  summary: List pipelnie pipeline params
+  operationId: listPipelineParams
+  description: List all  pipeline params
+  tags:
+    - pipelines
+  parameters:
+    - $ref: "../parameters/path/pipelineId.yaml"
+  responses:
+    "200":
+      description: A array of  pipelines params
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/PipelineParam.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"

@@ -3,12 +3,12 @@ import sys
 import logging
 from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from .db import global_session
 from .trend import Trend
 from database import lds
 
-from . import method
+# from . import method
 # from .method import MethodBalance, MethodWave, MethodMask, MethodCombine
 # klasy zapisane stringiem, aby uniknąć cyklicznych importów - jak nie będzie to potrzebne to zminić na klasy
 METHOD_CLASSES = {
@@ -40,8 +40,18 @@ class Pipeline:
         self._plant = plant
         self.id = id
         self.name = name
-        self.begin_pos = begin_pos
+        # self.begin_pos = begin_pos
+        
+        self._read_params()
+        self.begin_pos = self._params.get('BEGIN_POS',0)
+        self.length_resolution = self._params.get('LENGTH_RESOLUTION', 1)
+        self.time_resolution = self._params.get('TIME_RESOLUTION', 1)
+        self.active_methods = self._params.get('ACTIVE_METHODS', '').split(',')
+        self.method_events = self._params.get('METHOD_EVENTS', '').split(',')
+        # TODO: obsługa wymagalności parametrów metod
+
         self._build() 
+
 
 
     def _build(self) -> None:
@@ -50,10 +60,26 @@ class Pipeline:
         for node, in global_session.execute(stmt):
             self._nodes[node.NodeID] = self._plant.nodes[node.NodeID]
 
+        from . import method
+
         stmt = select(lds.Method).where(lds.Method.PipelineID == self.id)
         for method, in global_session.execute(stmt):            
             method_class = getattr(sys.modules["leak_detector.method"], METHOD_CLASSES[method.MethodDefID.strip()])
             self._methods[method.ID] = method_class(self, method.ID, method.Name)
+
+    def _read_params(self):
+        stmt = select([lds.PipelineParam, lds.PipelineParamDef]) \
+            .select_from(lds.PipelineParamDef) \
+            .outerjoin(lds.PipelineParam, \
+                    and_(lds.PipelineParamDef.ID == lds.PipelineParam.PipelineParamDefID, lds.PipelineParam.PipelineID == self.id) \
+                )  
+
+        self._params = {}
+        for param, param_def in global_session.execute(stmt):
+            if param is not None:
+                self._params[param_def.ID.strip()] = param.Value
+            # else:
+            # TODO: obsługa defaultowych wartości parametrów
 
     @property
     def plant(self) -> dict:

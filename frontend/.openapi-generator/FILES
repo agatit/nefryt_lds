@@ -20,6 +20,8 @@ src/models/ModelError.ts
 src/models/Node.ts
 src/models/Pipeline.ts
 src/models/PipelineNode.ts
+src/models/PipelineParam.ts
+src/models/PipelineParamDef.ts
 src/models/Trend.ts
 src/models/TrendData.ts
 src/models/TrendDef.ts

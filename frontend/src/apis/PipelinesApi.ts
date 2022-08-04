@@ -21,6 +21,9 @@ import {
     Pipeline,
     PipelineFromJSON,
     PipelineToJSON,
+    PipelineParam,
+    PipelineParamFromJSON,
+    PipelineParamToJSON,
 } from '../models';
 
 export interface CreatePipelineRequest {
@@ -35,9 +38,19 @@ export interface GetPipelineByIdRequest {
     pipelineId: number;
 }
 
+export interface ListPipelineParamsRequest {
+    pipelineId: number;
+}
+
 export interface UpdatePipelineRequest {
     pipelineId: number;
     pipeline?: Pipeline;
+}
+
+export interface UpdatePipelineParamRequest {
+    pipelineId: number;
+    pipelineParamDefId: string;
+    pipelineParam?: Array<PipelineParam>;
 }
 
 
@@ -184,6 +197,54 @@ export function getPipelineById<T>(requestParameters: GetPipelineByIdRequest, re
 }
 
 /**
+ * List all  pipeline params
+ * List pipelnie pipeline params
+ */
+function listPipelineParamsRaw<T>(requestParameters: ListPipelineParamsRequest, requestConfig: runtime.TypedQueryConfig<T, Array<PipelineParam>> = {}): QueryConfig<T> {
+    if (requestParameters.pipelineId === null || requestParameters.pipelineId === undefined) {
+        throw new runtime.RequiredError('pipelineId','Required parameter requestParameters.pipelineId was null or undefined when calling listPipelineParams.');
+    }
+
+    let queryParameters = null;
+
+
+    const headerParameters : runtime.HttpHeaders = {};
+
+
+    const { meta = {} } = requestConfig;
+
+    const config: QueryConfig<T> = {
+        url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/param`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))),
+        meta,
+        update: requestConfig.update,
+        queryKey: requestConfig.queryKey,
+        optimisticUpdate: requestConfig.optimisticUpdate,
+        force: requestConfig.force,
+        rollback: requestConfig.rollback,
+        options: {
+            method: 'GET',
+            headers: headerParameters,
+        },
+        body: queryParameters,
+    };
+
+    const { transform: requestTransform } = requestConfig;
+    if (requestTransform) {
+        config.transform = (body: ResponseBody, text: ResponseBody) => requestTransform(body.map(PipelineParamFromJSON), text);
+    }
+
+    return config;
+}
+
+/**
+* List all  pipeline params
+* List pipelnie pipeline params
+*/
+export function listPipelineParams<T>(requestParameters: ListPipelineParamsRequest, requestConfig?: runtime.TypedQueryConfig<T, Array<PipelineParam>>): QueryConfig<T> {
+    return listPipelineParamsRaw(requestParameters, requestConfig);
+}
+
+/**
  * List all pipelines
  * List pipelines
  */
@@ -275,5 +336,59 @@ function updatePipelineRaw<T>(requestParameters: UpdatePipelineRequest, requestC
 */
 export function updatePipeline<T>(requestParameters: UpdatePipelineRequest, requestConfig?: runtime.TypedQueryConfig<T, Pipeline>): QueryConfig<T> {
     return updatePipelineRaw(requestParameters, requestConfig);
+}
+
+/**
+ * Put  pipeline params
+ * Put pipelnie pipeline params
+ */
+function updatePipelineParamRaw<T>(requestParameters: UpdatePipelineParamRequest, requestConfig: runtime.TypedQueryConfig<T, Information> = {}): QueryConfig<T> {
+    if (requestParameters.pipelineId === null || requestParameters.pipelineId === undefined) {
+        throw new runtime.RequiredError('pipelineId','Required parameter requestParameters.pipelineId was null or undefined when calling updatePipelineParam.');
+    }
+
+    if (requestParameters.pipelineParamDefId === null || requestParameters.pipelineParamDefId === undefined) {
+        throw new runtime.RequiredError('pipelineParamDefId','Required parameter requestParameters.pipelineParamDefId was null or undefined when calling updatePipelineParam.');
+    }
+
+    let queryParameters = null;
+
+
+    const headerParameters : runtime.HttpHeaders = {};
+
+    headerParameters['Content-Type'] = 'application/json';
+
+
+    const { meta = {} } = requestConfig;
+
+    const config: QueryConfig<T> = {
+        url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/param/{methodParamDefId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"pipelineParamDefId"}}`, encodeURIComponent(String(requestParameters.pipelineParamDefId))),
+        meta,
+        update: requestConfig.update,
+        queryKey: requestConfig.queryKey,
+        optimisticUpdate: requestConfig.optimisticUpdate,
+        force: requestConfig.force,
+        rollback: requestConfig.rollback,
+        options: {
+            method: 'PUT',
+            headers: headerParameters,
+        },
+        body: queryParameters || requestParameters.pipelineParam?.map(PipelineParamToJSON),
+    };
+
+    const { transform: requestTransform } = requestConfig;
+    if (requestTransform) {
+        config.transform = (body: ResponseBody, text: ResponseBody) => requestTransform(InformationFromJSON(body), text);
+    }
+
+    return config;
+}
+
+/**
+* Put  pipeline params
+* Put pipelnie pipeline params
+*/
+export function updatePipelineParam<T>(requestParameters: UpdatePipelineParamRequest, requestConfig?: runtime.TypedQueryConfig<T, Information>): QueryConfig<T> {
+    return updatePipelineParamRaw(requestParameters, requestConfig);
 }
 

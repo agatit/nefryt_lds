@@ -67,6 +67,18 @@ class Pipeline(Base):
     BeginPos = Column(Numeric(10, 2))
 
 
+class PipelineParamDef(Base):
+    __tablename__ = 'PipelineParamDef'
+    __table_args__ = (
+        PrimaryKeyConstraint('ID', name='PipelineParamDef_pk'),
+        {'schema': 'lds'}
+    )
+
+    ID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'))
+    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    DataType = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'))
+
+
 class TrendData(Base):
     __tablename__ = 'TrendData'
     __table_args__ = (
@@ -167,6 +179,23 @@ class PipelineNode(Base):
 
     Node_ = relationship('Node')
     Pipeline_ = relationship('Pipeline')
+
+
+class PipelineParam(Base):
+    __tablename__ = 'PipelineParam'
+    __table_args__ = (
+        ForeignKeyConstraint(['PipelineID'], ['lds.Pipeline.ID'], name='PipelineParamPipeline_fk'),
+        ForeignKeyConstraint(['PipelineParamDefID'], ['lds.PipelineParamDef.ID'], ondelete='CASCADE', onupdate='CASCADE', name='PipelineParamPipelineParamDef_fk'),
+        PrimaryKeyConstraint('PipelineParamDefID', 'PipelineID', name='PipelineParam_pk'),
+        {'schema': 'lds'}
+    )
+
+    PipelineParamDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
+    PipelineID = Column(Integer, nullable=False)
+    Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+
+    Pipeline_ = relationship('Pipeline')
+    PipelineParamDef_ = relationship('PipelineParamDef')
 
 
 class Trend(Base):

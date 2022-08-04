@@ -162,8 +162,6 @@ def list_nodes():  # noqa: E501
             select([ln, en]).outerjoin(en, en.c.ID == ln.c.ID )
         ).fetchall()
 
-        print(nodes)
-
         if nodes is None:
             return Error(message="Not Found", code=500), 404
 
