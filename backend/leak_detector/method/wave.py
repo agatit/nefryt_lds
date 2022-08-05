@@ -1,7 +1,10 @@
 import logging
+from os import times_result
 from typing import List
 
-from .base import MethodBase
+import numpy
+
+from .base import MethodBase, Segment
 from ..plant import Event
 
 
@@ -17,15 +20,25 @@ class MethodWave(MethodBase):
             self._pressure_deriv_trends.append(pipeline.plant.trends[int(trend_id)])
         # etc.
 
-        # podział na segmenty (jeśli zaimplementujemy więcej niż dwa trendy na metodę)
-        # może zamiast PRESSURE_DERIV_TREND zrobić PRESSURE_DERIV_LIST z ID trendów oddzielonych przecinkami...
+        self._max_level = float(self._params['MAX_LEVEL'])
+        self._min_level = float(self._params['MIN_LEVEL'])
+        self._alarm_level = float(self._params['ALARM_LEVEL'])
 
-        # wyznacznie odległości pomiędzy pomiarami
-        # segment[0].length = ...
+        # podział na segmenty (jeśli zaimplementujemy więcej niż dwa trendy na metodę)
+        self.create_segments()
         
 
-    def get_probablity(self, timestamp) -> List[float]:
+    def create_segments(self) -> None:
+        self._segments = []
+        previous_trend = None
+        for current_trend in self._pressure_deriv_trends:
+            if (previous_trend is not None):
+                self._segments.append(Segment(self._pipeline.plant, previous_trend, current_trend))
+            previous_trend = current_trend
+        
 
+    #Dodałem parametr dot. czasu sprawdzanego wycieku
+    def get_probability(self, begin, end, step) -> List[float]:
         # probability = [[]]
         #dla każdego segmentu:
             #dla każdej rozpatrywanej chwili w czasie (current_time):
@@ -42,7 +55,47 @@ class MethodWave(MethodBase):
                     #
                     # normalizacja na podstawie parametrów min, max i alarm metody 
                     # wave_speed docelowo powinno być funkcją składającą śrendią prędkość na podstawie danych z nodów i linków
-        pass
+
+        #Powinna być jakaś funkcja która to liczy
+        wave_speed = 1000 
+        
+        data_start = data_end = None
+        
+        probability = []
+
+        for segment in self._segments:
+
+            # W trakcie pobrania danych musi być jakieś okienko, ze względu na opóźnienie fali
+            window_begin = begin - 40
+            window_end = end + 40
+
+            #Tylko jedne zapytanie na trend do bazy danych
+            if data_start is None:    
+                data_start = segment.start.get_trend_data(window_begin, window_end)
+            
+            data_end = segment.end.get_trend_data(window_begin, window_end)
+            for current_time in range(begin, end, step): #skok o step czy o time_resolution?
+                probability_row = []
+
+                for current_pos in range(0, segment.length, self._pipeline.length_resolution):
+                    l1 = current_pos
+                    l2 = segment.length - l1
+                    offset1 = int(l1/wave_speed * 100)
+                    offset2 = int(l2/wave_speed * 100)
+                    start = current_time - window_begin
+                    dp1 = min(0, data_start[start - offset1])
+                    dp2 = min(0, data_end[start - offset2])
+                    dp3 = min(0, data_start[start + offset1])
+                    dp4 = min(0, data_end[start + offset2])
+                    res = dp1 + dp2 - dp3 - dp4
+                    res = (res - self._min_level) / (self._max_level - self._min_level)
+                    probability_row.append(res)
+
+                probability.append(probability_row)
+        
+            data_start = data_end
+
+        return probability
 
 
     def find_leaks_in_range(self, begin, end) -> List[Event]:

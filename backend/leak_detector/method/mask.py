@@ -11,5 +11,5 @@ class MethodMask(MethodBase):
         # skopiowanie specyficznych parametrów metody:
 
 
-    def get_probablity(self, timestamp, step) -> List[float]:
+    def get_probability(self, timestamp, step) -> List[float]:
         pass    

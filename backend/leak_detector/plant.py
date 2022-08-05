@@ -85,16 +85,26 @@ class Pipeline:
     def plant(self) -> dict:
         return self._plant
 
+    @property
+    def methods(self) -> dict:
+        return self._methods
 
-    def get_probablity(self, timestamp, step) -> List[float]:
+
+    # Tu chyba powinien być słownik aby wiedzieć jaka metoda zwraca jakie prawdopodobieństwo
+    def get_probability(self, begin, end, step) -> List[float]:
         result = []
-        for method in self.methods:
-            result.append(method.get_probablity(timestamp, step))
+        for method in self.methods.values():
+            #id = 20 to trend typu WAVE
+            if (method._id == 20):
+                probs = method.get_probability(begin, end, step)
+                result.append(probs)
+        return result
+
 
 
     def find_leaks_in_range(self, begin, end, time_resolution, length_resolution) -> List[Event]:
         """ Wersja bezstanowa, wykrywająca wycieki w zadanym przedziale czasowym
-            wykonuje metodę get_probablity() dla każdej aktywnej metody
+            wykonuje metodę get_probability() dla każdej aktywnej metody
             zawsze zwraca alarmy, które wykryła w zadanym okresie czasowym
         """
         pass
@@ -145,7 +155,7 @@ class Plant:
 
         stmt = select(lds.Trend)
         for trend, in global_session.execute(stmt):
-            self._trends[trend.ID] = Trend(trend.ID)            
+            self._trends[trend.ID] = Trend(trend.ID, trend.NodeID)            
 
 
     def _build_pipelines(self) -> None:
@@ -174,10 +184,13 @@ class Plant:
         return self._trends
 
 
-    def get_distances(self, node1: Node, node2: Node, visited) -> List[int]:
+    def get_distances(self, node1: Node, node2: Node, visited=None) -> List[int]:
         """ Zwraca listę odległości między dwoma węzłami, różnymi drogami
             implementacja rekursywna
         """
+        if (visited is None):
+            visited = set()
+            
         if (node1 == node2):
             return [0]
 
@@ -185,8 +198,8 @@ class Plant:
         visited.add(node1)
         for link in self.links.values():
             if (link.begin_node == node1 and link.end_node not in visited):
-                distances.extend([link.length + dist for dist in self.get_distances(link.end_node, node2, copy.copy(visited))])
+                distances.extend([int(link.length + dist) for dist in self.get_distances(link.end_node, node2, copy.copy(visited))])
                 
             if (link.end_node == node1 and link.begin_node not in visited):
-                distances.extend([link.length + dist for dist in self.get_distances(link.begin_node, node2, copy.copy(visited))])        
+                distances.extend([int(link.length + dist) for dist in self.get_distances(link.begin_node, node2, copy.copy(visited))])        
         return distances
