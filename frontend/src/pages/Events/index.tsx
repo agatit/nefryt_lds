@@ -15,11 +15,16 @@ import { useSort } from '@table-library/react-table-library/sort';
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { EventsState } from "./type";
 import { RootState } from "../../";
-import { getData } from "../../actions/events/actions";
+import { getData, setData } from "../../actions/events/actions";
+import { listEvents } from "../../apis";
+import { useRequest } from "redux-query-react";
+import { getEntities, getQueries } from "../../store";
 
 const EventsPage: React.FC = () => {
  //var data:any = [{url:'aaa', title:'bbb', created_at:'ccc', points:'ddd', num_components:'ff' }];
 
+ const queries = useSelector(getQueries) || [];
+ const entities = useSelector(getEntities) || [];
 
  const theme = useTheme([
   getTheme(),
@@ -76,11 +81,36 @@ const reducer: EventsState = useSelector(
 )
 
 
-let data:any =reducer.table.data;
+let data:any =reducer.table;
+
+
+
+var queryEventList = listEvents({
+  queryKey: 'events_data',
+   transform: (data) => {
+       return {
+        events_data: data,
+       };
+   },
+   update: {
+    events_data: (oldValue: any, newValue: any) => {
+       return (oldValue=newValue);
+     },
+   }
+  }
+);
+
+const [EventsListState] = useRequest(queryEventList);
+
+
+if ((reducer.is_loading) && (EventsListState.isFinished)){
+  console.log('aaaaa');
+  dispatch(setData(entities.events_data));
+}
 
 
 React.useEffect(() => {
-
+  //dispatch(getData(null));
  
 });
 
@@ -138,8 +168,8 @@ function onSortChange(action:any, state:any) {
 
  
  const COLUMNS = [
-  { label: 'Task', renderCell: (item:any) => item.name,resize: true, sort: { sortKey: 'TASK' } },
-  {
+  { label: 'caption', renderCell: (item:any) => item.name,resize: true, sort: { sortKey: 'caption' } },
+  /*{
     label: 'Deadline',
     renderCell: (item:any) =>
       item.deadline.toLocaleDateString('en-US', {
@@ -157,6 +187,7 @@ function onSortChange(action:any, state:any) {
     resize: true,
   },
   { label: 'Tasks', renderCell: (item:any) => item.nodes?.length , resize: true, sort: { sortKey: 'Tasks' } },
+  */
  ];
 
   return (

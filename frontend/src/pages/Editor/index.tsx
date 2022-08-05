@@ -188,6 +188,24 @@ const handleSubmitAreaEditor  = (e: any ) => {
   dispatch(cancelNodeAction());
 
 }
+
+  
+const handleSubmitNewNode  = (e: any ) => {
+  console.log(e);
+/*
+  var node : INode = {NodeID : -1,
+    type : form.elements.Type.value,
+    Name : form.elements.Name.value,
+    positionX:0,
+    positionY:0,
+    TrendDef : { } 
+  }
+*/
+  //dispatch(createNode(node));
+
+  //dispatch(reset('EditorAreaSettings'));  // requires form name
+  //dispatch(cancelNodeAction());
+}
   
   return (
     <div className={'root'}>
@@ -203,7 +221,7 @@ const handleSubmitAreaEditor  = (e: any ) => {
             <PipelineEditorWorkspace editorState={state} action={action} acctiveNode={activeNode} ></PipelineEditorWorkspace>
           
           </div>
-          <NewNodeForm ></NewNodeForm>
+          <NewNodeForm onSubmit={handleSubmitNewNode} ></NewNodeForm>
           <EditorAreaSettings onSubmit={handleSubmitAreaEditor} ></EditorAreaSettings>
           <div id="mySidepanel" className={sidepanelClasses}>
           <NodePropertyEditor  ></NodePropertyEditor>

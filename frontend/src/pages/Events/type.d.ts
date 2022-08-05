@@ -9,10 +9,11 @@ export type IEventsAction ={
 
 
 export type EventsState = {
-    table : EventParams
+    table : EventParams,
+    is_loading:boolean
 }
 
 export type EventParams = {
-    data: any,
+    nodes: any,
     pageInfo: any
   }

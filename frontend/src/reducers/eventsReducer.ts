@@ -1,5 +1,5 @@
 import { getData } from "../actions/events/actions";
-import { GET_DATA } from "../actions/events/actionType";
+import { GET_DATA, SET_DATA } from "../actions/events/actionType";
 import { EventsState, IEventsAction } from "../pages/Events/type";
 //import { getDefaultMiddleware } from '@reduxjs/toolkit';
 
@@ -36,13 +36,11 @@ function getGridData(params:any): any {
 }
 
 
-
-
-
 const initialState: EventsState = {
-    table: {data  :   getGridData(null),
+    table: {nodes  :   [],
       pageInfo: null
-    }
+    },
+    is_loading : true
   }
 
 
@@ -53,11 +51,18 @@ const eventsReducer = (
   ): EventsState => {
 
     switch (action.type) {
-        case GET_DATA:{
-          var data = getGridData(action.data);
+        case SET_DATA:{
+          //var data = getGridData(action.data);
+          console.log(action.data);
           return {
             ...state,
-            table: {data: data, pageInfo:state.table.pageInfo}
+            table: {nodes: action.data, pageInfo:state.table.pageInfo}, is_loading:false
+          }
+        }
+        case GET_DATA:{
+          return {
+            ...state,
+            table: state.table, is_loading:true
           }
         }
         

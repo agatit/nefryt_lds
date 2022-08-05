@@ -1,0 +1,28 @@
+.root {
+   /* border:1px solid black;*/
+}
+.root > div {
+    height:50%;
+    box-sizing:border-box;
+    -moz-box-sizing:border-box;
+}
+
+#dashboard-left {
+    float:left;
+    width: 50%;
+    padding:10px!important;
+   /* border-right:1px solid black;*/
+}
+#dashboard-right {
+    
+    float:right;
+    width: 50%;
+    padding:10px!important;
+    padding-right: 48px!important;
+}
+#dashboard-bottom {
+   /* border-top:1px solid black;*/
+    clear: both;
+    padding:10px!important;
+    padding-right: 48px!important;
+}

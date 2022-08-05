@@ -15,7 +15,8 @@ export type EntitiesState = {
   trends_live_data: TrendData[],
   trends_list:Trend[],
   pipeline_list:Pipeline[],
-  node_list : Array<Node>
+  node_list : Array<Node>,
+  events_data: Array<Event>
 }
 
 export const getQueries = (state: { queries: QueriesState; }) => state.queries;

@@ -1,7 +1,7 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import { IEventsAction } from "../../pages/Events/type";
-import { GET_DATA } from "./actionType";
+import { GET_DATA, SET_DATA } from "./actionType";
 
 /*
 const users=['James','Michael','Harry','Sam','Dubby']
@@ -57,6 +57,15 @@ export function getData(params:any) {
   const action: IEventsAction = {
     type: GET_DATA,
     data : params
+  }
+  return action;
+}
+
+export function setData(data:any) {
+ 
+  const action: IEventsAction = {
+    type: SET_DATA,
+    data : data
   }
   return action;
 }

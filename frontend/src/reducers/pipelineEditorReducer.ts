@@ -251,18 +251,20 @@ const editorReducer = (
           var nodeList : INode [] = [];
            
           var idx=0;
-          nds.forEach((element: Node) => {
-            var nodeElement : INode = {
-              NodeID: element.iD,
-              type: element.type,
-              Name: element.name? element.name : "",
-              positionX: element.editorParams? element.editorParams.posX : 100,
-              positionY: element.editorParams? element.editorParams.posY : 100,
-              TrendDef: {}
-            };
-            nodeList.push(nodeElement);
-            idx++;
-          });
+          if (nds){
+            nds.forEach((element: Node) => {
+              var nodeElement : INode = {
+                NodeID: element.iD,
+                type: element.type,
+                Name: element.name? element.name : "",
+                positionX: element.editorParams? element.editorParams.posX : 100,
+                positionY: element.editorParams? element.editorParams.posY : 100,
+                TrendDef: {}
+              };
+              nodeList.push(nodeElement);
+              idx++;
+            });
+          }
   
           return {
             ...state,

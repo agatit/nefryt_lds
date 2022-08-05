@@ -19,9 +19,11 @@ import { INode } from "./type";
     </div>
   )
 
-
-
-const NewNodeForm: React.FC = () => {
+  type p = {
+    handleSubmit : any; 
+    }
+ 
+const NewNodeForm: React.FC<p> = (a:p) => {
   const dispatch: Dispatch<any> = useDispatch()
   const isOpen: boolean = useSelector(
     (state: RootState) => state.pipelineEditorReducer.action.type == NEW_NODE,
@@ -32,10 +34,12 @@ const NewNodeForm: React.FC = () => {
 const handleCancel  = (e: React.MouseEvent<HTMLElement>) => {
   dispatch(cancelNodeAction());
 }
-
+/*
 const handleSubmit  = (e: any ) => {
   e.preventDefault();
   const form = e.currentTarget;
+
+  console.log(form);
 
   var node : INode = {NodeID : -1,
     type : form.elements.Type.value,
@@ -46,11 +50,12 @@ const handleSubmit  = (e: any ) => {
   }
 
   dispatch(createNode(node));
-}
+
+}*/
 
   return (
     <Modal isOpen={isOpen} >
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={a.handleSubmit}>
         <ModalHeader>
           Nowy węzeł
         </ModalHeader>
