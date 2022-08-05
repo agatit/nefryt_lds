@@ -16,6 +16,8 @@ from api.models.method_param_def import MethodParamDef
 from api.models.node import Node
 from api.models.pipeline import Pipeline
 from api.models.pipeline_node import PipelineNode
+from api.models.pipeline_param import PipelineParam
+from api.models.pipeline_param_def import PipelineParamDef
 from api.models.trend import Trend
 from api.models.trend_data import TrendData
 from api.models.trend_def import TrendDef

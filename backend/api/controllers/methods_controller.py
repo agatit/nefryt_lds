@@ -1,126 +1,283 @@
 import connexion
-import six
-from typing import Dict
-from typing import Tuple
-from typing import Union
 
 from api.models.error import Error  # noqa: E501
 from api.models.information import Information  # noqa: E501
 from api.models.method import Method  # noqa: E501
 from api.models.method_param import MethodParam  # noqa: E501
+from api.models.method_def import MethodDef  # noqa: E501
 from api import util
 
+from sqlalchemy import alias, select, and_
+from ..db import session
+from database.models import lds
 
-def create_method(pipeline_id, method=None):  # noqa: E501
-    """Creates method
 
-    Creates a  method # noqa: E501
+def create_method(method=None):  # noqa: E501
+    """Create method
 
-    :param pipeline_id: The id of the pipeline to retrieve
-    :type pipeline_id: int
+    Create a method # noqa: E501
+
     :param method: 
     :type method: dict | bytes
 
-    :rtype: Union[Method, Tuple[Method, int], Tuple[Method, int, Dict[str, str]]
+    :rtype: Information
     """
+
     if connexion.request.is_json:
-        method = Method.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+        api_method = Method.from_dict(connexion.request.get_json())  # noqa: E501
+    try:
+        if connexion.request.is_json:
+            method = Method.from_dict(connexion.request.get_json())  # noqa: E501
+        else:
+            return Error(message="Expected a JSON request", code=400), 400
+
+        db_method = lds.Method()
+
+        db_method.Name = api_method.name
+        db_method.MethodDefID = api_method.method_def_id  
+        session.add(db_method)
+        
+        session.commit()
+
+        return get_method_by_id(db_method.ID)
+
+    except Exception as e:
+        error: Error = Error(message=str(e), code=500)
+        return error, 500   
 
 
 def delete_method_by_id(pipeline_id, method_id):  # noqa: E501
-    """Deletes  method
+    """Deletes method
 
-    Deletes specific  method # noqa: E501
+    Deletes specific method # noqa: E501
 
-    :param pipeline_id: The id of the pipeline to retrieve
-    :type pipeline_id: int
-    :param method_id: The id of the pipeline method to retrieve
+    :param method_id: The id of the method to retrieve
     :type method_id: int
 
-    :rtype: Union[Information, Tuple[Information, int], Tuple[Information, int, Dict[str, str]]
+    :rtype: Information
     """
-    return 'do some magic!'
+    try:        
+        db_method = session.get(lds.Method, method_id)
+        if db_method is None:
+            return Error(message="Not Found", code=404), 404
+        session.delete(db_method)
+        session.commit()
+
+        return Information(message="Success", status=200), 200
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500
 
 
 def get_method_by_id(pipeline_id, method_id):  # noqa: E501
-    """Gets  method details
+    """Detail method
 
-    Info for specific  method # noqa: E501
+    Info for specific method # noqa: E501
 
-    :param pipeline_id: The id of the pipeline to retrieve
-    :type pipeline_id: int
-    :param method_id: The id of the pipeline method to retrieve
+    :param method_id: The id of the method to retrieve
     :type method_id: int
 
-    :rtype: Union[Method, Tuple[Method, int], Tuple[Method, int, Dict[str, str]]
+    :rtype: Method
     """
-    return 'do some magic!'
+    try:
+        db_method = session.get(lds.Method, method_id)
+        if db_method is None:
+            return Error(message="Not Found", code=404), 404
 
+        api_method = Method()
+        api_method.id = db_method.ID
+        api_method.name = db_method.Name
+        api_method.method_def_id = db_method.MethodDefID.strip()
+        return api_method, 200
 
-def list_method_params(pipeline_id, method_id):  # noqa: E501
-    """List pipelnie method params
-
-    List all  method params # noqa: E501
-
-    :param pipeline_id: The id of the pipeline to retrieve
-    :type pipeline_id: int
-    :param method_id: The id of the pipeline method to retrieve
-    :type method_id: int
-
-    :rtype: Union[List[MethodParam], Tuple[List[MethodParam], int], Tuple[List[MethodParam], int, Dict[str, str]]
-    """
-    return 'do some magic!'
-
-
-def list_methods(pipeline_id):  # noqa: E501
-    """List pipelnie methods
-
-    List all methods # noqa: E501
-
-    :param pipeline_id: The id of the pipeline to retrieve
-    :type pipeline_id: int
-
-    :rtype: Union[List[Method], Tuple[List[Method], int], Tuple[List[Method], int, Dict[str, str]]
-    """
-    return 'do some magic!'
+    except Exception as e:
+        return Error(message=str(e), code=500), 500
 
 
 def update_method(pipeline_id, method_id, method=None):  # noqa: E501
-    """Updates method
+    """Update method
 
-    Updates  method # noqa: E501
+    Update a method # noqa: E501
 
-    :param pipeline_id: The id of the pipeline to retrieve
-    :type pipeline_id: int
-    :param method_id: The id of the pipeline method to retrieve
-    :type method_id: int
     :param method: 
     :type method: dict | bytes
 
-    :rtype: Union[Method, Tuple[Method, int], Tuple[Method, int, Dict[str, str]]
+    :rtype: Information
     """
-    if connexion.request.is_json:
-        method = Method.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+    try:
+        if connexion.request.is_json:
+            api_method = Method.from_dict(connexion.request.get_json())  # noqa: E501
+        else:
+            return Error(message="Expected a JSON request", code=400), 400
+
+        db_method = session.get(lds.Method, method_id)
+        if db_method is None:
+            return Error(message="Not Found", code=404), 404
+
+        db_method.Name = api_method.name
+        db_method.MethodDefID = api_method.method_def_id
+        session.add(db_method)
+
+        session.commit()
+
+        return get_method_by_id(db_method.ID)
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500  
 
 
-def update_method_params(pipeline_id, method_id, method_param_def_id, method_param=None):  # noqa: E501
-    """Put pipelnie method params
+def list_methods(pipeline_id):  # noqa: E501
+    """List methods
 
-    Put  method params # noqa: E501
+    List all methods # noqa: E501
 
-    :param pipeline_id: The id of the pipeline to retrieve
-    :type pipeline_id: int
-    :param method_id: The id of the pipeline method to retrieve
+
+    :rtype: List[Method]
+    """
+    try:
+        stmt = select(lds.Method).where(lds.Method.PipelineID == pipeline_id)
+        db_methods = session.execute(stmt)
+
+        api_methods = []
+        for db_method, in db_methods:
+            api_method = Method()
+            api_method.id = db_method.ID
+            api_method.name = db_method.Name
+            api_method.method_def_id = db_method.MethodDefID.strip()
+            api_methods.append(api_method)        
+
+        return api_methods, 200
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500
+
+
+def get_method_param_by_id(pipeline_id, method_id, method_param_def_id):  # noqa: E501
+    """Gets method param detail
+
+    Info for specific method param # noqa: E501
+
+    :param method_id: The id of the method to retrieve
     :type method_id: int
-    :param method_param_def_id: The id of the param to retrieve
-    :type method_param_def_id: str
-    :param method_param: 
-    :type method_param: list | bytes
+    :param param_id: The id of the param to retrieve
+    :type param_id: int
 
-    :rtype: Union[Information, Tuple[Information, int], Tuple[Information, int, Dict[str, str]]
+    :rtype: MethodParam
     """
-    if connexion.request.is_json:
-        method_param = [MethodParam.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
-    return 'do some magic!'
+    try:
+        db_method_param = session.get(lds.MethodParam, (method_param_def_id, method_id))
+        if db_method_param is None:
+            return Error(message="Not Found", code=404), 404
+
+        api_method_param = MethodParam()
+        api_method_param.method_id = db_method_param.MethodID
+        api_method_param.method_param_def_id = db_method_param.MethodParamDefID.strip()
+        api_method_param.value = db_method_param.Value
+
+        return api_method_param, 200
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500
+
+
+def list_method_params(pipeline_id, method_id):  # noqa: E501
+    """List method params
+
+    List all method params # noqa: E501
+
+    :param method_id: The id of the method to retrieve
+    :type method_id: int
+
+    :rtype: List[MethodParam]
+    """
+
+    try:
+        # select t.ID, tpd.ID, tpd.Name, tp.Value, tpd.DataType
+        #    from lds.Method t
+        #    left join lds.MethodParamDef tpd on t.MethodDefID = tpd.MethodDefID
+        #    left join lds.MethodParam tp on tpd.ID = tp.MethodParamDefID and t.ID = tp.MethodID
+        # where
+        #     t.ID = 101
+
+        tp = alias(lds.MethodParam, "tp")
+        t = alias(lds.Method, "t")
+        tpd = alias(lds.MethodParamDef, "tpd")
+        
+        stmt = select(t.c.ID.label("MethodID"), tpd.c.ID.label("MethodParamDefID"), tpd.c.Name, tp.c.Value, tpd.c.DataType) \
+            .select_from(t) \
+            .outerjoin(tpd, t.c.MethodDefID == tpd.c.MethodDefID ) \
+            .outerjoin(tp, and_(tpd.c.ID == tp.c.MethodParamDefID, t.c.ID == tp.c.MethodID)) \
+            .where(t.c.ID == method_id)
+
+        db_method_params = session.execute(stmt)
+
+        api_method_params = []
+        for db_method_param in db_method_params:
+            api_method_param = MethodParam()
+            api_method_param.method_id = db_method_param.MethodID
+            api_method_param.method_param_def_id = db_method_param.MethodParamDefID.strip()
+            api_method_param.value = db_method_param.Value
+            api_method_param.name = db_method_param.Name
+            api_method_param.data_type = db_method_param.DataType.strip()
+            api_method_params.append(api_method_param)
+
+        return api_method_params, 200
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500
+
+
+def update_method_param(pipeline_id, method_id, method_param_def_id, method_param=None):  # noqa: E501
+    """Update method params
+
+    Updates method param # noqa: E501
+
+    :param method_id: The id of the method to retrieve
+    :type method_id: int
+    :param method_param: 
+    :type method_param: dict | bytes
+
+    :rtype: Information
+    """
+    try:
+        if connexion.request.is_json:
+            api_method_param = MethodParam.from_dict(connexion.request.get_json())  # noqa: E501
+
+        db_method_param = session.get(lds.MethodParam, (method_param_def_id, method_id))
+        if db_method_param is None:
+            return Error(message="Not Found", code=404), 404
+
+        
+        db_method_param.Value = api_method_param.value
+        session.add(db_method_param)
+
+        session.commit()
+
+        return get_method_param_by_id(db_method_param.MethodID, db_method_param.MethodParamDefID)
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500          
+
+
+def list_method_defs():  # noqa: E501
+    """List methods
+
+    List all methods # noqa: E501
+
+
+    :rtype: List[Method]
+    """
+    try:
+        methods = session.execute(select(lds.MethodDef))
+
+        api_methods = []
+        for method, in methods:
+            api_method = MethodDef()
+            api_method.id = method.ID.strip()
+            api_method.name = method.Name
+            api_methods.append(api_method)        
+
+        return api_methods, 200
+
+    except Exception as e:
+        return Error(message=str(e), code=500), 500    

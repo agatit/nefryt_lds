@@ -11,6 +11,8 @@ export * from './ModelError';
 export * from './Node';
 export * from './Pipeline';
 export * from './PipelineNode';
+export * from './PipelineParam';
+export * from './PipelineParamDef';
 export * from './Trend';
 export * from './TrendData';
 export * from './TrendDef';

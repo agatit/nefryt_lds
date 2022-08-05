@@ -1,0 +1,55 @@
+get:
+  summary: Gets link details
+  operationId: getLinkById
+  description: Info for specific link
+  tags:
+    - links
+  parameters:
+    - $ref: "../parameters/path/linkId.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Link.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+put:
+  summary: Updates links
+  operationId: updateLink
+  description: Updates a links
+  tags:
+    - links
+  parameters:
+    - $ref: "../parameters/path/linkId.yaml"    
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Link.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Link.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"  
+
+delete:
+  summary: Deletes link
+  operationId: deleteLinkById
+  description: Deletes specific link
+  tags:
+    - links
+  parameters:
+    - $ref: "../parameters/path/linkId.yaml"
+  responses:
+    "204":
+      $ref: "../responses/Deleted.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+

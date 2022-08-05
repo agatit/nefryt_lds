@@ -1,6 +1,6 @@
 put:
   summary: Put pipelnie method params
-  operationId: updateMethodParams
+  operationId: updateMethodParam
   description: Put  method params
   tags:
     - methods

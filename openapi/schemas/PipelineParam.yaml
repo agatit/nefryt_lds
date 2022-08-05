@@ -1,0 +1,29 @@
+# schemas/orm/PipelineParam.yaml
+type: object
+required:
+  - PipelineID
+properties:
+  PipelineID:
+    type: integer
+    nullable: false
+    description: none
+    example: 0
+  PipelineParamDefID:
+    type: integer
+    nullable: false
+    description: none
+    example: 0
+  DataType:
+    type: string
+    # any char with length 0-6 only
+    pattern: ^.{0,6}
+    description: none
+  Name:
+    type: string
+    # any char with length 0-30 only
+    pattern: ^.{0,30}
+    description: none
+  Value:
+    type: string
+    pattern: ^.{0,30}
+    description: none

@@ -92,6 +92,131 @@ paths:
       tags:
       - events
       x-openapi-router-controller: api.controllers.events_controller
+  /link:
+    get:
+      description: List all links
+      operationId: list_links
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Link'
+                type: array
+          description: A array of links
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List links
+      tags:
+      - links
+      x-openapi-router-controller: api.controllers.links_controller
+    post:
+      description: Create a links
+      operationId: create_link
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Link'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create links
+      tags:
+      - links
+      x-openapi-router-controller: api.controllers.links_controller
+  /link/{linkId}:
+    delete:
+      description: Deletes specific link
+      operationId: delete_link_by_id
+      parameters: []
+      responses:
+        "204":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Information'
+          description: Deleted
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes link
+      tags:
+      - links
+      x-openapi-router-controller: api.controllers.links_controller
+    get:
+      description: Info for specific link
+      operationId: get_link_by_id
+      parameters:
+      - description: The id of the link to retrieve
+        explode: false
+        in: path
+        name: linkId
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets link details
+      tags:
+      - links
+      x-openapi-router-controller: api.controllers.links_controller
+    put:
+      description: Updates a links
+      operationId: update_link
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Link'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Updates links
+      tags:
+      - links
+      x-openapi-router-controller: api.controllers.links_controller
   /node:
     get:
       description: List all nodes
@@ -140,7 +265,7 @@ paths:
       tags:
       - nodes
       x-openapi-router-controller: api.controllers.nodes_controller
-  /node/{nodeId}:
+  /node/{linkId}:
     delete:
       description: Deletes specific node
       operationId: delete_node_by_id
@@ -600,7 +725,7 @@ paths:
   /pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}:
     put:
       description: Put  method params
-      operationId: update_method_params
+      operationId: update_method_param
       parameters:
       - description: The id of the pipeline to retrieve
         explode: false
@@ -650,6 +775,83 @@ paths:
       tags:
       - methods
       x-openapi-router-controller: api.controllers.methods_controller
+  /pipeline/{pipelineId}/param:
+    get:
+      description: List all  pipeline params
+      operationId: list_pipeline_params
+      parameters:
+      - description: The id of the pipeline to retrieve
+        explode: false
+        in: path
+        name: pipelineId
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PipelineParam'
+                type: array
+          description: A array of  pipelines params
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List pipelnie pipeline params
+      tags:
+      - pipelines
+      x-openapi-router-controller: api.controllers.pipelines_controller
+  /pipeline/{pipelineId}/param/{methodParamDefId}:
+    put:
+      description: Put  pipeline params
+      operationId: update_pipeline_param
+      parameters:
+      - description: The id of the pipeline to retrieve
+        explode: false
+        in: path
+        name: pipelineId
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: The id of the param to retrieve
+        explode: false
+        in: path
+        name: pipelineParamDefId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/PipelineParam'
+              type: array
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Information'
+          description: Updated
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Put pipelnie pipeline params
+      tags:
+      - pipelines
+      x-openapi-router-controller: api.controllers.pipelines_controller
   /trend:
     get:
       description: List all trends
@@ -1141,24 +1343,34 @@ components:
       description: Deleted
   schemas:
     Link:
+      example:
+        BeginNodeID: 0
+        Length: 1.4658129805029452
+        ID: 0
+        EndNodeID: 6
       properties:
         ID:
           description: none
           example: 0
           nullable: false
           readOnly: true
+          title: ID
           type: integer
         BeginNodeID:
           description: none
+          title: BeginNodeID
           type: integer
         EndNodeID:
           description: none
+          title: EndNodeID
           type: integer
         Length:
           description: none
+          title: Length
           type: number
       required:
       - ID
+      title: Link
       type: object
     Method:
       example:
@@ -1185,7 +1397,7 @@ components:
           type: integer
         Name:
           example: Arthur Dent
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
       required:
@@ -1204,7 +1416,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           type: string
       required:
       - ID
@@ -1237,17 +1449,17 @@ components:
           type: integer
         DataType:
           description: none
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: DataType
           type: string
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         Value:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Value
           type: string
       required:
@@ -1268,11 +1480,11 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           type: string
         DataType:
           description: none
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           type: string
       required:
       - ID
@@ -1296,7 +1508,7 @@ components:
         Type:
           description: none
           nullable: false
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: Type
           type: string
         TrendID:
@@ -1306,7 +1518,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,50}"
+          pattern: ^.{0,50}
           title: Name
           type: string
         EditorParams:
@@ -1336,7 +1548,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         BeginPos:
@@ -1348,6 +1560,67 @@ components:
       required:
       - ID
       title: Pipeline
+      type: object
+    PipelineParam:
+      example:
+        PipelineParamDefID: 0
+        Value: Value
+        PipelineID: 0
+        DataType: DataType
+        Name: Name
+      properties:
+        PipelineID:
+          description: none
+          example: 0
+          nullable: false
+          title: PipelineID
+          type: integer
+        PipelineParamDefID:
+          description: none
+          example: 0
+          nullable: false
+          title: PipelineParamDefID
+          type: integer
+        DataType:
+          description: none
+          pattern: ^.{0,6}
+          title: DataType
+          type: string
+        Name:
+          description: none
+          pattern: ^.{0,30}
+          title: Name
+          type: string
+        Value:
+          description: none
+          pattern: ^.{0,30}
+          title: Value
+          type: string
+      required:
+      - PipelineID
+      title: PipelineParam
+      type: object
+    PipelineParamDef:
+      properties:
+        ID:
+          description: none
+          example: 0
+          nullable: false
+          readOnly: true
+          type: integer
+        PipelineDefID:
+          description: none
+          type: integer
+        Name:
+          description: none
+          pattern: ^.{0,30}
+          type: string
+        DataType:
+          description: none
+          pattern: ^.{0,6}
+          type: string
+      required:
+      - ID
       type: object
     PipelineNode:
       properties:
@@ -1392,7 +1665,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         TrendGroupID:
@@ -1477,7 +1750,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         TimeExponent:
@@ -1486,12 +1759,12 @@ components:
           type: integer
         Format:
           description: none
-          pattern: "^.{0,20}"
+          pattern: ^.{0,20}
           title: Format
           type: string
         SIUnitTID:
           description: none
-          pattern: "^.{0,8}"
+          pattern: ^.{0,8}
           title: SIUnitTID
           type: string
       required:
@@ -1512,7 +1785,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,100}"
+          pattern: ^.{0,100}
           type: string
         AnalisisOnly:
           description: none
@@ -1540,17 +1813,17 @@ components:
           title: TrendParamDefID
           type: string
         Name:
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           readOnly: true
           title: Name
           type: string
         DataType:
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           readOnly: true
           title: DataType
           type: string
         Value:
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Value
           type: string
       required:
@@ -1573,11 +1846,11 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           type: string
         DataType:
           description: none
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           type: string
       required:
       - ID
@@ -1664,7 +1937,7 @@ components:
         AreaWidth:
           description: none
           nullable: false
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: AreaWidth
           type: integer
         AreaHeight:
@@ -1697,7 +1970,7 @@ components:
         PosX:
           description: none
           nullable: false
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: PosX
           type: integer
         PosY:

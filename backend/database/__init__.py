@@ -1,6 +1,6 @@
 import sqlalchemy as sql
 from sqlalchemy.orm import Session
-from .models import lds, editor
+from .models import lds, editor, obj
 
 session: Session = None
 

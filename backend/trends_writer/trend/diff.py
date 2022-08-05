@@ -2,7 +2,6 @@ from typing import List
 import logging
 import numpy as np
 
-from database import lds
 from ..db import Session
 from . import TrendBase
 

@@ -56,7 +56,7 @@ export interface UpdateMethodRequest {
     method?: Method;
 }
 
-export interface UpdateMethodParamsRequest {
+export interface UpdateMethodParamRequest {
     pipelineId: number;
     methodId: number;
     methodParamDefId: string;
@@ -376,17 +376,17 @@ export function updateMethod<T>(requestParameters: UpdateMethodRequest, requestC
  * Put  method params
  * Put pipelnie method params
  */
-function updateMethodParamsRaw<T>(requestParameters: UpdateMethodParamsRequest, requestConfig: runtime.TypedQueryConfig<T, Information> = {}): QueryConfig<T> {
+function updateMethodParamRaw<T>(requestParameters: UpdateMethodParamRequest, requestConfig: runtime.TypedQueryConfig<T, Information> = {}): QueryConfig<T> {
     if (requestParameters.pipelineId === null || requestParameters.pipelineId === undefined) {
-        throw new runtime.RequiredError('pipelineId','Required parameter requestParameters.pipelineId was null or undefined when calling updateMethodParams.');
+        throw new runtime.RequiredError('pipelineId','Required parameter requestParameters.pipelineId was null or undefined when calling updateMethodParam.');
     }
 
     if (requestParameters.methodId === null || requestParameters.methodId === undefined) {
-        throw new runtime.RequiredError('methodId','Required parameter requestParameters.methodId was null or undefined when calling updateMethodParams.');
+        throw new runtime.RequiredError('methodId','Required parameter requestParameters.methodId was null or undefined when calling updateMethodParam.');
     }
 
     if (requestParameters.methodParamDefId === null || requestParameters.methodParamDefId === undefined) {
-        throw new runtime.RequiredError('methodParamDefId','Required parameter requestParameters.methodParamDefId was null or undefined when calling updateMethodParams.');
+        throw new runtime.RequiredError('methodParamDefId','Required parameter requestParameters.methodParamDefId was null or undefined when calling updateMethodParam.');
     }
 
     let queryParameters = null;
@@ -426,7 +426,7 @@ function updateMethodParamsRaw<T>(requestParameters: UpdateMethodParamsRequest, 
 * Put  method params
 * Put pipelnie method params
 */
-export function updateMethodParams<T>(requestParameters: UpdateMethodParamsRequest, requestConfig?: runtime.TypedQueryConfig<T, Information>): QueryConfig<T> {
-    return updateMethodParamsRaw(requestParameters, requestConfig);
+export function updateMethodParam<T>(requestParameters: UpdateMethodParamRequest, requestConfig?: runtime.TypedQueryConfig<T, Information>): QueryConfig<T> {
+    return updateMethodParamRaw(requestParameters, requestConfig);
 }
 

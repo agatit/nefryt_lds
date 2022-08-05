@@ -32,7 +32,6 @@ def create_node(node=None):  # noqa: E501
 
         db_node = lds.Node()
         db_node.Type = node.type
-        db_node.TrendID = node.trend_id
         db_node.Name = node.name
         session.add(db_node)
         session.flush()
@@ -74,7 +73,6 @@ def update_node(node_id, node=None):  # noqa: E501
             return Error(message="Not Found", code=404), 404
 
         db_node.Type = api_node.type
-        db_node.TrendID = api_node.trend_id
         db_node.Name = api_node.name
         session.add(db_node)
         session.flush()
@@ -135,7 +133,6 @@ def get_node_by_id(node_id):  # noqa: E501
         api_node = Node()
         api_node.id = node.ID
         api_node.type = node.Type
-        api_node.trend_id = node.TrendID
         api_node.name = node.Name
 
         editor_node = session.get(editor.Node, node_id)
@@ -165,8 +162,6 @@ def list_nodes():  # noqa: E501
             select([ln, en]).outerjoin(en, en.c.ID == ln.c.ID )
         ).fetchall()
 
-        print(nodes)
-
         if nodes is None:
             return Error(message="Not Found", code=500), 404
 
@@ -175,7 +170,6 @@ def list_nodes():  # noqa: E501
             api_node = Node()
             api_node.id = node.ID
             api_node.type = node.Type
-            api_node.trend_id = node.TrendID
             api_node.name = node.Name
             if node.ID_1 is not None:
                 api_node.editor_params = EditorNode()

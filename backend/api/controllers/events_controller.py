@@ -80,14 +80,10 @@ def list_events():  # noqa: E501
     :rtype: List[Event]
     """
     try:
-        db_events: list[lds.Event] = session.execute(
-            select(lds.Event)
-                .join(lds.EventDef)
+        stmt = select(lds.Event) \
+                .join(lds.EventDef) \
                 .where(and_(lds.EventDef.Enabled == True, lds.EventDef.Visible == True))
-        ).fetchall()  
-
-        if db_events is None:
-            return Error(message="Not Found", code=500), 404
+        db_events = session.execute(stmt) 
 
         api_events = []
         for db_event, in db_events:
@@ -100,9 +96,9 @@ def list_events():  # noqa: E501
             api_event.ack_date = db_event.AckDate
             api_event.details = db_event.Details
             api_event.position = db_event.Position 
-            api_event.caption = db_event.EventDef.Caption
-            api_event.verbosity = db_event.EventDef.Verbosity
-            api_event.silient = db_event.EventDef.Silent
+            api_event.caption = db_event.EventDef_.Caption
+            api_event.verbosity = db_event.EventDef_.Verbosity
+            api_event.silient = db_event.EventDef_.Silent
 
             api_events.append(api_event)   
 

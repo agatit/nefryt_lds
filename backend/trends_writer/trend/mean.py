@@ -3,7 +3,6 @@ import logging
 import numpy as np
 from scipy import signal
 
-from database import lds
 from . import TrendFilter
 
 

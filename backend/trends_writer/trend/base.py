@@ -11,9 +11,13 @@ from sqlalchemy import select, insert, and_
 from ..db import global_session, Session
 from database import lds
 
-# from typing import TYPE_CHECKING
-# if TYPE_CHECKING:
-#     from . import TrendQuick, TrendBase, TrendMean, TrendDeriv, TrendDiff
+# klasy zapisane stringiem, aby uniknąć cyklicznych importów 
+TREND_CLASSES = {
+    'QUICK': 'TrendQuick',
+    'MEAN': 'TrendMean',
+    'DERIV': 'TrendDeriv',
+    'DIFF': 'TrendDiff'
+}
 
 class TrendBaseMeta(type):
     _objects = {}
@@ -70,13 +74,6 @@ class TrendBase(metaclass=TrendBaseMeta):
 
     def _read_children(self):
 
-        trend_classes = {
-            'QUICK': 'TrendQuick',
-            'MEAN': 'TrendMean',
-            'DERIV': 'TrendDeriv',
-            'DIFF': 'TrendDiff'
-        }
-
         stmt = select([lds.Trend, lds.TrendDef]) \
             .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) \
             .join(lds.TrendParam, lds.TrendParam.TrendID == lds.Trend.ID) \
@@ -84,7 +81,7 @@ class TrendBase(metaclass=TrendBaseMeta):
             .where(and_(lds.TrendParamDef.DataType == 'TREND', lds.TrendParam.Value == self.id))
 
         for trend, trend_def in global_session.execute(stmt):
-            trend_class = getattr(sys.modules["trends_writer.trends"], trend_classes[trend_def.ID.strip()])
+            trend_class = getattr(sys.modules["trends_writer.trends"], TREND_CLASSES[trend_def.ID.strip()])
             trend = trend_class(trend.ID, self.id)
             self.children.append(trend)
 

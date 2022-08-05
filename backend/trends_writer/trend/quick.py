@@ -1,6 +1,5 @@
 import logging
 
-from database import lds
 from . import TrendBase
 
 
