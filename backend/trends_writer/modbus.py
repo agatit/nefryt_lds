@@ -1,14 +1,15 @@
 from socketserver import TCPServer
+
 import umodbus
+import umodbus.server.tcp
 from umodbus.functions import create_function_from_request_pdu
-from umodbus.server.tcp import RequestHandler
-from umodbus.server.tcp import get_server
 
-from .config import config
-from .plant import pipe_plant                           
+from .config import config                        
 
 
-class ModbusRequest(RequestHandler):
+class ModbusRequest(umodbus.server.tcp.RequestHandler):
+    pipe_plant = None
+
     def __init__(self, request, client_address, server):
 
         super().__init__(request, client_address, server)
@@ -24,7 +25,7 @@ class ModbusRequest(RequestHandler):
         request_pdu = self.get_request_pdu(request_adu)
         function = create_function_from_request_pdu(request_pdu)
 
-        pipe_plant.update(function.starting_address, function.values)
+        self.pipe_plant.update(function.starting_address, function.values)
 
         response_pdu = function.create_response_pdu()
         response_adu = self.create_response_adu(meta_data, response_pdu)
@@ -32,8 +33,13 @@ class ModbusRequest(RequestHandler):
         return response_adu
 
 
+def get_server(pipe_plant):
+    umodbus.conf.SIGNED_VALUES = True
+    TCPServer.allow_reuse_address = True
 
-umodbus.conf.SIGNED_VALUES = True
-TCPServer.allow_reuse_address = True
+    ModbusRequest.pipe_plant = pipe_plant
 
-app = get_server(TCPServer, ('', config.get("modbus_port",502)), ModbusRequest)
+    app = umodbus.server.tcp.get_server(TCPServer, ('', config.get("modbus_port", 502)), ModbusRequest)
+
+    return app
+

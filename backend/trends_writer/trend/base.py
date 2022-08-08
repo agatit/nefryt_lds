@@ -80,8 +80,10 @@ class TrendBase(metaclass=TrendBaseMeta):
             .join(lds.TrendParamDef, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID)) \
             .where(and_(lds.TrendParamDef.DataType == 'TREND', lds.TrendParam.Value == self.id))
 
+        # from .. import trend
+
         for trend, trend_def in global_session.execute(stmt):
-            trend_class = getattr(sys.modules["trends_writer.trends"], TREND_CLASSES[trend_def.ID.strip()])
+            trend_class = getattr(sys.modules["trends_writer.trend"], TREND_CLASSES[trend_def.ID.strip()])
             trend = trend_class(trend.ID, self.id)
             self.children.append(trend)
 

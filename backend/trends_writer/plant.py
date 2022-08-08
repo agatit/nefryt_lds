@@ -33,5 +33,3 @@ class PipePlant:
             if trend.register == register:
                 # trend.update(np.array(data), round(time.time()))
                 threading.Thread(target=trend.update, args=(np.array(data), round(time.time()), Session() )).start()
-
-pipe_plant = PipePlant()

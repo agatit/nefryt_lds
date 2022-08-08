@@ -1,9 +1,12 @@
 import logging
-
-from trends_writer import app
+from . import modbus
+from . import plant
 
 
 if __name__ == '__main__':
+
+
+    app = modbus.get_server(plant.PipePlant())
 
     logging.info('Server started\n')
     try:
