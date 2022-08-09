@@ -12,11 +12,9 @@ class Trend:
         self.id = id
         self.node_id = node_id
 
-    #Poprawiona wersja, ale można jeszcze sprawdzić, funkcja zawsze zwraca taką samą ilość danych
-
-
     def get_trend_data(self, begin, end) -> List[float]:
-
+        begin = begin // 1000
+        end = end // 1000
         # reading trends definitions neccessary for scaling
         trend_def, = global_session.execute(select(lds.Trend).where(lds.Trend.ID == self.id)).fetchone()
 
@@ -48,11 +46,11 @@ class Trend:
                     one_second_data = struct.unpack("h"*100, db_data.Data)
 
                 # skalowanie
-                for raw_value in one_second_data: 
-                    last_valid = (trend_def.ScaledMax - trend_def.ScaledMin \
+                for raw_value in one_second_data:
+                    last_valid = (trend_def.ScaledMax - trend_def.ScaledMin) \
                                 * (raw_value - trend_def.RawMin) \
                                 / (trend_def.RawMax - trend_def.RawMin) \
-                                + trend_def.ScaledMin)
+                                + trend_def.ScaledMin
                     data_list.append(last_valid)
 
                 current_timestamp += 1

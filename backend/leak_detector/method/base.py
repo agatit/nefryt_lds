@@ -15,6 +15,9 @@ class Segment:
         self._start = start
         self._end = end
     
+    def window_size(self, wave_speed) -> int:
+        return int(self._length / wave_speed * 1000)
+
     @property
     def length(self) -> int:
         return self._length
@@ -57,7 +60,7 @@ class MethodBase:
             self._params[param.MethodParamDefID.strip()] = param.Value   
                      
 
-    def get_probability(self, timestamp, step) -> List[float]:
+    def get_probability(self, begin, end) -> List[List[float]]:
         pass
 
 

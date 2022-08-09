@@ -11,5 +11,5 @@ class MethodCombine(MethodBase):
         # skopiowanie specyficznych parametrów metody:
         
 
-    def get_probability(self, timestamp, step) -> List[float]:
+    def get_probability(self, begin, end) -> List[List[float]]:
         pass    

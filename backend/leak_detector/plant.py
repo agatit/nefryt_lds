@@ -1,9 +1,9 @@
 import copy
 import sys
-import logging
 from typing import List
 
 from sqlalchemy import select, and_
+
 from .db import global_session
 from .trend import Trend
 from database import lds
@@ -20,8 +20,10 @@ METHOD_CLASSES = {
 
  
 class Event:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, method, begin, end) -> None:
+        self._method = method
+        self._begin = begin
+        self._end = end
 
     def save() -> None:
         """save event to database"""
@@ -44,8 +46,8 @@ class Pipeline:
         
         self._read_params()
         self.begin_pos = self._params.get('BEGIN_POS',0)
-        self.length_resolution = self._params.get('LENGTH_RESOLUTION', 1)
-        self.time_resolution = self._params.get('TIME_RESOLUTION', 1)
+        self.length_resolution = int(self._params.get('LENGTH_RESOLUTION', 1))
+        self.time_resolution = int(self._params.get('TIME_RESOLUTION', 1))
         self.active_methods = self._params.get('ACTIVE_METHODS', '').split(',')
         self.method_events = self._params.get('METHOD_EVENTS', '').split(',')
         # TODO: obsługa wymagalności parametrów metod
@@ -59,8 +61,6 @@ class Pipeline:
         stmt = select(lds.PipelineNode).where(lds.PipelineNode.PipelineID == self.id)
         for node, in global_session.execute(stmt):
             self._nodes[node.NodeID] = self._plant.nodes[node.NodeID]
-
-        from . import method
 
         stmt = select(lds.Method).where(lds.Method.PipelineID == self.id)
         for method, in global_session.execute(stmt):            
@@ -90,19 +90,16 @@ class Pipeline:
         return self._methods
 
 
-    # Tu chyba powinien być słownik aby wiedzieć jaka metoda zwraca jakie prawdopodobieństwo
-    def get_probability(self, begin, end, step) -> List[float]:
-        result = []
-        for method in self.methods.values():
-            #id = 20 to trend typu WAVE
-            if (method._id == 20):
-                probs = method.get_probability(begin, end, step)
-                result.append(probs)
+    def get_probability(self, begin, end) -> dict:
+        result = {}
+        for id, method in self.methods.items():
+            result[id] = method.get_probability(begin, end)
+
         return result
 
 
 
-    def find_leaks_in_range(self, begin, end, time_resolution, length_resolution) -> List[Event]:
+    def find_leaks_in_range(self, begin, end) -> List[Event]:
         """ Wersja bezstanowa, wykrywająca wycieki w zadanym przedziale czasowym
             wykonuje metodę get_probability() dla każdej aktywnej metody
             zawsze zwraca alarmy, które wykryła w zadanym okresie czasowym
@@ -110,7 +107,7 @@ class Pipeline:
         pass
 
 
-    def find_leaks_to(self, end, time_resolution, length_resolution) -> List[Event]:
+    def find_leaks_to(self, end) -> List[Event]:
         """ Wersja stanowa, wykrywająca wycieki na podstawie danych zebranych wcześniej
             składa zapamiętane prawdopodobieństwa z nowymi obliczonymi metodą find_leaks_in_range()
             nie zwraca alarmów, które już zwróciła wcześniej
@@ -118,19 +115,19 @@ class Pipeline:
         pass    
 
 
+class Node:
+    def __init__(self, id, type, name) -> None:
+        self.id = id
+        self.type = type
+        self.name = name
+
+
 class Link:
-    def __init__(self, id, length, begin_node, end_node) -> None:
+    def __init__(self, id, length, begin_node : Node, end_node : Node) -> None:
         self.id = id
         self.length = length
         self.begin_node = begin_node
         self.end_node = end_node
-
-
-class Node:
-    def __init__(self, id, type, name):
-        self.id = id
-        self.type = type
-        self.name = name
 
 
 class Plant:

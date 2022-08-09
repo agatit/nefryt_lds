@@ -5,18 +5,18 @@ import numpy as np
 
 # test
 
-time_offset = 30 #sekundy
-time_resolution = 5  # sekundy
-length_resolution = 100 # metry
+time_offset = 30000 #milisekundy
 
 plant = Plant()
 
-#Trudno jest sprawdzić czy nastąpił wyciek, bo pochodna jest zawsze dodatnia
+# Wszystkie funkcje, które dostają parametr,
+# oznaczający timestamp dostają wartość w milisekundach.
+
 for i in range(10):
-    print(time.time())
+    
     for pipeline in plant.pipelines.values():
         if (pipeline.id == 2):
-            current_time = int(time.time())
-            probs = pipeline.get_probability(current_time - time_offset, current_time, time_resolution) 
-            print("PROBABILITY ON:", np.array(probs))
+            current_time = (int(time.time()) - 10) * 1000
+            probs = pipeline.get_probability(current_time - time_offset, current_time) 
+            print("PROBABILITY: ", np.array(probs))
     time.sleep(5)
