@@ -93,6 +93,7 @@ function createTrendRaw<T>(requestParameters: CreateTrendRequest, requestConfig:
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend`,
         meta,
@@ -141,6 +142,7 @@ function deleteTrendByIdRaw<T>(requestParameters: DeleteTrendByIdRequest, reques
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend/{trendId}`.replace(`{${"trendId"}}`, encodeURIComponent(String(requestParameters.trendId))),
         meta,
@@ -189,6 +191,7 @@ function getTrendByIdRaw<T>(requestParameters: GetTrendByIdRequest, requestConfi
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend/{trendId}`.replace(`{${"trendId"}}`, encodeURIComponent(String(requestParameters.trendId))),
         meta,
@@ -245,6 +248,7 @@ function getTrendCurrentDataRaw<T>(requestParameters: GetTrendCurrentDataRequest
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend/{trendIdList}/current_data/{period}/{samples}`.replace(`{${"trendIdList"}}`, encodeURIComponent(String(requestParameters.trendIdList))).replace(`{${"period"}}`, encodeURIComponent(String(requestParameters.period))).replace(`{${"samples"}}`, encodeURIComponent(String(requestParameters.samples))),
         meta,
@@ -305,6 +309,7 @@ function getTrendDataRaw<T>(requestParameters: GetTrendDataRequest, requestConfi
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend/{trendIdList}/data/{begin}/{end}/{samples}`.replace(`{${"trendIdList"}}`, encodeURIComponent(String(requestParameters.trendIdList))).replace(`{${"begin"}}`, encodeURIComponent(String(requestParameters.begin))).replace(`{${"end"}}`, encodeURIComponent(String(requestParameters.end))).replace(`{${"samples"}}`, encodeURIComponent(String(requestParameters.samples))),
         meta,
@@ -357,6 +362,7 @@ function getTrendParamByIdRaw<T>(requestParameters: GetTrendParamByIdRequest, re
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend/{trendId}/param/{trendParamDefId}`.replace(`{${"trendId"}}`, encodeURIComponent(String(requestParameters.trendId))).replace(`{${"trendParamDefId"}}`, encodeURIComponent(String(requestParameters.trendParamDefId))),
         meta,
@@ -401,6 +407,7 @@ function listTrendDefsRaw<T>( requestConfig: runtime.TypedQueryConfig<T, Array<T
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend_def`,
         meta,
@@ -449,6 +456,7 @@ function listTrendParamsRaw<T>(requestParameters: ListTrendParamsRequest, reques
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend/{trendId}/param`.replace(`{${"trendId"}}`, encodeURIComponent(String(requestParameters.trendId))),
         meta,
@@ -493,6 +501,7 @@ function listTrendsRaw<T>( requestConfig: runtime.TypedQueryConfig<T, Array<Tren
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend`,
         meta,
@@ -543,6 +552,7 @@ function updateTrendRaw<T>(requestParameters: UpdateTrendRequest, requestConfig:
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend/{trendId}`.replace(`{${"trendId"}}`, encodeURIComponent(String(requestParameters.trendId))),
         meta,
@@ -597,6 +607,7 @@ function updateTrendParamRaw<T>(requestParameters: UpdateTrendParamRequest, requ
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/trend/{trendId}/param/{trendParamDefId}`.replace(`{${"trendId"}}`, encodeURIComponent(String(requestParameters.trendId))).replace(`{${"trendParamDefId"}}`, encodeURIComponent(String(requestParameters.trendParamDefId))),
         meta,

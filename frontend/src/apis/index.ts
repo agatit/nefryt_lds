@@ -1,3 +1,4 @@
+export * from './AuthApi';
 export * from './EventsApi';
 export * from './LinksApi';
 export * from './MethodsApi';

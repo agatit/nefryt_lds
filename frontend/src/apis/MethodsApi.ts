@@ -83,6 +83,7 @@ function createMethodRaw<T>(requestParameters: CreateMethodRequest, requestConfi
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))),
         meta,
@@ -135,6 +136,7 @@ function deleteMethodByIdRaw<T>(requestParameters: DeleteMethodByIdRequest, requ
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method/{methodId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"methodId"}}`, encodeURIComponent(String(requestParameters.methodId))),
         meta,
@@ -187,6 +189,7 @@ function getMethodByIdRaw<T>(requestParameters: GetMethodByIdRequest, requestCon
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method/{methodId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"methodId"}}`, encodeURIComponent(String(requestParameters.methodId))),
         meta,
@@ -239,6 +242,7 @@ function listMethodParamsRaw<T>(requestParameters: ListMethodParamsRequest, requ
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method/{methodId}/param`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"methodId"}}`, encodeURIComponent(String(requestParameters.methodId))),
         meta,
@@ -287,6 +291,7 @@ function listMethodsRaw<T>(requestParameters: ListMethodsRequest, requestConfig:
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))),
         meta,
@@ -341,6 +346,7 @@ function updateMethodRaw<T>(requestParameters: UpdateMethodRequest, requestConfi
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method/{methodId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"methodId"}}`, encodeURIComponent(String(requestParameters.methodId))),
         meta,
@@ -399,6 +405,7 @@ function updateMethodParamRaw<T>(requestParameters: UpdateMethodParamRequest, re
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"methodId"}}`, encodeURIComponent(String(requestParameters.methodId))).replace(`{${"methodParamDefId"}}`, encodeURIComponent(String(requestParameters.methodParamDefId))),
         meta,

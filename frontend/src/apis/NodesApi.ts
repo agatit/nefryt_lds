@@ -56,6 +56,7 @@ function createNodeRaw<T>(requestParameters: CreateNodeRequest, requestConfig: r
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/node`,
         meta,
@@ -104,6 +105,7 @@ function deleteNodeByIdRaw<T>(requestParameters: DeleteNodeByIdRequest, requestC
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/node/{linkId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
         meta,
@@ -152,6 +154,7 @@ function getNodeByIdRaw<T>(requestParameters: GetNodeByIdRequest, requestConfig:
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/node/{linkId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
         meta,
@@ -196,6 +199,7 @@ function listNodesRaw<T>( requestConfig: runtime.TypedQueryConfig<T, Array<Node>
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/node`,
         meta,
@@ -246,6 +250,7 @@ function updateNodeRaw<T>(requestParameters: UpdateNodeRequest, requestConfig: r
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/node/{linkId}`.replace(`{${"nodeId"}}`, encodeURIComponent(String(requestParameters.nodeId))),
         meta,

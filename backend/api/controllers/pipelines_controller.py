@@ -12,9 +12,10 @@ from api import util
 from sqlalchemy import alias, select, delete, and_
 from ..db import session
 from database.models import editor, lds
+from .security_controller import check_permissions
 
 
-def create_pipeline(pipeline=None):  # noqa: E501
+def create_pipeline(pipeline=None, token_info={}):  # noqa: E501
     """Create pipelines
 
     Create a pipelines # noqa: E501
@@ -26,6 +27,9 @@ def create_pipeline(pipeline=None):  # noqa: E501
     """
 
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_pipeline: Pipeline = Pipeline.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -53,7 +57,7 @@ def create_pipeline(pipeline=None):  # noqa: E501
     except Exception as e:
         return Error(message=str(e), code=500), 500        
 
-def update_pipeline(pipeline_id, pipeline=None):  # noqa: E501
+def update_pipeline(pipeline_id, pipeline=None, token_info={}):  # noqa: E501
     """Create pipelines
 
     Create a pipelines # noqa: E501
@@ -65,6 +69,9 @@ def update_pipeline(pipeline_id, pipeline=None):  # noqa: E501
     """
 
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_pipeline = Pipeline.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -96,7 +103,7 @@ def update_pipeline(pipeline_id, pipeline=None):  # noqa: E501
     except Exception as e:
         return Error(message=str(e), code=500), 500  
 
-def delete_pipeline_by_id(pipeline_id):  # noqa: E501
+def delete_pipeline_by_id(pipeline_id, token_info={}):  # noqa: E501
     """Detail pipeline
 
     Delete specific pipeline # noqa: E501
@@ -107,6 +114,9 @@ def delete_pipeline_by_id(pipeline_id):  # noqa: E501
     :rtype: Information
     """
     try:        
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         db_pipeline = session.get(lds.Pipeline, pipeline_id)
         if db_pipeline is None:
             return Error(message="Not Found", code=404), 404
@@ -256,7 +266,7 @@ def list_pipeline_params(pipeline_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def update_pipeline_param(pipeline_id, pipeline_param_def_id, pipeline_param=None):  # noqa: E501
+def update_pipeline_param(pipeline_id, pipeline_param_def_id, pipeline_param=None, token_info={}):  # noqa: E501
     """Update pipeline params
 
     Updates pipeline param # noqa: E501
@@ -269,6 +279,9 @@ def update_pipeline_param(pipeline_id, pipeline_param_def_id, pipeline_param=Non
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+            
         if connexion.request.is_json:
             api_pipeline_param = PipelineParam.from_dict(connexion.request.get_json())  # noqa: E501
 

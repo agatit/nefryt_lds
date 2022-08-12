@@ -8,7 +8,43 @@ servers:
   url: http://192.168.1.231:8080/
 - description: Developer's local server
   url: http://localhost:8080/
+security:
+- bearerAuth: []
 paths:
+  /auth/login:
+    post:
+      operationId: auth_login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginPermissions'
+          description: OK
+      security: []
+      summary: Authentication Login
+      tags:
+      - auth
+      x-openapi-router-controller: api.controllers.auth_controller
+  /auth/refresh:
+    post:
+      operationId: auth_refresh
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginPermissions'
+          description: OK
+      summary: Authentication token refresh
+      tags:
+      - auth
+      x-openapi-router-controller: api.controllers.auth_controller
   /event:
     get:
       description: List all events
@@ -1341,6 +1377,12 @@ components:
           schema:
             $ref: '#/components/schemas/Information'
       description: Deleted
+    Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Unauthorized'
+      description: Unauthorized
   schemas:
     Link:
       example:
@@ -2023,3 +2065,125 @@ components:
       - status
       title: Information
       type: object
+    Login:
+      example:
+        password: password
+        deviceId: deviceId
+        deviceName: deviceName
+        username: username
+      properties:
+        username:
+          minLength: 1
+          title: username
+          type: string
+        password:
+          minLength: 1
+          title: password
+          type: string
+        deviceId:
+          minLength: 1
+          title: deviceId
+          type: string
+        deviceName:
+          minLength: 1
+          title: deviceName
+          type: string
+      required:
+      - password
+      - username
+      title: Login
+      type: object
+      x-examples:
+        example-1:
+          username: JohnDoe
+          password: _hashed_password_here_
+          deviceId: ad49afd9-ec38-4716-b93f-416bd8c0c684
+          deviceName: model
+    LoginPermissions:
+      example:
+        refreshTokenExpiration: refreshTokenExpiration
+        success: true
+        permissions:
+        - key: '{}'
+        - key: '{}'
+        username: username
+        token: token
+        refreshToken: refreshToken
+      properties:
+        username:
+          minLength: 1
+          title: username
+          type: string
+        success:
+          title: success
+          type: boolean
+        token:
+          minLength: 1
+          title: token
+          type: string
+        refreshToken:
+          minLength: 1
+          title: refreshToken
+          type: string
+        refreshTokenExpiration:
+          minLength: 1
+          title: refreshTokenExpiration
+          type: string
+        permissions:
+          items:
+            additionalProperties: true
+            type: object
+          title: permissions
+          type: array
+      required:
+      - refreshToken
+      - refreshTokenExpiration
+      - token
+      title: LoginPermissions
+      type: object
+      x-examples:
+        example-1:
+          username: JohnDoe
+          success: true
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          refreshTokenExpiration: 2022-03-30T23:59:59.000Z
+          permissions:
+          - TRENDS
+          - ANALYTICS
+          - ADMIN
+    Unauthorized:
+      example:
+        error: Unauthorised
+        status: 401
+        timestamp: 2020-10-29T13:08:16.235Z
+        path: /method.123
+        message: REQUEST_UNAUTHORISED
+        traceId: "1234567890"
+      properties:
+        error:
+          type: string
+        status:
+          format: int32
+          type: integer
+        timestamp:
+          type: string
+        path:
+          type: string
+        message:
+          type: string
+        traceId:
+          type: string
+      required:
+      - error
+      - path
+      - status
+      - timestamp
+      title: Unauthorized
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+      x-bearerInfoFunc: api.controllers.security_controller.decode_token

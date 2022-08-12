@@ -24,21 +24,24 @@ paths:
     $ref: "./paths/trendCurrentData.yaml"    
   /trend_def:
     $ref: "./paths/trendDefs.yaml"    
+    
   /node:
     $ref: "./paths/nodes.yaml"
-  /node/{linkId}:
+  /node/{nodeId}:
     $ref: "./paths/node.yaml"
+
   /link:
     $ref: "./paths/links.yaml"
   /link/{linkId}:
     $ref: "./paths/link.yaml"    
+
   /pipeline:
     $ref: "./paths/pipelines.yaml"
   /pipeline/{pipelineId}:
     $ref: "./paths/pipeline.yaml"
   /pipeline/{pipelineId}/param:
     $ref: "./paths/pipelineParams.yaml"
-  /pipeline/{pipelineId}/param/{methodParamDefId}:
+  /pipeline/{pipelineId}/param/{pipelineParamDefId}:
     $ref: "./paths/pipelineParam.yaml"   
   /pipeline/{pipelineId}/method:
     $ref: "./paths/methods.yaml" 
@@ -48,12 +51,19 @@ paths:
     $ref: "./paths/methodParams.yaml"
   /pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}:
     $ref: "./paths/methodParam.yaml"       
+
   /event:
     $ref: "./paths/events.yaml"
   /event/{eventId}:
     $ref: "./paths/event.yaml"
   /event/{eventId}/ack:
     $ref: "./paths/eventAck.yaml"
+
+  /auth/login:
+    $ref: "./paths/authLogin.yaml"
+  /auth/refresh:
+    $ref: "./paths/authRefresh.yaml"
+
 components:
   parameters:
     $ref: "./parameters/_index.yaml"
@@ -61,3 +71,12 @@ components:
     $ref: "./schemas/_index.yaml"
   responses:
     $ref: "./responses/_index.yaml"
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes    
+      x-bearerInfoFunc: api.controllers.security_controller.decode_token
+
+security:
+  - bearerAuth: []       

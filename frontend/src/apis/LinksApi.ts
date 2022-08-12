@@ -51,6 +51,7 @@ function createLinkRaw<T>(requestParameters: CreateLinkRequest, requestConfig: r
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/link`,
         meta,
@@ -95,6 +96,7 @@ function deleteLinkByIdRaw<T>( requestConfig: runtime.TypedQueryConfig<T, Inform
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/link/{linkId}`,
         meta,
@@ -143,6 +145,7 @@ function getLinkByIdRaw<T>(requestParameters: GetLinkByIdRequest, requestConfig:
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/link/{linkId}`.replace(`{${"linkId"}}`, encodeURIComponent(String(requestParameters.linkId))),
         meta,
@@ -187,6 +190,7 @@ function listLinksRaw<T>( requestConfig: runtime.TypedQueryConfig<T, Array<Link>
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/link`,
         meta,
@@ -233,6 +237,7 @@ function updateLinkRaw<T>(requestParameters: UpdateLinkRequest, requestConfig: r
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/link/{linkId}`,
         meta,

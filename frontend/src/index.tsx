@@ -19,7 +19,7 @@ import {  createStore, combineReducers } from 'redux';
 
 export const history = createBrowserHistory();
 /*
-const store = createStore(
+const store = createStore(  
   reducer,
   applyMiddleware(queryMiddleware(superagentInterface, getQueries, getEntities)),
 );
