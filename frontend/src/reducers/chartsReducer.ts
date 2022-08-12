@@ -6,7 +6,6 @@ import { ADD_SERIE, APPEND_DATA, AREA_REF,  AUTOSCALE,  CLEAR_TIMER,  DEFAULT_ST
 
 import { getTrendData, GetTrendDataRequest } from "../apis/TrendsApi";
 import { Trend, TrendData, TrendDef } from "../models";
-import { TrendDataApiFromJSON } from "../models/TrendDataApi";
 import { color } from "@mui/system";
 
 

@@ -10,9 +10,10 @@ from api import util
 from sqlalchemy import alias, select, and_
 from ..db import session
 from database.models import lds
+from .security_controller import check_permissions
 
 
-def create_method(method=None):  # noqa: E501
+def create_method(method=None, token_info={}):  # noqa: E501
     """Create method
 
     Create a method # noqa: E501
@@ -23,11 +24,12 @@ def create_method(method=None):  # noqa: E501
     :rtype: Information
     """
 
-    if connexion.request.is_json:
-        api_method = Method.from_dict(connexion.request.get_json())  # noqa: E501
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
-            method = Method.from_dict(connexion.request.get_json())  # noqa: E501
+            api_method = Method.from_dict(connexion.request.get_json())  # noqa: E501
         else:
             return Error(message="Expected a JSON request", code=400), 400
 
@@ -46,7 +48,7 @@ def create_method(method=None):  # noqa: E501
         return error, 500   
 
 
-def delete_method_by_id(pipeline_id, method_id):  # noqa: E501
+def delete_method_by_id(pipeline_id, method_id, token_info={}):  # noqa: E501
     """Deletes method
 
     Deletes specific method # noqa: E501
@@ -57,6 +59,9 @@ def delete_method_by_id(pipeline_id, method_id):  # noqa: E501
     :rtype: Information
     """
     try:        
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         db_method = session.get(lds.Method, method_id)
         if db_method is None:
             return Error(message="Not Found", code=404), 404
@@ -94,7 +99,7 @@ def get_method_by_id(pipeline_id, method_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def update_method(pipeline_id, method_id, method=None):  # noqa: E501
+def update_method(pipeline_id, method_id, method=None, token_info={}):  # noqa: E501
     """Update method
 
     Update a method # noqa: E501
@@ -105,6 +110,9 @@ def update_method(pipeline_id, method_id, method=None):  # noqa: E501
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_method = Method.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -227,7 +235,7 @@ def list_method_params(pipeline_id, method_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def update_method_param(pipeline_id, method_id, method_param_def_id, method_param=None):  # noqa: E501
+def update_method_param(pipeline_id, method_id, method_param_def_id, method_param=None, token_info={}):  # noqa: E501
     """Update method params
 
     Updates method param # noqa: E501
@@ -240,6 +248,9 @@ def update_method_param(pipeline_id, method_id, method_param_def_id, method_para
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_method_param = MethodParam.from_dict(connexion.request.get_json())  # noqa: E501
 

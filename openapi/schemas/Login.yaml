@@ -1,0 +1,24 @@
+description: ''
+type: object
+properties:
+  username:
+    type: string
+    minLength: 1
+  password:
+    type: string
+    minLength: 1
+  deviceId:
+    type: string
+    minLength: 1
+  deviceName:
+    type: string
+    minLength: 1
+required:
+  - username
+  - password
+x-examples:
+  example-1:
+    username: JohnDoe
+    password: _hashed_password_here_
+    deviceId: ad49afd9-ec38-4716-b93f-416bd8c0c684
+    deviceName: model

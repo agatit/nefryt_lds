@@ -25,7 +25,7 @@ import moment from "moment";
 import { ForceRequestCallback, ForceRequestsCallback, useRequest, useRequests } from 'redux-query-react';
 import { BASE_PATH, Configuration, TypedQueryConfig } from "../../runtime";
 import { Method, Trend, TrendData, TrendDataFromJSON, TrendFromJSON } from "../../models";
-import { listMethods } from "../../apis/MethodApi";
+import { listMethods } from "../../apis/MethodsApi";
 import { getTrendData, getTrendCurrentData, listTrendDefs, listTrends } from "../../apis/TrendsApi";
 import store, {  getEntities, getQueries } from "../../store";
 import { Entities, QueriesState, QueryConfig, QueryState, requestAsync, ResponseBody, updateEntities, UpdateStrategy } from "redux-query";
@@ -101,7 +101,7 @@ const useStyles  = makeStyles(theme => ({
     
 }));
 
-Configuration.basePath = 'http://192.168.1.231:8080';
+Configuration.basePath = BASE_PATH;
 
 function valuetext(value:any) {
   return `${value}°C`;

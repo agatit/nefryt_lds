@@ -15,6 +15,7 @@ from api import util
 from sqlalchemy import alias, select, delete, and_, lambda_stmt
 from ..db import session
 from database.models import lds
+from .security_controller import check_permissions
 
 
 def create_trend(trend=None):  # noqa: E501
@@ -59,7 +60,7 @@ def create_trend(trend=None):  # noqa: E501
         return error, 500   
 
 
-def delete_trend_by_id(trend_id):  # noqa: E501
+def delete_trend_by_id(trend_id, token_info={}):  # noqa: E501
     """Deletes trend
 
     Deletes specific trend # noqa: E501
@@ -69,7 +70,10 @@ def delete_trend_by_id(trend_id):  # noqa: E501
 
     :rtype: Information
     """
-    try:        
+    try:     
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         db_trend = session.get(lds.Trend, trend_id)
         if db_trend is None:
             return Error(message="Not Found", code=404), 404
@@ -115,7 +119,7 @@ def get_trend_by_id(trend_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def update_trend(trend_id, trend=None):  # noqa: E501
+def update_trend(trend_id, trend=None, token_info = {}):  # noqa: E501
     """Update trend
 
     Update a trend # noqa: E501
@@ -126,6 +130,9 @@ def update_trend(trend_id, trend=None):  # noqa: E501
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_trend = Trend.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -380,7 +387,7 @@ def list_trend_params(trend_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def update_trend_param(trend_id, trend_param_def_id, trend_param=None):  # noqa: E501
+def update_trend_param(trend_id, trend_param_def_id, trend_param=None, token_info={}):  # noqa: E501
     """Update trend params
 
     Updates trend param # noqa: E501
@@ -393,6 +400,9 @@ def update_trend_param(trend_id, trend_param_def_id, trend_param=None):  # noqa:
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+            
         if connexion.request.is_json:
             api_trend_param = TrendParam.from_dict(connexion.request.get_json())  # noqa: E501
 

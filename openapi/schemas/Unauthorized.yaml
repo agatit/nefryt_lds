@@ -1,0 +1,28 @@
+title: Unauthorized
+required:
+  - error
+  - status
+  - timestamp
+  - path
+type: object
+properties:
+  error:
+    type: string
+  status:
+    type: integer
+    format: int32
+  timestamp:
+    type: string
+  path:
+    type: string
+  message:
+    type: string
+  traceId:
+    type: string
+example:
+  error: Unauthorised
+  status: 401
+  timestamp: '2020-10-29T13:08:16.235Z'
+  path: /method.123
+  message: REQUEST_UNAUTHORISED
+  traceId: '1234567890'

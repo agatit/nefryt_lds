@@ -49,6 +49,7 @@ function ackEventRaw<T>(requestParameters: AckEventRequest, requestConfig: runti
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/event/{eventId}/ack`.replace(`{${"eventId"}}`, encodeURIComponent(String(requestParameters.eventId))),
         meta,
@@ -97,6 +98,7 @@ function getEventByIdRaw<T>(requestParameters: GetEventByIdRequest, requestConfi
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/event/{eventId}`.replace(`{${"eventId"}}`, encodeURIComponent(String(requestParameters.eventId))),
         meta,
@@ -141,6 +143,7 @@ function listEventsRaw<T>( requestConfig: runtime.TypedQueryConfig<T, Array<Even
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/event`,
         meta,

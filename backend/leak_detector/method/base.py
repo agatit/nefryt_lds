@@ -10,7 +10,7 @@ from ..plant import Event, Plant, Trend
 #Prosta Klasa segmentu, chyba można wrzucić do osobnego pliku
 class Segment:
     def __init__(self, plant : Plant, start: Trend, end: Trend) -> None:
-        #TO DO: Dla wielu dróg powinno wyrzucać błąd
+        # TODO: Dla wielu dróg powinno wyrzucać błąd
         self._length = plant.get_distances(plant.nodes[start.node_id], plant.nodes[end.node_id])[0]
         self._start = start
         self._end = end

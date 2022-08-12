@@ -40,3 +40,9 @@ Error:
   $ref: "./Error.yaml"
 Information:
   $ref: "./Information.yaml"
+Login:
+  $ref: "./Login.yaml"
+LoginPermissions:
+  $ref: "./LoginPermissions.yaml"
+Unauthorized:
+  $ref: "./Unauthorized.yaml"

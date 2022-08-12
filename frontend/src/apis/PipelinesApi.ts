@@ -69,6 +69,7 @@ function createPipelineRaw<T>(requestParameters: CreatePipelineRequest, requestC
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline`,
         meta,
@@ -117,6 +118,7 @@ function deletePipelineByIdRaw<T>(requestParameters: DeletePipelineByIdRequest, 
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))),
         meta,
@@ -165,6 +167,7 @@ function getPipelineByIdRaw<T>(requestParameters: GetPipelineByIdRequest, reques
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))),
         meta,
@@ -213,6 +216,7 @@ function listPipelineParamsRaw<T>(requestParameters: ListPipelineParamsRequest, 
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/param`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))),
         meta,
@@ -257,6 +261,7 @@ function listPipelinesRaw<T>( requestConfig: runtime.TypedQueryConfig<T, Array<P
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline`,
         meta,
@@ -307,6 +312,7 @@ function updatePipelineRaw<T>(requestParameters: UpdatePipelineRequest, requestC
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))),
         meta,
@@ -361,6 +367,7 @@ function updatePipelineParamRaw<T>(requestParameters: UpdatePipelineParamRequest
 
     const { meta = {} } = requestConfig;
 
+    meta.authType = ['bearer'];
     const config: QueryConfig<T> = {
         url: `${runtime.Configuration.basePath}/pipeline/{pipelineId}/param/{methodParamDefId}`.replace(`{${"pipelineId"}}`, encodeURIComponent(String(requestParameters.pipelineId))).replace(`{${"pipelineParamDefId"}}`, encodeURIComponent(String(requestParameters.pipelineParamDefId))),
         meta,

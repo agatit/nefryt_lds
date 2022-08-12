@@ -9,3 +9,4 @@ umodbus >= 1.0.4
 numpy >= 1.14.3
 scipy >= 1.8.1
 pyodbc >= 4.0.22
+pyjwt >= 2.4.0

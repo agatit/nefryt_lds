@@ -11,9 +11,10 @@ from api import util
 from sqlalchemy import alias, select, delete
 from ..db import session
 from database.models import editor, lds
+from .security_controller import check_permissions
 
 
-def create_node(node=None):  # noqa: E501
+def create_node(node=None, token_info={}):  # noqa: E501
     """Create nodes
 
     Create a nodes # noqa: E501
@@ -25,6 +26,9 @@ def create_node(node=None):  # noqa: E501
     """
 
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             node = Node.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -51,7 +55,7 @@ def create_node(node=None):  # noqa: E501
         error: Error = Error(message=str(e), code=500)
         return error, 500        
 
-def update_node(node_id, node=None):  # noqa: E501
+def update_node(node_id, node=None, token_info={}):  # noqa: E501
     """Create nodes
 
     Create a nodes # noqa: E501
@@ -63,6 +67,9 @@ def update_node(node_id, node=None):  # noqa: E501
     """
 
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_node = Node.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -93,7 +100,7 @@ def update_node(node_id, node=None):  # noqa: E501
     except Exception as e:
         return Error(message=str(e), code=500), 500  
 
-def delete_node_by_id(node_id):  # noqa: E501
+def delete_node_by_id(node_id, token_info={}):  # noqa: E501
     """Detail node
 
     Delete specific node # noqa: E501
@@ -104,6 +111,9 @@ def delete_node_by_id(node_id):  # noqa: E501
     :rtype: Information
     """
     try:        
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403        
+
         db_node = session.get(lds.Node, node_id)
         if db_node is None:
             return Error(message="Not Found", code=404), 404
