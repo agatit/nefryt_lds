@@ -1,7 +1,5 @@
 import time
 from .plant import Plant
-from .trend import Trend
-import numpy as np
 
 # test
 
@@ -13,10 +11,11 @@ plant = Plant()
 # oznaczający timestamp dostają wartość w milisekundach.
 
 for i in range(10):
-    
     for pipeline in plant.pipelines.values():
-        if (pipeline.id == 2):
-            current_time = (int(time.time()) - 10) * 1000
-            probs = pipeline.get_probability(current_time - time_offset, current_time) 
-            print("PROBABILITY: ", np.array(probs))
+        begin_time = (int(time.time()) - 10) * 1000
+        current_time = time.time()
+        print("START: ", current_time)
+        probs = pipeline.find_leaks_in_range(begin_time - time_offset, begin_time)
+        print("END:", time.time())
+        print("TIME:", time.time() - current_time)
     time.sleep(5)

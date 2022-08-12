@@ -1,22 +1,40 @@
 from typing import List
 import logging
 
-from sqlalchemy import select, insert, and_
+from sqlalchemy import select, and_
 
-from ..db import global_session, Session
+from ..db import global_session
 from database import lds
-from ..plant import Event, Plant, Trend
+from ..plant import Event, Trend, Pipeline
 
-#Prosta Klasa segmentu, chyba można wrzucić do osobnego pliku
 class Segment:
-    def __init__(self, plant : Plant, start: Trend, end: Trend) -> None:
+    # Na razie jest, że każdy segment ma stały wave_speed
+
+    def __init__(self, pipeline : Pipeline, start: Trend, end: Trend, begin_pos, wave_speed) -> None:
         #TO DO: Dla wielu dróg powinno wyrzucać błąd
-        self._length = plant.get_distances(plant.nodes[start.node_id], plant.nodes[end.node_id])[0]
+        distances = pipeline.plant.get_distances(pipeline.plant.nodes[start.node_id],
+                                                 pipeline.plant.nodes[end.node_id])
+        self._length = distances[0]
         self._start = start
         self._end = end
-    
-    def window_size(self, wave_speed) -> int:
-        return int(self._length / wave_speed * 1000)
+        self._begin_pos = begin_pos
+        self._end_pos = self._length + self._length
+
+
+
+        # Tutaj maksymalne okno powinno zostać policzone w inny sposób,
+        # jeżeli segment nie będzie miał stałego wave_speed
+        self._wave_speed = wave_speed
+        self._max_window_size = int(self._length / self._wave_speed * 1000) 
+
+
+    def calc_wave_speed(self, position) -> int:
+        return self._wave_speed
+
+
+    @property
+    def max_window_size(self) -> int:
+        return self._max_window_size
 
     @property
     def length(self) -> int:
@@ -52,8 +70,6 @@ class MethodBase:
             .join(lds.MethodParamDef, lds.MethodDef.ID == lds.MethodParamDef.MethodDefID) \
             .join(lds.MethodParam, and_(lds.MethodParamDef.ID == lds.MethodParam.MethodParamDefID, lds.Method.ID == lds.MethodParam.MethodID)) \
             .where(lds.Method.ID == self._id)
-
-        print(stmt)
 
         self._params = {}
         for param, in global_session.execute(stmt):

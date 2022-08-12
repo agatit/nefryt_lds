@@ -1,10 +1,11 @@
 import copy
+from datetime import  datetime
 import sys
 from typing import List
 
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, insert
 
-from .db import global_session
+from .db import Session, global_session
 from .trend import Trend
 from database import lds
 
@@ -20,14 +21,18 @@ METHOD_CLASSES = {
 
  
 class Event:
-    def __init__(self, method, begin, end) -> None:
-        self._method = method
-        self._begin = begin
-        self._end = end
+    def __init__(self, method_id, time, position) -> None:
+        self._method_id = method_id
+        self._time = datetime.fromtimestamp(time // 1000)
+        self._position = position
 
-    def save() -> None:
+    def save(self) -> None:
         """save event to database"""
-        pass
+        session = Session()
+        stmt = insert(lds.Event).values(EventDefID='LEAK', MethodID=20, BeginDate=self._time, Position=self._position)
+        session.execute(stmt)
+        session.commit()
+        return
 
 
 # TODO: Wygląda na to, żę brakuje parametrów pipeline!
@@ -35,25 +40,26 @@ class Event:
 # może też progi, które są wymagane do wygenerowania zdarzenia
 # Można to tez zapisać w configu, ale chyba będzie trudniej dla wielu pipelinów
 class Pipeline:
-    def __init__(self, plant, id, name, begin_pos) -> None:
+    def __init__(self, plant, id, name) -> None:
         self._methods = {}
         self._nodes = {}
         self._active_methods = {}
         self._plant = plant
         self.id = id
         self.name = name
-        # self.begin_pos = begin_pos
         
         self._read_params()
+        self._build()
+
         self.begin_pos = self._params.get('BEGIN_POS',0)
         self.length_resolution = int(self._params.get('LENGTH_RESOLUTION', 1))
         self.time_resolution = int(self._params.get('TIME_RESOLUTION', 1))
-        self.active_methods = self._params.get('ACTIVE_METHODS', '').split(',')
+        
+        for id in self._params.get('ACTIVE_METHODS', '').split(','):
+            self._active_methods[int(id)] = self._methods[int(id)]
+
         self.method_events = self._params.get('METHOD_EVENTS', '').split(',')
         # TODO: obsługa wymagalności parametrów metod
-
-        self._build() 
-
 
 
     def _build(self) -> None:
@@ -92,19 +98,23 @@ class Pipeline:
 
     def get_probability(self, begin, end) -> dict:
         result = {}
-        for id, method in self.methods.items():
+        for id, method in self._active_methods.items():
             result[id] = method.get_probability(begin, end)
 
         return result
 
 
 
-    def find_leaks_in_range(self, begin, end) -> List[Event]:
+    def find_leaks_in_range(self, begin, end) -> dict:
         """ Wersja bezstanowa, wykrywająca wycieki w zadanym przedziale czasowym
             wykonuje metodę get_probability() dla każdej aktywnej metody
             zawsze zwraca alarmy, które wykryła w zadanym okresie czasowym
         """
-        pass
+        events = {}
+        for id, method in self._active_methods.items():
+            events[id] = method.find_leaks_in_range(begin, end)
+
+        return events
 
 
     def find_leaks_to(self, end) -> List[Event]:
@@ -159,7 +169,7 @@ class Plant:
         """ Wczytuje pipliny i metody z bazy danych """
         stmt = select(lds.Pipeline)
         for pipeline, in global_session.execute(stmt):
-            self._pipelines[pipeline.ID] = Pipeline(self, pipeline.ID, pipeline.Name, pipeline.BeginPos)
+            self._pipelines[pipeline.ID] = Pipeline(self, pipeline.ID, pipeline.Name)
 
 
     @property
