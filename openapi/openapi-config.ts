@@ -4,24 +4,25 @@ import type { ConfigFile } from '@rtk-query/codegen-openapi'
 
 const config: ConfigFile = {
   schemaFile: './build/merged.yaml',
-  apiFile: '../frontend.test/src/store/emptyApi.ts',
+  apiFile: '../frontend/src/store/emptyApi.ts',
+  hooks: true,
   outputFiles: {
-    '../frontend.test/src/store/trend.ts': {
+    '../frontend/src/store/trendApi.ts': {
       filterEndpoints: [/trend/i],
     },
-    '../frontend.test/src/store/node.ts': {
+    '../frontend/src/store/nodeApi.ts': {
       filterEndpoints: [/node/i],
     },
-    '../frontend.test/src/store/link.ts': {
+    '../frontend/src/store/linkApi.ts': {
       filterEndpoints: [/link/i],
     },
-    '../frontend.test/src/store/pipeline.ts': {
+    '../frontend/src/store/pipelineApi.ts': {
         filterEndpoints: [/pipeline/i],
     },    
-    '../frontend.test/src/store/event.ts': {
+    '../frontend/src/store/eventApi.ts': {
         filterEndpoints: [/event/i],
     },
-    '../frontend.test/src/store/auth.ts': {
+    '../frontend/src/store/authApi.ts': {
         filterEndpoints: [/auth/i],
     },
   }

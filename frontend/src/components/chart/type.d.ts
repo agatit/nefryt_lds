@@ -1,4 +1,4 @@
-import { Trend, TrendData } from "../../models";
+// import { Trend, TrendData } from "../../models";
 //type of chart parameeters
 
 

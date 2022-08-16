@@ -4,8 +4,8 @@ import { ChartsState } from "../pages/Charts/type";
 import { GridLines, IChartAction, ITrend, ITrendData } from "../components/chart/type";
 import { ADD_SERIE, APPEND_DATA, AREA_REF,  AUTOSCALE,  CLEAR_TIMER,  DEFAULT_STATE,  DISABLE_TREND,  ENABLE_TREND,  FORCE_REFRESH,  H_GRID_LINE,  LOAD_TREND_LIST,  ONLY_SELECTED,  REMOVE_SERIE,  SET_BRUSH_RANGE,  SET_DATA,  SET_DATE_RANGE,  SET_FROM_DATE,  SET_TIMER,  SET_TIMESTAMP_RANGE,  SET_TO_DATE,  SET_TREND_SCALE,  TOGGLE_LIVE_MODE, TOGGLE_RPANEL, TOGGLE_TOOLTIP, TOGGLE_ZOOM_MODE, V_GRID_LINE } from "../actions/charts/actionType";
 
-import { getTrendData, GetTrendDataRequest } from "../apis/TrendsApi";
-import { Trend, TrendData, TrendDef } from "../models";
+// import { getTrendData, GetTrendDataRequest } from "../apis/TrendsApi";
+// import { Trend, TrendData, TrendDef } from "../models";
 import { color } from "@mui/system";
 
 
