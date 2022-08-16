@@ -2,7 +2,7 @@
 import { EditorState, IEditorAction, ILink, INode } from "../pages/Editor/type"
 import * as pipelineEditorAction from "../actions/editor/actions"
 import { ACTIVE_NODE, BROWSE, CANCEL_NODE_ACTION, CLONE_NODE, CREATE_NODE, DRAG_NODE, DROP_NODE, EDITOR_AREA_SETTINGS, LINK_NODES, LOAD_NODE_LIST, LOAD_PIPELINE_LIST, MOVE_NODE, NEW_NODE, REFRESH_DATA, REMOVE_NODE, SAVE_NODE, UNLINK_NODES, USE_EDITOR_MONITORING, USE_EDITOR_NODES } from "../actions/editor/actionType"
-import {Node} from "../models/Node"
+// import {Node} from "../models/Node"
 
 const initialState: EditorState = {
      area:{

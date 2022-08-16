@@ -22,16 +22,17 @@ import { CategoricalChartState } from "recharts/types/chart/generateCategoricalC
 import { ITrend, ITrendData } from "../../components/chart/type";
 import moment from "moment";
 
-import { ForceRequestCallback, ForceRequestsCallback, useRequest, useRequests } from 'redux-query-react';
 import { BASE_PATH, Configuration, TypedQueryConfig } from "../../runtime";
-import { Method, Trend, TrendData, TrendDataFromJSON, TrendFromJSON } from "../../models";
-import { listMethods } from "../../apis/MethodsApi";
-import { getTrendData, getTrendCurrentData, listTrendDefs, listTrends } from "../../apis/TrendsApi";
-import store, {  getEntities, getQueries } from "../../store";
-import { Entities, QueriesState, QueryConfig, QueryState, requestAsync, ResponseBody, updateEntities, UpdateStrategy } from "redux-query";
-import { connectRequest } from 'redux-query-react';
 
-import { QueryClient, useMutation, useQuery } from 'react-query';
+// import { ForceRequestCallback, ForceRequestsCallback, useRequest, useRequests } from 'redux-query-react';
+// import { Method, Trend, TrendData, TrendDataFromJSON, TrendFromJSON } from "../../models";
+// import { listMethods } from "../../apis/MethodsApi";
+// import { getTrendData, getTrendCurrentData, listTrendDefs, listTrends } from "../../apis/TrendsApi";
+// import store, {  getEntities, getQueries } from "../../store";
+// import { Entities, QueriesState, QueryConfig, QueryState, requestAsync, ResponseBody, updateEntities, UpdateStrategy } from "redux-query";
+// import { connectRequest } from 'redux-query-react';
+// import { QueryClient, useMutation, useQuery } from 'react-query';
+// import { cancelQuery } from 'redux-query'
 
 import { CollectionsOutlined } from "@mui/icons-material";
 import { request } from "http";
@@ -39,15 +40,12 @@ import { getLogger } from "react-query/types/core/logger";
 
 import { straightLine } from "../../components/chart/StraightLine";
 
-import { cancelQuery } from 'redux-query';
-
-
 import CustomSurface from "../../components/chart/CustomSurface";
 import { ExpandMore} from '@material-ui/icons'
 import Typography from '@mui/material/Typography';
 
 
-var runLive : ForceRequestCallback;
+// var runLive : ForceRequestCallback;
 
 
 
@@ -130,11 +128,11 @@ const ChartsPage: React.FC = () => {
   var brush_endIndex = 0;
 
  
-  const queries = useSelector(getQueries) || [];
-  const entities = useSelector(getEntities) || [];
+  // const queries = useSelector(getQueries) || [];
+  // const entities = useSelector(getEntities) || [];
 
-  console.log(queries);
-  console.log(entities);
+  // console.log(queries);
+  // console.log(entities);
 
   const reducer: ChartsState = useSelector(
     (state: RootState) => state.chartsReducer,
