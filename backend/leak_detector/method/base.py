@@ -18,14 +18,14 @@ class Segment:
         self._start = start
         self._end = end
         self._begin_pos = begin_pos
-        self._end_pos = self._length + self._length
+        self._end_pos = self._begin_pos + self._length
 
 
 
         # Tutaj maksymalne okno powinno zostać policzone w inny sposób,
         # jeżeli segment nie będzie miał stałego wave_speed
         self._wave_speed = wave_speed
-        self._max_window_size = int(self._length / self._wave_speed * 1000) 
+        self._max_window_size = (self._length / self._wave_speed) * 1000 
 
 
     def calc_wave_speed(self, position) -> int:
