@@ -1,5 +1,3 @@
-from datetime import datetime
-from turtle import pos
 from typing import List
 
 import numpy as np
@@ -69,13 +67,14 @@ class MethodWave(MethodBase):
             l2 = segment._end_pos - current_pos
 
             for current_time in range(begin, end, self._pipeline.time_resolution):
-                offset1 = int(l1 / wave_speed * 100)
-                offset2 = int(l2 / wave_speed * 100)
-                data_point = int((current_time - window_begin) / 10)
-                dp1 = min(0, data_start[data_point - offset1])
-                dp2 = min(0, data_end[data_point - offset2])
-                dp3 = min(0, data_start[data_point + offset1])
-                dp4 = min(0, data_end[data_point + offset2])
+                offset1 = (l1 * 1000) / wave_speed 
+                offset2 = (l2 * 1000) / wave_speed 
+                data_point = current_time - window_begin
+                
+                dp1 = data_start[int((data_point - offset1) / 10)]
+                dp2 = data_end[int((data_point - offset2) / 10)]
+                dp3 = data_start[int((data_point + offset1) / 10)]
+                dp4 = data_end[int((data_point + offset2) / 10)]
                 
                 res = dp1 + dp2 - dp3 - dp4
                 
@@ -93,43 +92,19 @@ class MethodWave(MethodBase):
 
     def find_leaks_in_range(self, begin, end) -> List[Event]:
         probabilities = np.array(self.get_probability(begin, end))
-        position_size = 2
-        time_size = 10
         
-        leak_points = set()
         events = []
 
         for position in range(len(probabilities)):
             for time in range(len(probabilities[0])):
-                if (probabilities[position][time] > self._alarm_level):
-                    leak_points.add((position, time))
+                if (probabilities[position][time] < self._alarm_level):
+                    probabilities[position][time] = 0
 
-        while (len(leak_points) != 0):
-            leak = []
-            added = True
-            point = leak_points.pop()
-            leak.append(point)
-            min_position = max_position = point[0]
-            min_time = max_time = point[1]
-            while (added):
-                added = False
-                for curr_point in leak_points:
-                    if (min_position - position_size <= curr_point[0] <= max_position + position_size and
-                        min_time - time_size <= curr_point[1] <= max_time + time_size):
-                        leak_points.remove(curr_point)
-                        leak.append(curr_point)
-                        min_position = min(min_position, curr_point[0])
-                        max_position = max(max_position, curr_point[0])
-                        min_time = min(min_time, curr_point[1])
-                        max_time = max(max_time, curr_point[1])
-                        added = True
-                        break
+        # Miejsce na algorytm:
 
-            leak = list(filter(lambda x : x[1] == min_time, leak))
-            leak = sorted(leak, key=lambda point: (probabilities[point[0]][point[1]], point[0]))
-            
-            if (len(leak) != 0):
-                events.append(Event(self._id, begin + leak[-1][1], leak[-1][0]))
+        fig, ax = plt.subplots()
+        ax.imshow(probabilities)
+        plt.show()
 
         return events
 

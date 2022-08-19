@@ -3,7 +3,7 @@ from .plant import Plant
 
 # test
 
-time_offset = 30000 #milisekundy
+time_offset = 60000 #milisekundy
 
 plant = Plant()
 

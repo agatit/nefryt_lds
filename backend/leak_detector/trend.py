@@ -1,5 +1,7 @@
 from typing import List
 import struct
+from matplotlib import pyplot as plt
+import numpy as np
 
 from sqlalchemy import select, and_
 
@@ -41,9 +43,9 @@ class Trend:
 
                 # rozpoznajemy czy dane sa signed czy unsigned
                 if trend_def.RawMin >= 0:
-                    one_second_data = struct.unpack("H"*100, db_data.Data)
+                    one_second_data = reversed(struct.unpack("H"*100, db_data.Data))
                 else:
-                    one_second_data = struct.unpack("h"*100, db_data.Data)
+                    one_second_data = reversed(struct.unpack("h"*100, db_data.Data))
 
                 # skalowanie
                 for raw_value in one_second_data:
@@ -56,5 +58,6 @@ class Trend:
                 current_timestamp += 1
                                     
             chunk_start += chunk_size
-                
+        # rysowanie wykresu pochodnej dla danego segmentu
+        plt.plot(np.array(data_list))
         return data_list

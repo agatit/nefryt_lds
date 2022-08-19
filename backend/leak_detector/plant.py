@@ -1,7 +1,7 @@
 import copy
 from datetime import  datetime
 import sys
-from typing import List
+from typing import Dict, List
 
 from sqlalchemy import select, and_, insert
 
@@ -26,6 +26,8 @@ class Event:
         self._time = datetime.fromtimestamp(time // 1000)
         self._position = position
 
+    # Co jeżeli dwa razy zostanie wykryte te samo zdarzenie?
+    # Obsługa takiej sytuacji
     def save(self) -> None:
         """save event to database"""
         session = Session()
