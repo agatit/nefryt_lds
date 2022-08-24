@@ -1,7 +1,5 @@
 from typing import List
 import struct
-from matplotlib import pyplot as plt
-import numpy as np
 
 from sqlalchemy import select, and_
 
@@ -58,6 +56,5 @@ class Trend:
                 current_timestamp += 1
                                     
             chunk_start += chunk_size
-        # rysowanie wykresu pochodnej dla danego segmentu
-        plt.plot(np.array(data_list))
+
         return data_list

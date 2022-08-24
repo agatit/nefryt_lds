@@ -1,7 +1,7 @@
 import copy
 from datetime import  datetime
 import sys
-from typing import Dict, List
+from typing import List
 
 from sqlalchemy import select, and_, insert
 

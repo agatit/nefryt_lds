@@ -1,11 +1,10 @@
 from typing import List
 
-import numpy as np
+from ..tests.plots import global_plot
 
 from .base import MethodBase, Segment
 from ..plant import Event, Pipeline
 
-import matplotlib.pyplot as plt
 class MethodWave(MethodBase):
 
     def __init__(self, pipeline : Pipeline, id, name):
@@ -59,18 +58,18 @@ class MethodWave(MethodBase):
             if (previous_segment != segment):
                 window_begin = begin - segment.max_window_size
                 window_end = end + segment.max_window_size
-
                 data_start = segment.start.get_trend_data(window_begin, window_end)
                 data_end = segment.end.get_trend_data(window_begin, window_end)
+                global_plot.trend_graph(data_start, window_begin, window_end, self._pipeline.time_resolution)
+                global_plot.trend_graph(data_end, window_begin, window_end, self._pipeline.time_resolution)
 
             l1 = current_pos - segment._begin_pos
             l2 = segment._end_pos - current_pos
 
             for current_time in range(begin, end, self._pipeline.time_resolution):
-                offset1 = (l1 * 1000) / wave_speed 
-                offset2 = (l2 * 1000) / wave_speed 
+                offset1 = l1 / wave_speed * 1000 
+                offset2 = l2 / wave_speed * 1000
                 data_point = current_time - window_begin
-                
                 dp1 = data_start[int((data_point - offset1) / 10)]
                 dp2 = data_end[int((data_point - offset2) / 10)]
                 dp3 = data_start[int((data_point + offset1) / 10)]
@@ -81,7 +80,7 @@ class MethodWave(MethodBase):
                 res = (res - self._min_level) / (self._max_level - self._min_level)
 
                 res = min(max(0, res), 1)
-                
+
                 probability_pos.append(res)
 
             previous_segment = segment
@@ -91,20 +90,66 @@ class MethodWave(MethodBase):
 
 
     def find_leaks_in_range(self, begin, end) -> List[Event]:
-        probabilities = np.array(self.get_probability(begin, end))
-        
+        probabilities = self.get_probability(begin, end)
+        # Stałe:
+        window_position_size = 10
+        window_time_size = 1500
+
+        start_leak_points = set()
         events = []
 
+        # Pierwszy algorytm
+        # Działa na symulowanych danych w większości przypadków (rozmiar okna powinien być lepiej dobrany)
+        # 1. Wybiera pierwsze punkty w których prawdopodobieńśtwo wycieku jest większe od zera i po których wystąpił wyciek
+        # 2. Dzieli te pierwsze punkty na zbiory punktów reprezentujący jeden wyciek
+        # 3. Wybiera czas w którym proste reprezentujące przez punkty się przecinają
+        # 4. Szacuje punkt wycieku na podstawie czasu
+
+        # Jestem prawie pewien, że trzeba będzie wymyśleć coś lepszego dla rzeczywistych wycieków.
+        # Algorytm czasami przez okno może niedobrze wybrać wycieki
+        # Można również podzielić wydarzenia przez kubełki/na przedziały czasu
+
         for position in range(len(probabilities)):
+            is_leak = False
             for time in range(len(probabilities[0])):
-                if (probabilities[position][time] < self._alarm_level):
-                    probabilities[position][time] = 0
+                if probabilities[position][time] > self._alarm_level:
+                    if not is_leak:
+                        is_leak = True
+                        while (time > 0 and probabilities[position][time] > 0):
+                            time -= 1
+                        start_leak_points.add((position, time))
+                else:
+                    is_leak = False
 
-        # Miejsce na algorytm:
+        while (len(start_leak_points) != 0):
+            leak = []
+            added = True
+            point = start_leak_points.pop()
+            leak.append(point)
 
-        fig, ax = plt.subplots()
-        ax.imshow(probabilities)
-        plt.show()
+            min_position = max_position = point[0]
+            min_time = max_time = point[1]
+
+            while (added):
+                added = False
+                for curr_point in start_leak_points:
+                    if (min_position - window_position_size <= curr_point[0] <= max_position + window_position_size and
+                        min_time - window_time_size <= curr_point[1] <= max_time + window_time_size):
+                        start_leak_points.remove(curr_point)
+                        leak.append(curr_point)
+                        min_position = min(min_position, curr_point[0])
+                        max_position = max(max_position, curr_point[0])
+                        min_time = min(min_time, curr_point[1])
+                        max_time = max(max_time, curr_point[1])
+                        added = True
+                        break
+    
+            leak_points = list(map(lambda point: point[0], filter(lambda point: point[1] == max_time, leak)))
+            position = int(sum(leak_points) / len(leak_points))
+            events.append(Event(self._id, begin + max_time * self._pipeline.time_resolution, position))
+
+        global_plot.probability_heatmap(probabilities, begin, end, self._length_pipeline)
+
 
         return events
 

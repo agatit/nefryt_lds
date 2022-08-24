@@ -1,3 +1,4 @@
+from math import ceil
 from typing import List
 import logging
 
@@ -25,7 +26,7 @@ class Segment:
         # Tutaj maksymalne okno powinno zostać policzone w inny sposób,
         # jeżeli segment nie będzie miał stałego wave_speed
         self._wave_speed = wave_speed
-        self._max_window_size = (self._length / self._wave_speed) * 1000 
+        self._max_window_size = ceil(self._length / self._wave_speed) * 1000 
 
 
     def calc_wave_speed(self, position) -> int:

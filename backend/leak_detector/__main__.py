@@ -1,4 +1,6 @@
 import time
+
+from .tests.plots import global_plot
 from .plant import Plant
 
 # test
@@ -24,4 +26,5 @@ for i in range(10):
                 print("  TIME: ", event._time)
                 print("  POSITION: ", event._position, "m")
                 print("")
+        global_plot.show()
     time.sleep(5)
