@@ -43,9 +43,10 @@ const handleTrendClick = async () => {
 
   return (
     <Layout content={<></>} rPanel={{
-      visible: false,
+      enable: false,
       open: false,
-      content: undefined
+      content: undefined,
+      handleDrawer: undefined
     }}></Layout>    
   )
 }

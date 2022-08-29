@@ -24,8 +24,9 @@ export type RPanelParams = {
 }
     
 export type RPanel ={
-  visible: boolean,
+  enable: boolean,
   open: boolean,
   content : ReactElement,
+  handleDrawer:  MouseEventHandler<T>,  
 }
 

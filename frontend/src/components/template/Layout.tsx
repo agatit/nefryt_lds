@@ -144,16 +144,18 @@ const Layout: React.FC<Props> = (p) => {
 
       
   var sidebar_open = templateReducer.sidebar_open;
-  var rpanel_visible = p.rPanel.visible;
+  var rpanel_enable = p.rPanel.enable;
   var rpanel_open = p.rPanel.open;
 
-  var pRight = rpanel_visible ? 20 : 0;
+  var pRight = rpanel_enable ? 20 : 0;
 
-  var appClass : string  = rpanel_visible ? "none-user-select" : "auto" ;
+  var appClass : string  = rpanel_enable ? "none-user-select" : "auto" ;
       
   const handleToggleDrawer  = (e: React.MouseEvent<HTMLElement>) => {
     dispatch(toggleSidebar());
   }
+
+
  
     
 
@@ -186,7 +188,7 @@ const Layout: React.FC<Props> = (p) => {
     
       <div id='app-content' className={appClass} style={{paddingRight:pRight}}>
         {p.content}
-        {rpanel_visible ? <RightPanel content={p.rPanel.content} styles={styles} is_open={rpanel_open} handleDrawer={undefined} children={undefined} ></RightPanel> : null} 
+        {rpanel_enable ? <RightPanel content={p.rPanel.content} styles={styles} is_open={rpanel_open} handleDrawer={p.rPanel.handleDrawer} children={undefined} ></RightPanel> : null} 
       </div> 
     </div>      
   )
