@@ -19,6 +19,7 @@ import { getData, setData } from "../../actions/events/actions";
 import { listEvents } from "../../apis";
 import { useRequest } from "redux-query-react";
 import { getEntities, getQueries } from "../../store";
+import moment from "moment";
 
 const EventsPage: React.FC = () => {
  //var data:any = [{url:'aaa', title:'bbb', created_at:'ccc', points:'ddd', num_components:'ff' }];
@@ -106,6 +107,7 @@ const [EventsListState] = useRequest(queryEventList);
 if ((reducer.is_loading) && (EventsListState.isFinished)){
   console.log('aaaaa');
   dispatch(setData(entities.events_data));
+
 }
 
 
@@ -168,7 +170,11 @@ function onSortChange(action:any, state:any) {
 
  
  const COLUMNS = [
-  { label: 'caption', renderCell: (item:any) => item.name,resize: true, sort: { sortKey: 'caption' } },
+  { label: 'caption', renderCell: (item:any) => item.caption,resize: true, sort: { sortKey: 'caption' } },
+  { label: 'beginDate', renderCell: (item:any) => moment(item.beginDate).format('dd/MM/yyyy'),resize: true, sort: { sortKey: 'beginDate' } },
+  { label: 'endDate', renderCell: (item:any) => moment(item.endDate).format('dd/MM/yyyy'),resize: true, sort: { sortKey: 'endDate' } },
+  { label: 'ackDate', renderCell: (item:any) => moment(item.ackDate).format('dd/MM/yyyy'),resize: true, sort: { sortKey: 'ackDate' } },
+  { label: 'position', renderCell: (item:any) => item.position,resize: true, sort: { sortKey: 'position' } },
   /*{
     label: 'Deadline',
     renderCell: (item:any) =>
