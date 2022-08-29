@@ -1,5 +1,6 @@
 import * as React from "react";
 import ReactDOM from 'react-dom';
+import { Layout } from "../../components/template/Layout";
 
 
 
@@ -7,9 +8,11 @@ import ReactDOM from 'react-dom';
 const EditorPage: React.FC = () => {
 
   return (
-    <div className={'root'}>
-      Daschboard
-    </div>
+    <Layout content={<></>} rPanel={{
+      visible: false,
+      open: false,
+      content: undefined
+    }}></Layout>    
   )
 }
 

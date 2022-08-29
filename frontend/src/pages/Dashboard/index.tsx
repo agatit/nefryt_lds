@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { useNavigate } from "react-router-dom";
 import { AuthLoginApiArg, useAuthLoginMutation } from "../../store/authApi";
 import { useListTrendsQuery } from "../../store/trendApi";
-
+import { Layout } from "../../components/template/Layout";
 
 
 
@@ -42,13 +42,11 @@ const handleTrendClick = async () => {
 
 
   return (
-    <div className={'root'}>
-      <div>Daschboard</div>
-      <Button onClick={handleClick} variant="contained">Charts</Button>
-      
-                  
-    </div>
-    
+    <Layout content={<></>} rPanel={{
+      visible: false,
+      open: false,
+      content: undefined
+    }}></Layout>    
   )
 }
 

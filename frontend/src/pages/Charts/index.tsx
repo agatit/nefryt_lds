@@ -2,6 +2,7 @@ import { Button } from "@material-ui/core";
 import * as React from "react";
 import ReactDOM from 'react-dom';
 import { useNavigate } from "react-router-dom";
+import { Layout } from "../../components/template/Layout";
 import { useListTrendsQuery } from "../../store/trendApi";
 
 
@@ -22,10 +23,11 @@ const handleClick = async () => {
 };
 
   return (
-    <div className={'root'}>
-      Charts
-      <Button onClick={handleClick} variant="contained">Home</Button>
-    </div>
+    <Layout content={<></>} rPanel={{
+      visible: false,
+      open: false,
+      content: undefined
+    }}></Layout>    
   )
 }
 

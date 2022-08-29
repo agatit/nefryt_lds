@@ -22,7 +22,9 @@ const slice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    logout: () => initialState,
+    logout: (state) => {
+      state = initialState
+    }
   },
   extraReducers: (builder) => {
     builder
