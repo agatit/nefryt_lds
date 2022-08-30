@@ -10,6 +10,7 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: 'http://192.168.1.86:8080/',
   prepareHeaders: (headers, { getState }) => {
       var token = localStorage.getItem('token');
+      console.log(token);
       headers.set('Access-Control-Allow-Origin', '*')
       headers.set('Authorization', `Bearer ${token}`)
     return headers}

@@ -19,10 +19,10 @@ var isAuth=false;
 
   
   
- const { data, error, isLoading } = useListTrendsQuery();
- console.log(data);
-console.log(error);
-console.log(isLoading);
+ //const { data, error, isLoading } = useListTrendsQuery();
+ //console.log(data);
+//console.log(error);
+//console.log(isLoading);
 
   const handleClick = async () => {
     

@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
 import { ChartsState, ITrend } from '../../features/charts/types';
-import { setAutoscale, setDateRange, setFromDate, setHorizontalLine, setOnlySelected, setToDate, setTrendScale, setVerticalLine, toggleLiveMode, toggleTooltip, toggleZoomMode } from '../../features/charts/chartsSlice';
+import { addSerie, setAutoscale, setDateRange, setFromDate, setHorizontalLine, setOnlySelected, setToDate, setTrendScale, setVerticalLine, toggleLiveMode, toggleTooltip, toggleZoomMode } from '../../features/charts/chartsSlice';
 import { Dispatch } from '@reduxjs/toolkit';
 
 export const ChartsRPanel: React.FC = () => {
@@ -71,6 +71,9 @@ export const ChartsRPanel: React.FC = () => {
 
            const handleChangeTrend = (event: any) => {
             event.preventDefault();
+            if (event.target.checked){
+              dispatch(addSerie({trendName: event.target.name.replace('trd_', '')}));
+            }
               //dispatch(changeTrend(event.target.name.replace('trd_', ''), event.target.checked));
             if (!event.target.checked){
                setExpanded('false');
@@ -86,7 +89,7 @@ export const ChartsRPanel: React.FC = () => {
             return `${value}°C`;
           }
 
-          console.log(reducer.chart.trends);
+         // console.log(reducer.chart.trends);
           
     return (
         <> 

@@ -23,7 +23,10 @@ const slice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state = initialState
+      state = initialState;
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
     }
   },
   extraReducers: (builder) => {
@@ -32,9 +35,6 @@ const slice = createSlice({
         console.log('pending', action)
       })
       .addMatcher(authApi.endpoints.authLogin.matchFulfilled, (state, action) => {
-        //console.log('fulfilled', action);
-        //console.log('LLLLLLLLLLLLLLLLLLLLLLL');
-        //console.log(action.payload.token);
         state.user = action.payload.username
         state.token = action.payload.token
         state.refreshToken = action.payload.refreshToken
@@ -47,7 +47,6 @@ const slice = createSlice({
         console.log('rejected', action)
       })
       .addMatcher(authApi.endpoints.authRefresh.matchFulfilled, (state, action) => {
-        console.log(action.payload);
         state.user = action.payload.username
         state.token = action.payload.token
         state.refreshToken = action.payload.refreshToken

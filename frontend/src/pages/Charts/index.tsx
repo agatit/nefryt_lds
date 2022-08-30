@@ -11,6 +11,7 @@ import { ChartsState } from "../../features/charts/types";
 import { useListTrendsQuery } from "../../store/trendApi";
 import { ChartsContent } from "./content";
 import { ChartsRPanel } from "./rpanel";
+import "./style.css";
 
 
 

@@ -3,6 +3,7 @@ import { ChartsPage } from '../../pages/Charts'
 import {  ChartsState, ITrend, PERIOD_EXTENSION} from './types'
 import { enhancedApi as trendApi, Trend, TrendDef } from '../../store/trendApi'
 
+var colorList:string[] = ["#ff0000", "#00ff00", '#0000ff', '#000000'];
 
 const initialState: ChartsState={
     chart: {
@@ -126,6 +127,58 @@ export const chartsSlice = createSlice({
           element.autoscale = action.payload.autoscale;
         }      
       });
+    },
+    addSerie : (state, action) => {
+      var trd : ITrend[] = state.chart.trends.map((obj: ITrend) => ({...obj}));
+
+      var idx=0; 
+      const selectedTrends: ITrend[] =trd.filter((obj: ITrend) => obj.selected);
+
+      idx = selectedTrends.length;
+      trd.forEach(element => {
+         if (element.ID == action.payload.trendName)
+         {
+           element.selected = true; 
+           element.disabled = false; 
+           element.autoscale = true;
+           //element.scaledMax = 
+           //if (element.color==undefined){
+             if (selectedTrends.length < colorList.length){
+               var selectedColorList: ITrend[] =trd.filter((obj: ITrend) => obj.Color==colorList[idx%colorList.length]);
+               if (selectedColorList.length>0){
+                 try{
+                   colorList.forEach(color => {
+                     selectedColorList =selectedTrends.filter((obj: ITrend) => obj.Color==color);
+                     if (selectedColorList.length==0){
+                       element.Color =color;
+                     }
+                   });
+
+                 }catch{
+
+                 }
+
+
+               }else{
+                 element.Color =colorList[idx%colorList.length];
+               }
+             }else{
+               var count = selectedTrends.length;
+               var mincolor = colorList[idx%colorList.length];
+               colorList.forEach(color => {
+                 selectedColorList =selectedTrends.filter((obj: ITrend) => obj.Color==color);
+                 if (count > selectedColorList.length){
+                   count = selectedColorList.length;
+                   element.Color =color;
+                 }
+               });
+               
+             }
+           //}
+         }
+       });
+       state.chart.trends = trd;
+
     }
 
   },
@@ -136,11 +189,8 @@ export const chartsSlice = createSlice({
         console.log('pending');
       })
       .addMatcher(trendApi.endpoints.listTrends.matchFulfilled, (state, action) => {
-        //console.log('fulfilled', action)
         var trd : Trend[] = action.payload;
-        //console.log(action.payload.entries);
         var idx=0;
-        var data : ITrend[] = [];
         trd.forEach((element: Trend) => {
         
            var tmp : string =  element.Symbol? element.Symbol : element.ID.toString(); 
@@ -165,18 +215,14 @@ export const chartsSlice = createSlice({
              step: (element.ScaledMax - element.ScaledMin) / 100
            };
 
-           data.push(elm);
+           state.chart.trends.push(elm);
            
            idx++;
          });
-         console.log('AAAAAAAAAAAAAAAA');
-         console.log(data);
-         state.chart.trends = data;
 
       })
       .addMatcher(trendApi.endpoints.listTrends.matchRejected, (state, action) => {
         console.log('rejected', action)
-        state.chart.trends = [];
       })
       
       
@@ -185,7 +231,8 @@ export const chartsSlice = createSlice({
 })
 
 export const { setHorizontalLine, setVerticalLine, toggleLiveMode, toggleZoomMode, toggleTooltip, toggleRightPanel, 
-               setFromDate,setToDate, setOnlySelected, setTrendScale, setDateRange, setAutoscale } = chartsSlice.actions
+               setFromDate,setToDate, setOnlySelected, setTrendScale, setDateRange, setAutoscale,
+               addSerie } = chartsSlice.actions
 
 // The function below is called a thunk and allows us to perform async logic. It
 // can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This
