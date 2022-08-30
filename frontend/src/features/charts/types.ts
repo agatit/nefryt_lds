@@ -30,7 +30,7 @@ export type ChartParams = {
     unixtime : number
   }
 
-  export type ITrend  = Trend  & {
+  export type ITrend  = Trend & {
     selected:boolean;
     axislabel:string;
     trendname:string;

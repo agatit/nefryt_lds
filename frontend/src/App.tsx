@@ -32,8 +32,8 @@ const ProtectedRoute = ({ user=false, redirectPath = '/login' }) => {
 
 export default function App() {
   
-  //const isAuthenticated = useSelector(selectIsAuthenticated)
-  const isAuthenticated = true;
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  //const isAuthenticated = true;
 
 
   const auth: AuthData = useSelector(

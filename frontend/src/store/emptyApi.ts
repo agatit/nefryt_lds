@@ -9,8 +9,9 @@ import { RootState } from '../app/store';
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: 'http://192.168.1.86:8080/',
   prepareHeaders: (headers, { getState }) => {
+      var token = localStorage.getItem('token');
       headers.set('Access-Control-Allow-Origin', '*')
-      headers.set('Authorization', `Bearer ${(getState() as RootState).auth.token}`)
+      headers.set('Authorization', `Bearer ${token}`)
     return headers}
   }),
   

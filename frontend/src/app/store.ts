@@ -10,11 +10,14 @@ export const store = configureStore({
   reducer: {
 
     [trendApi.reducerPath] : trendApi.reducer,
+    [trendApi.reducerPath] : trendApi.reducer,
     auth,
     template,
-    charts
+    charts,
+    
   },
-
+  //middleware: (getDefaultMiddleware) =>
+   // getDefaultMiddleware().concat(trendApi),
 });
 
 export type AppDispatch = typeof store.dispatch;

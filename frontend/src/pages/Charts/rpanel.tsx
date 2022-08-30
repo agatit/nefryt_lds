@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
 import { ChartsState, ITrend } from '../../features/charts/types';
-import { setHorizontalLine, setVerticalLine, toggleLiveMode, toggleTooltip, toggleZoomMode } from '../../features/charts/chartsSlice';
+import { setAutoscale, setDateRange, setFromDate, setHorizontalLine, setOnlySelected, setToDate, setTrendScale, setVerticalLine, toggleLiveMode, toggleTooltip, toggleZoomMode } from '../../features/charts/chartsSlice';
 import { Dispatch } from '@reduxjs/toolkit';
 
 export const ChartsRPanel: React.FC = () => {
@@ -38,35 +38,30 @@ export const ChartsRPanel: React.FC = () => {
     };
 
     function changeDateFrom(this: any, newValue: number | null) {
-        //dispatch(setFromDate(newValue));
+        dispatch(setFromDate(newValue));
       }
     
       function changeDateTo(this: any, newValue: number | null) {
-        //dispatch(setToDate(newValue));
+        dispatch(setToDate(newValue));
       }
 
       const handleSwitchOnlySelected = (event: any) => {
-        //dispatch(setOnlySelected(event.target.checked));
+        dispatch(setOnlySelected(event.target.checked));
       }
 
       const handleChange2 = (event: any, newValue: number | number[]) => {
         if (!Array.isArray(newValue)) {
             return;
           }
-        //  console.log(event.target.parentElement.querySelector('input').name);
-         var trd = event.target.parentElement.querySelector('input').name.replace('trd_slider_', '');
-        console.log(newValue);
-            //dispatch(setTrendScale(trd,newValue));
+          var trd = event.target.parentElement.querySelector('input').name.replace('trd_slider_', '');
+          dispatch(setTrendScale({trendiD: trd, scale: newValue}));
         };
 
         const changeDataRange = (e: React.MouseEvent<HTMLElement>) => {
-           // dispatch(setDateRange());
+            dispatch(setDateRange());
         }
   
         const handleChange = (panel: string) => (event: any, isExpanded: any) => {
-            // console.log(event.target );
-            // console.log(event.target.parentElement );
-              console.log(event.target.classList.contains("changeAccordionState") );
              if ((event.target.classList.contains("changeAccordionState")) || ((event.target.parentElement) && (event.target.parentElement.classList.contains("changeAccordionState")))){
                  setExpanded(isExpanded ? panel : 'false');
              }
@@ -84,12 +79,14 @@ export const ChartsRPanel: React.FC = () => {
           }
 
           const toggleAutoscale = (event:any) => {
-           // dispatch(setAutoscale(event.target.name.replace('trd_manual_scale_', ''), !event.target.checked));
+            dispatch(setAutoscale({trendiD : event.target.name.replace('trd_manual_scale_', ''), autoscale: !event.target.checked}));
           }
           
           function valuetext(value:any) {
             return `${value}°C`;
           }
+
+          console.log(reducer.chart.trends);
           
     return (
         <> 

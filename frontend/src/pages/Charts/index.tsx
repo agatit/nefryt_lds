@@ -9,6 +9,7 @@ import { Layout } from "../../components/template/Layout";
 import { toggleRightPanel } from "../../features/charts/chartsSlice";
 import { ChartsState } from "../../features/charts/types";
 import { useListTrendsQuery } from "../../store/trendApi";
+import { ChartsContent } from "./content";
 import { ChartsRPanel } from "./rpanel";
 
 
@@ -23,10 +24,10 @@ const ChartsPage: React.FC = () => {
   )
   
   const navigate = useNavigate();
-  const { data, error, isLoading } = useListTrendsQuery();
-  console.log(data);
-console.log(error);
-console.log(isLoading);
+  //const { data, error, isLoading } = useListTrendsQuery();
+  //console.log(data);
+  //console.log(error);
+  //console.log(isLoading);
 const handleClick = async () => {
     
   
@@ -44,7 +45,7 @@ const handleToggleRightPanel  = (e: React.MouseEvent<HTMLElement>) => {
 
 
   return (
-    <Layout content={<></>} rPanel={{
+    <Layout content={<ChartsContent/>} rPanel={{
       enable: true,
       open: reducer.rpanel_open,
       content: <ChartsRPanel/>,
