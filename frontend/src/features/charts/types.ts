@@ -1,5 +1,6 @@
-import { Trend, TrendData } from "../../models";
-//type of chart parameeters
+import { Trend, TrendData } from "../../store/trendApi";
+
+export const PERIOD_EXTENSION = 2;
 
 
 export type ChartsState = {
@@ -29,7 +30,7 @@ export type ChartParams = {
     unixtime : number
   }
 
-  export type ITrend  = Trend & {
+  export type ITrend  = Trend  & {
     selected:boolean;
     axislabel:string;
     trendname:string;
