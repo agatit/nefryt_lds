@@ -1,6 +1,5 @@
-import { Trend, TrendData } from "../../store/trendApi";
-
-export const PERIOD_EXTENSION = 2;
+import { Trend, TrendData } from "../../models";
+//type of chart parameeters
 
 
 export type ChartsState = {
