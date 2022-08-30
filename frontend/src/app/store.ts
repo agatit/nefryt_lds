@@ -10,7 +10,7 @@ export const store = configureStore({
   reducer: {
 
     [trendApi.reducerPath] : trendApi.reducer,
-    [trendApi.reducerPath] : trendApi.reducer,
+    //[trendApi.reducerPath] : trendApi.reducer,
     auth,
     template,
     charts,
