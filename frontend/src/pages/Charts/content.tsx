@@ -11,8 +11,19 @@ import { renderCusomizedLegend } from './legend';
 import { useGetTrendDataQuery, useListTrendsQuery } from '../../store/trendApi';
 import { areaRef, setBrushRange } from '../../features/charts/chartsSlice';
 import { Dispatch } from '@reduxjs/toolkit';
+import "./style.css";
 
-export const ChartsContent: React.FC = () => {
+interface BrushStartEndIndex {
+  startIndex?: number;
+  endIndex?: number;
+}
+
+type Props={
+  data:any[];
+  onbrushchange?:(React.FormEventHandler<SVGElement> & ((newIndex: BrushStartEndIndex) => void)) | undefined;
+} 
+
+export const ChartsContent: React.FC<Props> = (p) => {
  
   
   const dispatch :Dispatch = useDispatch();
@@ -47,14 +58,13 @@ export const ChartsContent: React.FC = () => {
     //var TrendsDataState: QueryState={isFinished:false,isPending:false, lastUpdated:0};
     var TrendsDataState = {isPending:false};
 
-    var dat1 =reducer.chart.data;
+   // var dat1 =reducer.chart.data;
 
-    const activeTrends: any[] =reducer.chart.trends.filter((obj: ITrend) => obj.selected &&  !obj.disabled);
-
-    
-    var dat2:any[] = [];
 
     
+    //var 
+
+  /*  
 dat1.forEach((element: ITrendData) => {
   var tmp:any={Timestamp: element.Timestamp, TimestampMs: element.Timestamp, unixtime: element.unixtime};
 
@@ -67,7 +77,7 @@ dat1.forEach((element: ITrendData) => {
   
 
 });
-
+*/
     const handleMouseDown = (e: CategoricalChartState) => {
         if (!e || !e.activeLabel) {
           return
@@ -179,35 +189,22 @@ dat1.forEach((element: ITrendData) => {
       const selectedTrends: ITrend[] =trends.filter((obj: ITrend) => obj.selected);
       const selectedTrendCount = selectedTrends.length;
 
-      var data_range_from=0;
-      var data_range_to=0;
-      var brush_startIndex = 0;
-      var brush_endIndex = 0;
-
-      const handlemouseup  = (e: React.MouseEvent<HTMLElement>) => {
-        if ((data_range_from > 0) && (data_range_to>0)){
-          dispatch(setBrushRange({from: data_range_from, to: data_range_to, startIndex: brush_startIndex, endIndex:brush_endIndex} ));
-          data_range_from=0;
-          data_range_to=0;
-          brush_startIndex = 0;
-          brush_endIndex = 0;
-        }
-  }
+     
 
   
     return (
         <>
             <Box sx={{ width: '100%', height:'10px'}}>
                
-              {TrendsDataState.isPending &&  <LinearProgress />}
+              {reducer.chart.is_loading_trends &&  <LinearProgress />}
              </Box>
               
-              <ResponsiveContainer width="100%" height="100%" >
+              <ResponsiveContainer width="100%" height="100%">
               
                 <LineChart
                   width={500}
                   height={300}
-                  data={dat2}
+                  data={p.data}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   // eslint-disable-next-line react/jsx-no-bind
@@ -276,20 +273,9 @@ dat1.forEach((element: ITrendData) => {
        { !reducer.chart.mode.live.active?
     
               <><Brush dataKey="unixtime" startIndex={reducer.chart.brush.startIndex} endIndex={reducer.chart.brush.endIndex}
-                        tickFormatter={formatBrush} onChange={(a: any) => {
-
-                          var from;
-                          var to;
-                          data_range_from = dat2[a.startIndex].unixtime;
-                          data_range_to = dat2[a.endIndex].unixtime;
-                          brush_startIndex = a.startIndex;
-                          brush_endIndex = a.endIndex;
-
-                          from = dat2[a.startIndex].unixtime; //- range * (Math.round(0.9*DATA_SIZE/2));
-                          to = dat2[a.endIndex].unixtime;
-
+                        tickFormatter={formatBrush} onChange={p.onbrushchange} ></Brush>
                           
-                        } } />
+                        
 
                         </>  
                  : null }

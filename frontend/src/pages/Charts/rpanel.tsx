@@ -11,6 +11,7 @@ import { RootState } from '../../app/store';
 import { ChartsState, ITrend } from '../../features/charts/types';
 import { addSerie, removeSerie, setAutoscale, setDateRange, setFromDate, setHorizontalLine, setOnlySelected, setToDate, setTrendScale, setVerticalLine, toggleLiveMode, toggleTooltip, toggleZoomMode } from '../../features/charts/chartsSlice';
 import { Dispatch } from '@reduxjs/toolkit';
+import "./style.css";
 
 export const ChartsRPanel: React.FC = () => {
     

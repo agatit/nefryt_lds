@@ -6,8 +6,8 @@ import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../app/store";
 import { Layout } from "../../components/template/Layout";
-import { setTimer, setTimestampRange, toggleRightPanel } from "../../features/charts/chartsSlice";
-import { ChartsState, ITrend } from "../../features/charts/types";
+import { setBrushRange, setTimer, setTimestampRange, toggleRightPanel } from "../../features/charts/chartsSlice";
+import { ChartsState, ITrend, ITrendData } from "../../features/charts/types";
 import { useListTrendsQuery } from "../../store/trendApi";
 import { ChartsContent } from "./content";
 import { ChartsRPanel } from "./rpanel";
@@ -70,9 +70,70 @@ const ChartsPage: React.FC = () => {
 
   }, [reducer])
 
+ /* const handlemouseup = (e: any) => {
+    if (!e || !e.activeLabel) {
+      return
+    }
+  }
+  */
+
+  var data_range_from=0;
+  var data_range_to=0;
+  var brush_startIndex = 0;
+  var brush_endIndex = 0;
+
+  var dat1 =reducer.chart.data;
+
+  
+  var dat2 : any[] = []; 
+  const activeTrends: any[] =reducer.chart.trends.filter((obj: ITrend) => obj.selected &&  !obj.disabled);
+
+  
+dat1.forEach((element: ITrendData) => {
+var tmp:any={Timestamp: element.Timestamp, TimestampMs: element.Timestamp, unixtime: element.unixtime};
+
+activeTrends.forEach((trd:ITrend)=>{
+  tmp[trd.ID] = element[trd.ID];
+});
+
+dat2.push(tmp);
+
+
+
+});
+
+
+  const handlemouseup  = (e: React.MouseEvent<HTMLElement>) => {
+    //alert('AAAAAAAAAAAAAAAAAAAAA');
+    //console.log(data_range_from);
+    if ((data_range_from > 0) && (data_range_to>0)){
+      
+      dispatch(setBrushRange({from: data_range_from, to: data_range_to, startIndex: brush_startIndex, endIndex:brush_endIndex} ));
+      data_range_from=0;
+      data_range_to=0;
+      brush_startIndex = 0;
+      brush_endIndex = 0;
+    }
+}
+
+  const handlebrushchange = (a: any) => {
+
+    var from;
+    var to;
+    data_range_from = dat2[a.startIndex].unixtime;
+    data_range_to = dat2[a.endIndex].unixtime;
+    brush_startIndex = a.startIndex;
+    brush_endIndex = a.endIndex;
+
+    from = dat2[a.startIndex].unixtime; //- range * (Math.round(0.9*DATA_SIZE/2));
+    to = dat2[a.endIndex].unixtime;
+
+    
+  } 
+
 
   return (
-    <Layout content={<ChartsContent/>} rPanel={{
+    <Layout onmouseup={handlemouseup} content={<ChartsContent onbrushchange={handlebrushchange} data={dat2}/>} rPanel={{
       enable: true,
       open: reducer.rpanel_open,
       content: <ChartsRPanel/>,

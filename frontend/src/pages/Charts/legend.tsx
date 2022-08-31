@@ -4,7 +4,7 @@ import { shallowEqual, useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
 import { ChartsState, ITrend } from '../../features/charts/types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceArea, Brush, Surface, Symbols } from 'recharts';
-
+import "./style.css";
 
 
  export const renderCusomizedLegend = (payload :any) => {

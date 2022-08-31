@@ -300,10 +300,12 @@ export const chartsSlice = createSlice({
 
       .addMatcher(trendApi.endpoints.listTrends.matchRejected, (state, action) => {
         //console.log('rejected', action)
+        
       })  
 
       .addMatcher(trendApi.endpoints.getTrendData.matchPending, (state) => {
         //console.log('pending');
+        state.chart.is_loading_trends = true;
       })
 
       .addMatcher(trendApi.endpoints.getTrendData.matchFulfilled, (state, action) => {
@@ -341,12 +343,13 @@ export const chartsSlice = createSlice({
            state.chart.data = dat;
            console.log(state.chart.data);
         }
-
+        state.chart.is_loading_trends = false;
 
       })
 
       .addMatcher(trendApi.endpoints.getTrendData.matchRejected, (state, action) => {
-        console.log('rejected TrendData', action)
+        console.log('rejected TrendData', action);
+        state.chart.is_loading_trends = false;
       })  
   },
   
