@@ -16,8 +16,8 @@ export const store = configureStore({
     charts,
     
   },
-  //middleware: (getDefaultMiddleware) =>
-   // getDefaultMiddleware().concat(trendApi),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(trendApi.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;

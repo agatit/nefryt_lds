@@ -23,13 +23,11 @@ export const RightPanel: React.FC<RPanelParams> = (p) => {
       //dispatch(toggleRPanel());
   //}
 
-  const panelclick = (e: React.MouseEvent<HTMLElement>) => {
-    // e.preventDefault();
-  }
+ 
 
 
   return (  
-    <div id="mySidepanel" className={rightpanelClasses} onClick={panelclick}>
+    <div id="mySidepanel" className={rightpanelClasses} >
       <div style={{textAlign:'left'}}>
         <IconButton className={p.styles.sidebarRightButton} onClick={p.handleDrawer}>
           {is_open?  <ChevronRightOutlined /> :  <ChevronLeftOutlined />}

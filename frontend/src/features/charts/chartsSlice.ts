@@ -1,9 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { ChartsPage } from '../../pages/Charts'
-import {  ChartsState, ITrend, PERIOD_EXTENSION} from './types'
-import { enhancedApi as trendApi, Trend, TrendDef } from '../../store/trendApi'
+import {  ChartsState, ITrend, ITrendData, PERIOD_EXTENSION} from './types'
+import { enhancedApi as trendApi, Trend, TrendData, TrendDef } from '../../store/trendApi'
+import { CollectionsOutlined } from '@material-ui/icons';
 
 var colorList:string[] = ["#ff0000", "#00ff00", '#0000ff', '#000000'];
+
+var x = new Date();
+var currentTimeZoneOffsetInSeconds = x.getTimezoneOffset();
+
 
 const initialState: ChartsState={
     chart: {
@@ -66,8 +71,8 @@ export const chartsSlice = createSlice({
 
        state.chart.mode.live.period = period;
        state.chart.mode.live.active = !state.chart.mode.live.active;
-       state.chart.currRange.from = cFrom;
-       state.chart.currRange.to = cTo;
+     //  state.chart.currRange.from = cFrom;
+     //  state.chart.currRange.to = cTo;
     
     },
     toggleZoomMode : (state) => {
@@ -80,10 +85,10 @@ export const chartsSlice = createSlice({
         state.rpanel_open = !state.rpanel_open;
     },
     setFromDate : (state, action) => {
-      state.chart.cfgRange.from = action.payload;
+      state.chart.cfgRange.from =  Date.parse(action.payload);
     },
     setToDate : (state, action) => {
-      state.chart.cfgRange.to = action.payload;
+      state.chart.cfgRange.to =  Date.parse(action.payload);
     },
     setOnlySelected : (state, action) => {
       state.chart.onlySelected = action.payload;
@@ -129,6 +134,7 @@ export const chartsSlice = createSlice({
       });
     },
     addSerie : (state, action) => {
+      //console.log('add');
       var trd : ITrend[] = state.chart.trends.map((obj: ITrend) => ({...obj}));
 
       var idx=0; 
@@ -179,6 +185,76 @@ export const chartsSlice = createSlice({
        });
        state.chart.trends = trd;
 
+    },
+    removeSerie : (state, action) => {
+      //console.log('remove');
+      var data : any[] = [];
+          var trds : ITrend[] = state.chart.trends.map((obj: ITrend) => ({...obj})); 
+          if ((state.chart.data) && (state.chart.data.length>0)){
+           data = state.chart.data.map((obj: any) => ({...obj}));
+          }
+         
+         trds.forEach(element => {
+            if (element.ID == action.payload.trendName)
+            {
+              element.selected = false;
+              element.Color = undefined;
+              
+            }
+          });
+          state.chart.data=data;
+          state.chart.trends = trds;
+    },
+    areaRef:(state, action) => {
+      state.chart.refArea = action.payload;
+    },
+    setBrushRange: (state, action) => {
+      var range = action.payload.to - action.payload.from;
+      
+      if (range==0){
+        range=1;
+      }
+      var cFrom;
+      var cTo;
+      if (state.chart.mode.live.active){
+        cFrom = action.payload.from 
+        cTo = action.payload.to
+      }else{
+        cFrom = action.payload.from - (PERIOD_EXTENSION*range);
+        cTo =  action.payload.to + (PERIOD_EXTENSION*range);
+      }  
+      state.chart.brush.startIndex = action.payload.from;
+      state.chart.brush.endIndex = action.payload.to;
+      state.chart.currRange.from = cFrom;
+      state.chart.currRange.to = cTo;
+      state.chart.cfgRange.from = action.payload.from;
+      state.chart.cfgRange.to = action.payload.to;
+
+    },
+    setTimer : (state, action) => {
+      state.chart.mode.live.active = action.payload ? true : false;
+      state.chart.mode.live.timer = action.payload;
+    },
+    setTimestampRange: (state, action) => {
+      var range = action.payload.to - action.payload.from;
+      
+      if (range==0){
+        range=1;
+      }
+      var cFrom;
+      var cTo;
+      if (state.chart.mode.live.active){
+        cFrom = action.payload.from 
+        cTo = action.payload.to
+      }else{
+        cFrom = action.payload.from - (PERIOD_EXTENSION*range);
+        cTo =  action.payload.to + (PERIOD_EXTENSION*range);
+      }  
+      state.chart.currRange.from = cFrom;
+      state.chart.currRange.to = cTo;
+      state.chart.cfgRange.from = action.payload.from;
+      state.chart.cfgRange.to = action.payload.to;
+
     }
 
   },
@@ -186,7 +262,7 @@ export const chartsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addMatcher(trendApi.endpoints.listTrends.matchPending, (state) => {
-        console.log('pending');
+        //console.log('pending');
       })
       .addMatcher(trendApi.endpoints.listTrends.matchFulfilled, (state, action) => {
         var trd : Trend[] = action.payload;
@@ -221,18 +297,64 @@ export const chartsSlice = createSlice({
          });
 
       })
+
       .addMatcher(trendApi.endpoints.listTrends.matchRejected, (state, action) => {
-        console.log('rejected', action)
+        //console.log('rejected', action)
+      })  
+
+      .addMatcher(trendApi.endpoints.getTrendData.matchPending, (state) => {
+        //console.log('pending');
       })
-      
-      
+
+      .addMatcher(trendApi.endpoints.getTrendData.matchFulfilled, (state, action) => {
+        console.log('TrendData match');
+        console.log(action);
+        var dat : ITrendData[]=[];
+        var mltp = 1; //1000;
+
+        var brushStartIndex=0;
+        var brushEndIndex=0;
+        var timeTo=state.chart.cfgRange.to;
+        var timeFrom=state.chart.cfgRange.from;
+        if ((action.payload) &&  (action.payload.length > 0)){ 
+          
+          timeTo = action.payload[action.payload.length-1].Timestamp * mltp + action.payload[action.payload.length-1].TimestampMs;
+          timeFrom = timeTo - state.chart.mode.live.period;
+          //console.log(timeFrom);
+          //console.log(timeTo);
+          console.log(currentTimeZoneOffsetInSeconds);
+          action.payload.forEach((el:TrendData)=>{
+            var ut = el.Timestamp *mltp + el.TimestampMs + currentTimeZoneOffsetInSeconds*1000;
+            //console.log(ut);
+            dat.push({...el, unixtime:ut});
+            
+            if (el.Timestamp *mltp + el.TimestampMs  < state.chart.cfgRange.from - currentTimeZoneOffsetInSeconds*1000){
+              brushStartIndex = brushStartIndex+1;
+            }
+            if (el.Timestamp *mltp + el.TimestampMs  < state.chart.cfgRange.to - currentTimeZoneOffsetInSeconds*1000){
+              brushEndIndex = brushEndIndex+1;
+            }          
+            //console.log(state.chart.data);
+           });
+           state.chart.brush.startIndex = brushStartIndex;
+           state.chart.brush.endIndex = brushEndIndex;
+           state.chart.data = dat;
+           console.log(state.chart.data);
+        }
+
+
+      })
+
+      .addMatcher(trendApi.endpoints.getTrendData.matchRejected, (state, action) => {
+        console.log('rejected TrendData', action)
+      })  
   },
   
 })
 
 export const { setHorizontalLine, setVerticalLine, toggleLiveMode, toggleZoomMode, toggleTooltip, toggleRightPanel, 
                setFromDate,setToDate, setOnlySelected, setTrendScale, setDateRange, setAutoscale,
-               addSerie } = chartsSlice.actions
+               addSerie, removeSerie, areaRef, setBrushRange, setTimer, setTimestampRange } = chartsSlice.actions
 
 // The function below is called a thunk and allows us to perform async logic. It
 // can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This

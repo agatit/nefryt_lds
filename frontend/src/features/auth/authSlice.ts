@@ -66,9 +66,9 @@ export const selectIsAuthenticated = (state: RootState) =>{
     if (token){
       const decodedToken: { exp: number } = jwt_decode(token);
         let currentDate = new Date();
-        console.log(decodedToken.exp * 1000);
-        console.log(currentDate.getTime());
-        console.log(currentDate.getTime() - decodedToken.exp * 1000);
+       // console.log(decodedToken.exp * 1000);
+       // console.log(currentDate.getTime());
+       // console.log(currentDate.getTime() - decodedToken.exp * 1000);
         if (decodedToken.exp * 1000 < currentDate.getTime()) {
           console.log('refresh');
           }else{

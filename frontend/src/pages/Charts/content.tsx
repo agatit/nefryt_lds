@@ -2,34 +2,78 @@ import React from 'react';
 import {Accordion, AccordionDetails, AccordionSummary, Badge, Box, Button, Checkbox, IconButton, LinearProgress, makeStyles, Slider} from '@material-ui/core';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceArea, Brush, Surface, Symbols } from 'recharts';
 import { CategoricalChartState } from "recharts/types/chart/generateCategoricalChart";
-import { ChartsState, ITrend } from '../../features/charts/types';
-import { shallowEqual, useSelector } from 'react-redux';
+import { ChartsState, ITrend, ITrendData } from '../../features/charts/types';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
 import moment from "moment";
 import { straightLine } from "./StraightLine";
 import { renderCusomizedLegend } from './legend';
-import { useListTrendsQuery } from '../../store/trendApi';
+import { useGetTrendDataQuery, useListTrendsQuery } from '../../store/trendApi';
+import { areaRef, setBrushRange } from '../../features/charts/chartsSlice';
+import { Dispatch } from '@reduxjs/toolkit';
 
 export const ChartsContent: React.FC = () => {
  
+  
+  const dispatch :Dispatch = useDispatch();
+    
     const reducer: ChartsState = useSelector(
         (state: RootState) => state.charts,
         shallowEqual
       )
       
+    const SAMPLES_COUNT = reducer.chart.mode.live.active ? 1000 : 4000;
+  
+    useListTrendsQuery();
 
-       useListTrendsQuery();
+    var trdList :number[] = [];
+
+    var trends :ITrend[]= reducer.chart.trends.map((obj: ITrend) => ({...obj}));
+    const selTrd: ITrend[] =trends.filter((obj: ITrend) => obj.selected);
+    const selTrdCount = selTrd.length;
+    
+    if (selTrd && (selTrd.length > 0)) {
+      selTrd.forEach((obj: ITrend) => {
+        trdList.push(obj.ID);
+      });
+    }
+
+    useGetTrendDataQuery({trendIdList: trdList, begin: reducer.chart.currRange.from, end:reducer.chart.currRange.to, samples :  SAMPLES_COUNT});
+    //trendIdList: number[];
+    //begin: number;
+    //end: number;
+    //samples: number;
 
     //var TrendsDataState: QueryState={isFinished:false,isPending:false, lastUpdated:0};
     var TrendsDataState = {isPending:false};
-    var dat2: any[] | undefined=[];
+
+    var dat1 =reducer.chart.data;
+
+    const activeTrends: any[] =reducer.chart.trends.filter((obj: ITrend) => obj.selected &&  !obj.disabled);
+
+    
+    var dat2:any[] = [];
+
+    
+dat1.forEach((element: ITrendData) => {
+  var tmp:any={Timestamp: element.Timestamp, TimestampMs: element.Timestamp, unixtime: element.unixtime};
+
+  activeTrends.forEach((trd:ITrend)=>{
+    tmp[trd.ID] = element[trd.ID];
+  });
+  
+  dat2.push(tmp);
+  
+  
+
+});
 
     const handleMouseDown = (e: CategoricalChartState) => {
         if (!e || !e.activeLabel) {
           return
         }
         
-        //dispatch(areaRef({left:e.activeLabel, right:0}))
+        dispatch(areaRef({left:e.activeLabel, right:0}))
       }
 
       const handleMouseMove = (e: CategoricalChartState) => {
@@ -49,6 +93,8 @@ export const ChartsContent: React.FC = () => {
       }
 
       const formatXAxis = (tickItem: any) => {
+        //var tickItemA = tickItem/1000;
+       // console.log(tickItem);
         var range = reducer.chart.currRange.to-reducer.chart.currRange.from;
         //var range = 1655804041 - 1655796348;
         var divMonth = range  /  (30*60*60*24*1000);
@@ -97,6 +143,7 @@ export const ChartsContent: React.FC = () => {
 
     
         const formatBrush = (unixTime: any, index: any)  => {
+          //var unixTimeA = unixTime/1000;
             var range = reducer.chart.currRange.to-reducer.chart.currRange.from;
             var divMonth = range  /  (30*60*60*24*1000);
             var divWeek = range /  (7*60*60*24*1000);
@@ -126,7 +173,7 @@ export const ChartsContent: React.FC = () => {
           
 
          
-console.log(reducer.chart.trends);
+//console.log(reducer.chart.trends);
           
       var trends :ITrend[]= reducer.chart.trends.map((obj: ITrend) => ({...obj}));
       const selectedTrends: ITrend[] =trends.filter((obj: ITrend) => obj.selected);
@@ -139,7 +186,7 @@ console.log(reducer.chart.trends);
 
       const handlemouseup  = (e: React.MouseEvent<HTMLElement>) => {
         if ((data_range_from > 0) && (data_range_to>0)){
-          //dispatch(setBrushRange(data_range_from, data_range_to, brush_startIndex, brush_endIndex ));
+          dispatch(setBrushRange({from: data_range_from, to: data_range_to, startIndex: brush_startIndex, endIndex:brush_endIndex} ));
           data_range_from=0;
           data_range_to=0;
           brush_startIndex = 0;
@@ -203,9 +250,9 @@ console.log(reducer.chart.trends);
                  {reducer.chart.mode.tooltip ? <Tooltip  labelFormatter={formatBrush} formatter={formatValue}  /> : <></>}
                 
                  <Legend
-              verticalAlign="bottom"
-              height={36}
-              align="left"
+                    verticalAlign="bottom"
+                    height={36}
+                    align="left"
 
               content={renderCusomizedLegend({selectedTrends: selectedTrends})}
             />
@@ -233,13 +280,13 @@ console.log(reducer.chart.trends);
 
                           var from;
                           var to;
-                        //  data_range_from = dat2[a.startIndex].unixtime;
-                        //  data_range_to = dat2[a.endIndex].unixtime;
-                        //  brush_startIndex = a.startIndex;
-                        //  brush_endIndex = a.endIndex;
+                          data_range_from = dat2[a.startIndex].unixtime;
+                          data_range_to = dat2[a.endIndex].unixtime;
+                          brush_startIndex = a.startIndex;
+                          brush_endIndex = a.endIndex;
 
-                        //  from = dat2[a.startIndex].unixtime; //- range * (Math.round(0.9*DATA_SIZE/2));
-                         // to = dat2[a.endIndex].unixtime;
+                          from = dat2[a.startIndex].unixtime; //- range * (Math.round(0.9*DATA_SIZE/2));
+                          to = dat2[a.endIndex].unixtime;
 
                           
                         } } />

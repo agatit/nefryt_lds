@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
 import { ChartsState, ITrend } from '../../features/charts/types';
-import { addSerie, setAutoscale, setDateRange, setFromDate, setHorizontalLine, setOnlySelected, setToDate, setTrendScale, setVerticalLine, toggleLiveMode, toggleTooltip, toggleZoomMode } from '../../features/charts/chartsSlice';
+import { addSerie, removeSerie, setAutoscale, setDateRange, setFromDate, setHorizontalLine, setOnlySelected, setToDate, setTrendScale, setVerticalLine, toggleLiveMode, toggleTooltip, toggleZoomMode } from '../../features/charts/chartsSlice';
 import { Dispatch } from '@reduxjs/toolkit';
 
 export const ChartsRPanel: React.FC = () => {
@@ -70,11 +70,15 @@ export const ChartsRPanel: React.FC = () => {
            const [expanded, setExpanded] = React.useState('false');
 
            const handleChangeTrend = (event: any) => {
+            console.log('clicked');
             event.preventDefault();
             if (event.target.checked){
+              
               dispatch(addSerie({trendName: event.target.name.replace('trd_', '')}));
+            }else{
+              dispatch(removeSerie({trendName: event.target.name.replace('trd_', '')}));
             }
-              //dispatch(changeTrend(event.target.name.replace('trd_', ''), event.target.checked));
+
             if (!event.target.checked){
                setExpanded('false');
             }
@@ -149,17 +153,17 @@ export const ChartsRPanel: React.FC = () => {
                           {reducer.chart.trends.map((trend : ITrend, index) => (
                             //var aa = document.getElementById("trd_manual_scale_" + trend.iD.toLocaleString());
                            ((!reducer.chart.onlySelected) || ((reducer.chart.onlySelected) && (trend.selected))) ?
-                            <Accordion expanded={expanded === "trd_" + trend.ID.toLocaleString()} onChange={handleChange("trd_" + trend.ID.toLocaleString())}>
-                            <AccordionSummary 
+                            <Accordion key={"Accordion_" + index} expanded={expanded === "trd_" + trend.ID.toLocaleString()} onChange={handleChange("trd_" + trend.ID.toLocaleString())}>
+                            <AccordionSummary key={"AccordionSummary_" + index}
                               expandIcon={trend.selected?<ExpandMore className="changeAccordionState" /> : null}
                               aria-controls={"panel_trd_" + trend.ID.toLocaleString() + "-content"}
                               id={"panel_trd_" + trend.ID.toLocaleString() + "-header"}
                               className={trend.selected?"changeAccordionState":""}
                             >
-                              <Typography sx={{flexShrink: 0 }}>
-                              <FormControlLabel  key={index}
+                              <Typography key={"Typography_" + index} sx={{flexShrink: 0 }}>
+                              <FormControlLabel   key={"FormControlLabel_" + index}
                               control={
-                              <Checkbox className="select-trend" key={trend.ID } checked={trend.selected ? trend.selected : false}  onChange={handleChangeTrend} name={"trd_" + trend.ID.toLocaleString()} />
+                              <Checkbox className="select-trend" key={"trd_" + trend.ID.toLocaleString()} checked={trend.selected ? trend.selected : false}  onChange={handleChangeTrend} name={"trd_" + trend.ID.toLocaleString()} />
                            }
                               label={trend.Name}
                               
@@ -167,34 +171,28 @@ export const ChartsRPanel: React.FC = () => {
                               </Typography>
                              
                             </AccordionSummary>
-                            <AccordionDetails>
-                              <Typography width="300px" marginLeft={4}>
-                              <FormControlLabel  key={index}
+                            <AccordionDetails key={"AccordionDetails_" + index}>
+                              <Typography key={"TypographyDetails_" + index}  width="300px" marginLeft={4}>
+                              <FormControlLabel key={"FormControlLabelDetails_" + index}
                               control={
-                               <Checkbox className="select-trend" checked={!trend.autoscale} onChange={toggleAutoscale} key={trend.ID }  name={"trd_manual_scale_" + trend.ID.toLocaleString()} />
+                               <Checkbox key={"trd_manual_scale_" + trend.ID.toLocaleString()} className="select-trend" checked={!trend.autoscale} onChange={toggleAutoscale}  name={"trd_manual_scale_" + trend.ID.toLocaleString()} />
                               }
                               label="Ustaw ręcznie zakres wartości"
                               
                             />
 
                       
-                                <Slider name={"trd_slider_" + trend.ID.toLocaleString()} disabled={trend.autoscale}
-                                  //aria-label="Minimum distance shift"
+                                <Slider key={"trd_slider_" + trend.ID.toLocaleString()}  name={"trd_slider_" + trend.ID.toLocaleString()} disabled={trend.autoscale}
                                   getAriaLabel={() => 'Minimum distance shift'}
-                                  value={[trend.scale.min, trend.scale.max]}
-                                  
+                                  value={[trend.scale.min, trend.scale.max]}  
                                   onChange={handleChange2}
-                                  
                                   getAriaValueText={valuetext}
-                                  //disableSwap
-                                  //defaultValue={0.00000005}
-                                  //getAriaValueText={valuetext}
                                   step={trend.step}
-                                  //marks
                                   min={trend.ScaledMin}
                                   max={trend.ScaledMax}
                                   valueLabelDisplay="auto"
                                   marks={trend.marks}
+                                  
                                 />
                               </Typography>
                             </AccordionDetails>

@@ -90,10 +90,8 @@ const LoginPage = () => {
 
   const onSubmitHandler: SubmitHandler<LoginInput> = (values) => {
     // 👇 Executing the loginUser Mutation
-    var tmp :  AuthLoginApiArg ={login:{password:'aa', username:'bb'}};
-  
-    console.log('aaa');
-    loginUser(tmp);
+    var authData :  AuthLoginApiArg ={login:{password:values.password, username:values.username}};
+    loginUser(authData);
   };
 
   return (
