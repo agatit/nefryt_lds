@@ -34,7 +34,6 @@ const initialState: ChartsState={
         from: Date.now() - ((PERIOD_EXTENSION)*(1*60*60*1000)+ (1*60*60*1000)),
         to: Date.now() + (PERIOD_EXTENSION*(1*60*60*1000))
       },
-      refArea:{left:0,right:0},
       onlySelected : false,
       trends:[],
       data : [],
@@ -205,9 +204,6 @@ export const chartsSlice = createSlice({
           state.chart.data=data;
           state.chart.trends = trds;
     },
-    areaRef:(state, action) => {
-      state.chart.refArea = action.payload;
-    },
     setBrushRange: (state, action) => {
       var range = action.payload.to - action.payload.from;
       
@@ -254,6 +250,24 @@ export const chartsSlice = createSlice({
       state.chart.currRange.to = cTo;
       state.chart.cfgRange.from = action.payload.from;
       state.chart.cfgRange.to = action.payload.to;
+
+    },
+    disableTrend : (state, action) => {
+      var trd : ITrend[] = state.chart.trends;
+         
+      trd.forEach((element: ITrend) => {
+        if (element.ID == action.payload){
+         element.disabled = true;
+        }
+      });
+    },
+    enableTrend: (state, action) => {
+      var trd : ITrend[] = state.chart.trends;
+      trd.forEach((element: ITrend) => {
+        if (element.ID == action.payload){
+          element.disabled = false;
+        }
+      });
 
     }
 
@@ -357,7 +371,8 @@ export const chartsSlice = createSlice({
 
 export const { setHorizontalLine, setVerticalLine, toggleLiveMode, toggleZoomMode, toggleTooltip, toggleRightPanel, 
                setFromDate,setToDate, setOnlySelected, setTrendScale, setDateRange, setAutoscale,
-               addSerie, removeSerie, areaRef, setBrushRange, setTimer, setTimestampRange } = chartsSlice.actions
+               addSerie, removeSerie, setBrushRange, setTimer, setTimestampRange,
+               enableTrend, disableTrend } = chartsSlice.actions
 
 // The function below is called a thunk and allows us to perform async logic. It
 // can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This

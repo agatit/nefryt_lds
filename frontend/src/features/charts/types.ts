@@ -12,10 +12,6 @@ export type ChartParams = {
     mode:ChartMode,
     grid_lines: GridLines,
     is_loading_trends:boolean,
-    refArea:{
-       left:number,
-       right:number 
-    },
     cfgRange  : ChartRange,
     currRange : ChartRange,
     data : ITrendData[],
