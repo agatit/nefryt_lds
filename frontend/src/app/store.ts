@@ -5,6 +5,7 @@ import {enhancedApi as trendApi} from '../store/trendApi'
 import auth from '../features/auth/authSlice'
 import template from '../features/template/templateSlice'
 import charts from '../features/charts/chartsSlice'
+import editor from '../features/editor/editorSlice'
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     auth,
     template,
     charts,
+    editor
     
   },
   middleware: (getDefaultMiddleware) =>
