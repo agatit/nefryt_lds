@@ -68,9 +68,9 @@ const handleSubmitNewNode  = (e: any ) => {
       <React.Fragment>
           <div id='editor-body' className="table">
             <div className="table-row">
-              <NodeToolbox editorState={reducer} ></NodeToolbox>
+              <NodeToolbox state={reducer} ></NodeToolbox>
             </div>
-            <PipelineEditorWorkspace editorState={reducer} ></PipelineEditorWorkspace>
+            <PipelineEditorWorkspace state={reducer} ></PipelineEditorWorkspace>
           
           </div>
           <NewNodeForm onSubmit={handleSubmitNewNode} ></NewNodeForm>

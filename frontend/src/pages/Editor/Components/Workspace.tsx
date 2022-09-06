@@ -8,9 +8,10 @@ import $ from "jquery"
 import { mutateAsync, updateEntities } from "redux-query";
 import { CropLandscapeOutlined } from "@material-ui/icons";
 import { useMutation } from "redux-query-react";
+import { removeNode } from "../../../features/editor/editorSlice";
 
   type Props = {
-    editorState : EditorState;
+    state : EditorState;
    // action : IEditorAction;
    // acctiveNode:INode | {};
   }
@@ -149,11 +150,11 @@ console.log(nodeA);
 
 
     const clearLink = (i: number) => {
-      var beginPosX = p.editorState.Links[i].beginPointX;
-      var beginPosY = p.editorState.Links[i].beginPointY;
+      var beginPosX = p.state.Links[i].beginPointX;
+      var beginPosY = p.state.Links[i].beginPointY;
 
-      var lengthX  = p.editorState.Links[i].endPointX - p.editorState.Links[i].beginPointX;
-      var lengthY  = p.editorState.Links[i].endPointY - p.editorState.Links[i].beginPointY;
+      var lengthX  = p.state.Links[i].endPointX - p.state.Links[i].beginPointX;
+      var lengthY  = p.state.Links[i].endPointY - p.state.Links[i].beginPointY;
 
       var markY : number=1;
       var lenY : number =1;
@@ -201,29 +202,29 @@ console.log(nodeA);
       var lengthY : number = 0;
       $('.table-cell').removeClass('link_horizontal');
       $('.table-cell').removeClass('link_vertical');
-      for (let i=0; i<p.editorState.Links.length;i++){  
-        var BeginNode : INode = p.editorState.Nodes.find((x: { NodeID: any }) => x.NodeID === p.editorState.Links[i].BeginNodeID) as INode;
-        var EndNode : INode = p.editorState.Nodes.find((x: { NodeID: any }) => x.NodeID === p.editorState.Links[i].EndNodeID) as INode;
+      for (let i=0; i<p.state.Links.length;i++){  
+        var BeginNode : INode = p.state.Nodes.find((x: { NodeID: any }) => x.NodeID === p.state.Links[i].BeginNodeID) as INode;
+        var EndNode : INode = p.state.Nodes.find((x: { NodeID: any }) => x.NodeID === p.state.Links[i].EndNodeID) as INode;
         if (BeginNode && EndNode && (BeginNode.positionX) && (BeginNode.positionY)){
-          beginPosX  = (BeginNode.positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(BeginNode.positionX / p.editorState.area.ScaleWidth) : Math.floor(BeginNode.positionX / p.editorState.area.ScaleWidth) + 1;
-          beginPosY = (BeginNode.positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(BeginNode.positionY / p.editorState.area.ScaleHeight) : Math.floor(BeginNode.positionY / p.editorState.area.ScaleHeight) + 1;
+          beginPosX  = (BeginNode.positionX % p.state.area.ScaleWidth) == 0 ?  Math.floor(BeginNode.positionX / p.state.area.ScaleWidth) : Math.floor(BeginNode.positionX / p.state.area.ScaleWidth) + 1;
+          beginPosY = (BeginNode.positionY % p.state.area.ScaleHeight) == 0 ?  Math.floor(BeginNode.positionY / p.state.area.ScaleHeight) : Math.floor(BeginNode.positionY / p.state.area.ScaleHeight) + 1;
         
-          endPosX  = (EndNode.positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(EndNode.positionX / p.editorState.area.ScaleWidth) : Math.floor(EndNode.positionX / p.editorState.area.ScaleWidth) + 1;
-          endPosY = (EndNode.positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(EndNode.positionY / p.editorState.area.ScaleHeight) : Math.floor(EndNode.positionY / p.editorState.area.ScaleHeight) + 1;
+          endPosX  = (EndNode.positionX % p.state.area.ScaleWidth) == 0 ?  Math.floor(EndNode.positionX / p.state.area.ScaleWidth) : Math.floor(EndNode.positionX / p.state.area.ScaleWidth) + 1;
+          endPosY = (EndNode.positionY % p.state.area.ScaleHeight) == 0 ?  Math.floor(EndNode.positionY / p.state.area.ScaleHeight) : Math.floor(EndNode.positionY / p.state.area.ScaleHeight) + 1;
             
           lengthX  = endPosX - beginPosX;
           lengthY  = endPosY - beginPosY;
 
-          if ((beginPosX !=  p.editorState.Links[i].beginPointX) || (beginPosY !=  p.editorState.Links[i].beginPointY)
-            ||  (endPosX !=  p.editorState.Links[i].endPointX) || (endPosY !=  p.editorState.Links[i].endPointY)){
+          if ((beginPosX !=  p.state.Links[i].beginPointX) || (beginPosY !=  p.state.Links[i].beginPointY)
+            ||  (endPosX !=  p.state.Links[i].endPointX) || (endPosY !=  p.state.Links[i].endPointY)){
           
           }
           
-          p.editorState.Links[i].beginPointX = beginPosX;
-          p.editorState.Links[i].beginPointY = beginPosY;
+          p.state.Links[i].beginPointX = beginPosX;
+          p.state.Links[i].beginPointY = beginPosY;
 
-          p.editorState.Links[i].endPointX = endPosY;
-          p.editorState.Links[i].endPointY = endPosY;
+          p.state.Links[i].endPointX = endPosY;
+          p.state.Links[i].endPointY = endPosY;
                 
           var markY : number=1;
           var lenY : number =1;
@@ -263,43 +264,42 @@ console.log(nodeA);
   });
 
 
-  if (p.editorState){
-    let nodes:INode[] = [];
-    for (let i=0;i<p.editorState.Nodes.length;i++){
-        var posX :number = (p.editorState.Nodes[i].positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(p.editorState.Nodes[i].positionX / p.editorState.area.ScaleWidth) : Math.floor(p.editorState.Nodes[i].positionX / p.editorState.area.ScaleWidth) + 1;
-        var posY : number = (p.editorState.Nodes[i].positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.Nodes[i].positionY / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.Nodes[i].positionY / p.editorState.area.ScaleHeight) + 1;
+  if (p.state){
+    let nodes:any[] = [];
+    for (let i=0;i<p.state.Nodes.length;i++){
+        var posX :number = (p.state.Nodes[i].positionX % p.state.area.ScaleWidth) == 0 ?  Math.floor(p.state.Nodes[i].positionX / p.state.area.ScaleWidth) : Math.floor(p.state.Nodes[i].positionX / p.state.area.ScaleWidth) + 1;
+        var posY : number = (p.state.Nodes[i].positionY % p.state.area.ScaleHeight) == 0 ?  Math.floor(p.state.Nodes[i].positionY / p.state.area.ScaleHeight) : Math.floor(p.state.Nodes[i].positionY / p.state.area.ScaleHeight) + 1;
     
         var strPosX : string = (posX * 2).toString();
         var strPosY : string = (posY *2).toString(); 
         var cellid : string = 'cell_' + strPosY + '_'+ strPosX;
 
-       // var selected=(p.acctiveNode) && ((p.acctiveNode as INode).NodeID == p.editorState.Nodes[i].NodeID);
-       // nodes.push({cell_id :cellid, node:<NodeElm key={i} node={p.editorState.Nodes[i]} removeNode={()=>removeNode(p.editorState.Nodes[i]) } selected={selected} ></NodeElm>})
+        var selected=(p.state.activeNode) && ((p.state.activeNode.node as INode).NodeID == p.state.Nodes[i].NodeID);
+        nodes.push({cell_id :cellid, node:<NodeElm key={i} node={p.state.Nodes[i]} removeNode={()=>removeNode(p.state.Nodes[i]) } selected={selected} ></NodeElm>})
     }
 
-    width = (p.editorState.area.Width % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(p.editorState.area.Width / p.editorState.area.ScaleWidth) : Math.floor(p.editorState.area.Width / p.editorState.area.ScaleWidth) + 1;
-    height = (p.editorState.area.Height % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) + 1;
+    width = (p.state.area.Width % p.state.area.ScaleWidth) == 0 ?  Math.floor(p.state.area.Width / p.state.area.ScaleWidth) : Math.floor(p.state.area.Width / p.state.area.ScaleWidth) + 1;
+    height = (p.state.area.Height % p.state.area.ScaleHeight) == 0 ?  Math.floor(p.state.area.Height / p.state.area.ScaleHeight) : Math.floor(p.state.area.Height / p.state.area.ScaleHeight) + 1;
     
     for(let iW = 0; iW <= (width *2) + 1 ; iW++)	{
       row.push(<div className="table-cell" key={iW} style={{height:20, width:20, left:20*iW }}  onMouseLeave={editorMouseLeave}  onMouseEnter={editorMouseEntere}></div>);
     }
     
     for(let iW = 0; iW <= width ; iW++)	{
-      positionsHorizontal.push(<p key={iW}><span>{iW*p.editorState.area.ScaleWidth}<br/>[{p.editorState.area.SIUnit.SIUnitTID}]</span></p>);
+      positionsHorizontal.push(<p key={iW}><span>{iW*p.state.area.ScaleWidth}<br/>[{p.state.area.SIUnit.SIUnitTID}]</span></p>);
     }
     for (let i = 0; i <= (height *2)+1; i++) {
       row=[];
       for(let iW = 0; iW <= (width *2) + 1 ; iW++)	{
           let id = 'cell_' + i.toString() + '_' + iW.toString();
-          //var n :any = nodes.filter(a=>a.cell_id == id);    
-          var n:any[]=[];
+          var n :any = nodes.filter(a=>a.cell_id == id);    
           row.push(<div  id={id}  className="table-cell" key={iW} style={{height:20, width:20, left:20*iW }} onClick={editorMouseClick} onDragOver={allowDrop} onDrop={onDrop}  onMouseLeave={editorMouseLeave}  onMouseEnter={editorMouseEntere}>{n.length > 0? n[0].node : ''}</div>);
         } 
         content.push(<div className="table-row" style={{height:20}} key={i}>{row}</div>);
     }
     
     for (let i = 0; i <= height; i++) {
-      positionsVertical.push(<p key={i}><span>{i*p.editorState.area.ScaleHeight}<br/>[{p.editorState.area.SIUnit.SIUnitTID}]</span></p>);
+      positionsVertical.push(<p key={i}><span>{i*p.state.area.ScaleHeight}<br/>[{p.state.area.SIUnit.SIUnitTID}]</span></p>);
     }
   }
   return (

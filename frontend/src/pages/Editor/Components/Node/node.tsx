@@ -1,8 +1,9 @@
 import * as React from "react"
 import { Dispatch } from "redux"
 import { shallowEqual, useDispatch, useSelector } from "react-redux"
-import { EditorState, IEditorAction, INode, IPipelinesArea, ITrendDef } from "../../type"
+import { EditorState, INode, ITrendDef } from "../../type"
 import { RootState } from "../../../../app/store"
+import { dragNode, setActiveNode } from "../../../../features/editor/editorSlice"
 
 
 type Props = {
@@ -34,7 +35,8 @@ export const NodeElm: React.FC<Props> = (p) => {
       
       var tmpNode : INode[] = reducer.Nodes.filter(node => node.NodeID==ID);
       
-      //dispatch(dragNode(tmpNode[0] as INode));
+      dispatch(dragNode(tmpNode[0] as INode));
+      //dispatch(setActiveNode(tmpNode[0] as INode));
     }
   }
 
@@ -47,7 +49,7 @@ export const NodeElm: React.FC<Props> = (p) => {
       var ID : number = parseInt((nodeID as RegExpMatchArray)[0]);
       var tmpNode : INode[] = reducer.Nodes.filter(node => node.NodeID==ID);
     
-      //dispatch(setActiveNode(tmpNode[0] as INode));
+      dispatch(setActiveNode(tmpNode[0] as INode));
     }
  }
 

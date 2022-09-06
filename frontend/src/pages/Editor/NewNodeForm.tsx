@@ -4,7 +4,6 @@ import { useDispatch } from "react-redux"
 import { useSelector, shallowEqual } from "react-redux"
 import { actionTypes, Field, reduxForm } from 'redux-form';
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
-import { INode } from "./type";
 import { RootState } from "../../app/store";
 
 

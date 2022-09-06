@@ -101,7 +101,7 @@ const MuiSelect = withStyles((theme) =>({
 
 
 type Props = {
-  editorState : EditorState;
+  state : EditorState;
   //action : IEditorAction;
   //activeEditor : string;
 }
@@ -144,8 +144,8 @@ export const NodeToolbox: React.FC<Props> = (p) => {
     }
   }
 
-  if (p.editorState){
-    editorHeight = (p.editorState.area.Height % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) + 1;
+  if (p.state){
+    editorHeight = (p.state.area.Height % p.state.area.ScaleHeight) == 0 ?  Math.floor(p.state.area.Height / p.state.area.ScaleHeight) : Math.floor(p.state.area.Height / p.state.area.ScaleHeight) + 1;
   }
   //var activeMoveNode = p.action.type == editorAction.MOVE_NODE ? 'active' : '';
   //var moveNodeClasses = "node node-move " + activeMoveNode;
@@ -177,10 +177,10 @@ export const NodeToolbox: React.FC<Props> = (p) => {
   let pipeline_id = 1;
 
   var SelValues : any[] = [];  
-  p.editorState.pipelines.forEach((pipeline) => {
-    SelValues.push(<MenuItem value={pipeline.iD}>pipeline.name</MenuItem>);
+  p.state.pipelines.forEach((pipeline) => {
+    SelValues.push(<MenuItem value={pipeline.ID}>pipeline.name</MenuItem>);
   }) 
-    console.log(p.editorState.pipelines);
+    console.log(p.state.pipelines);
   return (
     <div style={{maxHeight: '100%', overflowY: 'auto', overflowX:'hidden'}} id="editor-menu" >
        
@@ -250,8 +250,8 @@ export const NodeToolbox: React.FC<Props> = (p) => {
                 label="Odcinek"
                 onChange={handleChange}
               >
-                 {p.editorState.pipelines.map((pipeline) => {
-                   return <MenuItem key={"pid" + pipeline.iD} value={pipeline.iD}>{pipeline.name}</MenuItem>
+                 {p.state.pipelines.map((pipeline) => {
+                   return <MenuItem key={"pid" + pipeline.ID} value={pipeline.ID}>{pipeline.Name}</MenuItem>
                   })
                 } 
               {/*  <MenuItem value={1}>Ten</MenuItem>

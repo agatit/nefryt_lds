@@ -4,7 +4,7 @@ import { connect, useDispatch } from "react-redux"
 import { useSelector, shallowEqual } from "react-redux"
 import { actionTypes, Field, reduxForm, SubmissionError, WrappedFieldProps } from 'redux-form';
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
-import { INode, IPipelinesArea } from "./type";
+import {  IPipelinesArea } from "./type";
 import { compose } from "@reduxjs/toolkit";
 import { Area } from "recharts";
 import {reset} from 'redux-form';

@@ -2,11 +2,12 @@ import { PropTypes } from "@material-ui/core"
 import { ClassNameMap } from "@material-ui/core/styles/withStyles"
 import { ComponentType } from "react"
 import { InjectedFormProps } from "redux-form"
+import { Pipeline } from "../../store/pipelineApi"
 
 
   interface ITrendDefType{
     TrendDefTypeID : number
-    Name : sstring
+    Name : string
   }
 
   interface ITrendDefGroup{
@@ -32,8 +33,8 @@ import { InjectedFormProps } from "redux-form"
     SIUnitGroup : ISIUnitGroup | {}
   }
 
-  interface ITrendDef{
-    TrendDefID : int
+  export interface ITrendDef{
+    TrendDefID : number
     Name : string
     TimeExponent : number
     Format : string
@@ -43,7 +44,7 @@ import { InjectedFormProps } from "redux-form"
   }
 
 
-  interface INode{
+ export interface INode{
     NodeID : number
     type : string
     Name : string
@@ -52,7 +53,7 @@ import { InjectedFormProps } from "redux-form"
     TrendDef : ITrendDef | {}
   }
 
-  interface IPipelinesArea{
+  export interface IPipelinesArea{
     Width : number
     ScaleWidth : number
     Height : number
@@ -77,22 +78,20 @@ import { InjectedFormProps } from "redux-form"
     active : boolean
   }
 
+ export const DRAG_NODE = "DRAG_NODE";
 
    export type EditorState = {
-    //pipeline : IPipeline
     pipelines : Pipeline[]
-    loaded : {
-     pipeline: boolean;
-     nodes : boolean,
-     links : booelan
-    }
     forceRefresh : boolean,
-    Nodes : INode[] = []
-    Links : ILink[] = []
+    Nodes : INode[],
+    Links : ILink[],
     area : IPipelinesArea
     //action : IEditorAction
     //activeEditor: string 
-    activeNode : INode | {}
+    activeNode : {
+      node : INode | {},
+      state : string
+    }
   }
 
   export type PropertyEditorState = {
