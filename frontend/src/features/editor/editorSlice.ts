@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { DRAG_NODE, EditorState, INode } from '../../pages/Editor/type';
+import { DRAG_NODE, EditorState, ILink, INode } from '../../pages/Editor/type';
 import { enhancedApi as nodeApi, Node, ListNodesApiResponse} from '../../store/nodeApi'
+import { enhancedApi as linkApi, Link} from '../../store/linkApi'
+import { Simulate } from 'react-dom/test-utils';
 
 const initialState: EditorState = {
   area:{
@@ -20,23 +22,10 @@ const initialState: EditorState = {
      },
   },
   forceRefresh : false,
-  Nodes :  [
-  // {Name:'AAA', NodeID : 1, TrendDef:{}, type : 'VALVE', positionX:130,positionY:100},
-  // {Name:'BBB', NodeID : 2, TrendDef:{}, type : 'TEMP',  positionX:50,positionY:50},
-  // {Name:'CC', NodeID : 3, TrendDef:{}, type : 'TANK', positionX:230,positionY:200},
-  // {Name:'DD', NodeID : 4, TrendDef:{}, type : 'PRESS',  positionX:150,positionY:200},
- ],
- Links : [
- //{BeginNodeID:1, EndNodeID:2, beginPointX:-1, beginPointY:-1,endPointX:-1,endPointY:-1},
- //{BeginNodeID:3, EndNodeID:4,beginPointX:-1, beginPointY:-1,endPointX:-1,endPointY:-1}
- ],
- pipelines : [],
- //action:{
- //  type:BROWSE,
- //  data : []
- //},
- //activeEditor: USE_EDITOR_NODES,  
- activeNode: {node : {}, state : ''}
+  Nodes :  [],
+  Links : [],
+  pipelines : [],
+  activeNode: {node : {}, state : ''}
 }
 
 export const editorSlice = createSlice({
@@ -64,8 +53,8 @@ export const editorSlice = createSlice({
       //console.log('pending');
     })
     .addMatcher(nodeApi.endpoints.listNodes.matchFulfilled, (state, action) => {
-      console.log('GGGGGGGGGGGGGGG');
-      console.log(action.payload);
+      //console.log('GGGGGGGGGGGGGGG');
+      //console.log(action.payload);
       var nds : Node[] = action.payload;
       var nodeList : INode [] = [];
            
@@ -90,6 +79,72 @@ export const editorSlice = createSlice({
     })
 
     .addMatcher(nodeApi.endpoints.listNodes.matchRejected, (state, action) => {
+      //console.log('rejected', action) 
+    })  
+
+
+    .addMatcher(linkApi.endpoints.listLinks.matchPending, (state) => {
+      //console.log('pending');
+    })
+    .addMatcher(linkApi.endpoints.listLinks.matchFulfilled, (state, action) => {
+      console.log(state);
+      var nds : Link[] = action.payload;
+      var linkList : ILink [] = [];
+           
+          var idx=0;
+          if (nds){
+            nds.forEach((element: Link) => {
+              var linkElement : ILink = {
+                ID : element.ID,
+                BeginNodeID: element.BeginNodeID ? element.BeginNodeID : -1,
+                EndNodeID: element.EndNodeID ? element.EndNodeID : -1 ,
+                beginPointX: 0,
+                beginPointY: 0,
+                endPointX: 0,
+                endPointY: 0,
+                length : element.Length
+              };
+              
+ 
+              var beginPosX : number = 0;
+              var beginPosY : number = 0; 
+              var endPosX : number = 0;
+              var endPosY : number = 0; 
+              var lengthX : number = 0;
+              var lengthY : number = 0;
+
+              var BeginNode : INode = state.Nodes.find((x: { NodeID: any }) => x.NodeID === linkElement.BeginNodeID) as INode;
+              var EndNode : INode = state.Nodes.find((x: { NodeID: any }) => x.NodeID === linkElement.EndNodeID) as INode;
+                if (BeginNode && EndNode && (BeginNode.positionX) && (BeginNode.positionY)){
+                  beginPosX  = (BeginNode.positionX % state.area.ScaleWidth) == 0 ?  Math.floor(BeginNode.positionX / state.area.ScaleWidth) : Math.floor(BeginNode.positionX / state.area.ScaleWidth) + 1;
+                  beginPosY = (BeginNode.positionY % state.area.ScaleHeight) == 0 ?  Math.floor(BeginNode.positionY / state.area.ScaleHeight) : Math.floor(BeginNode.positionY / state.area.ScaleHeight) + 1;
+                
+                  endPosX  = (EndNode.positionX % state.area.ScaleWidth) == 0 ?  Math.floor(EndNode.positionX / state.area.ScaleWidth) : Math.floor(EndNode.positionX / state.area.ScaleWidth) + 1;
+                  endPosY = (EndNode.positionY % state.area.ScaleHeight) == 0 ?  Math.floor(EndNode.positionY / state.area.ScaleHeight) : Math.floor(EndNode.positionY / state.area.ScaleHeight) + 1;              
+                 
+                  lengthX  = endPosX - beginPosX;
+                  lengthY  = endPosY - beginPosY;
+        
+                  
+                  
+                  linkElement.beginPointX = beginPosX;
+                  linkElement.beginPointY = beginPosY;
+        
+                  linkElement.endPointX = endPosX;
+                  linkElement.endPointY = endPosY;
+                }
+
+                linkList.push(linkElement);
+                idx++;
+            });
+          }
+
+          state.Links = linkList;
+
+      
+    })
+
+    .addMatcher(linkApi.endpoints.listLinks.matchRejected, (state, action) => {
       //console.log('rejected', action) 
     })  
 

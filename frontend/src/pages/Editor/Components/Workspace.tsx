@@ -110,6 +110,27 @@ import { removeNode } from "../../../features/editor/editorSlice";
       e.preventDefault();
     }
 
+    const link_horizontalClick  = async (e: any) => {
+      if (e.target.classList.contains('selected')){
+        e.target.classList.remove('selected');
+        console.log(e.target.classList);
+      }else{
+        e.target.classList.add('selected');
+        console.log(e.target.classList);
+        for (var x=0; x< e.target.classList.length; x++){
+          let pattern1 = /Link_/g;
+          let result1 = pattern1.test(e.target.classList[x]);
+          if (result1){
+            const collection = document.getElementsByClassName(e.target.classList[x]);
+            for (var y=0; y< collection.length; y++){
+              collection[y].classList.add("selected");
+            }
+            break;
+          }
+        }
+      }
+    }
+
     const editorMouseClick  = async (e: React.MouseEvent<HTMLElement>) => {
       var id :string = (e.target as HTMLElement).id;
       var position : RegExpMatchArray | null = id.match(/\d+/g);
@@ -187,23 +208,16 @@ console.log(nodeA);
 
 
     useEffect(() => {
-      var width : number;
-      var height : number;
-      var posX : number;
-      var posY : number; 
       var strPosX : string;
       var strPosY : string;
 
-      var beginPosX : number = 0;
-      var beginPosY : number = 0; 
-      var endPosX : number = 0;
-      var endPosY : number = 0; 
+     
       var lengthX : number = 0;
       var lengthY : number = 0;
       $('.table-cell').removeClass('link_horizontal');
       $('.table-cell').removeClass('link_vertical');
       for (let i=0; i<p.state.Links.length;i++){  
-        var BeginNode : INode = p.state.Nodes.find((x: { NodeID: any }) => x.NodeID === p.state.Links[i].BeginNodeID) as INode;
+        /*var BeginNode : INode = p.state.Nodes.find((x: { NodeID: any }) => x.NodeID === p.state.Links[i].BeginNodeID) as INode;
         var EndNode : INode = p.state.Nodes.find((x: { NodeID: any }) => x.NodeID === p.state.Links[i].EndNodeID) as INode;
         if (BeginNode && EndNode && (BeginNode.positionX) && (BeginNode.positionY)){
           beginPosX  = (BeginNode.positionX % p.state.area.ScaleWidth) == 0 ?  Math.floor(BeginNode.positionX / p.state.area.ScaleWidth) : Math.floor(BeginNode.positionX / p.state.area.ScaleWidth) + 1;
@@ -225,7 +239,10 @@ console.log(nodeA);
 
           p.state.Links[i].endPointX = endPosY;
           p.state.Links[i].endPointY = endPosY;
-                
+            */
+          lengthX = p.state.Links[i].endPointX -  p.state.Links[i].beginPointX;
+          lengthY = p.state.Links[i].endPointY - p.state.Links[i].beginPointY;  
+          
           var markY : number=1;
           var lenY : number =1;
           var markX : number=1;
@@ -241,26 +258,31 @@ console.log(nodeA);
           }
             
           for (let j=0; j< (Math.abs(lengthY) *2) + lenY; j++){
-            strPosX = (beginPosX * 2).toString();
-            strPosY = ((beginPosY *2)+(markY*j)).toString(); 
+            strPosX = (p.state.Links[i].beginPointX * 2).toString();
+            strPosY = ((p.state.Links[i].beginPointY *2)+(markY*j)).toString(); 
             var cellid_ : string = 'cell_' + strPosY + '_'+ strPosX;
             var cell_ : HTMLElement = document.getElementById(cellid_) as HTMLElement;
             cell_.classList.add("link_vertical");
+            cell_.classList.add("Link_" + p.state.Links[i].ID);
           }
           
           //poziome
           for (let j=0; j< Math.abs(lengthX) *2; j++){
-            strPosX = ((beginPosX * 2) + (markX *j)+lenX).toString();
-            strPosY = ((beginPosY *2)+(lengthY *2) ).toString(); 
+            strPosX = ((p.state.Links[i].beginPointX * 2) + (markX *j)+lenX).toString();
+            strPosY = ((p.state.Links[i].beginPointY *2)+(lengthY *2) ).toString(); 
 
             var cellid_ : string = 'cell_' + strPosY + '_'+ strPosX;
             var cell_ : HTMLElement = document.getElementById(cellid_) as HTMLElement;
             cell_.classList.add("link_horizontal");
-        }
-      }else{
+            cell_.classList.add("Link_" + p.state.Links[i].ID);
+            cell_.onclick = link_horizontalClick;
+        
+          }
+      //else{
 
-      }
+      //}
     }
+    
   });
 
 

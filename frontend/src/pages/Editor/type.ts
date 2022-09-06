@@ -117,12 +117,14 @@ import { Pipeline } from "../../store/pipelineApi"
   //}
 
   export interface ILink {
+    ID : number
     BeginNodeID : number
     EndNodeID : number
     beginPointX : number
     beginPointY : number
     endPointX : number
     endPointY : number
+    length : number | undefined
   }
 
 
