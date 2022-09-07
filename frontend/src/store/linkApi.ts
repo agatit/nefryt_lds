@@ -60,7 +60,7 @@ export type DeleteLinkByIdApiArg = {
   linkId: number;
 };
 export type Link = {
-  ID: number;
+  ID?: number;
   BeginNodeID?: number;
   EndNodeID?: number;
   Length?: number;

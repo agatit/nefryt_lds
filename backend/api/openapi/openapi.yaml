@@ -301,7 +301,7 @@ paths:
       tags:
       - nodes
       x-openapi-router-controller: api.controllers.nodes_controller
-  /node/{linkId}:
+  /node/{nodeId}:
     delete:
       description: Deletes specific node
       operationId: delete_node_by_id
@@ -843,7 +843,7 @@ paths:
       tags:
       - pipelines
       x-openapi-router-controller: api.controllers.pipelines_controller
-  /pipeline/{pipelineId}/param/{methodParamDefId}:
+  /pipeline/{pipelineId}/param/{pipelineParamDefId}:
     put:
       description: Put  pipeline params
       operationId: update_pipeline_param
@@ -1410,8 +1410,6 @@ components:
           description: none
           title: Length
           type: number
-      required:
-      - ID
       title: Link
       type: object
     Method:
@@ -1439,11 +1437,10 @@ components:
           type: integer
         Name:
           example: Arthur Dent
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
       required:
-      - ID
       - MethodDefID
       - PipelineID
       title: Method
@@ -1458,10 +1455,8 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           type: string
-      required:
-      - ID
       type: object
     MethodParam:
       example:
@@ -1491,17 +1486,17 @@ components:
           type: integer
         DataType:
           description: none
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: DataType
           type: string
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         Value:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Value
           type: string
       required:
@@ -1522,14 +1517,12 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           type: string
         DataType:
           description: none
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           type: string
-      required:
-      - ID
       type: object
     Node:
       example:
@@ -1550,7 +1543,7 @@ components:
         Type:
           description: none
           nullable: false
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: Type
           type: string
         TrendID:
@@ -1560,13 +1553,12 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,50}
+          pattern: "^.{0,50}"
           title: Name
           type: string
         EditorParams:
           $ref: '#/components/schemas/EditorNode'
       required:
-      - ID
       - Type
       title: Node
       type: object
@@ -1590,7 +1582,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         BeginPos:
@@ -1599,8 +1591,6 @@ components:
           type: number
         EditorParams:
           $ref: '#/components/schemas/EditorPipeline'
-      required:
-      - ID
       title: Pipeline
       type: object
     PipelineParam:
@@ -1625,17 +1615,17 @@ components:
           type: integer
         DataType:
           description: none
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: DataType
           type: string
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         Value:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Value
           type: string
       required:
@@ -1655,14 +1645,12 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           type: string
         DataType:
           description: none
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           type: string
-      required:
-      - ID
       type: object
     PipelineNode:
       properties:
@@ -1679,7 +1667,6 @@ components:
           description: none
           type: boolean
       required:
-      - ID
       - NodeID
       type: object
     Trend:
@@ -1707,7 +1694,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         TrendGroupID:
@@ -1751,7 +1738,6 @@ components:
           title: ScaledMax
           type: number
       required:
-      - ID
       - RawMax
       - RawMin
       - ScaledMax
@@ -1792,7 +1778,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Name
           type: string
         TimeExponent:
@@ -1801,17 +1787,16 @@ components:
           type: integer
         Format:
           description: none
-          pattern: ^.{0,20}
+          pattern: "^.{0,20}"
           title: Format
           type: string
         SIUnitTID:
           description: none
-          pattern: ^.{0,8}
+          pattern: "^.{0,8}"
           title: SIUnitTID
           type: string
       required:
       - Format
-      - ID
       - Name
       - SIUnitTID
       - TimeExponent
@@ -1827,14 +1812,13 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,100}
+          pattern: "^.{0,100}"
           type: string
         AnalisisOnly:
           description: none
           type: boolean
       required:
       - AnalisisOnly
-      - ID
       - Name
       type: object
     TrendParam:
@@ -1855,17 +1839,17 @@ components:
           title: TrendParamDefID
           type: string
         Name:
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           readOnly: true
           title: Name
           type: string
         DataType:
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           readOnly: true
           title: DataType
           type: string
         Value:
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           title: Value
           type: string
       required:
@@ -1888,14 +1872,13 @@ components:
           type: integer
         Name:
           description: none
-          pattern: ^.{0,30}
+          pattern: "^.{0,30}"
           type: string
         DataType:
           description: none
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           type: string
       required:
-      - ID
       - TrendDefID
       type: object
     Event:
@@ -1965,7 +1948,6 @@ components:
       required:
       - BeginDate
       - EventDefID
-      - ID
       - MethodID
       title: Event
       type: object
@@ -1979,7 +1961,7 @@ components:
         AreaWidth:
           description: none
           nullable: false
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: AreaWidth
           type: integer
         AreaHeight:
@@ -2012,7 +1994,7 @@ components:
         PosX:
           description: none
           nullable: false
-          pattern: ^.{0,6}
+          pattern: "^.{0,6}"
           title: PosX
           type: integer
         PosY:
@@ -2066,6 +2048,7 @@ components:
       title: Information
       type: object
     Login:
+      description: ""
       example:
         password: password
         deviceId: deviceId
@@ -2100,12 +2083,13 @@ components:
           deviceId: ad49afd9-ec38-4716-b93f-416bd8c0c684
           deviceName: model
     LoginPermissions:
+      description: ""
       example:
         refreshTokenExpiration: refreshTokenExpiration
         success: true
         permissions:
-        - key: '{}'
-        - key: '{}'
+        - key: ""
+        - key: ""
         username: username
         token: token
         refreshToken: refreshToken

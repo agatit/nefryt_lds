@@ -45,7 +45,7 @@ import { Pipeline } from "../../store/pipelineApi"
 
 
  export interface INode{
-    NodeID : number
+    NodeID? : number
     type : string
     Name : string
     positionX:number
@@ -88,8 +88,9 @@ import { Pipeline } from "../../store/pipelineApi"
     area : IPipelinesArea
     //action : IEditorAction
     //activeEditor: string 
-    activeNode : {
+    activeElement : {
       node : INode | {},
+      link : ILink | {},
       state : string
     }
   }
@@ -117,7 +118,7 @@ import { Pipeline } from "../../store/pipelineApi"
   //}
 
   export interface ILink {
-    ID : number
+    ID? : number
     BeginNodeID : number
     EndNodeID : number
     beginPointX : number

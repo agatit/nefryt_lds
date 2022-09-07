@@ -148,7 +148,7 @@ export type ListTrendDefsApiResponse =
   /** status 200 A array of trend defs */ TrendDef[];
 export type ListTrendDefsApiArg = void;
 export type Trend = {
-  ID: number;
+  ID?: number;
   Name?: string;
   TrendGroupID?: number;
   TrendDefID: string;
@@ -184,7 +184,7 @@ export type TrendData = {
   [key: string]: number;
 };
 export type TrendDef = {
-  ID: number;
+  ID?: number;
   Name: string;
   TimeExponent: number;
   Format: string;

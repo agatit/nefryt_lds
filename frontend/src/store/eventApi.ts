@@ -31,7 +31,7 @@ export type AckEventApiArg = {
   eventId: number;
 };
 export type Event = {
-  ID: number;
+  ID?: number;
   EventDefID: number;
   MethodID: number;
   BeginDate: string;

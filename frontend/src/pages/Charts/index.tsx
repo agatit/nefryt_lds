@@ -34,7 +34,9 @@ const ChartsPage: React.FC = () => {
 
   if (selectedTrendsCount > 0) {
     selectedTrends.forEach((obj: ITrend) => {
-      trdList.push(obj.ID);
+      if (obj.ID){
+        trdList.push(obj.ID);
+      }
     });
   }
 
@@ -74,7 +76,9 @@ const ChartsPage: React.FC = () => {
   trendData.forEach((element: ITrendData) => {
     var tmp:any={Timestamp: element.Timestamp, TimestampMs: element.Timestamp, unixtime: element.unixtime};
     activeTrends.forEach((trd:ITrend)=>{
-      tmp[trd.ID] = element[trd.ID];
+      if (trd.ID){
+        tmp[trd.ID] = element[trd.ID];
+      }
     });
     activeTrendData.push(tmp);
   });

@@ -283,7 +283,7 @@ export const chartsSlice = createSlice({
         var idx=0;
         trd.forEach((element: Trend) => {
         
-           var tmp : string =  element.Symbol? element.Symbol : element.ID.toString(); 
+           var tmp : string =  element.Symbol? element.Symbol : element.ID? element.ID.toString():''; 
            tmp += element.Unit? ' [' + element.Unit + ']' : '';
            var marks = [];
            marks.push({value:element.ScaledMin, label:element.ScaledMin.toLocaleString()+element.Unit});

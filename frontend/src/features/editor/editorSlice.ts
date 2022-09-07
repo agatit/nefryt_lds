@@ -3,6 +3,7 @@ import { DRAG_NODE, EditorState, ILink, INode } from '../../pages/Editor/type';
 import { enhancedApi as nodeApi, Node, ListNodesApiResponse} from '../../store/nodeApi'
 import { enhancedApi as linkApi, Link} from '../../store/linkApi'
 import { Simulate } from 'react-dom/test-utils';
+import { SettingsEthernet } from '@material-ui/icons';
 
 const initialState: EditorState = {
   area:{
@@ -25,7 +26,7 @@ const initialState: EditorState = {
   Nodes :  [],
   Links : [],
   pipelines : [],
-  activeNode: {node : {}, state : ''}
+  activeElement: {node : {}, link:-1, state : ''}
 }
 
 export const editorSlice = createSlice({
@@ -37,13 +38,23 @@ export const editorSlice = createSlice({
 
     },
     setActiveNode: (state, action) => {
-      state.activeNode.node = action.payload; 
-      state.activeNode.state = '';     
+      state.activeElement.node = action.payload;
+      state.activeElement.link = -1; 
+      state.activeElement.state = '';     
+
+    },
+    setActiveLink: (state, action) => {
+      console.log('aaaaa');
+      console.log(action.payload);
+      state.activeElement.node = {};
+      state.activeElement.link = action.payload; 
+      state.activeElement.state = '';     
 
     },
     dragNode: (state, action) => {
-      state.activeNode.node = action.payload;      
-      state.activeNode.state = DRAG_NODE;
+      state.activeElement.node = action.payload;  
+      state.activeElement.link = -1;    
+      state.activeElement.state = DRAG_NODE;
     },
   },
 
@@ -113,8 +124,8 @@ export const editorSlice = createSlice({
               var lengthX : number = 0;
               var lengthY : number = 0;
 
-              var BeginNode : INode = state.Nodes.find((x: { NodeID: any }) => x.NodeID === linkElement.BeginNodeID) as INode;
-              var EndNode : INode = state.Nodes.find((x: { NodeID: any }) => x.NodeID === linkElement.EndNodeID) as INode;
+              var BeginNode : INode = state.Nodes.find((x: { NodeID?: number }) => x.NodeID === linkElement.BeginNodeID) as INode;
+              var EndNode : INode = state.Nodes.find((x: { NodeID?: number }) => x.NodeID === linkElement.EndNodeID) as INode;
                 if (BeginNode && EndNode && (BeginNode.positionX) && (BeginNode.positionY)){
                   beginPosX  = (BeginNode.positionX % state.area.ScaleWidth) == 0 ?  Math.floor(BeginNode.positionX / state.area.ScaleWidth) : Math.floor(BeginNode.positionX / state.area.ScaleWidth) + 1;
                   beginPosY = (BeginNode.positionY % state.area.ScaleHeight) == 0 ?  Math.floor(BeginNode.positionY / state.area.ScaleHeight) : Math.floor(BeginNode.positionY / state.area.ScaleHeight) + 1;
@@ -147,13 +158,24 @@ export const editorSlice = createSlice({
     .addMatcher(linkApi.endpoints.listLinks.matchRejected, (state, action) => {
       //console.log('rejected', action) 
     })  
+    .addMatcher(nodeApi.endpoints.updateNode.matchFulfilled, (state, action) => {
+      console.log('FFFFFFFFFFF');
+      console.log(action);
+      //state.user = action.payload.username
+      //state.token = action.payload.token
+      //state.refreshToken = action.payload.refreshToken
+      //localStorage.setItem('token', action.payload.token);
+      //localStorage.setItem('refreshToken', action.payload.token);
+      //localStorage.setItem('user', action.payload.token);
+      //state.isAuthenticated = true
+    })
 
 
   },
   
 })
 
-export const { removeNode, setActiveNode, dragNode } = editorSlice.actions
+export const { removeNode, setActiveNode, dragNode, setActiveLink } = editorSlice.actions
 
 // The function below is called a thunk and allows us to perform async logic. It
 // can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This

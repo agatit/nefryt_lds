@@ -9,7 +9,7 @@ import { PipelineEditorWorkspace } from './Components/Workspace';
 import NewNodeForm from './NewNodeForm';
 import EditorAreaSettings from './EditorAreaSettings';
 import { NodePropertyEditor } from './Components/nodePropertyEditor';
-import { EditorState } from './type';
+import { EditorState, INode } from './type';
 
 
 
@@ -26,9 +26,9 @@ export const EditorContent: React.FC = () => {
   var sidepanelClasses='sidepanel';
 
 
-  //if ((activeNode) && ((activeNode as INode).NodeID > 0) && (DRAG_NODE.localeCompare( action.type)!=0)){
-  //  sidepanelClasses = sidepanelClasses + ' open';
-  //}
+  if ((reducer.activeElement.node) && ((((reducer.activeElement.node as INode).NodeID as number) > 0) || (reducer.activeElement.link > 0)))  {
+    sidepanelClasses = sidepanelClasses + ' open';
+  }
 
   const handleSubmitAreaEditor  = (e: any ) => {
     //e.preventDefault();
@@ -76,8 +76,8 @@ const handleSubmitNewNode  = (e: any ) => {
           <NewNodeForm onSubmit={handleSubmitNewNode} ></NewNodeForm>
           <EditorAreaSettings onSubmit={handleSubmitAreaEditor} ></EditorAreaSettings>
           <div id="mySidepanel" className={sidepanelClasses}>
-          <NodePropertyEditor  ></NodePropertyEditor>
-        </div>
+            <NodePropertyEditor  ></NodePropertyEditor>
+          </div>
       </React.Fragment>
     </>
   )

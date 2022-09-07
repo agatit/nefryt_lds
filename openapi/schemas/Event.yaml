@@ -1,7 +1,6 @@
 # schemas/orm/Event.yaml
 type: object
 required:
-  - ID
   - EventDefID
   - MethodID
   - BeginDate

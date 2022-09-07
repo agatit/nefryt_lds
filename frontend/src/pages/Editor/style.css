@@ -83,10 +83,10 @@ div.node .TANK									{position: absolute; z-index: 100; cursor: pointer; backg
 div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; background-image:url(./img/press.png);background-repeat: no-repeat;background-size: 100%; width:40px;height:40px; border: solid 1px}
 
 .link_horizontal {border-bottom: 2px solid  black !important;}
-.link_horizontal.selected {border-bottom: 2px solid  red !important;}
+.link_horizontal.h_selected {border-bottom: 2px solid  red !important;}
 
 .link_vertical {border-right: 2px solid black!important;}
-.link_vertical.selected {border-right: 2px solid red!important;}
+.link_vertical.v_selected {border-right: 2px solid red!important;}
 
 .modal-dialog {
     margin-top: 10%;

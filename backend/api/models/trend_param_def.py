@@ -79,8 +79,6 @@ class TrendParamDef(Model):
         :param id: The id of this TrendParamDef.
         :type id: int
         """
-        if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 

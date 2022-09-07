@@ -1,7 +1,6 @@
 # schemas/orm/TrendGroup.yaml
 type: object
 required:  
-  - ID
   - Name
   - AnalisisOnly
 properties:

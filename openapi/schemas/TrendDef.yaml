@@ -1,7 +1,6 @@
 # schemas/orm/TrendDef.yaml
 type: object
 required:
-  - ID
   - Name
   - TimeExponent
   - Format

@@ -1,7 +1,6 @@
 # schemas/orm/Trend.yaml
 type: object
 required:  
-  - ID
   - TrendDefID
   - RawMin
   - RawMax

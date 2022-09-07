@@ -64,7 +64,7 @@ export type EditorNode = {
   PosY: number;
 };
 export type Node = {
-  ID: number;
+  ID?: number;
   Type: string;
   TrendID?: number | null;
   Name?: string;

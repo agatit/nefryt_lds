@@ -1,7 +1,6 @@
 # schemas/orm/Node.yaml
 type: object
 required:  
-  - ID
   - Type
 properties:
   ID:

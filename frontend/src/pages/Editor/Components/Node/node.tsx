@@ -43,17 +43,20 @@ export const NodeElm: React.FC<Props> = (p) => {
 
 
  const nodeClick = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    
     var id :string = (e.currentTarget as HTMLElement).id;
     var nodeID : RegExpMatchArray | null = id.match(/\d+/g);
     if (nodeID && (nodeID as RegExpMatchArray).length==1){
       var ID : number = parseInt((nodeID as RegExpMatchArray)[0]);
       var tmpNode : INode[] = reducer.Nodes.filter(node => node.NodeID==ID);
-    
+    //alert('aaa');
       dispatch(setActiveNode(tmpNode[0] as INode));
+      
     }
  }
 
- var id :number = p.node ? (p.node as INode).NodeID : -1;
+ var id :number = p.node ?  ((p.node as INode).NodeID as number) : -1;
  var name : string = p.node ? (p.node as INode).Name : '';
  var nodeType : string = p.node ? (p.node as INode).type : 'unknown_node_type'; 
  var TrendDef : ITrendDef | {}  = p.node ? (p.node as INode).TrendDef : {};

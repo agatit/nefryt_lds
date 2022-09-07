@@ -80,9 +80,8 @@ export const NodePropertyEditor: React.FC = () => {
             <MuiTab label="Odcinki" {...a11yProps(1)}  />
           </MuiTabs>
         </Box>
-        {/*<PropertyEditorTab activeTabIndex={activeTabIndex} index={0}>      
-          </PropertyEditorTab><PropertyEditorTab activeTabIndex={activeTabIndex} index={1}>    
-  </PropertyEditorTab>*/}
+        <PropertyEditorTab activeTabIndex={activeTabIndex} index={0} /> 
+        <PropertyEditorTab activeTabIndex={activeTabIndex} index={1} />    
       </MuiThemeProvider>
     </React.Fragment>
   

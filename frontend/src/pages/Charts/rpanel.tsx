@@ -140,18 +140,21 @@ export const ChartsRPanel: React.FC = () => {
                   <FormGroup style={{ width:'410px',  }}>
                     <div style={{ maxHeight: 230, overflowY:'auto', overflowX:'hidden'}}>
                       {reducer.chart.trends.map((trend : ITrend, index) => (
+                      
                         ((!reducer.chart.onlySelected) || ((reducer.chart.onlySelected) && (trend.selected))) ?
-                        <Accordion key={"Accordion_" + index} expanded={expanded === "trd_" + trend.ID.toLocaleString()} onChange={handleTrendPanelExpanded("trd_" + trend.ID.toLocaleString())}>
+                        
+                        <Accordion key={"Accordion_" + index} expanded={expanded === "trd_" + (trend.ID as number).toLocaleString() ?? ''} onChange={handleTrendPanelExpanded("trd_" + (trend.ID as number).toLocaleString())}>
                           <AccordionSummary key={"AccordionSummary_" + index}
                             expandIcon={trend.selected?<ExpandMore className="changeAccordionState" /> : null}
-                            aria-controls={"panel_trd_" + trend.ID.toLocaleString() + "-content"}
-                            id={"panel_trd_" + trend.ID.toLocaleString() + "-header"}
+                            aria-controls={"panel_trd_" + (trend.ID as number).toLocaleString() + "-content"}
+                            id={"panel_trd_" + (trend.ID as number).toLocaleString() + "-header"}
                             className={trend.selected?"changeAccordionState":""}
                           >
                             <Typography key={"Typography_" + index} sx={{flexShrink: 0 }}>
                               <FormControlLabel   key={"FormControlLabel_" + index}
+                               
                                 control={
-                                  <Checkbox className="select-trend" key={"trd_" + trend.ID.toLocaleString()} checked={trend.selected ? trend.selected : false}  onChange={handleTrendList} name={"trd_" + trend.ID.toLocaleString()} />
+                                  <Checkbox className="select-trend" key={"trd_" + (trend.ID as number).toLocaleString()} checked={trend.selected ? trend.selected : false}  onChange={handleTrendList} name={"trd_" + (trend.ID as number).toLocaleString()} />
                                 }
                                 label={trend.Name}
                               />
@@ -161,11 +164,11 @@ export const ChartsRPanel: React.FC = () => {
                             <Typography key={"TypographyDetails_" + index}  width="300px" marginLeft={4}>
                               <FormControlLabel key={"FormControlLabelDetails_" + index}
                                 control={
-                                  <Checkbox key={"trd_manual_scale_" + trend.ID.toLocaleString()} className="select-trend" checked={!trend.autoscale} onChange={handleAutoscale}  name={"trd_manual_scale_" + trend.ID.toLocaleString()} />
+                                  <Checkbox key={"trd_manual_scale_" + (trend.ID as number).toLocaleString()} className="select-trend" checked={!trend.autoscale} onChange={handleAutoscale}  name={"trd_manual_scale_" + (trend.ID as number).toLocaleString()} />
                                 }
                                 label="Ustaw ręcznie zakres wartości"
                               />
-                              <Slider key={"trd_slider_" + trend.ID.toLocaleString()}  name={"trd_slider_" + trend.ID.toLocaleString()} disabled={trend.autoscale}
+                              <Slider key={"trd_slider_" + (trend.ID as number).toLocaleString()}  name={"trd_slider_" + (trend.ID as number).toLocaleString()} disabled={trend.autoscale}
                                 getAriaLabel={() => 'Minimum distance shift'}
                                 value={[trend.scale.min, trend.scale.max]}  
                                 onChange={handleTrendScale}

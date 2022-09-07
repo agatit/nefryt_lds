@@ -108,7 +108,7 @@ export type EditorPipeline = {
   AreaHeightDivision: number;
 };
 export type Pipeline = {
-  ID: number;
+  ID?: number;
   Name?: string;
   BeginPos?: number;
   EditorParams?: EditorPipeline;
