@@ -132,6 +132,7 @@ const Layout: React.FC<Props> = (p) => {
   const handleLogin  = (e: React.MouseEvent<HTMLElement>) => {
     if (isAuthenticated){
       dispatch(logout());
+      
     }else{
       navigate('/login');
     }

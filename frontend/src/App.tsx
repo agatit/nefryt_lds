@@ -10,7 +10,7 @@ import { useListTrendsQuery } from './store/trendApi';
 
 import { AuthLoginApiArg, AuthLoginApiResponse, Login, useAuthLoginMutation, useAuthRefreshMutation } from './store/authApi';
 import { UseMutationStateOptions } from '@reduxjs/toolkit/dist/query/react/buildHooks';
-import { useEffect } from 'react';
+import { Dispatch, useEffect } from 'react';
 import LoginPage from './pages/User/Login';
 import {
   Link,
@@ -18,9 +18,14 @@ import {
   Outlet,
 } from 'react-router-dom';
 import { AuthData, selectIsAuthenticated } from './features/auth/authSlice';
-import {  shallowEqual, useSelector } from 'react-redux';
+import {  shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { RootState, store } from './app/store';
 import jwt_decode from "jwt-decode";
+import { SnackbarMessage, SnackbarProvider, useSnackbar } from 'notistack';
+import useNotifier from './components/template/useNotifier';
+import { enqueueSnackbar } from './features/template/templateSlice';
+
+
 
 const ProtectedRoute = ({ user=false, redirectPath = '/login' }) => {
   if (!user) {
@@ -30,11 +35,18 @@ const ProtectedRoute = ({ user=false, redirectPath = '/login' }) => {
   return <Outlet />;
 };
 
+
+
+
+
+
 export default function App() {
   
+
   const isAuthenticated = useSelector(selectIsAuthenticated)
   //const isAuthenticated = true;
 
+  
 
   const auth: AuthData = useSelector(
     (state: RootState) => state.auth,
@@ -43,12 +55,17 @@ export default function App() {
 
   
 
+  //enqueueSnackbar();
+  
 
 const [
   refreshTokenPost,          // This is the mutation trigger
   { isLoading: isUpdating }, // This is the destructured mutation result
 
 ] = useAuthRefreshMutation();
+
+
+  useNotifier();
 
 
   return (
@@ -58,9 +75,9 @@ const [
               <Route element={<ProtectedRoute user={isAuthenticated} />}>
                   <Route path='/' element={<DashboardPage/>} />
                 
-              <Route path='/editor' element={<EditorPage/>} />
-              <Route path='/events' element={<EventsPage/>} />
-              <Route path='/charts' element={<ChartsPage/>} />
+                  <Route path='/editor' element={<EditorPage/>} />
+                  <Route path='/events' element={<EventsPage/>} />
+                  <Route path='/charts' element={<ChartsPage/>} />
               </Route> 
               <Route path='/login' element={<LoginPage/>} />
               <Route path="*" element={<NoPageFound/>}/>

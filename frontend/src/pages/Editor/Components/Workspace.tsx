@@ -10,6 +10,7 @@ import { CropLandscapeOutlined } from "@material-ui/icons";
 import { useMutation } from "redux-query-react";
 import {Node, useUpdateNodeMutation, UpdateNodeApiArg} from "../../../store/nodeApi"
 import { removeNode, setActiveLink, setActiveNode } from "../../../features/editor/editorSlice";
+import { Button } from "reactstrap";
 
   type Props = {
     state : EditorState;
@@ -128,6 +129,9 @@ import { removeNode, setActiveLink, setActiveNode } from "../../../features/edit
     const editorMouseClick  = async (e: any) => {
       var id :string = (e.target as HTMLElement).id;
 
+   
+     
+      
      /* console.log(e.target);
         //e.target.classList.add('selected');
 
