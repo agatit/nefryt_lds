@@ -7,7 +7,7 @@ import { RootState } from '../app/store';
 
 // initialize an empty api service that we'll inject endpoints into later as needed
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://192.168.1.86:8080/',
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://127.0.0.1:8080/',
   prepareHeaders: (headers, { getState }) => {
       var token = localStorage.getItem('token');
       console.log('DDDDDDDDDDDD');
