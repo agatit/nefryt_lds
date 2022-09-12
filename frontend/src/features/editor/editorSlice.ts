@@ -91,6 +91,8 @@ export const editorSlice = createSlice({
 
     .addMatcher(nodeApi.endpoints.listNodes.matchRejected, (state, action) => {
       //console.log('rejected', action) 
+      console.log('rejected', action);
+        console.log(action);
     })  
 
 
@@ -168,6 +170,10 @@ export const editorSlice = createSlice({
       //localStorage.setItem('refreshToken', action.payload.token);
       //localStorage.setItem('user', action.payload.token);
       //state.isAuthenticated = true
+    })
+    .addMatcher(nodeApi.endpoints.updateNode.matchRejected, (state, action) => {
+      console.log('rejected', action);
+      console.log(action);
     })
 
 

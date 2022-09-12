@@ -313,7 +313,8 @@ export const chartsSlice = createSlice({
       })
 
       .addMatcher(trendApi.endpoints.listTrends.matchRejected, (state, action) => {
-        //console.log('rejected', action)
+       // console.log('rejected', action);
+      //  console.log(action);
         
       })  
 

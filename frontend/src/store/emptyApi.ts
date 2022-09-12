@@ -15,7 +15,9 @@ export const api = createApi({
       headers.set('Access-Control-Allow-Origin', '*')
       headers.set('Authorization', `Bearer ${token}`)
     return headers}
+  
   }),
   
   endpoints: () => ({}),
 })
+

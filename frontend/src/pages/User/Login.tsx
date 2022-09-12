@@ -10,6 +10,7 @@ import { LoadingButton as _LoadingButton } from '@mui/lab';
 import { toast } from 'react-toastify';
 import { AuthLoginApiArg, useAuthLoginMutation } from '../../store/authApi';
 import FormInput from '../../components/FormInput';
+import { SnackbarProvider } from 'notistack';
 
 const LoadingButton = styled(_LoadingButton)`
   padding: 0.6rem 0;
@@ -65,7 +66,7 @@ const LoginPage = () => {
       toast.success('You successfully logged in');
       navigate(from);
     }
-    if (isError) {
+    if ((isError) && (error) && ((error as any).data)) {
       if (Array.isArray((error as any).data.error)) {
         (error as any).data.error.forEach((el: any) =>
           toast.error(el.message, {
@@ -105,6 +106,7 @@ const LoginPage = () => {
         backgroundColor: '#2363eb',
       }}
     >
+      
       <Box
         sx={{
           display: 'flex',
@@ -167,6 +169,7 @@ const LoginPage = () => {
           </Box>
         </FormProvider>
       </Box>
+    
     </Container>
   );
 };
