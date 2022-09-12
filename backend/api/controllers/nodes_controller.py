@@ -141,9 +141,9 @@ def get_node_by_id(node_id):  # noqa: E501
         if node is None:
             return Error(message="Not Found", code=404), 404
         api_node = Node()
-        api_node.id = node.ID
-        api_node.type = node.Type
-        api_node.name = node.Name
+        api_node.id = node.ID.strip()
+        api_node.type = node.Type.strip()
+        api_node.name = node.Name.strip()
 
         editor_node = session.get(editor.Node, node_id)
         if editor_node is not None:
@@ -178,9 +178,9 @@ def list_nodes():  # noqa: E501
         api_nodes = []
         for node in nodes:
             api_node = Node()
-            api_node.id = node.ID
-            api_node.type = node.Type
-            api_node.name = node.Name
+            api_node.id = node.ID.strip()
+            api_node.type = node.Type.strip()
+            api_node.name = node.Name.strip()
             if node.ID_1 is not None:
                 api_node.editor_params = EditorNode()
                 api_node.editor_params.pos_x = node.PosX
