@@ -1,4 +1,5 @@
 from ast import stmt
+from operator import or_
 import connexion
 import six
 
@@ -8,7 +9,7 @@ from api.models.node import Node  # noqa: E501
 from api.models.editor_node import EditorNode  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, delete
+from sqlalchemy import alias, select, delete, or_
 from ..db import session
 from database.models import editor, lds
 from .security_controller import check_permissions
@@ -117,6 +118,10 @@ def delete_node_by_id(node_id, token_info={}):  # noqa: E501
         db_node = session.get(lds.Node, node_id)
         if db_node is None:
             return Error(message="Not Found", code=404), 404
+
+        stmt = delete(lds.Link).where(lds.Link.BeginNodeID == node_id or lds.Link.EndNodeID == node_id)
+        session.execute(stmt)
+
         session.delete(db_node)
         session.commit()
 
