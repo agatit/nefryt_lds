@@ -79,6 +79,8 @@ import { Pipeline } from "../../store/pipelineApi"
   }
 
  export const DRAG_NODE = "DRAG_NODE";
+ export const SELECTED = "SELECTED";
+ export const NEW_NODE = "NEW_NODE";
 
    export type EditorState = {
     pipelines : Pipeline[]
@@ -89,8 +91,8 @@ import { Pipeline } from "../../store/pipelineApi"
     //action : IEditorAction
     //activeEditor: string 
     activeElement : {
-      node : INode | {},
-      link : ILink | {},
+      node : INode | undefined,
+      LinkID : number,
       state : string
     }
   }

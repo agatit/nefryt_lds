@@ -46,7 +46,16 @@ export const templateSlice = createSlice({
       }
       state.notifications.push({message: 'Błąd połaczenia z serwerem.', options:{variant:'error'},
       key: new Date().getTime() + Math.random()});
-    }); 
+    })
+    .addMatcher((action) =>  action.type.endsWith('/rejected'),  (state, action) => {
+       if ((action.payload.data.code >=400) && (action.payload.data.code <500)){  
+        for (var x=0; x<state.displayed.length; x++){
+          state.notifications = state.notifications.filter((notification: any) => notification.key!=state.displayed[x]);
+        }
+        state.notifications.push({message: 'Brak uprawnień do wykonania zadania!.', options:{variant:'warning'},
+        key: new Date().getTime() + Math.random()});
+       }
+    })
   }
 })
 

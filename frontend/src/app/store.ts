@@ -12,48 +12,6 @@ import { useSnackbar } from 'notistack';
 import { useDispatch } from 'react-redux';
 
 
-export const rtkQueryErrorLogger: Middleware =
-  (api: MiddlewareAPI) => (next) => (action) => {
-    
- var state = api.getState();
-
- //state.template.notifications.push({message: 'Failed fetching data.' + Date.now(),
- //key: new Date().getTime() + Math.random()});
-
- //return;
- //state.template.enqueueSnackbar({message: 'Failed fetching data.' + Date.now(),
- //key: new Date().getTime() + Math.random()});
- 
- //notifications.push({message: 'Failed fetching data.' + Date.now(),
- //key: new Date().getTime() + Math.random()});
- 
- // const { enqueueSnackbar } = useSnackbar();
-    console.log('FFFFFFFFFFFFFFFFFFFF');
-    console.log(state);
-    console.log(api);
-    console.log(action);
-    console.log(isRejectedWithValue(action));
-    
-    //api.dispatch(enqueueSnackbar({message: 'Failed fetching data.' + Date.now(),
-    //key: new Date().getTime() + Math.random()}));
-  
-   // return state.template.enqueueSnackbar({message: 'Failed fetching data.' + Date.now(),
-   // key: new Date().getTime() + Math.random()});
-   
-   // return;
-
-    // RTK Query uses `createAsyncThunk` from redux-toolkit under the hood, so we're able to utilize these matchers!
-    if (isRejectedWithValue(action)) {
-      console.log('FFFFFFFFFFFFFFFFFFFF');
-      console.warn('We got a rejected action!')
-    //  addMessage('We got a rejected action!');
-    //  enqueueSnackbar(action.error.data.message);
-      //toast.warn({ title: 'Async error!', message: action.error.data.message })
-    }
-
-    return next(action)
-  }
-
 
 export const store = configureStore({
   reducer: {
@@ -66,7 +24,7 @@ export const store = configureStore({
   },
   
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(rtkQueryErrorLogger),
+    getDefaultMiddleware().concat(),
 });
 
 

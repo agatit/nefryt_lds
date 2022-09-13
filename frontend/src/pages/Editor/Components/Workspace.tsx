@@ -3,12 +3,12 @@ import { Dispatch } from "redux"
 import { useDispatch } from "react-redux"
 import {NodeElm} from "./Node/node" 
 import { useEffect } from "react";
-import { EditorState, IEditorAction, INode } from "../type"
+import { EditorState, IEditorAction, INode, NEW_NODE } from "../type"
 import $ from "jquery"
 import { mutateAsync, updateEntities } from "redux-query";
 import { CropLandscapeOutlined } from "@material-ui/icons";
 import { useMutation } from "redux-query-react";
-import {Node, useUpdateNodeMutation, UpdateNodeApiArg} from "../../../store/nodeApi"
+import {Node, useUpdateNodeMutation, UpdateNodeApiArg, useCreateNodeMutation} from "../../../store/nodeApi"
 import { removeNode, setActiveLink, setActiveNode } from "../../../features/editor/editorSlice";
 import { Button } from "reactstrap";
 
@@ -78,10 +78,14 @@ import { Button } from "reactstrap";
     const [updateNode, { isLoading, isError, error, isSuccess }] =
     useUpdateNodeMutation();
 
+    const [createNode, { }] =
+    useCreateNodeMutation();
+
+    
 
     const onDrop = (e: React.MouseEvent<HTMLElement>) => {
-      console.log('AAAAA');
-      if ((p.state.activeElement) && ((p.state.activeElement.node as INode).NodeID as number) > 0){
+     // console.log('AAAAA');
+      if ((p.state.activeElement) && (p.state.activeElement.node) && ((p.state.activeElement.node as INode).NodeID as number) > 0){
         var id :string = (e.target as HTMLElement).id;
           var position : RegExpMatchArray | null = id.match(/\d+/g);
         if ((position as RegExpMatchArray).length==2){
@@ -183,7 +187,16 @@ import { Button } from "reactstrap";
       var position : RegExpMatchArray | null = id.match(/\d+/g);
       if (position && (position as RegExpMatchArray).length==2){
         if (SelectedLinkID<0){
-          dispatch(setActiveNode({}));
+          var nodeA : Node = {
+            //ID: (p.state.activeElement.node as INode).NodeID,
+            EditorParams: {
+              PosX: Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.state.area.ScaleHeight,
+              PosY: Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.state.area.ScaleWidth
+            },
+            Type: (p.state.activeElement.node as INode).type
+          }
+          createNode({node:nodeA});
+          //dispatch(setActiveNode({}));
         }
       }
     /*alert('aaa');
@@ -318,7 +331,7 @@ console.log(nodeA);
             var cell_ : HTMLElement = document.getElementById(cellid_) as HTMLElement;
             cell_.classList.add("link_vertical");
             cell_.classList.add("V_Link_" + p.state.Links[i].ID);
-            if (p.state.Links[i].ID == p.state.activeElement.link){
+            if (p.state.Links[i].ID == p.state.activeElement.LinkID){
               cell_.classList.add("v_selected");
             }
             cell_.onclick = link_Click;
@@ -333,7 +346,7 @@ console.log(nodeA);
             var cell_ : HTMLElement = document.getElementById(cellid_) as HTMLElement;
             cell_.classList.add("link_horizontal");
             cell_.classList.add("H_Link_" + p.state.Links[i].ID);
-            if (p.state.Links[i].ID == p.state.activeElement.link){
+            if (p.state.Links[i].ID == p.state.activeElement.LinkID){
               cell_.classList.add("h_selected");
             }
             cell_.onclick = link_Click;
@@ -357,7 +370,7 @@ console.log(nodeA);
         var strPosY : string = (posY *2).toString(); 
         var cellid : string = 'cell_' + strPosY + '_'+ strPosX;
 
-        var selected=(p.state.activeElement) && ((p.state.activeElement.node as INode).NodeID == p.state.Nodes[i].NodeID);
+        var selected=(p.state.activeElement) && (p.state.activeElement.node? true : false) && ((p.state.activeElement.node as INode).NodeID == p.state.Nodes[i].NodeID);
         nodes.push({cell_id :cellid, node:<NodeElm key={i} node={p.state.Nodes[i]} removeNode={()=>removeNode(p.state.Nodes[i]) } selected={selected} ></NodeElm>})
     }
 
@@ -396,8 +409,8 @@ console.log(nodeA);
         <div className="table-row">
           <div className="ruler-left table-cell"><div className="ruler-vertical-item">{positionsVertical}</div></div>
           <div className="editor-content table-cell">
-            {//(p.action.type==MOVE_NODE) && (p.action.data &&(p.action.data).length>0) && <div id="tmp-Node"><NodeElm node={p.action.data[0]} removeNode={() => removeNode(p.action.data[0])} selected={false}></NodeElm></div>}
-            }
+            {(p.state.activeElement.state == NEW_NODE) && <div id="tmp-Node"><NodeElm node={p.state.activeElement.node ? p.state.activeElement.node : {} } removeNode={() => removeNode(p.state.activeElement.node ? p.state.activeElement.node : {})} selected={false}></NodeElm></div>}
+            
             <p id="editor-horizontal-indicator">&nbsp;</p>
             <p id="editor-vertical-indicator">&nbsp;</p>
             <div style={{width: (width+1)*40, height: (height+1)*40}}><div className="table">{content}</div></div>

@@ -1,10 +1,11 @@
 import * as React from "react"
 import { Dispatch } from "redux"
 import { useDispatch } from "react-redux"
-import { EditorState, IEditorAction } from "../../type";
+import { EditorState, IEditorAction, INode } from "../../type";
 import { ExpandMore } from '@material-ui/icons';
 import { Accordion, AccordionSummary, AccordionDetails, createTheme, withStyles, makeStyles, FormControl, Select, InputLabel, MenuItem } from '@material-ui/core';
 import { Button, TextField } from "@mui/material";
+import { newNode, NodeDescription, NodeTypes } from "../../../../features/editor/editorSlice";
 
 
 
@@ -120,10 +121,22 @@ export const NodeToolbox: React.FC<Props> = (p) => {
 
  var editorHeight = 0;
 
+ const newNodeClick = (e: React.MouseEvent<HTMLElement>, nodeType:string) => {
+  var tmpNode : INode ={
+    type: nodeType,
+    Name: "",
+    positionX: 0,
+    positionY: 0,
+    TrendDef: {}
+  }
+  dispatch(newNode(tmpNode));
+ }
   const menuItemClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (e.currentTarget.classList.contains('node-new')){	
-       //dispatch(newNode());
-    }else if (e.currentTarget.classList.contains('node-move')){	
+    //if (e.currentTarget.classList.contains('node-new')){	
+       //alert('newNode');
+       
+    //}else 
+    if (e.currentTarget.classList.contains('node-move')){	
      // dispatch(moveNode({}));
     }else if (e.currentTarget.classList.contains('node-clone')){	
       //dispatch(cloneNode({}));
@@ -150,7 +163,7 @@ export const NodeToolbox: React.FC<Props> = (p) => {
   //var activeMoveNode = p.action.type == editorAction.MOVE_NODE ? 'active' : '';
   //var moveNodeClasses = "node node-move " + activeMoveNode;
   //var activeNewNode = p.action.type == editorAction.NEW_NODE ? 'active' : '';
-  //var newNodeClasses = "node node-new " + activeNewNode;
+  var newNodeClasses = "node node-new ";// + activeNewNode;
 
   //var activeEditNode = p.action.type == editorAction.EDIT_NODE ? 'active' : '';
   //var editNodeClasses = "node node-edit " + activeEditNode;
@@ -203,6 +216,9 @@ export const NodeToolbox: React.FC<Props> = (p) => {
       
           </MuiAccordionDetails>
       </MuiAccordion>
+
+      
+
       <MuiAccordion >
         <MuiAccordionSummary
           expandIcon={<ExpandMore />}
@@ -210,10 +226,18 @@ export const NodeToolbox: React.FC<Props> = (p) => {
           aria-controls="additional-actions1-content"
           id="additional-actions1-header"
         >
-          Edycja Węzłów
+          Dodaj węzeł
         </MuiAccordionSummary>
         <MuiAccordionDetails>
           <div id="editor-menu-containetr" className="table-cell">
+          {
+                  NodeTypes.map((element:string, index : number) => (
+
+                    <p onClick={e => newNodeClick(e, element)} className={newNodeClasses + ' ' + element}><span>&nbsp;</span>{NodeDescription[index]}</p>
+
+                  ))
+
+                 }
             {//<p onClick={menuItemClick} className={newNodeClasses}><span>&nbsp;</span>Nowy węzeł</p>
             //<p onClick={menuItemClick} className={editNodeClasses} ><span>&nbsp;</span>Edytuj węzeł</p>
             //<p onClick={menuItemClick} className={moveNodeClasses}><span>&nbsp;</span>Przesuń węzeł</p>

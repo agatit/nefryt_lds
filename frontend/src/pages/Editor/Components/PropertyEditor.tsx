@@ -7,11 +7,7 @@ type Prop={
     index:number
     activeTabIndex:number
 }
-
-
-
-
-      
+   
 export const PropertyEditorTab: React.FC<Prop> = (p) => {
     return (
         

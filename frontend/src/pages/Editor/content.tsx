@@ -9,7 +9,8 @@ import { PipelineEditorWorkspace } from './Components/Workspace';
 import NewNodeForm from './NewNodeForm';
 import EditorAreaSettings from './EditorAreaSettings';
 import { NodePropertyEditor } from './Components/nodePropertyEditor';
-import { EditorState, INode } from './type';
+import { EditorState, INode, SELECTED } from './type';
+import { LinkPropertyEditor } from './Components/linkPropertyEditor';
 
 
 
@@ -26,7 +27,7 @@ export const EditorContent: React.FC = () => {
   var sidepanelClasses='sidepanel';
 
 
-  if ((reducer.activeElement.node) && ((((reducer.activeElement.node as INode).NodeID as number) > 0) || (reducer.activeElement.link > 0)))  {
+  if (((reducer.activeElement.node) && (((reducer.activeElement.node as INode).NodeID as number) > 0)  || (reducer.activeElement.LinkID > 0)) && (reducer.activeElement.state == SELECTED))  {
     sidepanelClasses = sidepanelClasses + ' open';
   }
 
@@ -46,6 +47,7 @@ export const EditorContent: React.FC = () => {
   
 const handleSubmitNewNode  = (e: any ) => {
   console.log(e);
+  //alert('AAA');
 /*
   var node : INode = {NodeID : -1,
     type : form.elements.Type.value,
@@ -61,8 +63,7 @@ const handleSubmitNewNode  = (e: any ) => {
   //dispatch(cancelNodeAction());
 }
 
-
-             
+        
   return (
     <>
       <React.Fragment>
@@ -76,7 +77,7 @@ const handleSubmitNewNode  = (e: any ) => {
           <NewNodeForm onSubmit={handleSubmitNewNode} ></NewNodeForm>
           <EditorAreaSettings onSubmit={handleSubmitAreaEditor} ></EditorAreaSettings>
           <div id="mySidepanel" className={sidepanelClasses}>
-            <NodePropertyEditor  ></NodePropertyEditor>
+           {reducer.activeElement.node ? <NodePropertyEditor></NodePropertyEditor> : <LinkPropertyEditor  ></LinkPropertyEditor>}
           </div>
       </React.Fragment>
     </>
