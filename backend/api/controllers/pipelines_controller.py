@@ -9,7 +9,9 @@ from api.models.pipeline_param_def import PipelineParamDef  # noqa: E501
 from api.models.editor_pipeline import EditorPipeline  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, delete, and_
+from odata_query.sqlalchemy import apply_odata_query
+from sqlalchemy import select, delete, and_
+from sqlalchemy.orm import aliased
 from ..db import session
 from database.models import editor, lds
 from .security_controller import check_permissions
@@ -162,7 +164,7 @@ def get_pipeline_by_id(pipeline_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def list_pipelines():  # noqa: E501
+def list_pipelines(filter_=None, filter=None):  # noqa: E501
     """List pipelines
 
     List all pipelines # noqa: E501
@@ -171,27 +173,25 @@ def list_pipelines():  # noqa: E501
     :rtype: List[pipeline]
     """
     try:
-        ln = alias(lds.Pipeline, "ln")
-        en = alias(editor.Pipeline, "en")  
-        db_pipelines = session.execute(
-            select(ln, en).select_from(ln).outerjoin(en, en.c.ID == ln.c.ID )
-        ).fetchall()        
-
-        if db_pipelines is None:
-            return Error(message="Not Found", code=500), 404
+        ln = aliased(lds.Pipeline)
+        en = aliased(editor.Pipeline)
+        stmt = select(ln, en).select_from(ln).outerjoin(en, en.ID == ln.ID)
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)        
+        db_pipelines = session.execute(stmt)        
 
         api_pipelines = []
-        for db_pipeline in db_pipelines:
+        for lds_pipeline, editor_pipeline in db_pipelines:
             api_pipeline = Pipeline()
-            api_pipeline.id = db_pipeline.ID
-            api_pipeline.name = db_pipeline.Name
-            api_pipeline.begin_pos = db_pipeline.BeginPos
-            if db_pipeline.ID_1 is not None:
+            api_pipeline.id = lds_pipeline.ID
+            api_pipeline.name = lds_pipeline.Name
+            api_pipeline.begin_pos = lds_pipeline.BeginPos
+            if editor_pipeline is not None:
                 api_pipeline.editor_params = EditorPipeline()
-                api_pipeline.editor_params.area_height = db_pipeline.AreaHeight
-                api_pipeline.editor_params.area_width = db_pipeline.AreaWidth
-                api_pipeline.editor_params.area_height_division = db_pipeline.AreaHeightDivision
-                api_pipeline.editor_params.area_width_division = db_pipeline.AreaWidthDivision
+                api_pipeline.editor_params.area_height = editor_pipeline.AreaHeight
+                api_pipeline.editor_params.area_width = editor_pipeline.AreaWidth
+                api_pipeline.editor_params.area_height_division = editor_pipeline.AreaHeightDivision
+                api_pipeline.editor_params.area_width_division = editor_pipeline.AreaWidthDivision
             api_pipelines.append(api_pipeline)        
 
         return api_pipelines, 200
@@ -228,7 +228,7 @@ def get_pipeline_param_by_id(pipeline_id, pipeline_param_def_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def list_pipeline_params(pipeline_id):  # noqa: E501
+def list_pipeline_params(pipeline_id, filter_=None, filter=None):  # noqa: E501
     """List pipeline params
 
     List all pipeline params # noqa: E501
@@ -246,6 +246,8 @@ def list_pipeline_params(pipeline_id):  # noqa: E501
             .outerjoin(lds.PipelineParam, \
                     and_(lds.PipelineParamDef.ID == lds.PipelineParam.PipelineParamDefID, lds.PipelineParam.PipelineID == pipeline_id) \
                 )  
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)                
 
         db_pipeline_params = session.execute(stmt)
 

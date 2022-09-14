@@ -9,7 +9,9 @@ from api.models.node import Node  # noqa: E501
 from api.models.editor_node import EditorNode  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, delete, or_
+from odata_query.sqlalchemy import apply_odata_query
+from sqlalchemy import select, delete, or_
+from sqlalchemy.orm import aliased
 from ..db import session
 from database.models import editor, lds
 from .security_controller import check_permissions
@@ -162,7 +164,7 @@ def get_node_by_id(node_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def list_nodes():  # noqa: E501
+def list_nodes(filter_=None, filter=None):  # noqa: E501
     """List nodes
 
     List all nodes # noqa: E501
@@ -171,25 +173,24 @@ def list_nodes():  # noqa: E501
     :rtype: List[Node]
     """
     try:
-        ln = alias(lds.Node, "ln")
-        en = alias(editor.Node, "en")
-        nodes = session.execute(
-            select([ln, en]).outerjoin(en, en.c.ID == ln.c.ID )
-        ).fetchall()
+        ln = aliased(lds.Node)
+        en = aliased(editor.Node)
 
-        if nodes is None:
-            return Error(message="Not Found", code=500), 404
+        stmt = select(ln, en).outerjoin(en, en.ID == ln.ID )
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)        
+        nodes = session.execute(stmt)
 
         api_nodes = []
-        for node in nodes:
+        for lds_node, editor_node in nodes:
             api_node = Node()
-            api_node.id = node.ID
-            api_node.type = node.Type.strip()
-            api_node.name = node.Name
-            if node.ID_1 is not None:
+            api_node.id = lds_node.ID
+            api_node.type = lds_node.Type.strip()
+            api_node.name = lds_node.Name
+            if editor_node is not None:
                 api_node.editor_params = EditorNode()
-                api_node.editor_params.pos_x = node.PosX
-                api_node.editor_params.pos_y = node.PosY
+                api_node.editor_params.pos_x = editor_node.PosX
+                api_node.editor_params.pos_y = editor_node.PosY
             api_nodes.append(api_node)        
 
 

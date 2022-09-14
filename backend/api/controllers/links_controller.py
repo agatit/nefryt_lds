@@ -7,7 +7,8 @@ from api.models.information import Information  # noqa: E501
 from api.models.link import Link  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, delete
+from odata_query.sqlalchemy import apply_odata_query
+from sqlalchemy import select, delete
 from ..db import session
 from database.models import lds
 from .security_controller import check_permissions
@@ -135,7 +136,7 @@ def get_link_by_id(link_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def list_links(token_info):  # noqa: E501
+def list_links(token_info, filter=None, filter_=None):  # noqa: E501
     """List links
 
     List all links # noqa: E501
@@ -144,11 +145,10 @@ def list_links(token_info):  # noqa: E501
     :rtype: List[Link]
     """
     try:
-        links = session.execute(
-            select([lds.Link])
-        )
-
-        print(links)
+        stmt = select([lds.Link])
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)        
+        links = session.execute(stmt)
 
         api_links = []
         for link, in links:
@@ -158,7 +158,6 @@ def list_links(token_info):  # noqa: E501
             api_link.end_node_id = link.EndNodeID
             api_link.length = link.Length            
             api_links.append(api_link)        
-
 
         return api_links, 200
 

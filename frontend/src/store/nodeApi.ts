@@ -2,7 +2,10 @@ import { api } from "./emptyApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     listNodes: build.query<ListNodesApiResponse, ListNodesApiArg>({
-      query: () => ({ url: `/node` }),
+      query: (queryArg) => ({
+        url: `/node`,
+        params: { $filter: queryArg.$filter },
+      }),
     }),
     createNode: build.mutation<CreateNodeApiResponse, CreateNodeApiArg>({
       query: (queryArg) => ({
@@ -35,7 +38,10 @@ const injectedRtkApi = api.injectEndpoints({
 });
 export { injectedRtkApi as enhancedApi };
 export type ListNodesApiResponse = /** status 200 A array of nodes */ Node[];
-export type ListNodesApiArg = void;
+export type ListNodesApiArg = {
+  /** Query filter in OData standard */
+  $filter?: string;
+};
 export type CreateNodeApiResponse =
   /** status 201 Expected response to a valid request */ Node;
 export type CreateNodeApiArg = {

@@ -132,6 +132,15 @@ paths:
     get:
       description: List all links
       operationId: list_links
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -257,6 +266,15 @@ paths:
     get:
       description: List all nodes
       operationId: list_nodes
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -398,6 +416,15 @@ paths:
     get:
       description: List all pipelines
       operationId: list_pipelines
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -540,6 +567,14 @@ paths:
       description: List all methods
       operationId: list_methods
       parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       - description: The id of the pipeline to retrieve
         explode: false
         in: path
@@ -816,6 +851,14 @@ paths:
       description: List all  pipeline params
       operationId: list_pipeline_params
       parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       - description: The id of the pipeline to retrieve
         explode: false
         in: path
@@ -892,6 +935,15 @@ paths:
     get:
       description: List all trends
       operationId: list_trends
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -1142,6 +1194,14 @@ paths:
       description: List all trend params
       operationId: list_trend_params
       parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       - description: The id of the trend to retrieve
         explode: false
         in: path
@@ -1253,6 +1313,15 @@ paths:
     get:
       description: List all trend defs
       operationId: list_trend_defs
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -1346,6 +1415,15 @@ components:
       schema:
         type: integer
       style: simple
+    filter:
+      description: Query filter in OData standard
+      explode: true
+      in: query
+      name: $filter
+      required: false
+      schema:
+        type: string
+      style: form
   responses:
     UnexpectedError:
       content:
@@ -1437,7 +1515,7 @@ components:
           type: integer
         Name:
           example: Arthur Dent
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
       required:
@@ -1455,7 +1533,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           type: string
       type: object
     MethodParam:
@@ -1486,17 +1564,17 @@ components:
           type: integer
         DataType:
           description: none
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: DataType
           type: string
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         Value:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Value
           type: string
       required:
@@ -1517,11 +1595,11 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           type: string
         DataType:
           description: none
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           type: string
       type: object
     Node:
@@ -1543,7 +1621,7 @@ components:
         Type:
           description: none
           nullable: false
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: Type
           type: string
         TrendID:
@@ -1553,7 +1631,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,50}"
+          pattern: ^.{0,50}
           title: Name
           type: string
         EditorParams:
@@ -1582,7 +1660,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         BeginPos:
@@ -1615,17 +1693,17 @@ components:
           type: integer
         DataType:
           description: none
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: DataType
           type: string
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         Value:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Value
           type: string
       required:
@@ -1645,11 +1723,11 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           type: string
         DataType:
           description: none
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           type: string
       type: object
     PipelineNode:
@@ -1671,19 +1749,20 @@ components:
       type: object
     Trend:
       example:
-        ScaledMax: 2.3021358869347655
+        ScaledMax: 7.061401241503109
         Symbol: Symbol
         Color: Color
         RawMax: 5
         TrendDefID: TrendDefID
         Unit: Unit
         Name: Name
-        RawMin: 1
-        ScaledMin: 5.637376656633329
+        RawMin: 5
+        ScaledMin: 2.3021358869347655
         TrendGroupID: 0
         Format: Format
+        NodeID: 6
         ID: 0
-        TimeExponent: 6
+        TimeExponent: 1
       properties:
         ID:
           description: none
@@ -1694,7 +1773,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         TrendGroupID:
@@ -1705,6 +1784,10 @@ components:
           description: none
           title: TrendDefID
           type: string
+        NodeID:
+          description: none
+          title: NodeID
+          type: integer
         TimeExponent:
           description: none
           title: TimeExponent
@@ -1778,7 +1861,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Name
           type: string
         TimeExponent:
@@ -1787,12 +1870,12 @@ components:
           type: integer
         Format:
           description: none
-          pattern: "^.{0,20}"
+          pattern: ^.{0,20}
           title: Format
           type: string
         SIUnitTID:
           description: none
-          pattern: "^.{0,8}"
+          pattern: ^.{0,8}
           title: SIUnitTID
           type: string
       required:
@@ -1812,7 +1895,7 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,100}"
+          pattern: ^.{0,100}
           type: string
         AnalisisOnly:
           description: none
@@ -1839,17 +1922,17 @@ components:
           title: TrendParamDefID
           type: string
         Name:
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           readOnly: true
           title: Name
           type: string
         DataType:
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           readOnly: true
           title: DataType
           type: string
         Value:
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           title: Value
           type: string
       required:
@@ -1872,11 +1955,11 @@ components:
           type: integer
         Name:
           description: none
-          pattern: "^.{0,30}"
+          pattern: ^.{0,30}
           type: string
         DataType:
           description: none
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           type: string
       required:
       - TrendDefID
@@ -1961,7 +2044,7 @@ components:
         AreaWidth:
           description: none
           nullable: false
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: AreaWidth
           type: integer
         AreaHeight:
@@ -1994,7 +2077,7 @@ components:
         PosX:
           description: none
           nullable: false
-          pattern: "^.{0,6}"
+          pattern: ^.{0,6}
           title: PosX
           type: integer
         PosY:
@@ -2048,7 +2131,6 @@ components:
       title: Information
       type: object
     Login:
-      description: ""
       example:
         password: password
         deviceId: deviceId
@@ -2083,13 +2165,12 @@ components:
           deviceId: ad49afd9-ec38-4716-b93f-416bd8c0c684
           deviceName: model
     LoginPermissions:
-      description: ""
       example:
         refreshTokenExpiration: refreshTokenExpiration
         success: true
         permissions:
-        - key: ""
-        - key: ""
+        - key: '{}'
+        - key: '{}'
         username: username
         token: token
         refreshToken: refreshToken

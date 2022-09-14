@@ -2,7 +2,10 @@ import { api } from "./emptyApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     listTrends: build.query<ListTrendsApiResponse, ListTrendsApiArg>({
-      query: () => ({ url: `/trend` }),
+      query: (queryArg) => ({
+        url: `/trend`,
+        params: { $filter: queryArg.$filter },
+      }),
     }),
     createTrend: build.mutation<CreateTrendApiResponse, CreateTrendApiArg>({
       query: (queryArg) => ({
@@ -34,7 +37,10 @@ const injectedRtkApi = api.injectEndpoints({
       ListTrendParamsApiResponse,
       ListTrendParamsApiArg
     >({
-      query: (queryArg) => ({ url: `/trend/${queryArg.trendId}/param` }),
+      query: (queryArg) => ({
+        url: `/trend/${queryArg.trendId}/param`,
+        params: { $filter: queryArg.$filter },
+      }),
     }),
     getTrendParamById: build.query<
       GetTrendParamByIdApiResponse,
@@ -68,14 +74,20 @@ const injectedRtkApi = api.injectEndpoints({
       }),
     }),
     listTrendDefs: build.query<ListTrendDefsApiResponse, ListTrendDefsApiArg>({
-      query: () => ({ url: `/trend_def` }),
+      query: (queryArg) => ({
+        url: `/trend_def`,
+        params: { $filter: queryArg.$filter },
+      }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as enhancedApi };
 export type ListTrendsApiResponse = /** status 200 A array of trends */ Trend[];
-export type ListTrendsApiArg = void;
+export type ListTrendsApiArg = {
+  /** Query filter in OData standard */
+  $filter?: string;
+};
 export type CreateTrendApiResponse =
   /** status 201 Expected response to a valid request */ Trend;
 export type CreateTrendApiArg = {
@@ -102,6 +114,8 @@ export type DeleteTrendByIdApiArg = {
 export type ListTrendParamsApiResponse =
   /** status 200 A array of params */ TrendParam[];
 export type ListTrendParamsApiArg = {
+  /** Query filter in OData standard */
+  $filter?: string;
   /** The id of the trend to retrieve */
   trendId: number;
 };
@@ -146,12 +160,16 @@ export type GetTrendCurrentDataApiArg = {
 };
 export type ListTrendDefsApiResponse =
   /** status 200 A array of trend defs */ TrendDef[];
-export type ListTrendDefsApiArg = void;
+export type ListTrendDefsApiArg = {
+  /** Query filter in OData standard */
+  $filter?: string;
+};
 export type Trend = {
   ID?: number;
   Name?: string;
   TrendGroupID?: number;
   TrendDefID: string;
+  NodeID?: number;
   TimeExponent?: number;
   Format?: string;
   Unit?: string;

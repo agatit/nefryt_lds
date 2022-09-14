@@ -5,6 +5,7 @@ get:
   tags:
     - trends
   parameters:
+    - $ref: "../parameters/path/filter.yaml"    
     - $ref: "../parameters/path/trendId.yaml"
   responses:
     "200":

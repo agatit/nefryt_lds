@@ -4,6 +4,8 @@ get:
   description: List all trend defs
   tags:
     - trends
+  parameters:
+    - $ref: "../parameters/path/filter.yaml"    
   responses:
     "200":
       description: A array of trend defs
