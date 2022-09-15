@@ -15,3 +15,5 @@ editorNodeId:
   $ref: "./path/editorNodeId.yaml"
 editorPipelineId:
   $ref: "./path/editorPipelineId.yaml"
+filter:
+  $ref: "./path/filter.yaml"

@@ -2,7 +2,10 @@ import { api } from "./emptyApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     listPipelines: build.query<ListPipelinesApiResponse, ListPipelinesApiArg>({
-      query: () => ({ url: `/pipeline` }),
+      query: (queryArg) => ({
+        url: `/pipeline`,
+        params: { $filter: queryArg.$filter },
+      }),
     }),
     createPipeline: build.mutation<
       CreatePipelineApiResponse,
@@ -43,7 +46,10 @@ const injectedRtkApi = api.injectEndpoints({
       ListPipelineParamsApiResponse,
       ListPipelineParamsApiArg
     >({
-      query: (queryArg) => ({ url: `/pipeline/${queryArg.pipelineId}/param` }),
+      query: (queryArg) => ({
+        url: `/pipeline/${queryArg.pipelineId}/param`,
+        params: { $filter: queryArg.$filter },
+      }),
     }),
     updatePipelineParam: build.mutation<
       UpdatePipelineParamApiResponse,
@@ -61,7 +67,10 @@ const injectedRtkApi = api.injectEndpoints({
 export { injectedRtkApi as enhancedApi };
 export type ListPipelinesApiResponse =
   /** status 200 A array of pipelines */ Pipeline[];
-export type ListPipelinesApiArg = void;
+export type ListPipelinesApiArg = {
+  /** Query filter in OData standard */
+  $filter?: string;
+};
 export type CreatePipelineApiResponse =
   /** status 201 Expected response to a valid request */ Pipeline;
 export type CreatePipelineApiArg = {
@@ -89,6 +98,8 @@ export type DeletePipelineByIdApiArg = {
 export type ListPipelineParamsApiResponse =
   /** status 200 A array of  pipelines params */ PipelineParam[];
 export type ListPipelineParamsApiArg = {
+  /** Query filter in OData standard */
+  $filter?: string;
   /** The id of the pipeline to retrieve */
   pipelineId: number;
 };

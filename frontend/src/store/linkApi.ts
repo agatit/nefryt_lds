@@ -2,7 +2,10 @@ import { api } from "./emptyApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     listLinks: build.query<ListLinksApiResponse, ListLinksApiArg>({
-      query: () => ({ url: `/link` }),
+      query: (queryArg) => ({
+        url: `/link`,
+        params: { $filter: queryArg.$filter },
+      }),
     }),
     createLink: build.mutation<CreateLinkApiResponse, CreateLinkApiArg>({
       query: (queryArg) => ({
@@ -35,7 +38,10 @@ const injectedRtkApi = api.injectEndpoints({
 });
 export { injectedRtkApi as enhancedApi };
 export type ListLinksApiResponse = /** status 200 A array of links */ Link[];
-export type ListLinksApiArg = void;
+export type ListLinksApiArg = {
+  /** Query filter in OData standard */
+  $filter?: string;
+};
 export type CreateLinkApiResponse =
   /** status 201 Expected response to a valid request */ Link;
 export type CreateLinkApiArg = {

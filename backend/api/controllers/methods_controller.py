@@ -7,7 +7,9 @@ from api.models.method_param import MethodParam  # noqa: E501
 from api.models.method_def import MethodDef  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, and_
+from odata_query.sqlalchemy import apply_odata_query
+from sqlalchemy import select, and_
+from sqlalchemy.orm import aliased
 from ..db import session
 from database.models import lds
 from .security_controller import check_permissions
@@ -134,7 +136,7 @@ def update_method(pipeline_id, method_id, method=None, token_info={}):  # noqa: 
         return Error(message=str(e), code=500), 500  
 
 
-def list_methods(pipeline_id):  # noqa: E501
+def list_methods(pipeline_id, filter_=None, filter=None):  # noqa: E501
     """List methods
 
     List all methods # noqa: E501
@@ -144,6 +146,8 @@ def list_methods(pipeline_id):  # noqa: E501
     """
     try:
         stmt = select(lds.Method).where(lds.Method.PipelineID == pipeline_id)
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)        
         db_methods = session.execute(stmt)
 
         api_methods = []
@@ -207,26 +211,28 @@ def list_method_params(pipeline_id, method_id):  # noqa: E501
         # where
         #     t.ID = 101
 
-        tp = alias(lds.MethodParam, "tp")
-        t = alias(lds.Method, "t")
-        tpd = alias(lds.MethodParamDef, "tpd")
+        mp = aliased(lds.MethodParam)
+        m = aliased(lds.Method)
+        mpd = aliased(lds.MethodParamDef)
         
-        stmt = select(t.c.ID.label("MethodID"), tpd.c.ID.label("MethodParamDefID"), tpd.c.Name, tp.c.Value, tpd.c.DataType) \
-            .select_from(t) \
-            .outerjoin(tpd, t.c.MethodDefID == tpd.c.MethodDefID ) \
-            .outerjoin(tp, and_(tpd.c.ID == tp.c.MethodParamDefID, t.c.ID == tp.c.MethodID)) \
-            .where(t.c.ID == method_id)
+        # t.c.ID.label("MethodID"), tpd.c.ID.label("MethodParamDefID"), tpd.c.Name, tp.c.Value, tpd.c.DataType
+        stmt = select(m, mp, mpd) \
+            .select_from(m) \
+            .outerjoin(mpd, m.MethodDefID == mpd.MethodDefID ) \
+            .outerjoin(mp, and_(mpd.ID == mp.MethodParamDefID, m.ID == mp.MethodID)) \
+            .where(m.ID == method_id)    
 
         db_method_params = session.execute(stmt)
 
         api_method_params = []
-        for db_method_param in db_method_params:
+        for db_method, db_method_param, method_param_def in db_method_params:
             api_method_param = MethodParam()
-            api_method_param.method_id = db_method_param.MethodID
-            api_method_param.method_param_def_id = db_method_param.MethodParamDefID.strip()
-            api_method_param.value = db_method_param.Value
-            api_method_param.name = db_method_param.Name
-            api_method_param.data_type = db_method_param.DataType.strip()
+            api_method_param.method_id = db_method.ID
+            api_method_param.method_param_def_id = method_param_def.ID.strip()            
+            api_method_param.name = method_param_def.Name
+            api_method_param.data_type = method_param_def.DataType.strip()            
+            if db_method_param is not None:
+                api_method_param.value = db_method_param.Value
             api_method_params.append(api_method_param)
 
         return api_method_params, 200
@@ -270,7 +276,7 @@ def update_method_param(pipeline_id, method_id, method_param_def_id, method_para
         return Error(message=str(e), code=500), 500          
 
 
-def list_method_defs():  # noqa: E501
+def list_method_defs(filter_=None, filter=None):  # noqa: E501
     """List methods
 
     List all methods # noqa: E501
@@ -279,7 +285,10 @@ def list_method_defs():  # noqa: E501
     :rtype: List[Method]
     """
     try:
-        methods = session.execute(select(lds.MethodDef))
+        stmt = select(lds.MethodDef)
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)        
+        methods = session.execute(stmt)
 
         api_methods = []
         for method, in methods:

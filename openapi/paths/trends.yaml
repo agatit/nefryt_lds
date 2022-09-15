@@ -3,9 +3,9 @@ get:
   operationId: listTrends
   description: List all trends
   tags:
-    - trends
-  # parameters:
-  #   - $ref: "../parameters/query/limit.yaml"
+    - trends  
+  parameters:
+    - $ref: "../parameters/path/filter.yaml"
   responses:
     "200":
       description: A array of trends
