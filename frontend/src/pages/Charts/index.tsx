@@ -14,7 +14,8 @@ import "./style.css";
 
 
 const ChartsPage: React.FC = () => {
-  useListTrendsQuery();
+  var filter = {}
+  useListTrendsQuery(filter);
 
   const dispatch :Dispatch = useDispatch();
 

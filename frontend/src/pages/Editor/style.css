@@ -185,3 +185,16 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
   padding-left: 5px;
   padding-right: 5px;
 }
+
+.sidepanel.MuiTab-root {
+  min-height: 10px!important;
+}
+.sidepanel.MuiTypography-root{
+  width:100%!important;
+  margin-left: 5px!important;
+  margin-right: 5px!important;
+}
+.sidepanel.MuiTabs-root {
+  min-height: 10px!important;
+  
+}

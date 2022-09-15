@@ -5,3 +5,7 @@
     margin-top:5px;
 }
 
+.MuiFormControl-root{
+    text-align: left;
+}
+

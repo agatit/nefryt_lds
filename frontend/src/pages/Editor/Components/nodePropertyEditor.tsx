@@ -1,7 +1,7 @@
-import { FormControl, FormControlLabel,  FormGroup,  FormHelperText,  FormLabel,  InputLabel,  Stack, Switch, TextField } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Checkbox, FormControl, FormControlLabel,  FormGroup,  FormHelperText,  FormLabel,  InputLabel,  Slider,  Stack, Switch, TextField, Typography } from "@mui/material";
 import { Box, Tabs, Tab, withStyles, makeStyles, createTheme, MuiThemeProvider,  Button, Select, MenuItem, IconButton, Badge, Tooltip } from "@material-ui/core"
 
-import { Delete } from "@material-ui/icons";
+import { Delete, ExpandMore } from "@material-ui/icons";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import * as React from "react"
 import { Dispatch, useEffect, useState } from "react";
@@ -12,7 +12,10 @@ import { Node, useDeleteNodeByIdMutation, useUpdateNodeMutation } from "../../..
 import { EditorState, INode, TactiveElement } from "../type";
 import { PropertyEditorTab } from "./PropertyEditor"
 import { NodeState } from "../../../features/editor/nodeEditorSlice";
-import { useListTrendsQuery } from "../../../store/trendApi"
+import { Trend, useListTrendsQuery } from "../../../store/trendApi"
+import { Label } from "recharts";
+import { TabPanel } from "@mui/lab";
+import PropTypes from 'prop-types';
 
   type Prop ={
       activeElement : TactiveElement;
@@ -74,10 +77,35 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
   const dispatch: Dispatch<any> = useDispatch()
 
   const classes = useStyles()
+  
 
-  useListTrendsQuery();
 
- 
+  function TabPanel(props: { [x: string]: any; children: any; value: any; index: any; }) {
+    const { children, value, index, ...other } = props;
+  
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && (
+          <Box sx={{ p: 3 }}>
+            <Typography>{children}</Typography>
+          </Box>
+        )}
+      </div>
+    );
+  }
+  
+  TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+  };
+
 
   const reducer: NodeState = useSelector(
     (state: RootState) => state.nodeEditor,
@@ -108,12 +136,24 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
   const [edtNodeType, setEdtNodeType] = useState(nodeType);
 
 
+  var node_id : string ='0';
   useEffect(() => {
     setEdtNodeName(nodeName);
     setEdtNodeType(nodeType);
-
   },[nodeName, nodeType]);
 
+  //useEffect(() => {
+    if ((p.activeElement.node ) && ((p.activeElement.node as INode).NodeID)){
+      node_id = (((p.activeElement.node as INode).NodeID) as number).toString();
+    }
+  //},[p]);
+
+ 
+
+  var filter_txt : string = 'NodeID eq ' + node_id; 
+  var filter={$filter:filter_txt};
+
+   useListTrendsQuery(filter, {refetchOnMountOrArgChange : true});
 
   const [updateNode, { isLoading, isError, error, isSuccess }] =
   useUpdateNodeMutation();
@@ -132,6 +172,16 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
     var tmpID : number = (p.activeElement.node as INode).NodeID? ((p.activeElement.node as INode).NodeID as number):0;
     delNode({nodeId:tmpID});
   }
+
+  const saveTrendData = (e: React.MouseEvent<HTMLElement>) => {
+
+
+  }
+
+  const saveParameters = (e: React.MouseEvent<HTMLElement>) => {
+
+
+  }
   const saveNode = (e: React.MouseEvent<HTMLElement>) => {
 
     var nodeA : Node = {
@@ -146,6 +196,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
 
     
 
+    
     updateNode({nodeId:((p.activeElement.node as INode).NodeID as number), node:nodeA});
        console.log(nodeA);    
     //dispatch(setDateRange());
@@ -154,6 +205,20 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
     //alert(name);
 
   }
+
+  const [expanded, setExpanded] = React.useState('false');
+  
+  const handleTrendPanelExpanded = (panel: string) => (event: any, isExpanded: any) => {
+    if ((event.target.classList.contains("changeAccordionState")) || ((event.target.parentElement) && (event.target.parentElement.classList.contains("changeAccordionState")))){
+      setExpanded(isExpanded ? panel : 'false');
+    }
+  };
+     
+  const [trdTabIndex, setTrdTabIndex] = React.useState(0);
+
+  const handleChangeTabIndex = (event: any, newValue: React.SetStateAction<number>) => {
+    setTrdTabIndex(newValue);
+  };
 
 
   return (
@@ -217,50 +282,44 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                   
                   <FormGroup style={{ width:'410px',  }}>
                     <div style={{ maxHeight: 230, overflowY:'auto', overflowX:'hidden'}}>
-                      {/*reducer.chart.trends.map((trend : ITrend, index) => (
+                      {reducer.trends.map((trend : Trend, index) => (
                       
-                        ((!reducer.chart.onlySelected) || ((reducer.chart.onlySelected) && (trend.selected))) ?
-                        
                         <Accordion key={"Accordion_" + index} expanded={expanded === "trd_" + (trend.ID as number).toLocaleString() ?? ''} onChange={handleTrendPanelExpanded("trd_" + (trend.ID as number).toLocaleString())}>
                           <AccordionSummary key={"AccordionSummary_" + index}
-                            expandIcon={trend.selected?<ExpandMore className="changeAccordionState" /> : null}
+                            expandIcon={<ExpandMore className="changeAccordionState" />}
                             aria-controls={"panel_trd_" + (trend.ID as number).toLocaleString() + "-content"}
                             id={"panel_trd_" + (trend.ID as number).toLocaleString() + "-header"}
-                            className={trend.selected?"changeAccordionState":""}
+                            className={"changeAccordionState"}
                           >
-                            <Typography key={"Typography_" + index} sx={{flexShrink: 0 }}>
-                              <FormControlLabel   key={"FormControlLabel_" + index}
-                               
-                                control={
-                                  <Checkbox className="select-trend" key={"trd_" + (trend.ID as number).toLocaleString()} checked={trend.selected ? trend.selected : false}  onChange={handleTrendList} name={"trd_" + (trend.ID as number).toLocaleString()} />
-                                }
-                                label={trend.Name}
-                              />
-                            </Typography>   
+                            {trend.Name}
                           </AccordionSummary>
                           <AccordionDetails key={"AccordionDetails_" + index}>
-                            <Typography key={"TypographyDetails_" + index}  width="300px" marginLeft={4}>
-                              <FormControlLabel key={"FormControlLabelDetails_" + index}
-                                control={
-                                  <Checkbox key={"trd_manual_scale_" + (trend.ID as number).toLocaleString()} className="select-trend" checked={!trend.autoscale} onChange={handleAutoscale}  name={"trd_manual_scale_" + (trend.ID as number).toLocaleString()} />
-                                }
-                                label="Ustaw ręcznie zakres wartości"
-                              />
-                              <Slider key={"trd_slider_" + (trend.ID as number).toLocaleString()}  name={"trd_slider_" + (trend.ID as number).toLocaleString()} disabled={trend.autoscale}
-                                getAriaLabel={() => 'Minimum distance shift'}
-                                value={[trend.scale.min, trend.scale.max]}  
-                                onChange={handleTrendScale}
-                                //getAriaValueText={valuetext}
-                                step={trend.step}
-                                min={trend.ScaledMin}
-                                max={trend.ScaledMax}
-                                valueLabelDisplay="auto"
-                                marks={trend.marks}  
-                              />
+                            <Typography key={"TypographyDetails_" + index}  width="100%" marginLeft={4}>
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                              <Tabs value={trdTabIndex} onChange={handleChangeTabIndex} aria-label="basic tabs example">
+                                <Tab label="Dane" {...a11yProps(0)} />
+                                <Tab label="Parametry" {...a11yProps(1)} />
+
+                              </Tabs>
+                            </Box>
+                            <TabPanel value={trdTabIndex} index={0}>
+                              <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
+                                
+                                <Button style={{marginTop:'30px', width:'300px'}} onClick={saveTrendData} variant="contained">Zapisz zmiany</Button>
+                              </FormControl>
+                            </TabPanel>
+                            <TabPanel value={trdTabIndex} index={1}>
+                              <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
+                              
+                              <Button style={{marginTop:'30px', width:'300px'}} onClick={saveParameters} variant="contained">Zapisz parametry</Button>
+                              </FormControl>
+                            </TabPanel>
+                                                  
+                              
                             </Typography>
                           </AccordionDetails>  
-                        </Accordion> : null 
-                              ))*/}
+                        </Accordion> 
+                              ))}
                     </div> 
                   </FormGroup>   
                   <FormHelperText> </FormHelperText>

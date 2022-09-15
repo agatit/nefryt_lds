@@ -11,8 +11,9 @@ import { useListLinksQuery } from "../../store/linkApi";
 const EditorPage: React.FC = () => {
 
   //console.log('AAAAAAAAAAAAAAAAAAAAAAAA');
-  useListNodesQuery();
-  useListLinksQuery();
+  var filter={};
+  useListNodesQuery(filter);
+  useListLinksQuery(filter);
   
   return (
     <Layout content={<EditorContent></EditorContent>} rPanel={{
