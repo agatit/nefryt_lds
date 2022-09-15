@@ -4,7 +4,8 @@ import { shallowEqual, useDispatch, useSelector } from "react-redux"
 import { EditorState, INode, ITrendDef } from "../../type"
 import { RootState } from "../../../../app/store"
 import { dragNode, setActiveNode } from "../../../../features/editor/editorSlice"
-
+import { useListTrendsQuery } from "../../../../store/trendApi"
+//import { enhancedApi as trendApi} from "../../../../store/trendApi"
 
 type Props = {
   node: INode | {}
@@ -13,8 +14,13 @@ type Props = {
 }
 
 
+
+//const [aaa] = useLazyTrendsQuery();
+
 export const NodeElm: React.FC<Props> = (p) => {
   const dispatch: Dispatch<any> = useDispatch()
+
+  //const [trigger, result, lastPromiseInfo] = trendApi.endpoints.listTrends.useLazyQuery();
 
   function deleteNode(n : INode | {}){
     p.removeNode(n);
@@ -37,12 +43,13 @@ export const NodeElm: React.FC<Props> = (p) => {
       
       dispatch(dragNode(tmpNode[0] as INode));
       //dispatch(setActiveNode(tmpNode[0] as INode));
+     
     }
   }
 
 
 
- const nodeClick = (e: React.MouseEvent<HTMLElement>) => {
+ const nodeClick = async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     
     var id :string = (e.currentTarget as HTMLElement).id;
@@ -52,6 +59,10 @@ export const NodeElm: React.FC<Props> = (p) => {
       var tmpNode : INode[] = reducer.Nodes.filter(node => node.NodeID==ID);
     //alert('aaa');
       dispatch(setActiveNode(tmpNode[0] as INode));
+    //  getNodeTrends();
+    //const payload = await trigger();
+    //console.log('AAAAAA');
+    //console.log(payload);
       
     }
  }
@@ -76,3 +87,4 @@ export const NodeElm: React.FC<Props> = (p) => {
     </div>
   )
 }
+

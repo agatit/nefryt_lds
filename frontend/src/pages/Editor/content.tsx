@@ -77,7 +77,7 @@ const handleSubmitNewNode  = (e: any ) => {
           <NewNodeForm onSubmit={handleSubmitNewNode} ></NewNodeForm>
           <EditorAreaSettings onSubmit={handleSubmitAreaEditor} ></EditorAreaSettings>
           <div id="mySidepanel" className={sidepanelClasses}>
-           {reducer.activeElement.node ? <NodePropertyEditor></NodePropertyEditor> : <LinkPropertyEditor  ></LinkPropertyEditor>}
+           {reducer.activeElement.node ? <NodePropertyEditor activeElement={reducer.activeElement}  ></NodePropertyEditor> : <LinkPropertyEditor  ></LinkPropertyEditor>}
           </div>
       </React.Fragment>
     </>

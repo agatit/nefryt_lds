@@ -187,16 +187,19 @@ import { Button } from "reactstrap";
       var position : RegExpMatchArray | null = id.match(/\d+/g);
       if (position && (position as RegExpMatchArray).length==2){
         if (SelectedLinkID<0){
-          var nodeA : Node = {
-            //ID: (p.state.activeElement.node as INode).NodeID,
-            EditorParams: {
-              PosX: Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.state.area.ScaleHeight,
-              PosY: Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.state.area.ScaleWidth
-            },
-            Type: (p.state.activeElement.node as INode).type
+          if ((p.state.activeElement.node as INode) && (p.state.activeElement.node as INode).type && (p.state.activeElement.state == NEW_NODE)){
+            var nodeA : Node = {
+              //ID: (p.state.activeElement.node as INode).NodeID,
+              EditorParams: {
+                PosX: Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.state.area.ScaleHeight,
+                PosY: Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.state.area.ScaleWidth
+              },
+              Type: (p.state.activeElement.node as INode).type
+            }
+            dispatch(createNode({node:nodeA}));
+          }else{
+            dispatch(setActiveNode({}));
           }
-          createNode({node:nodeA});
-          //dispatch(setActiveNode({}));
         }
       }
     /*alert('aaa');

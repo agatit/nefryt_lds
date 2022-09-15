@@ -6,6 +6,7 @@ import auth from '../features/auth/authSlice'
 import template, { enqueueSnackbar } from '../features/template/templateSlice'
 import charts from '../features/charts/chartsSlice'
 import editor from '../features/editor/editorSlice'
+import nodeEditor from '../features/editor/nodeEditorSlice'
 import { isRejectedWithValue } from '@reduxjs/toolkit'
 import type { MiddlewareAPI, Middleware } from '@reduxjs/toolkit'
 import { useSnackbar } from 'notistack';
@@ -20,7 +21,7 @@ export const store = configureStore({
     template,
     charts,
     editor,
-    
+    nodeEditor,
   },
   
   middleware: (getDefaultMiddleware) =>

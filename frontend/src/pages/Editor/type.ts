@@ -78,6 +78,11 @@ import { Pipeline } from "../../store/pipelineApi"
     active : boolean
   }
 
+  export type TactiveElement = {
+    node : INode | undefined,
+    LinkID : number,
+    state : string
+  }
  export const DRAG_NODE = "DRAG_NODE";
  export const SELECTED = "SELECTED";
  export const NEW_NODE = "NEW_NODE";
@@ -90,11 +95,7 @@ import { Pipeline } from "../../store/pipelineApi"
     area : IPipelinesArea
     //action : IEditorAction
     //activeEditor: string 
-    activeElement : {
-      node : INode | undefined,
-      LinkID : number,
-      state : string
-    }
+    activeElement : TactiveElement
   }
 
   export type PropertyEditorState = {

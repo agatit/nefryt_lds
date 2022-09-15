@@ -119,6 +119,12 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
   .sidepanel.open{
     width:500px;
     border-left: 1px solid #0f5295;
+    padding-right: 20px;
+    padding-left:  20px;
+  }
+
+  .sidepanel .MuiFormControl-root{
+    margin-top: 5px;
   }
   
   .sidepanel a {
@@ -139,6 +145,8 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
     top: 65;
     left: 5px;
     font-size: 36px;
+
+
   }
 
   .floatcontainer {
@@ -154,6 +162,7 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
 
 .sidepanel .MuiInputBase-input{
   color:white;
+  padding:10px;
 }
 
 #editor-menu label + .MuiInput-formControl {

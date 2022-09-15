@@ -39,16 +39,18 @@ export const templateSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-    .addMatcher((action) =>  action.type.endsWith('/rejected') && action.payload.status === "FETCH_ERROR",
+    .addMatcher((action) =>  action.type.endsWith('/rejected'),// && action.payload.status === "FETCH_ERROR",
     (state, action) => {
+      if ((action.payload) && (action.payload.status) && (action.payload.status === "FETCH_ERROR")){ 
       for (var x=0; x<state.displayed.length; x++){
         state.notifications = state.notifications.filter((notification: any) => notification.key!=state.displayed[x]);
       }
       state.notifications.push({message: 'Błąd połaczenia z serwerem.', options:{variant:'error'},
       key: new Date().getTime() + Math.random()});
+    }
     })
     .addMatcher((action) =>  action.type.endsWith('/rejected'),  (state, action) => {
-       if ((action.payload.data.code >=400) && (action.payload.data.code <500)){  
+       if ((action.payload) && (action.payload.data) && (action.payload.data.code >=400) && (action.payload.data.code <500)){  
         for (var x=0; x<state.displayed.length; x++){
           state.notifications = state.notifications.filter((notification: any) => notification.key!=state.displayed[x]);
         }
@@ -56,6 +58,15 @@ export const templateSlice = createSlice({
         key: new Date().getTime() + Math.random()});
        }
     })
+    .addMatcher((action) =>  action.type.endsWith('/rejected'),  (state, action) => {
+      if ((action.payload) && (action.payload.data)&&(action.payload.data.code >=500) && (action.payload.data.code <600)){  
+       for (var x=0; x<state.displayed.length; x++){
+         state.notifications = state.notifications.filter((notification: any) => notification.key!=state.displayed[x]);
+       }
+       state.notifications.push({message: 'Błąd połaczenia z serwerem!.', options:{variant:'warning'},
+       key: new Date().getTime() + Math.random()});
+      }
+   })
   }
 })
 
