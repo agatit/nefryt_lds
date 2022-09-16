@@ -1,13 +1,11 @@
 # schemas/orm/TrendDef.yaml
 type: object
 required:
+  - ID
   - Name
-  - TimeExponent
-  - Format
-  - SIUnitTID
 properties:
   ID:
-    type: integer
+    type: string
     nullable: false
     readOnly: true
     description: none
@@ -16,14 +14,4 @@ properties:
     type: string
     pattern: ^.{0,30}
     description: none
-  TimeExponent:
-    type: integer
-    description: none
-  Format:
-    type: string
-    pattern: ^.{0,20}
-    description: none
-  SIUnitTID:
-    type: string
-    pattern: ^.{0,8}
-    description: none
+

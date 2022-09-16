@@ -1846,43 +1846,24 @@ components:
       type: object
     TrendDef:
       example:
-        Format: Format
-        ID: 0
-        TimeExponent: 0
+        ID: "0"
         Name: Name
-        SIUnitTID: SIUnitTID
       properties:
         ID:
           description: none
-          example: 0
+          example: "0"
           nullable: false
           readOnly: true
           title: ID
-          type: integer
+          type: string
         Name:
           description: none
           pattern: ^.{0,30}
           title: Name
           type: string
-        TimeExponent:
-          description: none
-          title: TimeExponent
-          type: integer
-        Format:
-          description: none
-          pattern: ^.{0,20}
-          title: Format
-          type: string
-        SIUnitTID:
-          description: none
-          pattern: ^.{0,8}
-          title: SIUnitTID
-          type: string
       required:
-      - Format
+      - ID
       - Name
-      - SIUnitTID
-      - TimeExponent
       title: TrendDef
       type: object
     TrendGroup:
