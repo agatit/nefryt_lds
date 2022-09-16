@@ -1,3 +1,5 @@
+from datetime import datetime
+import logging
 from typing import List
 import struct
 
@@ -8,13 +10,15 @@ from database import lds
 
 
 class Trend:
-    def __init__(self, id, node_id):
+    def __init__(self, id: int, node_id: int):
         self.id = id
         self.node_id = node_id
+        logging.info(f"Trend {id} {node_id} created")
 
-    def get_trend_data(self, begin, end) -> List[float]:
+    def get_trend_data(self, begin: int, end: int) -> List[float]:
         begin = begin // 1000
         end = end // 1000
+        logging.debug(f"Get data from {datetime.fromtimestamp(begin)} to {datetime.fromtimestamp(end)}.")
         # reading trends definitions neccessary for scaling
         trend_def, = global_session.execute(select(lds.Trend).where(lds.Trend.ID == self.id)).fetchone()
 
@@ -56,5 +60,5 @@ class Trend:
                 current_timestamp += 1
                                     
             chunk_start += chunk_size
-
+        logging.debug(f"Got data successfully.")
         return data_list

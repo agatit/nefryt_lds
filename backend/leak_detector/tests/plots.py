@@ -29,6 +29,10 @@ class Plot(object):
         ax.set_xlabel("Czas [ms]")
         ax.set_ylabel("Odległość [m]")
 
+    def scatter_points(self, x, y):
+        _, ax = plt.subplots()
+        ax.scatter(x, y)
+
     def show(self) -> None:
         plt.show()
 
