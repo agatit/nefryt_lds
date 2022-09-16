@@ -202,11 +202,8 @@ export type TrendData = {
   [key: string]: number;
 };
 export type TrendDef = {
-  ID?: number;
+  ID: string;
   Name: string;
-  TimeExponent: number;
-  Format: string;
-  SIUnitTID: string;
 };
 export const {
   useListTrendsQuery,
