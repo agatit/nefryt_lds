@@ -12,7 +12,7 @@ import { Node, useDeleteNodeByIdMutation, useUpdateNodeMutation } from "../../..
 import { EditorState, INode, TactiveElement } from "../type";
 import { PropertyEditorTab } from "./PropertyEditor"
 import { NodeState } from "../../../features/editor/nodeEditorSlice";
-import { Trend, useListTrendsQuery } from "../../../store/trendApi"
+import { Trend, TrendDef, useListTrendDefsQuery, useListTrendsQuery } from "../../../store/trendApi"
 import { Label } from "recharts";
 import { TabPanel } from "@mui/lab";
 import PropTypes from 'prop-types';
@@ -135,6 +135,9 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
   const [edtNodeName, setEdtNodeName] = useState(nodeName);
   const [edtNodeType, setEdtNodeType] = useState(nodeType);
 
+  var trendName = 'Test';
+  const [edtTrendName, setEdtTrendName] = useState(trendName);
+
 
   var node_id : string ='0';
   useEffect(() => {
@@ -154,6 +157,9 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
   var filter={$filter:filter_txt};
 
    useListTrendsQuery(filter, {refetchOnMountOrArgChange : true});
+
+   var filterTrdDef={};
+   useListTrendDefsQuery(filterTrdDef, {refetchOnMountOrArgChange : true});
 
   const [updateNode, { isLoading, isError, error, isSuccess }] =
   useUpdateNodeMutation();
@@ -281,7 +287,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                 <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
                   
                   <FormGroup style={{ width:'410px',  }}>
-                    <div style={{ maxHeight: 230, overflowY:'auto', overflowX:'hidden'}}>
+                    <div style={{ maxHeight: 530, overflowY:'auto', overflowX:'hidden'}}>
                       {reducer.trends.map((trend : Trend, index) => (
                       
                         <Accordion key={"Accordion_" + index} expanded={expanded === "trd_" + (trend.ID as number).toLocaleString() ?? ''} onChange={handleTrendPanelExpanded("trd_" + (trend.ID as number).toLocaleString())}>
@@ -304,14 +310,50 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                             </Box>
                             <TabPanel value={trdTabIndex} index={0}>
                               <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
-                                
+                              
+                                  <TextField
+                                      required
+                                      id="active_trend_name"
+                                      label="Nazwa"
+                                      value={edtTrendName}
+                                      onChange={(e) => {
+                                        setEdtTrendName(e.target.value);
+                                      }}
+                                      InputLabelProps={{
+                                        shrink: true,
+                                        className: undefined
+                                      }}
+                                      
+                                  />
+
+                                  <TextField
+                                      variant="outlined"
+                                    
+                                      id="active_trend_type"
+                                      value={edtTrendDef}
+                                      label="Typ"
+                                      select
+                                      onChange={(e) => {
+                                        //console.log(e);
+                                        //console.log(e.target.value as string);
+                                        setEdtTrendDef((e.target.value as string));
+                                      }}
+                                  >
+                                    {
+                                      TrendDefs.map((element:TrendDef, index:number) => (
+                                        <MenuItem  value={element.ID}>{element.Name}</MenuItem>
+                                      ))
+
+                                    }
+                                  </TextField>
+
                                 <Button style={{marginTop:'30px', width:'300px'}} onClick={saveTrendData} variant="contained">Zapisz zmiany</Button>
                               </FormControl>
                             </TabPanel>
                             <TabPanel value={trdTabIndex} index={1}>
                               <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
                               
-                              <Button style={{marginTop:'30px', width:'300px'}} onClick={saveParameters} variant="contained">Zapisz parametry</Button>
+                                 <Button style={{marginTop:'30px', width:'300px'}} onClick={saveParameters} variant="contained">Zapisz parametry</Button>
                               </FormControl>
                             </TabPanel>
                                                   

@@ -193,8 +193,19 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
   width:100%!important;
   margin-left: 5px!important;
   margin-right: 5px!important;
+  text-align: center;
 }
 .sidepanel.MuiTabs-root {
   min-height: 10px!important;
   
+}
+.sidepanel .MuiAccordionDetails-root .MuiFormLabel-root {
+  color: black!important;
+  /*width:100%;
+  margin-left:0.5rem;*/
+}
+
+.sidepanel .MuiAccordionDetails-root .MuiInputBase-input {
+  color: black;
+  padding: 10px;
 }
