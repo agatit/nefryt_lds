@@ -101,7 +101,7 @@ class Pipeline:
         result = {}
         for id, method in self._active_methods.items():
             result[id] = method.get_probability(begin, end)
-        logging.info(f"Pipeline {id}: probabilities calculated.")
+        logging.info(f"Pipeline {self.id}: probabilities calculated.")
 
         return result
 
@@ -109,7 +109,7 @@ class Pipeline:
         events = {}
         for id, method in self._active_methods.items():
             events[id] = method.find_leaks_in_range(begin, end)
-        logging.info(f"Pipeline {id}: leaks detected.")
+        logging.info(f"Pipeline {self.id}: leaks detected.")
 
         return events
 
@@ -175,7 +175,7 @@ class Plant:
 
 
     
-    def get_distances(self, node1: Node, node2: Node, visited=None) -> List[int]:
+    def get_distances(self, node1: Node, node2: Node, visited=None) -> List:
         """ Zwraca listę odległości między dwoma węzłami, różnymi drogami
             implementacja rekursywna
         """
@@ -189,10 +189,10 @@ class Plant:
         visited.add(node1)
         for link in self.links.values():
             if (link.begin_node == node1 and link.end_node not in visited):
-                distances.extend([int(link.length + dist) for dist in self.get_distances(link.end_node, node2, copy.copy(visited))])
+                distances.extend([link.length + dist for dist in self.get_distances(link.end_node, node2, copy.copy(visited))])
                 
             if (link.end_node == node1 and link.begin_node not in visited):
-                distances.extend([int(link.length + dist) for dist in self.get_distances(link.begin_node, node2, copy.copy(visited))])        
+                distances.extend([link.length + dist for dist in self.get_distances(link.begin_node, node2, copy.copy(visited))])        
         
         return distances
 

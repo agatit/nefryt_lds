@@ -2,7 +2,7 @@ import logging
 from math import ceil
 from typing import List
 import numpy as np
-#from ..tests.plots import global_plot
+from ..tests.plots import global_plot
 
 from .base import MethodBase
 from ..trend import Trend
@@ -37,11 +37,10 @@ class Segment:
         
 
 class MethodWave(MethodBase):
-    def __init__(self, pipeline: Pipeline, id: int, name: str):
+    def __init__(self, pipeline: Pipeline, id: int, name: str) -> None:
         super().__init__(pipeline, id, name)
-
         self._get_params()
-        self.create_segments()
+        self._create_segments()
 
     def _get_params(self) -> None:
         try:
@@ -62,10 +61,9 @@ class MethodWave(MethodBase):
                 logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
             else:
                 logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self._id}, trend {error.args[0]} does not exist', exc_info=False)
-            raise
-    
+            raise  
 
-    def create_segments(self) -> None:
+    def _create_segments(self) -> None:
         previous_trend = None
         for current_trend in self._pressure_deriv_trends:
             if (previous_trend is not None):
@@ -76,98 +74,46 @@ class MethodWave(MethodBase):
 
             previous_trend = current_trend
     
-    def get_segment(self, position: int) -> Segment:
-        for segment in self._segments:
-            if (segment._begin_pos <= position <= segment._end_pos):
-                return segment
-        return None
-    
-    def get_probability(self, begin: int, end: int) -> List[List[float]]:
-        probability = []
-        previous_segment = None
-        for current_pos in range(0, int(self._length_pipeline), self._pipeline.length_resolution):
-            probability_pos = []
-            segment = self.get_segment(current_pos)
-            wave_speed = segment.calc_wave_speed()
+    # Wersja dla jednego segmentu:
+    def get_probability(self, begin: int, end: int):
+        segment = self._segments[0]
+        wave_speed = self._wave_speed
 
-            if (previous_segment != segment):
-                window_begin = begin - segment.max_window_size
-                window_end = end + segment.max_window_size
-                data_start = segment._start.get_trend_data(window_begin, window_end)
-                data_end = segment._end.get_trend_data(window_begin, window_end)
+        window_begin = begin - segment.max_window_size
+        window_end = end + segment.max_window_size
 
-            l1 = current_pos - segment._begin_pos
-            l2 = segment._end_pos - current_pos
-            offset1 = l1 / wave_speed * 1000 
-            offset2 = l2 / wave_speed * 1000
+        data_start = segment._start.get_trend_data(window_begin, window_end)
+        data_end = segment._end.get_trend_data(window_begin, window_end)
+       
+        time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
+        position = np.arange(0, self._length_pipeline, self._pipeline.length_resolution)
+        
+        times, positions = np.meshgrid(time, position)
 
-            for current_time in range(begin, end, self._pipeline.time_resolution):
-                data_point = current_time - window_begin
-                dp1 = min(0, data_start[int((data_point - offset1) / 10)])
-                dp2 = min(0, data_end[int((data_point - offset2) / 10)])
-                dp3 = min(0, data_start[int((data_point + offset1) / 10)])
-                dp4 = min(0, data_end[int((data_point + offset2) / 10)])
-                
-                res = dp1 + dp2 - dp3 - dp4
-                
-                res = (res - self._min_level) / (self._max_level - self._min_level)
+        offset_left = positions / wave_speed * 1000
+        offset_right = (self._length_pipeline - positions) / wave_speed * 1000
+        
+        dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)]
+        dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)]
+        dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)]
+        dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)]
 
-                res = min(max(0, res), 1)
+        dp1 = dp1 * (dp1 < 0) / self._max_level
+        dp2 = dp2 * (dp2 < 0) / self._max_level
+        dp3 = dp3 * (dp3 < 0) / self._max_level
+        dp4 = dp4 * (dp4 < 0) / self._max_level
 
-                probability_pos.append(res)
+        probability = np.sqrt(dp1 * dp2)
 
-            previous_segment = segment
-            probability.append(probability_pos)
+        global_plot.probability_heatmap(probability, time, position)
 
         return probability
 
     #TODO:
     # Zmienić na wiele segmentów.
     def find_leaks_in_range(self, begin: int, end: int) -> List[Event]:
+        self.get_probability(begin, end)
         events = []
-        leak_size = 5
-        leak_points = []
-        probabilities = self.get_probability(begin, end)
-
-        for position in range(len(probabilities)):
-            is_leak = False
-            for time in range(len(probabilities[0])):
-                if probabilities[position][time] > self._alarm_level:
-                    if not is_leak:
-                        is_leak = True
-                        while (time >= 0 and probabilities[position][time] > 0):
-                            time -= 1
-                        time += 1
-                        leak_points.append((time, position))
-                else:
-                    is_leak = False
-
-        leak_points.sort()
-        leaks = []
-
-        previous_point_id = None
-        previous_break_point = 0
-
-        for point_id in range(len(leak_points)):
-            if (previous_point_id is not None):
-                if (leak_points[point_id][0] - leak_points[previous_point_id][0] > leak_size):
-                    leaks.append(leak_points[previous_break_point:point_id])
-                    previous_break_point = point_id
-            previous_point_id = point_id
-
-        for leak in leaks:
-            p = np.polyfit(list(map(lambda x: x[1], leak)), list(map(lambda x: x[0], leak)), deg=10)
-            x = np.arange(0, self._length_pipeline, self._pipeline.length_resolution)
-            poly = np.poly1d(p)
-            y = poly(x)
-            leak_length = np.argmax(y)
-            leak_time = np.max(y)
-
-            if (0 <= leak_length < len(probabilities) and 0 <= leak_time < len(probabilities[0])):
-                events.append(Event(self._id, begin + leak_time * self._pipeline.time_resolution, leak_length * self._pipeline.length_resolution))
-        
-        #global_plot.probability_heatmap(probabilities, begin, end, self._pipeline.length_resolution)
-
         return events
 
 

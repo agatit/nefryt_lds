@@ -1,13 +1,12 @@
 from msilib.schema import Error
 import time
 import logging
-#from .tests.plots import global_plot
 
 from .plant import Plant
+from datetime import datetime
 
 # Wykresy do sprawdzania wycieku:
-# from .tests.plots import global_plot 
-from datetime import datetime
+from .tests.plots import global_plot 
 
 # test
 
@@ -50,6 +49,6 @@ if __name__ == '__main__':
                         logging.info(f'Detected a leak: ({method}) {event.datetime} {event.position}m')
 
             time.sleep(time_between_detections)
-            #global_plot.show()
+            global_plot.show()
     except Exception as Error:    
-        logging.error(Error)
+        logging.error(Error, exc_info=True)
