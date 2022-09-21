@@ -1,8 +1,10 @@
 import logging
 from math import ceil
+from re import A
 from typing import List
 import numpy as np
 from ..tests.plots import global_plot
+from scipy.ndimage import label
 
 from .base import MethodBase
 from ..trend import Trend
@@ -79,6 +81,8 @@ class MethodWave(MethodBase):
         segment = self._segments[0]
         wave_speed = self._wave_speed
 
+        d = 0
+
         window_begin = begin - segment.max_window_size
         window_end = end + segment.max_window_size
 
@@ -93,29 +97,38 @@ class MethodWave(MethodBase):
         offset_left = positions / wave_speed * 1000
         offset_right = (self._length_pipeline - positions) / wave_speed * 1000
         
+        friction = (1 - d * positions / self._length_pipeline) * (1 - d * (1 - positions / self._length_pipeline))
+
         dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)]
         dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)]
         dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)]
         dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)]
 
-        dp1 = dp1 * (dp1 < 0) / self._max_level
-        dp2 = dp2 * (dp2 < 0) / self._max_level
-        dp3 = dp3 * (dp3 < 0) / self._max_level
-        dp4 = dp4 * (dp4 < 0) / self._max_level
+        dp1 = - dp1 * (dp1 < 0) / self._max_level
+        dp2 = - dp2 * (dp2 < 0) / self._max_level
+        dp3 = - dp3 * (dp3 < 0) / self._max_level
+        dp4 = - dp4 * (dp4 < 0) / self._max_level
 
-        probability = np.sqrt(dp1 * dp2)
-
-        global_plot.probability_heatmap(probability, time, position)
+        probability = (dp1 * dp2) 
 
         return probability
 
-    #TODO:
-    # Zmienić na wiele segmentów.
     def find_leaks_in_range(self, begin: int, end: int) -> List[Event]:
-        self.get_probability(begin, end)
-        events = []
-        return events
+        probability = self.get_probability(begin, end)
 
+        events = []
+
+        leaks, _ = label(probability > 0)
+        alarm_labels = np.unique(np.where(probability > self._alarm_level, leaks, 0))[1:]
+
+        for alarm_label in alarm_labels:
+            alarm_values = np.where(leaks == alarm_label, probability, 0)
+            alarm_point = np.unravel_index(np.argmax(alarm_values), np.array(alarm_values).shape)
+            alarm_time = begin + self._pipeline.time_resolution * alarm_point[1]
+            alarm_position = self._pipeline.length_resolution * alarm_point[0]
+            events.append(Event(self._id, alarm_time, alarm_position))
+
+        return events
 
     def find_leaks_to(self, end: int) -> List[Event]:
         pass

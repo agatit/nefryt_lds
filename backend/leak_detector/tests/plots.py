@@ -20,12 +20,11 @@ class Plot(object):
         plt.ylabel("Ciśnienie [MPa]")
         
     def probability_heatmap(self, data, time, position) -> None:
-        dates = list(map(datetime.fromtimestamp, [time[0] / 1000, time[-1] / 1000]))
-        dates = mdates.date2num(dates)
+        dates = list(map(datetime.fromtimestamp, time / 1000))
         fig, ax = plt.subplots()
-        im = ax.pcolormesh(time, position, data)
-        ax.set_xlabel("Pozycja na rurociągu")
-        ax.set_ylabel("czas")
+        im = ax.pcolormesh(dates, position, data)
+        ax.set_ylabel("Pozycja")
+        ax.set_xlabel("Czas")
         cb = fig.colorbar(im, ax=ax)
         cb.set_label(label='Wartość wskaźnika')
 

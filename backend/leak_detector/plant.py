@@ -13,7 +13,6 @@ from database import lds
 if TYPE_CHECKING:
     from .method import MethodBase
 
-
 # from . import method
 # from .method import MethodBalance, MethodWave, MethodMask, MethodCombine
 # klasy zapisane stringiem, aby uniknąć cyklicznych importów - jak nie będzie to potrzebne to zminić na klasy
@@ -29,7 +28,7 @@ class Node:
         self.id = id
         self.type = type
         self.name = name
-        logging.info(f"Node {id}: {type} {name} created.")
+        logging.info(f"Node {self.id}: {self.type} {self.name} created.")
 
 
 class Link:
@@ -39,7 +38,7 @@ class Link:
         self.end_node = end_node
         self.length = length
 
-        logging.info(f"Link {id}: {begin_node.id} {end_node.id} {length} created.")
+        logging.info(f"Link {self.id}: {self.begin_node.id} {self.end_node.id} {self.length} created.")
 
 
 # TODO: Wygląda na to, żę brakuje parametrów pipeline!
@@ -61,7 +60,7 @@ class Pipeline:
         self._build()
         self._get_params()
 
-        logging.info(f"Pipeline {id}: {name} created.")
+        logging.info(f"Pipeline {self.id}: {self.name} created.")
 
     def _build(self) -> None:        
         stmt = select(lds.PipelineNode).where(lds.PipelineNode.PipelineID == self.id)
@@ -73,6 +72,7 @@ class Pipeline:
         for method, in global_session.execute(stmt):            
             method_class = getattr(sys.modules["leak_detector.method"], METHOD_CLASSES[method.MethodDefID.strip()])
             self._methods[method.ID] = method_class(self, method.ID, method.Name)
+        logging.debug(stmt)
 
     def _read_params(self) -> None:
         stmt = select([lds.PipelineParam, lds.PipelineParamDef]) \
@@ -80,11 +80,10 @@ class Pipeline:
             .outerjoin(lds.PipelineParam, \
                     and_(lds.PipelineParamDef.ID == lds.PipelineParam.PipelineParamDefID, lds.PipelineParam.PipelineID == self.id) \
                 )
-        logging.debug(stmt)
-
         for param, param_def in global_session.execute(stmt):
             if param is not None:
                 self._params[param_def.ID.strip()] = param.Value
+        logging.debug(stmt)
 
 
     def _get_params(self) -> None:
@@ -172,16 +171,11 @@ class Plant:
         for pipeline, in global_session.execute(stmt):
             self._pipelines[int(pipeline.ID)] = Pipeline(self, pipeline.ID, pipeline.Name)
         logging.debug(stmt)
-
-
     
-    def get_distances(self, node1: Node, node2: Node, visited=None) -> List:
-        """ Zwraca listę odległości między dwoma węzłami, różnymi drogami
-            implementacja rekursywna
-        """
+    def get_distances(self, node1: Node, node2: Node, visited=None) -> List[float]:
         if (visited is None):
             visited = set()
-            
+
         if (node1 == node2):
             return [0]
 
@@ -190,10 +184,10 @@ class Plant:
         for link in self.links.values():
             if (link.begin_node == node1 and link.end_node not in visited):
                 distances.extend([link.length + dist for dist in self.get_distances(link.end_node, node2, copy.copy(visited))])
-                
+
             if (link.end_node == node1 and link.begin_node not in visited):
                 distances.extend([link.length + dist for dist in self.get_distances(link.begin_node, node2, copy.copy(visited))])        
-        
+
         return distances
 
     @property
