@@ -27,3 +27,4 @@ from api.models.trend_group import TrendGroup
 from api.models.trend_param import TrendParam
 from api.models.trend_param_def import TrendParamDef
 from api.models.unauthorized import Unauthorized
+from api.models.unit import Unit

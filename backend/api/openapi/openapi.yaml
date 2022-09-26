@@ -1341,6 +1341,140 @@ paths:
       tags:
       - trends
       x-openapi-router-controller: api.controllers.trends_controller
+  /unit:
+    get:
+      description: List all units
+      operationId: list_units
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Unit'
+                type: array
+          description: A array of units
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List units
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
+    post:
+      description: Create a units
+      operationId: create_unit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Unit'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unit'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create units
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
+  /unit/{unitId}:
+    delete:
+      description: Deletes specific unit
+      operationId: delete_unit_by_id
+      parameters: []
+      responses:
+        "204":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Information'
+          description: Deleted
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes unit
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
+    get:
+      description: Info for specific unit
+      operationId: get_unit_by_id
+      parameters:
+      - description: The id of the unit to retrieve
+        explode: false
+        in: path
+        name: unitId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unit'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets unit details
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
+    put:
+      description: Updates a units
+      operationId: update_unit
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Unit'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unit'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Updates units
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
 components:
   parameters:
     eventId:
@@ -2014,6 +2148,31 @@ components:
       - EventDefID
       - MethodID
       title: Event
+      type: object
+    Unit:
+      example:
+        BaseID: BaseID
+        Symbol: Symbol
+        Multiplier: 0.8008281904610115
+        ID: ID
+        Name: Name
+      properties:
+        ID:
+          title: ID
+          type: string
+        Name:
+          title: Name
+          type: string
+        Symbol:
+          title: Symbol
+          type: string
+        BaseID:
+          title: BaseID
+          type: string
+        Multiplier:
+          title: Multiplier
+          type: number
+      title: Unit
       type: object
     EditorPipeline:
       example:

@@ -1,0 +1,41 @@
+get:
+  summary: List units
+  operationId: listUnits
+  description: List all units
+  tags:
+    - units
+  parameters:
+    - $ref: "../parameters/path/filter.yaml"    
+  responses:
+    "200":
+      description: A array of units
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/Unit.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+post:
+  summary: Create units
+  operationId: createUnit
+  description: Create a units
+  tags:
+    - units
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Unit.yaml"
+  responses:
+    "201":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Unit.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+      
