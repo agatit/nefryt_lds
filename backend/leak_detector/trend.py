@@ -13,7 +13,7 @@ class Trend:
     def __init__(self, id: int, node_id: int):
         self.id = id
         self.node_id = node_id
-        logging.info(f"Trend {self.id} {self.node_id} created")
+        logging.debug(f"Trend {self.id} {self.node_id} created")
 
     def get_trend_data(self, begin: int, end: int) -> List[float]:
         begin = begin // 1000

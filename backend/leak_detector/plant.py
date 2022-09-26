@@ -1,6 +1,7 @@
 import logging
 import sys
 import copy
+import time
 from typing import TYPE_CHECKING, Dict, List
 
 from sqlalchemy import Float, select, and_
@@ -10,6 +11,7 @@ from .trend import Trend
 from .event import Event
 from database import lds
 
+# Do importu type'ów:
 if TYPE_CHECKING:
     from .method import MethodBase
 
@@ -28,7 +30,7 @@ class Node:
         self.id = id
         self.type = type
         self.name = name
-        logging.info(f"Node {self.id}: {self.type} {self.name} created.")
+        logging.debug(f"Node {self.id}: {self.type} {self.name} created.")
 
 
 class Link:
@@ -38,7 +40,7 @@ class Link:
         self.end_node = end_node
         self.length = length
 
-        logging.info(f"Link {self.id}: {self.begin_node.id} {self.end_node.id} {self.length} created.")
+        logging.debug(f"Link {self.id}: {self.begin_node.id} {self.end_node.id} {self.length} created.")
 
 
 # TODO: Wygląda na to, żę brakuje parametrów pipeline!
@@ -60,7 +62,7 @@ class Pipeline:
         self._build()
         self._get_params()
 
-        logging.info(f"Pipeline {self.id}: {self.name} created.")
+        logging.debug(f"Pipeline {self.id}: {self.name} created.")
 
     def _build(self) -> None:        
         stmt = select(lds.PipelineNode).where(lds.PipelineNode.PipelineID == self.id)
@@ -87,7 +89,7 @@ class Pipeline:
 
 
     def _get_params(self) -> None:
-        self.begin_pos = self._params.get('BEGIN_POS', 0)
+        self.begin_pos = float(self._params.get('BEGIN_POS', 0))
         self.length_resolution = int(self._params.get('LENGTH_RESOLUTION', 1))
         self.time_resolution = int(self._params.get('TIME_RESOLUTION', 1))
         
@@ -147,7 +149,7 @@ class Plant:
         self._build_mesh()
         self._build_pipelines()
 
-        logging.info(f"Plant created.")
+        logging.debug(f"Plant created.")
 
 
     def _build_mesh(self) -> None:

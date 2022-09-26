@@ -19,7 +19,7 @@ class MethodBase:
         self._params = {}
         self._read_params()
 
-        logging.info(f"Method {id}: {name} created.")
+        logging.debug(f"Method {id}: {name} created.")
 
 
     def _read_params(self):

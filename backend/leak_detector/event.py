@@ -11,7 +11,7 @@ class Event:
         self.method_id = method_id
         self._datetime = datetime.fromtimestamp(time // 1000)
         self._position = position
-        logging.info(f"Event {method_id}: {self._datetime} {position}m created.")
+        logging.debug(f"Event {method_id}: {self._datetime} {position}m created.")
 
     # TODO:
     # - Zapisywanie event'ów.
