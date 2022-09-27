@@ -76,14 +76,9 @@ class MethodWave(MethodBase):
 
             previous_trend = current_trend
     
-    # Wersja dla jednego segmentu:
-    # Usunąć echa
+    # TODO: Wersja dla jednego segmentu:
     def get_probability(self, begin: int, end: int):
-        scale = 300000 # W Zygmuntowie, pomiary mają różną dokładność, więc skalowanie danych na zakres (0,1),
-                       # można zrobić tylko wtedy, gdy dzielimy wartość ciśnienia przez maksymalną wartość pomiaru na obu 
-                       # czujnikach w Pa/s.
         d = 0.3 # Przykładowa wartość
-
         segment = self._segments[0]
         wave_speed = self._wave_speed
 
@@ -96,7 +91,7 @@ class MethodWave(MethodBase):
         time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
         position = np.arange(0, self._length_pipeline, self._pipeline.length_resolution)
         
-        times, positions = np.meshgrid(time, np.flip(position))
+        times, positions = np.meshgrid(time, position)
 
         offset_left = positions / wave_speed * 1000
         offset_right = (self._length_pipeline - positions) / wave_speed * 1000
@@ -105,11 +100,14 @@ class MethodWave(MethodBase):
 
         dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)]
         dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)]
+        dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)]
+        dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)]
 
-        dp1 = - dp1 * (dp1 < 0) / scale
-        dp2 = - dp2 * (dp2 < 0) / scale
+        probability = dp3 * dp4 - dp1 * dp2
 
-        probability = np.where(friction > 0, np.sqrt(dp1 * dp2 / friction), 0)
+        probability = probability * (probability > 0)
+
+        probability = np.where(friction > 0, np.sqrt(probability / friction), 0)
 
         return probability
 

@@ -4,11 +4,11 @@ from .plant import Plant
 from datetime import datetime
 
 # Wykresy do sprawdzania wycieku:
-# from .tests.plots import global_plot 
+from .tests.plots import global_plot 
 
 # test
 
-detection_time = 3 * 60 * 1000 #ms
+detection_time = 60 * 1000 #ms
 time_between_detections = 3 * 60 * 1000 #ms
 time_delay = 10 * 1000 #ms
 plant = Plant()
@@ -26,12 +26,12 @@ plant = Plant()
 # - Może jakoś ładnie pozmieniać importy?
 
 # Zasymulowano wycieki, odległość od początku rurociągu:
-# 1. 12:57:44, 1428.06m
-# 2. 13:00:44, 1208.81m
-# 3. 13:03:44, 805.01m
-# 4. 13:06:44, 597.51m
-# 5. 13:09:44, 186.91m
-# 6. 13:12:44, 3.71m
+# 1. ok. 12:57:40, 1428.06m
+# 2. ok. 13:00:40, 1208.81m
+# 3. ok. 13:03:40, 805.01m
+# 4. ok. 13:06:40, 597.51m
+# 5. ok. 13:09:40, 186.91m
+# 6. ok. 13:12:40, 3.71m
 # Wycieki są od największego od najmniejszego.
 
 # Na pewno nie da sie wyznaczyć idelanie miejsca i czasu wycieku bo prędkość fali
@@ -60,6 +60,6 @@ if __name__ == '__main__':
 
             begin_detection_time += time_between_detections
 
-            # global_plot.show()
+            global_plot.show()
     except Exception as error:    
         logging.error(error, exc_info=True)

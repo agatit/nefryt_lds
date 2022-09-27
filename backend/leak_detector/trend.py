@@ -55,6 +55,9 @@ class Trend:
                                 * (raw_value - trend_def.RawMin) \
                                 / (trend_def.RawMax - trend_def.RawMin) \
                                 + trend_def.ScaledMin
+
+                    last_valid = - last_valid * (last_valid < 0) / (0 - trend_def.ScaledMin)
+                    
                     data_list.append(last_valid)
 
                 current_timestamp += 1

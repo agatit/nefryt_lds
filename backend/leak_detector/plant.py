@@ -1,7 +1,6 @@
 import logging
 import sys
 import copy
-import time
 from typing import TYPE_CHECKING, Dict, List
 
 from sqlalchemy import Float, select, and_
