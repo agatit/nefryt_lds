@@ -32,7 +32,7 @@ const slice = createSlice({
   extraReducers: (builder) => {
     builder
       .addMatcher(authApi.endpoints.authLogin.matchPending, (state, action) => {
-        console.log('pending', action)
+       // console.log('pending', action)
       })
       .addMatcher(authApi.endpoints.authLogin.matchFulfilled, (state, action) => {
         state.user = action.payload.username

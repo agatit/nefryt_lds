@@ -6,7 +6,6 @@ import { Dispatch } from '@reduxjs/toolkit';
 
 import { NodeToolbox } from './Components/Node/Toolbox';
 import { PipelineEditorWorkspace } from './Components/Workspace';
-import NewNodeForm from './NewNodeForm';
 import EditorAreaSettings from './EditorAreaSettings';
 import { NodePropertyEditor } from './Components/nodePropertyEditor';
 import { EditorState, INode, SELECTED } from './type';
@@ -69,13 +68,11 @@ const handleSubmitNewNode  = (e: any ) => {
       <React.Fragment>
           <div id='editor-body' className="table">
             <div className="table-row">
-              <NodeToolbox state={reducer} ></NodeToolbox>
+              <NodeToolbox key='NodeToolbox' state={reducer} ></NodeToolbox>
             </div>
             <PipelineEditorWorkspace state={reducer} ></PipelineEditorWorkspace>
           
           </div>
-          <NewNodeForm onSubmit={handleSubmitNewNode} ></NewNodeForm>
-          <EditorAreaSettings onSubmit={handleSubmitAreaEditor} ></EditorAreaSettings>
           <div id="mySidepanel" className={sidepanelClasses}>
            {reducer.activeElement.node ? <NodePropertyEditor activeElement={reducer.activeElement}  ></NodePropertyEditor> : <LinkPropertyEditor  ></LinkPropertyEditor>}
           </div>

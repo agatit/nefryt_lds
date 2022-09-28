@@ -45,7 +45,7 @@ def create_trend(trend=None):  # noqa: E501
         db_trend.TrendGroupID = api_trend.trend_group_id
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
-        db_trend.UnitID = api_trend.unit_id
+        db_trend.UnitID = api_trend.unit
         db_trend.RawMin = api_trend.raw_min
         db_trend.RawMax = api_trend.raw_max
         db_trend.ScaledMin = api_trend.scaled_min
@@ -109,7 +109,7 @@ def get_trend_by_id(trend_id):  # noqa: E501
         api_trend.trend_group_id = db_trend.TrendGroupID
         api_trend.trend_def_id = db_trend.TrendDefID.strip()
         api_trend.time_exponent = db_trend.TimeExponent
-        api_trend.unit_id = db_trend.UnitID.strip()
+        api_trend.unit = db_trend.UnitID.strip()
         api_trend.raw_min = db_trend.RawMin
         api_trend.raw_max = db_trend.RawMax
         api_trend.scaled_min = db_trend.ScaledMin
@@ -148,12 +148,13 @@ def update_trend(trend_id, trend=None, token_info = {}):  # noqa: E501
         db_trend.TrendGroupID = api_trend.trend_group_id
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
-        db_trend.UnitID = api_trend.unit_id
+        db_trend.UnitID = api_trend.unit
         db_trend.RawMin = api_trend.raw_min
         db_trend.RawMax = api_trend.raw_max
         db_trend.ScaledMin = api_trend.scaled_min
         db_trend.ScaledMax = api_trend.scaled_max
         db_trend.NodeID = api_trend.node_id 
+        db_trend.Symbol = api_trend.symbol
         session.add(db_trend)
 
         session.commit()

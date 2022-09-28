@@ -27,7 +27,7 @@ const useNotifier = () => {
     };
 
     React.useEffect(() => {
-        console.log(notifications);
+       // console.log(notifications);
         notifications.forEach(({ key, message, options = {}, dismissed = false }) => {
             dispatch(setDisplayedSnackbar(key));
             if (dismissed) {
