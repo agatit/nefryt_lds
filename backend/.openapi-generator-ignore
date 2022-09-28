@@ -33,3 +33,4 @@ api/controllers/methods_controller.py
 api/controllers/auth_controller.py
 api/controllers/security_controller_.py
 api/controllers/trends_controller.py
+api/controllers/units_controller.py

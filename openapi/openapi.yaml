@@ -59,6 +59,11 @@ paths:
   /event/{eventId}/ack:
     $ref: "./paths/eventAck.yaml"
 
+  /unit:
+    $ref: "./paths/units.yaml"
+  /unit/{unitId}:
+    $ref: "./paths/unit.yaml"    
+
   /auth/login:
     $ref: "./paths/authLogin.yaml"
   /auth/refresh:

@@ -1,0 +1,14 @@
+
+type: object
+properties:
+  ID:
+    type: string
+  Name:
+    type: string
+  Symbol:
+    type: string
+  BaseID:
+    type: string
+  Multiplier:
+    type: number    
+
