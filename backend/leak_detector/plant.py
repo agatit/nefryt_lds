@@ -50,6 +50,7 @@ class Pipeline:
     def __init__(self, plant: 'Plant', id: int, name: str) -> None:
         self._plant = plant
         self._nodes = {}
+        self._first_node = None
         self._methods : Dict[int, 'MethodBase'] = {}
         self._active_methods : Dict[int, 'MethodBase'] = {}
 
@@ -67,6 +68,8 @@ class Pipeline:
         stmt = select(lds.PipelineNode).where(lds.PipelineNode.PipelineID == self.id)
         for node, in global_session.execute(stmt):
             self._nodes[node.NodeID] = self._plant.nodes[node.NodeID]
+            if node.First:
+                self._first_node = self._nodes[node.NodeID]
         logging.debug(stmt)
 
         stmt = select(lds.Method).where(lds.Method.PipelineID == self.id)

@@ -5,14 +5,15 @@ from ..tests.plots import global_plot
 from scipy.ndimage import label
 
 from .base import MethodBase, Segment
-from ..plant import Event, Pipeline
+from ..plant import Event, Pipeline, Trend
 
 # Obecna wersja zakłada, że segmenty mają stały wave speed.
 class MethodWave(MethodBase):
     def __init__(self, pipeline: Pipeline, id: int, name: str) -> None:
-        super().__init__(pipeline, id, name)
+        super().__init__(pipeline, id, name)        
         self._get_params()
         self._create_segments()
+        self._begin_pos = pipeline.plant.get_distances(pipeline._first_node, self._pipeline.plant.nodes[self._pressure_deriv_trends[0].node_id])[0]
 
     def _get_params(self) -> None:
         try:
@@ -29,7 +30,7 @@ class MethodWave(MethodBase):
             logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
             raise
         try:
-            self._pressure_deriv_trends = []
+            self._pressure_deriv_trends : List[Trend] = []
             for trend_id in self._pressure_derivs_string.split(','):
                 self._pressure_deriv_trends.append(self._pipeline.plant.trends[int(trend_id)])
         except KeyError as error:
@@ -69,10 +70,10 @@ class MethodWave(MethodBase):
         friction = (1 - self._wave_coeff * positions / segment._length) \
                     * (1 - self._wave_coeff * (1 - positions / segment._length))
 
-        dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)]
-        dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)]
-        dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)]
-        dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)]
+        dp1 = np.round(np.array(data_start)[((times - offset_left) / 10).astype(int)], 4)
+        dp2 = np.round(np.array(data_end)[((times - offset_right) / 10).astype(int)], 4)
+        dp3 = np.round(np.array(data_start)[((times + offset_left) / 10).astype(int)], 4)
+        dp4 = np.round(np.array(data_end)[((times + offset_right) / 10).astype(int)], 4)
 
         probability = dp3 * dp4 - dp1 * dp2
 
@@ -80,12 +81,9 @@ class MethodWave(MethodBase):
 
         probability = np.where(friction > 0, np.sqrt(probability / friction), 0)
 
-        # global_plot.probability_heatmap(probability, time, position)
 
         return probability
 
-    # Dla każdego segmentu wartość alarmowa może być inna, zależnie od 
-    # dokładności przetworników na tym segmencie
     def find_leaks_in_range(self, begin: int, end: int) -> List[Event]:
         events = []
 
@@ -93,10 +91,11 @@ class MethodWave(MethodBase):
             probability = self.get_probability(segment, begin, end)
 
             leaks, _ = label(probability > 0)
-            alarm_labels = np.unique(np.where(probability > self._alarm_level, leaks, 0))[1:]
 
             probability = np.where(probability > self._min_level, probability, 0)
             probability = np.where(probability < self._max_level, probability, 1)
+
+            alarm_labels = np.unique(np.where(probability > self._alarm_level, leaks, 0))[1:]
 
             for alarm_label in alarm_labels:
                 alarm_values = np.where(leaks == alarm_label, probability, 0)
@@ -105,7 +104,7 @@ class MethodWave(MethodBase):
                 alarm_point_position = np.mean(np.nonzero(alarm_values[:,alarm_point_time])) #ewentualnie np.min, np.max, np.median itp.
                 alarm_time = begin + self._pipeline.time_resolution * alarm_point_time
                 alarm_position = self._pipeline.length_resolution * alarm_point_position
-                events.append(Event(self._id, alarm_time, segment._begin_pos + alarm_position))
+                events.append(Event(self._id, alarm_time, self._begin_pos + segment._begin_pos + alarm_position))
 
         return events
 
