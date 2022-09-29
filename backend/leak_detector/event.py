@@ -9,7 +9,7 @@ from database import lds
 class Event:
     def __init__(self, method_id: int, time: int, position: float) -> None:
         self.method_id = method_id
-        self._datetime = datetime.fromtimestamp(time // 1000)
+        self._datetime = datetime.fromtimestamp(time / 1000)
         self._position = position
         logging.debug(f"Event {method_id}: {self._datetime} {position}m created.")
 

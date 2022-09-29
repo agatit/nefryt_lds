@@ -95,7 +95,7 @@ class Pipeline:
         for id in self._params.get('ACTIVE_METHODS', '').split(','):
             self._active_methods[int(id)] = self._methods[int(id)]
 
-        self.method_events = self._params.get('METHOD_EVENTS', '').split(',')        
+        self.method_events = self._params.get('METHOD_EVENTS', '').split(',') 
 
     def get_probability(self, begin, end) -> Dict[int, List[List[Float]]]:
         result = {}
