@@ -70,10 +70,10 @@ class MethodWave(MethodBase):
         friction = (1 - self._wave_coeff * positions / segment._length) \
                     * (1 - self._wave_coeff * (1 - positions / segment._length))
 
-        dp1 = np.round(np.array(data_start)[((times - offset_left) / 10).astype(int)], 4)
-        dp2 = np.round(np.array(data_end)[((times - offset_right) / 10).astype(int)], 4)
-        dp3 = np.round(np.array(data_start)[((times + offset_left) / 10).astype(int)], 4)
-        dp4 = np.round(np.array(data_end)[((times + offset_right) / 10).astype(int)], 4)
+        dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)]
+        dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)]
+        dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)]
+        dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)]
 
         probability = dp3 * dp4 - dp1 * dp2
 
