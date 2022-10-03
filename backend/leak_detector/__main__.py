@@ -21,9 +21,7 @@ plant = Plant()
 # - Zapisywanie event'ów.
 # - Obsługa błędów parametrów i ustalenie domyślnych wartości.
 # - Zmienna prędkość rozchodzenia się fali na segmencie.
-# - 
-# - W bazie danych zmienić tabele Trend lub TrendParam, bo dane dot. rejestrów się powtarzają.
-# - Może jakoś ładnie pozmieniać importy?
+ 
 
 # Zasymulowano wycieki, odległość od początku rurociągu:
 # 1. ok. 12:57:40, 1428.06m

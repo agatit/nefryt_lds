@@ -56,7 +56,7 @@ class Trend:
                                 / (trend_def.RawMax - trend_def.RawMin) \
                                 + trend_def.ScaledMin
 
-                    last_valid = - last_valid * (last_valid < 0) / (0 - trend_def.ScaledMin)
+                    last_valid = - last_valid * (last_valid < 0)
                     
                     data_list.append(last_valid)
 

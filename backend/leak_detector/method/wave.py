@@ -18,14 +18,16 @@ class MethodWave(MethodBase):
     def _get_params(self) -> None:
         try:
             self._pressure_derivs_string = str(self._params['PRESSURE_DERIV_TRENDS'])
-            
-            self._max_level = float(self._params['MAX_LEVEL'])
+
             self._min_level = float(self._params['MIN_LEVEL'])
+            self._max_level = float(self._params['MAX_LEVEL'])
             self._alarm_level = float(self._params['ALARM_LEVEL'])
 
             self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
 
             self._wave_coeff = float(self._params['WAVE_COEFF'])
+
+            self._normal_range = float(self._params['NORMAL_RANGE'])
         except KeyError as error:
             logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
             raise
@@ -70,17 +72,18 @@ class MethodWave(MethodBase):
         friction = (1 - self._wave_coeff * positions / segment._length) \
                     * (1 - self._wave_coeff * (1 - positions / segment._length))
 
-        dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)]
-        dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)]
-        dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)]
-        dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)]
+        dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)] / self._normal_range
+        dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)] / self._normal_range
+        dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)] / self._normal_range
+        dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)] / self._normal_range
 
         probability = dp3 * dp4 - dp1 * dp2
 
-        probability = probability * (probability > 0)
+        probability = np.maximum(probability, 0)
 
         probability = np.where(friction > 0, np.sqrt(probability / friction), 0)
 
+        probability = np.minimum(probability, 1)
 
         return probability
 
@@ -92,16 +95,16 @@ class MethodWave(MethodBase):
 
             leaks, _ = label(probability > 0)
 
-            probability = np.where(probability > self._min_level, probability, 0)
-            probability = np.where(probability < self._max_level, probability, 1)
-
             alarm_labels = np.unique(np.where(probability > self._alarm_level, leaks, 0))[1:]
 
             for alarm_label in alarm_labels:
-                alarm_values = np.where(leaks == alarm_label, probability, 0)
-                # First non-zero point method:
-                alarm_point_time = np.argmin(np.sum(alarm_values, axis=0) == 0)
-                alarm_point_position = np.mean(np.nonzero(alarm_values[:,alarm_point_time])) #ewentualnie np.min, np.max, np.median itp.
+                leak_values = np.where(leaks == alarm_label, probability, 0)
+                leak_values_from_end = np.flip(leak_values, axis=1)
+                is_alarm_after = np.flip(np.logical_or.accumulate(leak_values_from_end > self._alarm_level, axis=1), axis=1)
+                is_alarm_after = is_alarm_after * (leak_values > 0)
+                alarm_point_time = np.argmin(np.max(leak_values, axis=0) == 0)
+                alarm_point_position = np.mean(np.nonzero(leak_values[:, alarm_point_time]))
+
                 alarm_time = begin + self._pipeline.time_resolution * alarm_point_time
                 alarm_position = self._pipeline.length_resolution * alarm_point_position
                 events.append(Event(self._id, alarm_time, self._begin_pos + segment._begin_pos + alarm_position))
