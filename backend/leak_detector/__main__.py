@@ -18,30 +18,33 @@ plant = Plant()
 
 # TO DO:
 # - Metoda find_leaks_to().
-# - Zapisywanie event'ów.
-# - Obsługa błędów parametrów i ustalenie domyślnych wartości.
 # - Zmienna prędkość rozchodzenia się fali na segmencie.
  
+# Kolejne odległości na zygmuntowie:
+# 1. ok. 1428.06m
+# 2. ok. 1208.81m
+# 3. ok. 805.01m
+# 4. ok. 597.51m
+# 5. ok. 186.91m
+# 6. ok. 3.71m
+# Wycieki są w pliku tests/log.txt
 
-# Zasymulowano wycieki, odległość od początku rurociągu:
-# 1. ok. 12:57:40, 1428.06m
-# 2. ok. 13:00:40, 1208.81m
-# 3. ok. 13:03:40, 805.01m
-# 4. ok. 13:06:40, 597.51m
-# 5. ok. 13:09:40, 186.91m
-# 6. ok. 13:12:40, 3.71m
-# Wycieki są od największego od najmniejszego.
 
-# Na pewno nie da sie wyznaczyć idelanie miejsca i czasu wycieku bo prędkość fali
-# jest szacowany.
+detection_time = 60 * 1000 #ms
+time_between_detections = 13 * 60 * 1000 #ms
+time_delay = 10 * 1000 #ms
+plant = Plant()
+
+begin_leaks_date = datetime(2022, 10, 5, 10, 24, 30)
+end_leaks_date = datetime(2022, 10, 5, 11, 32, 30)
+
 if __name__ == '__main__':
     try:
         logging.info('Leak detector started...')
         
-        begin_detection_date = datetime(2022, 9, 20, 12, 57, 30)
-        begin_detection_time = int(begin_detection_date.timestamp() * 1000)
+        begin_detection_time = int(begin_leaks_date.timestamp() * 1000)
 
-        while (begin_detection_time < datetime(2022, 9, 20, 13, 15).timestamp() * 1000):
+        while (begin_detection_time < end_leaks_date.timestamp() * 1000):
             for pipeline in plant.pipelines.values():
                 begin_detection_date = datetime.fromtimestamp(begin_detection_time / 1000)
             

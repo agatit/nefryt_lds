@@ -20,7 +20,6 @@ class MethodWave(MethodBase):
             self._pressure_derivs_string = str(self._params['PRESSURE_DERIV_TRENDS'])
 
             self._min_level = float(self._params['MIN_LEVEL'])
-            self._max_level = float(self._params['MAX_LEVEL'])
             self._alarm_level = float(self._params['ALARM_LEVEL'])
 
             self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
@@ -69,7 +68,7 @@ class MethodWave(MethodBase):
         offset_left = positions / wave_speed * 1000
         offset_right = (segment._length - positions) / wave_speed * 1000
         
-        friction = (1 - self._wave_coeff * positions / segment._length) \
+        wave_fading = (1 - self._wave_coeff * positions / segment._length) \
                     * (1 - self._wave_coeff * (1 - positions / segment._length))
 
         dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)] / self._normal_range
@@ -81,7 +80,7 @@ class MethodWave(MethodBase):
 
         probability = np.maximum(probability, 0)
 
-        probability = np.where(friction > 0, np.sqrt(probability / friction), 0)
+        probability = np.where(wave_fading > 0, np.sqrt(probability / wave_fading), 0)
 
         probability = np.minimum(probability, 1)
 
@@ -95,20 +94,18 @@ class MethodWave(MethodBase):
 
             leaks, _ = label(probability > 0)
 
+            probability = np.where(probability > self._min_level, probability, 0)
+
             alarm_labels = np.unique(np.where(probability > self._alarm_level, leaks, 0))[1:]
 
             for alarm_label in alarm_labels:
-                leak_values = np.where(leaks == alarm_label, probability, 0)
-                leak_values_from_end = np.flip(leak_values, axis=1)
-                is_alarm_after = np.flip(np.logical_or.accumulate(leak_values_from_end > self._alarm_level, axis=1), axis=1)
-                is_alarm_after = is_alarm_after * (leak_values > 0)
-                alarm_point_time = np.argmin(np.max(leak_values, axis=0) == 0)
-                alarm_point_position = np.mean(np.nonzero(leak_values[:, alarm_point_time]))
-
+                alarm_values = np.where(leaks == alarm_label, probability, 0)
+                alarm_point_time = np.argmin(np.sum(alarm_values, axis=0) == 0)
+                alarm_point_position = np.mean(np.nonzero(alarm_values[:,alarm_point_time])) #ewentualnie np.min, np.max, np.median itp.
                 alarm_time = begin + self._pipeline.time_resolution * alarm_point_time
                 alarm_position = self._pipeline.length_resolution * alarm_point_position
                 events.append(Event(self._id, alarm_time, self._begin_pos + segment._begin_pos + alarm_position))
-
+                
         return events
 
     def find_leaks_to(self, end: int) -> List[Event]:
