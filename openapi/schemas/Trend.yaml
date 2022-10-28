@@ -38,14 +38,4 @@ properties:
   Color:
     type: string
   Symbol:
-    type: string
-  RawMin:
-    type: integer
-  RawMax:
-    type: integer
-  ScaledMin:
-    type: number
-    format: double
-  ScaledMax:
-    type: number
-    format: double   
+    type: string 

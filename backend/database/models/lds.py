@@ -1,4 +1,4 @@
-from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, Float, ForeignKeyConstraint, Identity, Index, Integer, Numeric, PrimaryKeyConstraint, SmallInteger, String, text
+from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, ForeignKeyConstraint, Identity, Index, Integer, Numeric, PrimaryKeyConstraint, SmallInteger, String, text
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -209,10 +209,6 @@ class Trend(Base):
 
     ID = Column(Integer, Identity(start=1000, increment=1))
     TrendDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    RawMin = Column(Integer, nullable=False)
-    RawMax = Column(Integer, nullable=False)
-    ScaledMin = Column(Float(53), nullable=False)
-    ScaledMax = Column(Float(53), nullable=False)
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
     TrendGroupID = Column(Integer)
     TimeExponent = Column(Integer)
