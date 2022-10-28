@@ -7,17 +7,20 @@ import { Menu, SupervisedUserCircle} from '@material-ui/icons'
 import {Notifications} from '@material-ui/icons'
 import Link from '@material-ui/core/Link';
 import { useNavigate } from 'react-router-dom'
-import { RootState } from '../..'  
+import { RootState } from '../../app/store'  
+
 
 import { Sidebar } from './Sidebar'
-import { toggleSidebar } from '../../actions/Layout/actions'
+
 import { RPanel, TemplateState } from './type'
 
 import clsx from 'clsx'
 import "./styles.css"
 import { RightPanel } from './RightPanel'
-import chartsReducer from '../../reducers/chartsReducer'
 import { Badge } from '@mui/material'
+import { toggleSidebar } from '../../features/template/templateSlice'
+
+import { AuthData, logout, selectIsAuthenticated } from '../../features/auth/authSlice';
 
 const drawerWidth = 240;
 
@@ -122,28 +125,41 @@ const Layout: React.FC<Props> = (p) => {
   const dispatch: Dispatch<any> = useDispatch();
   const styles = useStyles()
 
+    //const isAuthenticated = useSelector(selectIsAuthenticated);
+    const isAuthenticated = true;
+
+
   const handleLogin  = (e: React.MouseEvent<HTMLElement>) => {
-    navigate('/login');
+    if (isAuthenticated){
+      dispatch(logout());
+      
+    }else{
+      navigate('/login');
+    }
   }
 
   const templateReducer: TemplateState = useSelector(
-    (state: RootState) => state.templateReducer,
+    (state: RootState) => state.template,
     shallowEqual
   )
 
       
   var sidebar_open = templateReducer.sidebar_open;
-  var rpanel_visible = p.rPanel.visible;
+  var rpanel_enable = p.rPanel.enable;
   var rpanel_open = p.rPanel.open;
 
-  var pRight = rpanel_visible ? 20 : 0;
+  var pRight = rpanel_enable ? 20 : 0;
 
-  var appClass : string  = rpanel_visible ? "none-user-select" : "auto" ;
+  var appClass : string  = rpanel_enable ? "none-user-select" : "auto" ;
       
   const handleToggleDrawer  = (e: React.MouseEvent<HTMLElement>) => {
     dispatch(toggleSidebar());
   }
+
+
  
+    
+
   return (    
     <div onMouseUp={p.onmouseup} className={styles.root}>
       <CssBaseline />
@@ -165,7 +181,7 @@ const Layout: React.FC<Props> = (p) => {
             
           <Link onClick={handleLogin} className={styles.linkToolbar} >
             <SupervisedUserCircle/>
-            Zaloguj
+            {isAuthenticated ? 'Wyloguj' : 'Zaloguj'}
           </Link>
         </Toolbar>    
       </AppBar>    
@@ -173,7 +189,7 @@ const Layout: React.FC<Props> = (p) => {
     
       <div id='app-content' className={appClass} style={{paddingRight:pRight}}>
         {p.content}
-        {rpanel_visible ? <RightPanel content={p.rPanel.content} styles={styles} is_open={rpanel_open} handleDrawer={undefined} children={undefined} ></RightPanel> : null} 
+        {rpanel_enable ? <RightPanel content={p.rPanel.content} styles={styles} is_open={rpanel_open} handleDrawer={p.rPanel.handleDrawer} children={undefined} ></RightPanel> : null} 
       </div> 
     </div>      
   )

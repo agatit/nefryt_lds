@@ -1,7 +1,6 @@
 # schemas/orm/TrendParamDef.yaml
 type: object
 required:
-  - ID
   - TrendDefID
 properties:
   ID:

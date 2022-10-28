@@ -4,6 +4,8 @@ get:
   description: List all pipelines
   tags:
     - pipelines
+  parameters:
+    - $ref: "../parameters/path/filter.yaml"    
   responses:
     "200":
       description: A array of pipelines

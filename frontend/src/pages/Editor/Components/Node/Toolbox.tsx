@@ -1,12 +1,11 @@
 import * as React from "react"
 import { Dispatch } from "redux"
 import { useDispatch } from "react-redux"
-import {  newNode, cloneNode, removeNode, linkNodes, unlinkNodes, setEditorArea, refreshData } from "../../../../actions/editor/actions";
-import * as editorAction from "../../../../actions/editor/actionType";
-import { EditorState, IEditorAction } from "../../type";
+import { EditorState, IEditorAction, INode } from "../../type";
 import { ExpandMore } from '@material-ui/icons';
 import { Accordion, AccordionSummary, AccordionDetails, createTheme, withStyles, makeStyles, FormControl, Select, InputLabel, MenuItem } from '@material-ui/core';
 import { Button, TextField } from "@mui/material";
+import { newNode, NodeDescription, NodeTypes } from "../../../../features/editor/editorSlice";
 
 
 
@@ -103,9 +102,9 @@ const MuiSelect = withStyles((theme) =>({
 
 
 type Props = {
-  editorState : EditorState;
-  action : IEditorAction;
-  activeEditor : string;
+  state : EditorState;
+  //action : IEditorAction;
+  //activeEditor : string;
 }
 
 const theme = createTheme();
@@ -122,52 +121,64 @@ export const NodeToolbox: React.FC<Props> = (p) => {
 
  var editorHeight = 0;
 
+ const newNodeClick = (e: React.MouseEvent<HTMLElement>, nodeType:string) => {
+  var tmpNode : INode ={
+    type: nodeType,
+    Name: "",
+    positionX: 0,
+    positionY: 0,
+    TrendDef: {}
+  }
+  dispatch(newNode(tmpNode));
+ }
   const menuItemClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (e.currentTarget.classList.contains('node-new')){	
-       dispatch(newNode());
-    }else if (e.currentTarget.classList.contains('node-move')){	
+    //if (e.currentTarget.classList.contains('node-new')){	
+       //alert('newNode');
+       
+    //}else 
+    if (e.currentTarget.classList.contains('node-move')){	
      // dispatch(moveNode({}));
     }else if (e.currentTarget.classList.contains('node-clone')){	
-      dispatch(cloneNode({}));
+      //dispatch(cloneNode({}));
     }else if (e.currentTarget.classList.contains('node-delete')){	
-      dispatch(removeNode({}));
+      //dispatch(removeNode({}));
     }
     else if (e.currentTarget.classList.contains('link-new')){	
-      dispatch(linkNodes({}));
+      //dispatch(linkNodes({}));
     }else if (e.currentTarget.classList.contains('link-delete')){	
-      dispatch(unlinkNodes({}));
+      //dispatch(unlinkNodes({}));
     }else if (e.currentTarget.classList.contains('settings')){	
-      dispatch(setEditorArea());
+     // dispatch(setEditorArea());
     }else if (e.currentTarget.classList.contains('refresh')){	
       
-      dispatch(refreshData());
+      //dispatch(refreshData());
       //console.log('RRRRRRRRRRRRRRRRRRRRRRRRRRR');
       //dispatch(setEditorArea());
     }
   }
 
-  if (p.editorState){
-    editorHeight = (p.editorState.area.Height % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) + 1;
+  if (p.state){
+    editorHeight = (p.state.area.Height % p.state.area.ScaleHeight) == 0 ?  Math.floor(p.state.area.Height / p.state.area.ScaleHeight) : Math.floor(p.state.area.Height / p.state.area.ScaleHeight) + 1;
   }
-  var activeMoveNode = p.action.type == editorAction.MOVE_NODE ? 'active' : '';
-  var moveNodeClasses = "node node-move " + activeMoveNode;
-  var activeNewNode = p.action.type == editorAction.NEW_NODE ? 'active' : '';
-  var newNodeClasses = "node node-new " + activeNewNode;
+  //var activeMoveNode = p.action.type == editorAction.MOVE_NODE ? 'active' : '';
+  //var moveNodeClasses = "node node-move " + activeMoveNode;
+  //var activeNewNode = p.action.type == editorAction.NEW_NODE ? 'active' : '';
+  var newNodeClasses = "node node-new ";// + activeNewNode;
 
-  var activeEditNode = p.action.type == editorAction.EDIT_NODE ? 'active' : '';
-  var editNodeClasses = "node node-edit " + activeEditNode;
+  //var activeEditNode = p.action.type == editorAction.EDIT_NODE ? 'active' : '';
+  //var editNodeClasses = "node node-edit " + activeEditNode;
 
-  var activeCloneNode = p.action.type == editorAction.CLONE_NODE ? 'active' : '';
-  var cloneNodeClasses = "node node-clone " + activeCloneNode;
+  //var activeCloneNode = p.action.type == editorAction.CLONE_NODE ? 'active' : '';
+  //var cloneNodeClasses = "node node-clone " + activeCloneNode;
 
-  var activeDeleteNode = p.action.type == editorAction.REMOVE_NODE ? 'active' : '';
-  var deleteNodeClasses = "node node-delete " + activeDeleteNode;
+  //var activeDeleteNode = p.action.type == editorAction.REMOVE_NODE ? 'active' : '';
+  //var deleteNodeClasses = "node node-delete " + activeDeleteNode;
 
-  var activeLinkNodes = p.action.type == editorAction.LINK_NODES ? 'active' : '';
-  var linkNodesClasses = "node link-new " + activeLinkNodes;
+  //var activeLinkNodes = p.action.type == editorAction.LINK_NODES ? 'active' : '';
+  //var linkNodesClasses = "node link-new " + activeLinkNodes;
 
-  var activeUnlinkNodes = p.action.type == editorAction.UNLINK_NODES ? 'active' : '';
-  var unlinkNodesClasses = "node link-delete " + activeUnlinkNodes;
+  //var activeUnlinkNodes = p.action.type == editorAction.UNLINK_NODES ? 'active' : '';
+  //var unlinkNodesClasses = "node link-delete " + activeUnlinkNodes;
       
   var settiongsClasses = "node settings ";
   var refreshClasses = "node refresh ";
@@ -179,10 +190,10 @@ export const NodeToolbox: React.FC<Props> = (p) => {
   let pipeline_id = 1;
 
   var SelValues : any[] = [];  
-  p.editorState.pipelines.forEach((pipeline) => {
-    SelValues.push(<MenuItem value={pipeline.iD}>pipeline.name</MenuItem>);
+  p.state.pipelines.forEach((pipeline) => {
+    SelValues.push(<MenuItem value={pipeline.ID}>pipeline.name</MenuItem>);
   }) 
-    console.log(p.editorState.pipelines);
+   // console.log(p.state.pipelines);
   return (
     <div style={{maxHeight: '100%', overflowY: 'auto', overflowX:'hidden'}} id="editor-menu" >
        
@@ -197,14 +208,17 @@ export const NodeToolbox: React.FC<Props> = (p) => {
         <MuiAccordionDetails>
 
        <div id="editor-menu-containetr" className="table-cell">
-            <p onClick={menuItemClick} className={refreshClasses}><span>&nbsp;</span>Załaduj z DB</p>
-            <p onClick={menuItemClick} className={settiongsClasses}><span>&nbsp;</span>Ustawienia Obszaru</p>
+            <span onClick={menuItemClick} className={refreshClasses}><span>&nbsp;</span>Załaduj z DB</span>
+            <span onClick={menuItemClick} className={settiongsClasses}><span>&nbsp;</span>Ustawienia Obszaru</span>
            
        </div>     
 
       
           </MuiAccordionDetails>
       </MuiAccordion>
+
+      
+
       <MuiAccordion >
         <MuiAccordionSummary
           expandIcon={<ExpandMore />}
@@ -212,17 +226,26 @@ export const NodeToolbox: React.FC<Props> = (p) => {
           aria-controls="additional-actions1-content"
           id="additional-actions1-header"
         >
-          Edycja Węzłów
+          Dodaj węzeł
         </MuiAccordionSummary>
         <MuiAccordionDetails>
           <div id="editor-menu-containetr" className="table-cell">
-            <p onClick={menuItemClick} className={newNodeClasses}><span>&nbsp;</span>Nowy węzeł</p>
-            <p onClick={menuItemClick} className={editNodeClasses} ><span>&nbsp;</span>Edytuj węzeł</p>
-            <p onClick={menuItemClick} className={moveNodeClasses}><span>&nbsp;</span>Przesuń węzeł</p>
-            <p onClick={menuItemClick} className={cloneNodeClasses}><span>&nbsp;</span>Sklonuj węzeł</p>
-            <p onClick={menuItemClick} className={deleteNodeClasses}><span>&nbsp;</span>Usuń węzeł</p>
-            <p onClick={menuItemClick} className={linkNodesClasses}><span>&nbsp;</span>Połącz węzły</p>
-            <p onClick={menuItemClick} className={unlinkNodesClasses}><span>&nbsp;</span>Rozłącz węzły</p>
+          {
+                  NodeTypes.map((element:string, index : number) => (
+
+                    <span key={'Nodetype_' + element} onClick={e => newNodeClick(e, element)} className={newNodeClasses + ' ' + element}><span>&nbsp;</span>{NodeDescription[index]}</span>
+
+                  ))
+
+                 }
+            {//<p onClick={menuItemClick} className={newNodeClasses}><span>&nbsp;</span>Nowy węzeł</p>
+            //<p onClick={menuItemClick} className={editNodeClasses} ><span>&nbsp;</span>Edytuj węzeł</p>
+            //<p onClick={menuItemClick} className={moveNodeClasses}><span>&nbsp;</span>Przesuń węzeł</p>
+            //<p onClick={menuItemClick} className={cloneNodeClasses}><span>&nbsp;</span>Sklonuj węzeł</p>
+            //<p onClick={menuItemClick} className={deleteNodeClasses}><span>&nbsp;</span>Usuń węzeł</p>
+            //<p onClick={menuItemClick} className={linkNodesClasses}><span>&nbsp;</span>Połącz węzły</p>
+            //<p onClick={menuItemClick} className={unlinkNodesClasses}><span>&nbsp;</span>Rozłącz węzły</p>
+            }
           </div>
         </MuiAccordionDetails>
       </MuiAccordion>
@@ -237,7 +260,8 @@ export const NodeToolbox: React.FC<Props> = (p) => {
         </MuiAccordionSummary>
         <MuiAccordionDetails>
           <div id="editor-menu-containetr" className="table-cell">
-            <p onClick={menuItemClick} className={newNodeClasses}><span>&nbsp;</span>Nowy odcinek</p>  
+            {//<p onClick={menuItemClick} className={newNodeClasses}><span>&nbsp;</span>Nowy odcinek</p>  
+            }
           </div>
         </MuiAccordionDetails>
         <MuiAccordionDetails>
@@ -247,11 +271,12 @@ export const NodeToolbox: React.FC<Props> = (p) => {
                 labelId="demo-simple-select-label"
                 id="select-pipeline"
                // value={pipeline_id}
+               value=''
                 label="Odcinek"
                 onChange={handleChange}
               >
-                 {p.editorState.pipelines.map((pipeline) => {
-                   return <MenuItem key={"pid" + pipeline.iD} value={pipeline.iD}>{pipeline.name}</MenuItem>
+                 {p.state.pipelines.map((pipeline) => {
+                   return <MenuItem key={"pid" + pipeline.ID} value={pipeline.ID}>{pipeline.Name}</MenuItem>
                   })
                 } 
               {/*  <MenuItem value={1}>Ten</MenuItem>
@@ -280,7 +305,8 @@ export const NodeToolbox: React.FC<Props> = (p) => {
 
         <MuiAccordionDetails>
           <div id="editor-menu-containetr" className="table-cell">
-            <p onClick={menuItemClick} className={newNodeClasses}><span>&nbsp;</span>Wybór odcinków</p> 
+            {//<p onClick={menuItemClick} className={newNodeClasses}><span>&nbsp;</span>Wybór odcinków</p> 
+            }
           </div>
         </MuiAccordionDetails>
       </MuiAccordion>

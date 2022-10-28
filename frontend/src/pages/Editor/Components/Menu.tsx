@@ -1,24 +1,25 @@
 import * as React from "react"
 import { Dispatch } from "redux"
 import { useSelector, shallowEqual, useDispatch } from "react-redux"
-import { USE_EDITOR_MONITORING, USE_EDITOR_NODES } from "../../../actions/editor/actionType";
 import { Button } from "@material-ui/core";
-import { RootState } from "../../..";
-import { useMonitoringEditor, useNodesEditor } from "../../../actions/editor/actions";
+import { RootState } from "../../../app/store";
 
 
 export const PipelineMenu: React.FC = () => {
   const dispatch: Dispatch= useDispatch();
 
-  const activeEditor: string = useSelector(
-    (state: RootState) => state.pipelineEditorReducer.activeEditor,
-    shallowEqual
-  )
+  const activeEditor = {};
+  const USE_EDITOR_MONITORING = '';
+  const USE_EDITOR_NODES = '';
+  //const activeEditor: string = useSelector(
+  //  (state: RootState) => state.editor.activeEditor,
+  //  shallowEqual
+ // )
   const nodesEditorClick = (e: React.MouseEvent<HTMLElement>) => {
-    dispatch(useNodesEditor());
+    //dispatch(useNodesEditor());
   }
   const monitoringEditorClick = (e: React.MouseEvent<HTMLElement>) => {
-    dispatch(useMonitoringEditor());
+    //dispatch(useMonitoringEditor());
   }
 
   return (

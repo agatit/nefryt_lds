@@ -12,9 +12,12 @@ from api.models.trend_param import TrendParam  # noqa: E501
 from api.models.trend_def import TrendDef  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, delete, and_, lambda_stmt
+from odata_query.sqlalchemy import apply_odata_query
+from sqlalchemy import select, delete, and_
+from sqlalchemy.orm import aliased
 from ..db import session
 from database.models import lds
+from .security_controller import check_permissions
 
 
 def create_trend(trend=None):  # noqa: E501
@@ -42,11 +45,7 @@ def create_trend(trend=None):  # noqa: E501
         db_trend.TrendGroupID = api_trend.trend_group_id
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
-        db_trend.UnitID = api_trend.unit_id
-        db_trend.RawMin = api_trend.raw_min
-        db_trend.RawMax = api_trend.raw_max
-        db_trend.ScaledMin = api_trend.scaled_min
-        db_trend.ScaledMax = api_trend.scaled_max   
+        db_trend.UnitID = api_trend.unit 
         db_trend.NodeID = api_trend.node_id     
         session.add(db_trend)
         
@@ -59,7 +58,7 @@ def create_trend(trend=None):  # noqa: E501
         return error, 500   
 
 
-def delete_trend_by_id(trend_id):  # noqa: E501
+def delete_trend_by_id(trend_id, token_info={}):  # noqa: E501
     """Deletes trend
 
     Deletes specific trend # noqa: E501
@@ -69,7 +68,10 @@ def delete_trend_by_id(trend_id):  # noqa: E501
 
     :rtype: Information
     """
-    try:        
+    try:     
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         db_trend = session.get(lds.Trend, trend_id)
         if db_trend is None:
             return Error(message="Not Found", code=404), 404
@@ -103,11 +105,7 @@ def get_trend_by_id(trend_id):  # noqa: E501
         api_trend.trend_group_id = db_trend.TrendGroupID
         api_trend.trend_def_id = db_trend.TrendDefID.strip()
         api_trend.time_exponent = db_trend.TimeExponent
-        api_trend.unit_id = db_trend.UnitID.strip()
-        api_trend.raw_min = db_trend.RawMin
-        api_trend.raw_max = db_trend.RawMax
-        api_trend.scaled_min = db_trend.ScaledMin
-        api_trend.scaled_max = db_trend.ScaledMax
+        api_trend.unit = db_trend.UnitID.strip()
         api_trend.node_id = db_trend.NodeID
         return api_trend, 200
 
@@ -115,7 +113,7 @@ def get_trend_by_id(trend_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def update_trend(trend_id, trend=None):  # noqa: E501
+def update_trend(trend_id, trend=None, token_info = {}):  # noqa: E501
     """Update trend
 
     Update a trend # noqa: E501
@@ -126,6 +124,9 @@ def update_trend(trend_id, trend=None):  # noqa: E501
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_trend = Trend.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -139,12 +140,9 @@ def update_trend(trend_id, trend=None):  # noqa: E501
         db_trend.TrendGroupID = api_trend.trend_group_id
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
-        db_trend.UnitID = api_trend.unit_id
-        db_trend.RawMin = api_trend.raw_min
-        db_trend.RawMax = api_trend.raw_max
-        db_trend.ScaledMin = api_trend.scaled_min
-        db_trend.ScaledMax = api_trend.scaled_max
+        db_trend.UnitID = api_trend.unit
         db_trend.NodeID = api_trend.node_id 
+        db_trend.Symbol = api_trend.symbol
         session.add(db_trend)
 
         session.commit()
@@ -155,21 +153,21 @@ def update_trend(trend_id, trend=None):  # noqa: E501
         return Error(message=str(e), code=500), 500  
 
 
-def list_trends():  # noqa: E501
+def list_trends(filter_=None, filter=None):  # noqa: E501
     """List trends
 
     List all trends # noqa: E501
 
+    :param filter: Query filter in OData standard
+    :type filter: str
 
     :rtype: List[Trend]
     """
     try:
-        db_trends = session.execute(
-            select(lds.Trend)
-        ).fetchall()
-
-        if db_trends is None:
-            return Error(message="Not Found", code=404), 404
+        stmt = select(lds.Trend)
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)
+        db_trends = session.execute(stmt)
 
         api_trends = []
         for db_trend, in db_trends:
@@ -182,10 +180,6 @@ def list_trends():  # noqa: E501
             api_trend.time_exponent = db_trend.TimeExponent
             api_trend.unit = db_trend.Unit_.Symbol
             api_trend.color = db_trend.Color
-            api_trend.raw_min = db_trend.RawMin
-            api_trend.raw_max = db_trend.RawMax
-            api_trend.scaled_min = db_trend.ScaledMin
-            api_trend.scaled_max = db_trend.ScaledMax
             api_trend.node_id = db_trend.NodeID
             api_trends.append(api_trend)        
 
@@ -215,13 +209,15 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
 
         # reading trends defnitions neccessary for scaling
         db_trends = session.execute(select(lds.Trend))
+        
         db_trends_scales = {}
         for db_trend, in db_trends:
+            params = list_trend_params(db_trend.ID)
             db_trends_scales[db_trend.ID] = {
-                "RawMin": db_trend.RawMin, 
-                "RawMax": db_trend.RawMax, 
-                "ScaledMin": db_trend.ScaledMin,
-                "ScaledMax": db_trend.ScaledMax
+                "RawMin": next(x for x in params if x.Name == "RAW_MIN").Value,
+                "RawMax":  next(x for x in params if x.Name == "RAW_MAX").Value,
+                "ScaledMin": next(x for x in params if x.Name == "SCALED_MIN").Value,
+                "ScaledMax": next(x for x in params if x.Name == "SCALED_MAX").Value,
                 }
 
         # readin the trend data
@@ -341,37 +337,27 @@ def list_trend_params(trend_id):  # noqa: E501
     """
 
     try:
-        # select t.ID, tpd.ID, tpd.Name, tp.Value, tpd.DataType
-        #    from lds.Trend t
-        #    left join lds.TrendParamDef tpd on t.TrendDefID = tpd.TrendDefID
-        #    left join lds.TrendParam tp on tpd.ID = tp.TrendParamDefID and t.ID = tp.TrendID
-        # where
-        #     t.ID = 101
-
-        tp = alias(lds.TrendParam, "tp")
-        t = alias(lds.Trend, "t")
-        tpd = alias(lds.TrendParamDef, "tpd")
+        tp = aliased(lds.TrendParam)
+        t = aliased(lds.Trend)
+        tpd = aliased(lds.TrendParamDef)
         
-        stmt = select(t.c.ID.label("TrendID"), tpd.c.ID.label("TrendParamDefID"), tpd.c.Name, tp.c.Value, tpd.c.DataType) \
+        stmt = select(tp, t, tpd) \
             .select_from(t) \
-            .outerjoin(tpd, t.c.TrendDefID == tpd.c.TrendDefID ) \
-            .outerjoin(tp, and_(tpd.c.ID == tp.c.TrendParamDefID, t.c.ID == tp.c.TrendID)) \
-            .where(t.c.ID == trend_id)
+            .outerjoin(tpd, t.TrendDefID == tpd.TrendDefID ) \
+            .outerjoin(tp, and_(tpd.ID == tp.TrendParamDefID, t.ID == tp.TrendID)) \
+            .where(t.ID == trend_id)
 
-        db_trend_params = session.execute(stmt).fetchall()
-
-
-        if db_trend_params is None:
-            return Error(message="Not Found", code=404), 404
+        db_trend_params = session.execute(stmt)
 
         api_trend_params = []
-        for db_trend_param in db_trend_params:
+        for db_trend_param, db_trend, db_trend_param_def in db_trend_params:
             api_trend_param = TrendParam()
-            api_trend_param.trend_id = db_trend_param.TrendID
-            api_trend_param.trend_param_def_id = db_trend_param.TrendParamDefID.strip()
-            api_trend_param.value = db_trend_param.Value
-            api_trend_param.name = db_trend_param.Name
-            api_trend_param.data_type = db_trend_param.DataType.strip()
+            api_trend_param.trend_id = db_trend.ID
+            api_trend_param.trend_param_def_id = db_trend_param_def.ID.strip()            
+            api_trend_param.name = db_trend_param_def.Name
+            api_trend_param.data_type = db_trend_param_def.DataType.strip()
+            if api_trend_param is not None:
+                api_trend_param.value = db_trend_param.Value
             api_trend_params.append(api_trend_param)
 
         return api_trend_params, 200
@@ -380,7 +366,7 @@ def list_trend_params(trend_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def update_trend_param(trend_id, trend_param_def_id, trend_param=None):  # noqa: E501
+def update_trend_param(trend_id, trend_param_def_id, trend_param=None, token_info={}):  # noqa: E501
     """Update trend params
 
     Updates trend param # noqa: E501
@@ -393,6 +379,9 @@ def update_trend_param(trend_id, trend_param_def_id, trend_param=None):  # noqa:
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+            
         if connexion.request.is_json:
             api_trend_param = TrendParam.from_dict(connexion.request.get_json())  # noqa: E501
 
@@ -412,7 +401,7 @@ def update_trend_param(trend_id, trend_param_def_id, trend_param=None):  # noqa:
         return Error(message=str(e), code=500), 500          
 
 
-def list_trend_defs():  # noqa: E501
+def list_trend_defs(filter=None, filter_=None):  # noqa: E501
     """List trends
 
     List all trends # noqa: E501
@@ -421,12 +410,11 @@ def list_trend_defs():  # noqa: E501
     :rtype: List[Trend]
     """
     try:
-        trends = session.execute(
-            select(lds.TrendDef)
-        ).fetchall()
+        stmt = select(lds.TrendDef)
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)
 
-        if trends is None:
-            return Error(message="Not Found", code=500), 404
+        trends = session.execute(stmt)
 
         api_trends = []
         for trend, in trends:

@@ -4,10 +4,7 @@ import { useDispatch } from "react-redux"
 import { useSelector, shallowEqual } from "react-redux"
 import { actionTypes, Field, reduxForm } from 'redux-form';
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
-import { cancelNodeAction, createNode, newNode, saveNode } from "../../actions/editor/actions";
-import { RootState } from "../..";
-import {NEW_NODE, NodeType as NodeType}  from "../../actions/editor/actionType";
-import { INode } from "./type";
+import { RootState } from "../../app/store";
 
 
 
@@ -25,14 +22,14 @@ import { INode } from "./type";
  
 const NewNodeForm: React.FC<p> = (a:p) => {
   const dispatch: Dispatch<any> = useDispatch()
-  const isOpen: boolean = useSelector(
-    (state: RootState) => state.pipelineEditorReducer.action.type == NEW_NODE,
-    shallowEqual
-)
-
+ // const isOpen: boolean = useSelector(
+ //   (state: RootState) => state.pipelineEditorReducer.action.type == NEW_NODE,
+ //   shallowEqual
+//)
+const isOpen=false;
 
 const handleCancel  = (e: React.MouseEvent<HTMLElement>) => {
-  dispatch(cancelNodeAction());
+ // dispatch(cancelNodeAction());
 }
 /*
 const handleSubmit  = (e: any ) => {
@@ -81,9 +78,10 @@ const handleSubmit  = (e: any ) => {
                 required
               >
                 <option value=""  disabled>Wybierz typ węzła</option>
-                {NodeType.map((element) => (
+                {/*NodeType.map((element) => (
                   <option value={element.value} key={element.value} >{element.name}</option>
-                ))}
+                ))
+                */}
                 
               </Field>
             </div>

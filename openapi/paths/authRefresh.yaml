@@ -1,0 +1,12 @@
+post:
+  summary: Authentication token refresh
+  operationId: authRefresh
+  tags:
+    - auth
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LoginPermissions.yaml'

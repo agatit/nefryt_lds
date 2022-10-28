@@ -7,8 +7,9 @@ import {makeStyles} from '@material-ui/core'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
+import { toggleSidebar } from '../../features/template/templateSlice';
 
-import {toggleRPanel, toggleSidebar } from '../../actions/Layout/actions'
+//import {toggleRPanel, toggleSidebar } from '../../actions/Layout/actions'
 
 const useStyles = makeStyles(theme => ({
     root:{

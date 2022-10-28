@@ -1,7 +1,6 @@
 # schemas/orm/Method.yaml
 type: object
 required:  
-  - ID
   - MethodDefID
   - PipelineID
 properties:

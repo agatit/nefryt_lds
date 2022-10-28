@@ -1,7 +1,6 @@
 # schemas/orm/Trend.yaml
 type: object
 required:  
-  - ID
   - TrendDefID
   - RawMin
   - RawMax
@@ -24,6 +23,9 @@ properties:
   TrendDefID:
     type: string
     description: none
+  NodeID:
+    type: integer
+    description: none    
   TimeExponent:
     type: integer
     description: none
@@ -36,14 +38,4 @@ properties:
   Color:
     type: string
   Symbol:
-    type: string
-  RawMin:
-    type: integer
-  RawMax:
-    type: integer
-  ScaledMin:
-    type: number
-    format: double
-  ScaledMax:
-    type: number
-    format: double   
+    type: string 

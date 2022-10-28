@@ -1,0 +1,18 @@
+post:
+  summary: Authentication Login
+  operationId: authLogin
+  security: []
+  tags:
+    - auth
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref : "../schemas/Login.yaml"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LoginPermissions.yaml'

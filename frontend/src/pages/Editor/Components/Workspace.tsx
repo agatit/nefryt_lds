@@ -2,22 +2,20 @@ import * as React from "react"
 import { Dispatch } from "redux"
 import { useDispatch } from "react-redux"
 import {NodeElm} from "./Node/node" 
-import { MOVE_NODE } from "../../../actions/editor/actionType";
-import { dropNode, refreshData, removeNode, saveNode, setActiveNode } from "../../../actions/editor/actions";
 import { useEffect } from "react";
-import { EditorState, IEditorAction, INode } from "../type"
+import { EditorState, IEditorAction, INode, NEW_NODE } from "../type"
 import $ from "jquery"
 import { mutateAsync, updateEntities } from "redux-query";
-import { createNode, updateNode, UpdateNodeRequest } from "../../../apis";
-import {Node} from "../../../models/Node"
 import { CropLandscapeOutlined } from "@material-ui/icons";
 import { useMutation } from "redux-query-react";
-import { EditorNode } from "../../../models";
+import {Node, useUpdateNodeMutation, UpdateNodeApiArg, useCreateNodeMutation} from "../../../store/nodeApi"
+import { removeNode, setActiveLink, setActiveNode } from "../../../features/editor/editorSlice";
+import { Button } from "reactstrap";
 
   type Props = {
-    editorState : EditorState;
-    action : IEditorAction;
-    acctiveNode:INode | {};
+    state : EditorState;
+   // action : IEditorAction;
+   // acctiveNode:INode | {};
   }
 
   const editorMouseEntere = (e: React.MouseEvent<HTMLElement>) => {
@@ -77,53 +75,49 @@ import { EditorNode } from "../../../models";
     var width : number=0;
     var height : number=0;
 
+    const [updateNode, { isLoading, isError, error, isSuccess }] =
+    useUpdateNodeMutation();
+
+    const [createNode, { }] =
+    useCreateNodeMutation();
+
+    
+
     const onDrop = (e: React.MouseEvent<HTMLElement>) => {
-      if ((p.acctiveNode) && (p.acctiveNode as INode).NodeID > 0){
+     // console.log('AAAAA');
+      if ((p.state.activeElement) && (p.state.activeElement.node) && ((p.state.activeElement.node as INode).NodeID as number) > 0){
         var id :string = (e.target as HTMLElement).id;
           var position : RegExpMatchArray | null = id.match(/\d+/g);
         if ((position as RegExpMatchArray).length==2){
-          (p.acctiveNode as INode).positionX = Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.editorState.area.ScaleHeight;
-          (p.acctiveNode as INode).positionY = Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.editorState.area.ScaleWidth;
-           var aa : UpdateNodeRequest = {
-             nodeId: 0
-           }
+         // (p.state.activeElement.node as INode).positionX = 
+         // (p.state.activeElement.node as INode).positionY = 
+          // var aa : UpdateNodeRequest = {
+          //   nodeId: 0
+          // }
            var nodeA : Node = {
-             iD: (p.acctiveNode as INode).NodeID,
-             editorParams: {
-               posX: (p.acctiveNode as INode).positionX,
-               posY: (p.acctiveNode as INode).positionY
+             //ID: (p.state.activeElement.node as INode).NodeID,
+             EditorParams: {
+               PosX: Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.state.area.ScaleHeight,
+               PosY: Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.state.area.ScaleWidth
              },
-             type: (p.acctiveNode as INode).type
+             Type: (p.state.activeElement.node as INode).type
            }
-          var queryUpdateNode = updateNode(
-            {
-              nodeId: (p.acctiveNode as INode).NodeID,
-              node: nodeA
-           });
-//console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-//console.log((p.acctiveNode as INode).positionX);
-//console.log((p.acctiveNode as INode).positionY);
-           queryUpdateNode.optimisticUpdate = true;
-          dispatch( mutateAsync (queryUpdateNode));
            
-         // updateNode().optimisticUpdate = {
-         //   name: () => name
-         // };
-          
-        /*  React.useCallback(
-            (            optimistic: UpdateNodeRequest) => {
-              updateNode(optimistic).then((result: number) => {
-                if (result !== 200) {
-                  //setError(result.text);
-                }
-        
-                //setStatus(result.status);
-              });
-            },
-            [updateNode]
-          );
-          */
-          dispatch(dropNode());
+           updateNode({nodeId:((p.state.activeElement.node as INode).NodeID as number), node:nodeA});
+           
+
+         // var queryUpdateNode = updateNode(
+         //   {
+         //     nodeId: (p.acctiveNode as INode).NodeID,
+         //     node: nodeA
+         //  });
+           
+
+           //queryUpdateNode.optimisticUpdate = true;
+          //dispatch( mutateAsync (queryUpdateNode));
+           
+
+         // dispatch(dropNode());
         }
       }
     }
@@ -131,12 +125,98 @@ import { EditorNode } from "../../../models";
       e.preventDefault();
     }
 
-    const editorMouseClick  = async (e: React.MouseEvent<HTMLElement>) => {
+    const link_Click  = async (e: any) => {
+      //alert('bbb');
+      
+    }
+
+    const editorMouseClick  = async (e: any) => {
       var id :string = (e.target as HTMLElement).id;
+
+   
+     
+      
+     /* console.log(e.target);
+        //e.target.classList.add('selected');
+
+        var collection = document.getElementsByClassName('h_selected');
+        console.log('AAAAA');
+        console.log(collection.length);
+            for (var y=collection.length-1; y>=0; y--){
+              collection[y].classList.remove("h_selected");
+            }
+            var collection = document.getElementsByClassName('v_selected');
+            for (var y=collection.length-1; y>=0 ; y--){
+              collection[y].classList.remove("v_selected");
+            }
+
+            collection = document.getElementsByClassName('h_selected');
+        console.log('CCC');
+        console.log(collection.length);
+
+        console.log(e.target.classList);
+        */
+        var SelectedLinkID=-1;
+        for (var x=0; x< e.target.classList.length; x++){
+          let pattern1 = /Link_/g;
+          let result1 = pattern1.test(e.target.classList[x]);
+          if (result1){
+            var SelectedLinkIDtxt = e.target.classList[x].substring(7, e.target.classList[x].length);
+            SelectedLinkID = parseInt(SelectedLinkIDtxt);
+            dispatch(setActiveLink(SelectedLinkID));
+            
+/*
+            var collection = document.getElementsByClassName('H_Link_' + SelectedLinkID);
+            console.log('BB');
+            console.log(collection.length);
+            for (var y=0; y< collection.length; y++){
+              collection[y].classList.add("h_selected");
+            }
+
+            collection = document.getElementsByClassName('V_Link_' + SelectedLinkID);
+            for (var y=0; y< collection.length; y++){
+              collection[y].classList.add("v_selected");
+            }
+            */
+
+            break;
+          }
+        }
+        
+        var id :string = (e.target as HTMLElement).id;
+      var position : RegExpMatchArray | null = id.match(/\d+/g);
+      if (position && (position as RegExpMatchArray).length==2){
+        if (SelectedLinkID<0){
+          if ((p.state.activeElement.node as INode) && (p.state.activeElement.node as INode).type && (p.state.activeElement.state == NEW_NODE)){
+            var nodeA : Node = {
+              //ID: (p.state.activeElement.node as INode).NodeID,
+              EditorParams: {
+                PosX: Math.floor((parseInt((position as RegExpMatchArray)[1]))/2)* p.state.area.ScaleHeight,
+                PosY: Math.floor((parseInt((position as RegExpMatchArray)[0]))/2)* p.state.area.ScaleWidth
+              },
+              Type: (p.state.activeElement.node as INode).type
+            }
+            dispatch(createNode({node:nodeA}));
+          }else{
+            dispatch(setActiveNode(undefined));
+          }
+        }
+      }
+    /*alert('aaa');
+      var collection = document.getElementsByClassName('h_selected');
+            for (var y=0; y< collection.length; y++){
+              collection[y].classList.remove("h_selected");
+            }
+            collection = document.getElementsByClassName('v_selected');
+            for (var y=0; y< collection.length; y++){
+              collection[y].classList.remove("v_selected");
+            }
+*/
+
       var position : RegExpMatchArray | null = id.match(/\d+/g);
       if (position && (position as RegExpMatchArray).length==2){
         
-        if (p.editorState.action.type=='MOVE_NODE'){
+      {/* if (p.editorState.action.type=='MOVE_NODE'){
           console.log('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD');
           if ((p.editorState.action.data) && (p.editorState.action.data.length > 0)){
           var nodeA : Node = {
@@ -154,43 +234,28 @@ import { EditorNode } from "../../../models";
           });
 console.log(nodeA);
           queryCreateNode.optimisticUpdate = true;
-          //useMutation(queryCreateNode);
           try{
             var todo = await mutateAsync (queryCreateNode);
             dispatch(todo);
             dispatch(refreshData());
-            //console.log(todo);
-            //var name : any = ((todo.body as Node).name) ? (todo.body as Node).name : "";
-            //var posX :any = (todo.body as Node).editorParams? ((todo.body as Node).editorParams as EditorNode).posX : 100;
-            //var posY :any = (todo.body as Node).editorParams? ((todo.body as Node).editorParams as EditorNode).posY : 100;
-           // var tmp :INode = {
-           //   NodeID: (todo.body as Node).iD,
-           //   type:  (todo.body as Node).type,
-           //   Name: name,
-           //   positionX: posX,
-           //   positionY: posY,
-           //   TrendDef: {}
-           // }
-           // console.log(tmp);
 
-           // dispatch(saveNode(tmp));
           }catch(error){
             console.log(error);
           }
         }
-
+      
         }
-       // dispatch(setActiveNode({}));
+      */}
       }
     }
 
 
     const clearLink = (i: number) => {
-      var beginPosX = p.editorState.Links[i].beginPointX;
-      var beginPosY = p.editorState.Links[i].beginPointY;
+      var beginPosX = p.state.Links[i].beginPointX;
+      var beginPosY = p.state.Links[i].beginPointY;
 
-      var lengthX  = p.editorState.Links[i].endPointX - p.editorState.Links[i].beginPointX;
-      var lengthY  = p.editorState.Links[i].endPointY - p.editorState.Links[i].beginPointY;
+      var lengthX  = p.state.Links[i].endPointX - p.state.Links[i].beginPointX;
+      var lengthY  = p.state.Links[i].endPointY - p.state.Links[i].beginPointY;
 
       var markY : number=1;
       var lenY : number =1;
@@ -223,45 +288,31 @@ console.log(nodeA);
 
 
     useEffect(() => {
-      var width : number;
-      var height : number;
-      var posX : number;
-      var posY : number; 
       var strPosX : string;
       var strPosY : string;
 
-      var beginPosX : number = 0;
-      var beginPosY : number = 0; 
-      var endPosX : number = 0;
-      var endPosY : number = 0; 
+     
       var lengthX : number = 0;
       var lengthY : number = 0;
       $('.table-cell').removeClass('link_horizontal');
       $('.table-cell').removeClass('link_vertical');
-      for (let i=0; i<p.editorState.Links.length;i++){  
-        var BeginNode : INode = p.editorState.Nodes.find((x: { NodeID: any }) => x.NodeID === p.editorState.Links[i].BeginNodeID) as INode;
-        var EndNode : INode = p.editorState.Nodes.find((x: { NodeID: any }) => x.NodeID === p.editorState.Links[i].EndNodeID) as INode;
-        if (BeginNode && EndNode && (BeginNode.positionX) && (BeginNode.positionY)){
-          beginPosX  = (BeginNode.positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(BeginNode.positionX / p.editorState.area.ScaleWidth) : Math.floor(BeginNode.positionX / p.editorState.area.ScaleWidth) + 1;
-          beginPosY = (BeginNode.positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(BeginNode.positionY / p.editorState.area.ScaleHeight) : Math.floor(BeginNode.positionY / p.editorState.area.ScaleHeight) + 1;
-        
-          endPosX  = (EndNode.positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(EndNode.positionX / p.editorState.area.ScaleWidth) : Math.floor(EndNode.positionX / p.editorState.area.ScaleWidth) + 1;
-          endPosY = (EndNode.positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(EndNode.positionY / p.editorState.area.ScaleHeight) : Math.floor(EndNode.positionY / p.editorState.area.ScaleHeight) + 1;
-            
-          lengthX  = endPosX - beginPosX;
-          lengthY  = endPosY - beginPosY;
-
-          if ((beginPosX !=  p.editorState.Links[i].beginPointX) || (beginPosY !=  p.editorState.Links[i].beginPointY)
-            ||  (endPosX !=  p.editorState.Links[i].endPointX) || (endPosY !=  p.editorState.Links[i].endPointY)){
-          
+      
+      var collection = document.getElementsByClassName('h_selected');
+     // console.log('AAAAA');
+     // console.log(collection.length);
+          for (var y=collection.length-1; y>=0; y--){
+            collection[y].classList.remove("h_selected");
           }
-          
-          p.editorState.Links[i].beginPointX = beginPosX;
-          p.editorState.Links[i].beginPointY = beginPosY;
+          var collection = document.getElementsByClassName('v_selected');
+          for (var y=collection.length-1; y>=0 ; y--){
+            collection[y].classList.remove("v_selected");
+          }
 
-          p.editorState.Links[i].endPointX = endPosY;
-          p.editorState.Links[i].endPointY = endPosY;
-                
+
+      for (let i=0; i<p.state.Links.length;i++){  
+          lengthX = p.state.Links[i].endPointX -  p.state.Links[i].beginPointX;
+          lengthY = p.state.Links[i].endPointY - p.state.Links[i].beginPointY;  
+          
           var markY : number=1;
           var lenY : number =1;
           var markX : number=1;
@@ -277,52 +328,64 @@ console.log(nodeA);
           }
             
           for (let j=0; j< (Math.abs(lengthY) *2) + lenY; j++){
-            strPosX = (beginPosX * 2).toString();
-            strPosY = ((beginPosY *2)+(markY*j)).toString(); 
+            strPosX = (p.state.Links[i].beginPointX * 2).toString();
+            strPosY = ((p.state.Links[i].beginPointY *2)+(markY*j)).toString(); 
             var cellid_ : string = 'cell_' + strPosY + '_'+ strPosX;
             var cell_ : HTMLElement = document.getElementById(cellid_) as HTMLElement;
             cell_.classList.add("link_vertical");
+            cell_.classList.add("V_Link_" + p.state.Links[i].ID);
+            if (p.state.Links[i].ID == p.state.activeElement.LinkID){
+              cell_.classList.add("v_selected");
+            }
+            cell_.onclick = link_Click;
           }
           
           //poziome
           for (let j=0; j< Math.abs(lengthX) *2; j++){
-            strPosX = ((beginPosX * 2) + (markX *j)+lenX).toString();
-            strPosY = ((beginPosY *2)+(lengthY *2) ).toString(); 
+            strPosX = ((p.state.Links[i].beginPointX * 2) + (markX *j)+lenX).toString();
+            strPosY = ((p.state.Links[i].beginPointY *2)+(lengthY *2) ).toString(); 
 
             var cellid_ : string = 'cell_' + strPosY + '_'+ strPosX;
             var cell_ : HTMLElement = document.getElementById(cellid_) as HTMLElement;
             cell_.classList.add("link_horizontal");
-        }
-      }else{
+            cell_.classList.add("H_Link_" + p.state.Links[i].ID);
+            if (p.state.Links[i].ID == p.state.activeElement.LinkID){
+              cell_.classList.add("h_selected");
+            }
+            cell_.onclick = link_Click;
+        
+          }
+      //else{
 
-      }
+      //}
     }
+    
   });
 
 
-  if (p.editorState){
-    let nodes = [];
-    for (let i=0;i<p.editorState.Nodes.length;i++){
-        var posX :number = (p.editorState.Nodes[i].positionX % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(p.editorState.Nodes[i].positionX / p.editorState.area.ScaleWidth) : Math.floor(p.editorState.Nodes[i].positionX / p.editorState.area.ScaleWidth) + 1;
-        var posY : number = (p.editorState.Nodes[i].positionY % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.Nodes[i].positionY / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.Nodes[i].positionY / p.editorState.area.ScaleHeight) + 1;
+  if (p.state){
+    let nodes:any[] = [];
+    for (let i=0;i<p.state.Nodes.length;i++){
+        var posX :number = (p.state.Nodes[i].positionX % p.state.area.ScaleWidth) == 0 ?  Math.floor(p.state.Nodes[i].positionX / p.state.area.ScaleWidth) : Math.floor(p.state.Nodes[i].positionX / p.state.area.ScaleWidth) + 1;
+        var posY : number = (p.state.Nodes[i].positionY % p.state.area.ScaleHeight) == 0 ?  Math.floor(p.state.Nodes[i].positionY / p.state.area.ScaleHeight) : Math.floor(p.state.Nodes[i].positionY / p.state.area.ScaleHeight) + 1;
     
         var strPosX : string = (posX * 2).toString();
         var strPosY : string = (posY *2).toString(); 
         var cellid : string = 'cell_' + strPosY + '_'+ strPosX;
 
-        var selected=(p.acctiveNode) && ((p.acctiveNode as INode).NodeID == p.editorState.Nodes[i].NodeID);
-        nodes.push({cell_id :cellid, node:<NodeElm key={i} node={p.editorState.Nodes[i]} removeNode={()=>removeNode(p.editorState.Nodes[i]) } selected={selected} ></NodeElm>})
+        var selected=(p.state.activeElement) && (p.state.activeElement.node? true : false) && ((p.state.activeElement.node as INode).NodeID == p.state.Nodes[i].NodeID);
+        nodes.push({cell_id :cellid, node:<NodeElm key={i} node={p.state.Nodes[i]} removeNode={()=>removeNode(p.state.Nodes[i]) } selected={selected} ></NodeElm>})
     }
 
-    width = (p.editorState.area.Width % p.editorState.area.ScaleWidth) == 0 ?  Math.floor(p.editorState.area.Width / p.editorState.area.ScaleWidth) : Math.floor(p.editorState.area.Width / p.editorState.area.ScaleWidth) + 1;
-    height = (p.editorState.area.Height % p.editorState.area.ScaleHeight) == 0 ?  Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) : Math.floor(p.editorState.area.Height / p.editorState.area.ScaleHeight) + 1;
+    width = (p.state.area.Width % p.state.area.ScaleWidth) == 0 ?  Math.floor(p.state.area.Width / p.state.area.ScaleWidth) : Math.floor(p.state.area.Width / p.state.area.ScaleWidth) + 1;
+    height = (p.state.area.Height % p.state.area.ScaleHeight) == 0 ?  Math.floor(p.state.area.Height / p.state.area.ScaleHeight) : Math.floor(p.state.area.Height / p.state.area.ScaleHeight) + 1;
     
     for(let iW = 0; iW <= (width *2) + 1 ; iW++)	{
       row.push(<div className="table-cell" key={iW} style={{height:20, width:20, left:20*iW }}  onMouseLeave={editorMouseLeave}  onMouseEnter={editorMouseEntere}></div>);
     }
     
     for(let iW = 0; iW <= width ; iW++)	{
-      positionsHorizontal.push(<p key={iW}><span>{iW*p.editorState.area.ScaleWidth}<br/>[{p.editorState.area.SIUnit.SIUnitTID}]</span></p>);
+      positionsHorizontal.push(<p key={iW}><span>{iW*p.state.area.ScaleWidth}<br/>[{p.state.area.SIUnit.SIUnitTID}]</span></p>);
     }
     for (let i = 0; i <= (height *2)+1; i++) {
       row=[];
@@ -335,7 +398,7 @@ console.log(nodeA);
     }
     
     for (let i = 0; i <= height; i++) {
-      positionsVertical.push(<p key={i}><span>{i*p.editorState.area.ScaleHeight}<br/>[{p.editorState.area.SIUnit.SIUnitTID}]</span></p>);
+      positionsVertical.push(<p key={i}><span>{i*p.state.area.ScaleHeight}<br/>[{p.state.area.SIUnit.SIUnitTID}]</span></p>);
     }
   }
   return (
@@ -349,7 +412,8 @@ console.log(nodeA);
         <div className="table-row">
           <div className="ruler-left table-cell"><div className="ruler-vertical-item">{positionsVertical}</div></div>
           <div className="editor-content table-cell">
-            {(p.action.type==MOVE_NODE) && (p.action.data &&(p.action.data).length>0) && <div id="tmp-Node"><NodeElm node={p.action.data[0]} removeNode={() => removeNode(p.action.data[0])} selected={false}></NodeElm></div>}
+            {(p.state.activeElement.state == NEW_NODE) && <div id="tmp-Node"><NodeElm node={p.state.activeElement.node ? p.state.activeElement.node : {} } removeNode={() => removeNode(p.state.activeElement.node ? p.state.activeElement.node : {})} selected={false}></NodeElm></div>}
+            
             <p id="editor-horizontal-indicator">&nbsp;</p>
             <p id="editor-vertical-indicator">&nbsp;</p>
             <div style={{width: (width+1)*40, height: (height+1)*40}}><div className="table">{content}</div></div>

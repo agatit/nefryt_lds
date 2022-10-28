@@ -1,0 +1,6 @@
+name: $filter
+in: query
+required: false
+description: Query filter in OData standard
+schema:
+  type: string

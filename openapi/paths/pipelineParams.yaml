@@ -5,6 +5,7 @@ get:
   tags:
     - pipelines
   parameters:
+    - $ref: "../parameters/path/filter.yaml"     
     - $ref: "../parameters/path/pipelineId.yaml"
   responses:
     "200":

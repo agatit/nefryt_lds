@@ -1,0 +1,55 @@
+get:
+  summary: Gets unit details
+  operationId: getUnitById
+  description: Info for specific unit
+  tags:
+    - units
+  parameters:
+    - $ref: "../parameters/path/unitId.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Unit.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+
+put:
+  summary: Updates units
+  operationId: updateUnit
+  description: Updates a units
+  tags:
+    - units
+  parameters:
+    - $ref: "../parameters/path/unitId.yaml"    
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Unit.yaml"
+  responses:
+    "200":
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Unit.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"  
+
+delete:
+  summary: Deletes unit
+  operationId: deleteUnitById
+  description: Deletes specific unit
+  tags:
+    - units
+  parameters:
+    - $ref: "../parameters/path/unitId.yaml"
+  responses:
+    "204":
+      $ref: "../responses/Deleted.yaml"
+    default:
+      $ref: "../responses/UnexpectedError.yaml"
+

@@ -1,7 +1,5 @@
 # schemas/orm/MethodParamDef.yaml
 type: object
-required:  
-  - ID
 properties:
   ID:
     type: integer
