@@ -13,14 +13,27 @@ class Trend:
     def __init__(self, id: int, node_id: int):
         self.id = id
         self.node_id = node_id
+        self.params = {}
+        self.get_params()
         logging.debug(f"Trend {self.id} {self.node_id} created")
+
+    def get_params(self):
+        stmt = select([lds.TrendParam, lds.TrendParamDef]) \
+                .select_from(lds.TrendParamDef) \
+                .where(lds.TrendParam.TrendID == self.id) \
+                .outerjoin(lds.TrendParam, \
+                    and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.TrendParam.TrendID == self.id) \
+                )
+        for param, param_def in global_session.execute(stmt):
+           if param is not None:
+                self.params[param_def.ID.strip()] = float(param.Value)
+        
 
     def get_trend_data(self, begin: int, end: int) -> List[float]:
         begin = begin // 1000
         end = end // 1000
         logging.debug(f"Get data from {datetime.fromtimestamp(begin)} to {datetime.fromtimestamp(end)}.")
         # reading trends definitions neccessary for scaling
-        trend_def, = global_session.execute(select(lds.Trend).where(lds.Trend.ID == self.id)).fetchone()
 
         last_valid = 0 # ostatnia prawidłowa wartość - do wypełniania pól z wartościami nieprawidływmi 
         chunk_size = 500 # how many trend points to fetch in one query
@@ -44,17 +57,17 @@ class Trend:
                     current_timestamp += 1
 
                 # rozpoznajemy czy dane sa signed czy unsigned
-                if trend_def.RawMin >= 0:
+                if self.params['RAW_MIN'] >= 0:
                     one_second_data = reversed(struct.unpack("H"*100, db_data.Data))
                 else:
                     one_second_data = reversed(struct.unpack("h"*100, db_data.Data))
 
                 # skalowanie
                 for raw_value in one_second_data:
-                    last_valid = (trend_def.ScaledMax - trend_def.ScaledMin) \
-                                * (raw_value - trend_def.RawMin) \
-                                / (trend_def.RawMax - trend_def.RawMin) \
-                                + trend_def.ScaledMin
+                    last_valid = (self.params['SCALED_MAX'] - self.params['SCALED_MIN']) \
+                                * (raw_value - self.params['RAW_MIN']) \
+                                / (self.params['RAW_MAX'] - self.params['RAW_MIN']) \
+                                + self.params['SCALED_MIN']
 
                     last_valid = - last_valid * (last_valid < 0)
                     
