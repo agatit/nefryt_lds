@@ -96,13 +96,13 @@ export const editorSlice = createSlice({
           }
 
           state.Nodes = nodeList;
-          console.log(nodeList);
+         // console.log(nodeList);
     })
 
     .addMatcher(nodeApi.endpoints.listNodes.matchRejected, (state, action) => {
       //console.log('rejected', action) 
-      console.log('rejected', action);
-        console.log(action);
+      //console.log('rejected', action);
+        //console.log(action);
     })  
 
 
@@ -110,7 +110,7 @@ export const editorSlice = createSlice({
       //console.log('pending');
     })
     .addMatcher(linkApi.endpoints.listLinks.matchFulfilled, (state, action) => {
-      console.log(state);
+     // console.log(state);
       var nds : Link[] = action.payload;
       var linkList : ILink [] = [];
            

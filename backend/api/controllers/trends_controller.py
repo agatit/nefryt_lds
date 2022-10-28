@@ -45,7 +45,7 @@ def create_trend(trend=None):  # noqa: E501
         db_trend.TrendGroupID = api_trend.trend_group_id
         db_trend.TrendDefID = api_trend.trend_def_id
         db_trend.TimeExponent = api_trend.time_exponent
-        db_trend.UnitID = api_trend.unit_id 
+        db_trend.UnitID = api_trend.unit 
         db_trend.NodeID = api_trend.node_id     
         session.add(db_trend)
         
@@ -142,6 +142,7 @@ def update_trend(trend_id, trend=None, token_info = {}):  # noqa: E501
         db_trend.TimeExponent = api_trend.time_exponent
         db_trend.UnitID = api_trend.unit
         db_trend.NodeID = api_trend.node_id 
+        db_trend.Symbol = api_trend.symbol
         session.add(db_trend)
 
         session.commit()

@@ -198,7 +198,7 @@ import { Button } from "reactstrap";
             }
             dispatch(createNode({node:nodeA}));
           }else{
-            dispatch(setActiveNode({}));
+            dispatch(setActiveNode(undefined));
           }
         }
       }

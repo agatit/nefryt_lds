@@ -16,6 +16,7 @@ import { Trend, TrendDef, useListTrendDefsQuery, useListTrendsQuery } from "../.
 import { Label } from "recharts";
 import { TabPanel } from "@mui/lab";
 import PropTypes from 'prop-types';
+import { TrendPropertyEditor } from "./trendPropertyEditor";
 
   type Prop ={
       activeElement : TactiveElement;
@@ -93,7 +94,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
       >
         {value === index && (
           <Box sx={{ p: 3 }}>
-            <Typography>{children}</Typography>
+            <Typography component="span">{children}</Typography>
           </Box>
         )}
       </div>
@@ -120,8 +121,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
     };  
   }
 
-  console.log('FFFFF');
-  console.log(reducer);
+ 
 
 
   const handleChange  = (e: React.ChangeEvent<{}>, value:number) => {
@@ -129,15 +129,14 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
   }
 
   var editFormLabel = p.activeElement.node ? 'Węzeł' : 'Odcinek';
-  var nodeName = p.activeElement.node ? p.activeElement.node.Name : '';  
-  var nodeType = p.activeElement.node ? p.activeElement.node.type? p.activeElement.node.type.trim() : '' : '';
+  var nodeName = p? p.activeElement.node ? p.activeElement.node.Name : '' : '';  
+  var nodeType = p? p.activeElement.node ? p.activeElement.node.type? p.activeElement.node.type.trim() : '' : '':'';
   
+
   const [edtNodeName, setEdtNodeName] = useState(nodeName);
   const [edtNodeType, setEdtNodeType] = useState(nodeType);
 
-  var trendName = 'Test';
-  const [edtTrendName, setEdtTrendName] = useState(trendName);
-
+ 
 
   var node_id : string ='0';
   useEffect(() => {
@@ -160,7 +159,8 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
 
    var filterTrdDef={};
    useListTrendDefsQuery(filterTrdDef, {refetchOnMountOrArgChange : true});
-
+  
+  
   const [updateNode, { isLoading, isError, error, isSuccess }] =
   useUpdateNodeMutation();
 
@@ -274,7 +274,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                 >
                  {
                   NodeTypes.map((element:string, index:number) => (
-                    <MenuItem  value={element}>{NodeDescription[index]}</MenuItem>
+                    <MenuItem key={'menuItemNodeType' + element}  value={element}>{NodeDescription[index]}</MenuItem>
                   ))
 
                  }
@@ -287,7 +287,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                 <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
                   
                   <FormGroup style={{ width:'410px',  }}>
-                    <div style={{ maxHeight: 530, overflowY:'auto', overflowX:'hidden'}}>
+                    <div style={{ maxHeight: 530, overflowY:'auto', overflowX:'hidden', maxWidth:'410px'}}>
                       {reducer.trends.map((trend : Trend, index) => (
                       
                         <Accordion key={"Accordion_" + index} expanded={expanded === "trd_" + (trend.ID as number).toLocaleString() ?? ''} onChange={handleTrendPanelExpanded("trd_" + (trend.ID as number).toLocaleString())}>
@@ -300,60 +300,22 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                             {trend.Name}
                           </AccordionSummary>
                           <AccordionDetails key={"AccordionDetails_" + index}>
-                            <Typography key={"TypographyDetails_" + index}  width="100%" marginLeft={4}>
-                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                              <Tabs value={trdTabIndex} onChange={handleChangeTabIndex} aria-label="basic tabs example">
-                                <Tab label="Dane" {...a11yProps(0)} />
-                                <Tab label="Parametry" {...a11yProps(1)} />
+                            <Typography component="span" key={"TypographyDetails_" + index}  width="100%" marginLeft={4}>
+                            <Box  key={'BoxTrend' + trend.ID} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                              <Tabs key={'tabsTrend_' + trend.ID} value={trdTabIndex} onChange={handleChangeTabIndex} aria-label="basic tabs example">
+                                <Tab key={'tabTrend0_' + trend.ID} label="Dane" {...a11yProps(0)} />
+                                <Tab  key={'tabTrend1_' + trend.ID} label="Parametry" {...a11yProps(1)} />
 
                               </Tabs>
                             </Box>
-                            <TabPanel value={trdTabIndex} index={0}>
-                              <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
-                              
-                                  <TextField
-                                      required
-                                      id="active_trend_name"
-                                      label="Nazwa"
-                                      value={edtTrendName}
-                                      onChange={(e) => {
-                                        setEdtTrendName(e.target.value);
-                                      }}
-                                      InputLabelProps={{
-                                        shrink: true,
-                                        className: undefined
-                                      }}
-                                      
-                                  />
-
-                                  <TextField
-                                      variant="outlined"
-                                    
-                                      id="active_trend_type"
-                                      value={edtTrendDef}
-                                      label="Typ"
-                                      select
-                                      onChange={(e) => {
-                                        //console.log(e);
-                                        //console.log(e.target.value as string);
-                                        setEdtTrendDef((e.target.value as string));
-                                      }}
-                                  >
-                                    {
-                                      TrendDefs.map((element:TrendDef, index:number) => (
-                                        <MenuItem  value={element.ID}>{element.Name}</MenuItem>
-                                      ))
-
-                                    }
-                                  </TextField>
-
-                                <Button style={{marginTop:'30px', width:'300px'}} onClick={saveTrendData} variant="contained">Zapisz zmiany</Button>
-                              </FormControl>
+                            <TabPanel key={'TabPanel0Trend' + trend.ID} value={trdTabIndex} index={0}>
+                              <TrendPropertyEditor key={'terndEditor' + trend.ID} activeTrend={trend} activeElement={undefined}></TrendPropertyEditor>
+                             
                             </TabPanel>
-                            <TabPanel value={trdTabIndex} index={1}>
+                            <TabPanel  key={'TabPanel1Trend' + trend.ID} value={trdTabIndex} index={1}>
                               <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
                               
-                                 <Button style={{marginTop:'30px', width:'300px'}} onClick={saveParameters} variant="contained">Zapisz parametry</Button>
+                                 <Button  key={'TabPanel0TrendButton' + trend.ID} style={{marginTop:'30px', width:'300px'}} onClick={saveParameters} variant="contained">Zapisz parametry</Button>
                               </FormControl>
                             </TabPanel>
                                                   
@@ -361,7 +323,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                             </Typography>
                           </AccordionDetails>  
                         </Accordion> 
-                              ))}
+                      ))}
                     </div> 
                   </FormGroup>   
                   <FormHelperText> </FormHelperText>
@@ -372,15 +334,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
 
           </Stack>
         </FormControl>  
-        {/*<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <MuiTabs TabIndicatorProps={{style: {top:0,}}} textColor="secondary" indicatorColor="secondary"  value={activeTabIndex} onChange={handleChange } >
-            <MuiTab label="Węzeł" {...a11yProps(0)} />
-            <MuiTab label="Odcinki" {...a11yProps(1)}  />
-          </MuiTabs>
-        </Box>
-        <PropertyEditorTab activeTabIndex={activeTabIndex} index={0} /> 
-        <PropertyEditorTab activeTabIndex={activeTabIndex} index={1} />   
-        */} 
+        
       </MuiThemeProvider>
     </React.Fragment>
   

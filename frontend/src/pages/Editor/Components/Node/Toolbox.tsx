@@ -193,7 +193,7 @@ export const NodeToolbox: React.FC<Props> = (p) => {
   p.state.pipelines.forEach((pipeline) => {
     SelValues.push(<MenuItem value={pipeline.ID}>pipeline.name</MenuItem>);
   }) 
-    console.log(p.state.pipelines);
+   // console.log(p.state.pipelines);
   return (
     <div style={{maxHeight: '100%', overflowY: 'auto', overflowX:'hidden'}} id="editor-menu" >
        
@@ -208,8 +208,8 @@ export const NodeToolbox: React.FC<Props> = (p) => {
         <MuiAccordionDetails>
 
        <div id="editor-menu-containetr" className="table-cell">
-            <p onClick={menuItemClick} className={refreshClasses}><span>&nbsp;</span>Załaduj z DB</p>
-            <p onClick={menuItemClick} className={settiongsClasses}><span>&nbsp;</span>Ustawienia Obszaru</p>
+            <span onClick={menuItemClick} className={refreshClasses}><span>&nbsp;</span>Załaduj z DB</span>
+            <span onClick={menuItemClick} className={settiongsClasses}><span>&nbsp;</span>Ustawienia Obszaru</span>
            
        </div>     
 
@@ -233,7 +233,7 @@ export const NodeToolbox: React.FC<Props> = (p) => {
           {
                   NodeTypes.map((element:string, index : number) => (
 
-                    <p onClick={e => newNodeClick(e, element)} className={newNodeClasses + ' ' + element}><span>&nbsp;</span>{NodeDescription[index]}</p>
+                    <span key={'Nodetype_' + element} onClick={e => newNodeClick(e, element)} className={newNodeClasses + ' ' + element}><span>&nbsp;</span>{NodeDescription[index]}</span>
 
                   ))
 
@@ -271,6 +271,7 @@ export const NodeToolbox: React.FC<Props> = (p) => {
                 labelId="demo-simple-select-label"
                 id="select-pipeline"
                // value={pipeline_id}
+               value=''
                 label="Odcinek"
                 onChange={handleChange}
               >
