@@ -13,6 +13,7 @@ import type { MiddlewareAPI, Middleware } from '@reduxjs/toolkit'
 import { useSnackbar } from 'notistack';
 import { useDispatch } from 'react-redux';
 import { api } from '../store/emptyApi';
+import trendEditor from '../features/editor/trendEditorSlice'
 
 
 
@@ -24,6 +25,7 @@ export const store = configureStore({
     charts,
     editor,
     nodeEditor,
+    trendEditor
   },
   
   middleware: (getDefaultMiddleware) =>

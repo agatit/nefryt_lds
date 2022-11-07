@@ -123,6 +123,13 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
     padding-left:  20px;
   }
 
+  .sidepanel .MuiTypography-root{
+    margin-left: 0px!important;
+  }
+ .sidepanel .MuiBox-root{
+  padding-right: 24px!important;
+  padding-left: 0px!important;
+ }
   .sidepanel .MuiFormControl-root{
     margin-top: 5px;
   }

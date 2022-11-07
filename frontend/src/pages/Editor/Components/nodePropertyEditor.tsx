@@ -17,6 +17,7 @@ import { Label } from "recharts";
 import { TabPanel } from "@mui/lab";
 import PropTypes from 'prop-types';
 import { TrendPropertyEditor } from "./trendPropertyEditor";
+import { TrendParamsEditor } from "./trendParamsEditor";
 
   type Prop ={
       activeElement : TactiveElement;
@@ -314,8 +315,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                             </TabPanel>
                             <TabPanel  key={'TabPanel1Trend' + trend.ID} value={trdTabIndex} index={1}>
                               <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
-                              
-                                 <Button  key={'TabPanel0TrendButton' + trend.ID} style={{marginTop:'30px', width:'300px'}} onClick={saveParameters} variant="contained">Zapisz parametry</Button>
+                                  <TrendParamsEditor key={'terndEditor' + trend.ID} activeTrend={trend}></TrendParamsEditor>
                               </FormControl>
                             </TabPanel>
                                                   

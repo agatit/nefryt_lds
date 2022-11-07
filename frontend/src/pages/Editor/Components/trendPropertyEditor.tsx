@@ -1,7 +1,7 @@
 
 import * as React from "react"
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
-import { Trend, TrendDef, useListTrendDefsQuery, useUpdateTrendMutation } from "../../../store/trendApi";
+import { Trend, TrendDef, TrendParam, useListTrendDefsQuery, useListTrendParamsQuery, useUpdateTrendMutation } from "../../../store/trendApi";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Checkbox, FormControl, FormControlLabel,  FormGroup,  FormHelperText,  FormLabel,  InputLabel,  MenuItem,  Slider,  Stack, Switch, TextField, Typography } from "@mui/material";
 import { RootState } from "../../../app/store";
 import { NodeState } from "../../../features/editor/nodeEditorSlice";
@@ -39,7 +39,10 @@ export const TrendPropertyEditor: React.FC<Prop> = (p) => {
 
     const saveTrend = (e: React.MouseEvent<HTMLElement>) => {
       console.log('DDDD');
-     
+      console.log(trendColor);
+      console.log(p.activeTrend.NodeID);
+      var trendID = p.activeTrend? p.activeTrend.ID ? p.activeTrend.ID  : -1 : -1;
+
         var tmptrend : Trend = {
             TrendDefID: trendDef,
             Symbol: trendSymbol,
@@ -49,15 +52,17 @@ export const TrendPropertyEditor: React.FC<Prop> = (p) => {
             RawMax: 0,
             ScaledMin: trendScaledMin,
             ScaledMax: trendScaledMax,
-            NodeID:p.activeTrend.NodeID
+            NodeID:p.activeTrend.NodeID,
+            Color: trendColor
         }
         console.log(tmptrend);
-            var trendID = p.activeTrend? p.activeTrend.ID ? p.activeTrend.ID  : -1 : -1;
+            
             if (trendID > 0){
-                updateTrend({trendId:trendID, trend: tmptrend});
+               updateTrend({trendId:trendID, trend: tmptrend});
             }
       }
     
+  
 
     return (
         <React.Fragment>
