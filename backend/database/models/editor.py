@@ -1,5 +1,5 @@
 from sqlalchemy import CHAR, Column, ForeignKeyConstraint, Identity, Integer, Numeric, PrimaryKeyConstraint, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -15,6 +15,8 @@ class Node(Base):
     Type = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
     Name = Column(String(50, 'SQL_Polish_CP1250_CS_AS'))
 
+    Node = relationship('Node_', uselist=False, back_populates='Node_')
+
 
 class Pipeline(Base):
     __tablename__ = 'Pipeline'
@@ -27,8 +29,10 @@ class Pipeline(Base):
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
     BeginPos = Column(Numeric(10, 2))
 
+    Pipeline = relationship('Pipeline_', uselist=False, back_populates='Pipeline_')
 
-class Node_(Node):
+
+class Node_(Base):
     __tablename__ = 'Node'
     __table_args__ = (
         ForeignKeyConstraint(['ID'], ['lds.Node.ID'], ondelete='CASCADE', onupdate='CASCADE', name='Node_fk'),
@@ -40,8 +44,10 @@ class Node_(Node):
     PosX = Column(Integer)
     PosY = Column(Integer)
 
+    Node_ = relationship('Node', back_populates='Node')
 
-class Pipeline_(Pipeline):
+
+class Pipeline_(Base):
     __tablename__ = 'Pipeline'
     __table_args__ = (
         ForeignKeyConstraint(['ID'], ['lds.Pipeline.ID'], ondelete='CASCADE', onupdate='CASCADE', name='Pipeline_fk'),
@@ -54,3 +60,5 @@ class Pipeline_(Pipeline):
     AreaWidthDivision = Column(Integer, nullable=False)
     AreaHeight = Column(Integer, nullable=False)
     AreaHeightDivision = Column(Integer, nullable=False)
+
+    Pipeline_ = relationship('Pipeline', back_populates='Pipeline')

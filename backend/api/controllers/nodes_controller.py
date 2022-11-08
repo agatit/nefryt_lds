@@ -81,7 +81,7 @@ def update_node(node_id, node=None, token_info={}):  # noqa: E501
         db_node.Name = api_node.name  
         if api_node.editor_params is not None:
             if db_node.Node is None:
-                db_node.Node = editor.Node_()
+                db_node.Node = editor.Node_
             db_node.Node.PosX = api_node.editor_params.pos_x
             db_node.Node.PosY = api_node.editor_params.pos_y
         session.add(db_node)
