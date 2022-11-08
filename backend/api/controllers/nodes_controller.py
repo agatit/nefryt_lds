@@ -44,7 +44,7 @@ def create_node(node=None, token_info={}):  # noqa: E501
         session.flush()
 
         if node.editor_params:
-            db_editor_node = editor.Node()
+            db_editor_node = editor.Node_()
             db_editor_node.ID = db_node.ID
             db_editor_node.PosX = node.editor_params.pos_x
             db_editor_node.PosY = node.editor_params.pos_y
@@ -87,9 +87,9 @@ def update_node(node_id, node=None, token_info={}):  # noqa: E501
         session.add(db_node)
         session.flush()
 
-        db_editor_node = session.get(editor.Node, node_id)
+        db_editor_node = session.get(editor.Node_, node_id)
         if db_editor_node is None:
-            db_editor_node = editor.Node()
+            db_editor_node = editor.Node_()
             db_editor_node.ID = node_id
 
         db_editor_node.PosX = api_node.editor_params.pos_x
@@ -152,7 +152,7 @@ def get_node_by_id(node_id):  # noqa: E501
         api_node.type = node.Type.strip()
         api_node.name = node.Name
 
-        editor_node = session.get(editor.Node, node_id)
+        editor_node = session.get(editor.Node_, node_id)
         if editor_node is not None:
             api_node.editor_params = EditorNode()
             api_node.editor_params.pos_x = editor_node.PosX
@@ -173,8 +173,8 @@ def list_nodes(filter_=None, filter=None):  # noqa: E501
     :rtype: List[Node]
     """
     try:
-        ln = aliased(lds.Node)
-        en = aliased(editor.Node)
+        ln = aliased(lds.Node, flat=True)
+        en = aliased(editor.Node_, flat=True)
 
         stmt = select(ln, en).outerjoin(en, en.ID == ln.ID )
         if filter_ is not None:
@@ -191,7 +191,7 @@ def list_nodes(filter_=None, filter=None):  # noqa: E501
                 api_node.editor_params = EditorNode()
                 api_node.editor_params.pos_x = editor_node.PosX
                 api_node.editor_params.pos_y = editor_node.PosY
-            api_nodes.append(api_node)        
+            api_nodes.append(api_node)    
 
 
         return api_nodes, 200

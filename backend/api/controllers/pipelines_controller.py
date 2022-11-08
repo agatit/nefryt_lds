@@ -44,7 +44,7 @@ def create_pipeline(pipeline=None, token_info={}):  # noqa: E501
         session.flush()
 
         if api_pipeline.editor_params is not None:
-            db_editor_pipeline: editor.Pipeline = editor.Pipeline()
+            db_editor_pipeline: editor.Pipeline_ = editor.Pipeline_()
             db_editor_pipeline.ID = api_pipeline.id
             db_editor_pipeline.AreaHeight = api_pipeline.editor_params.area_height
             db_editor_pipeline.AreaWidth = api_pipeline.editor_params.area_width
@@ -87,9 +87,9 @@ def update_pipeline(pipeline_id, pipeline=None, token_info={}):  # noqa: E501
         session.add(db_pipeline)
         session.flush()
 
-        db_editor_pipeline = session.get(editor.Pipeline, pipeline_id)
+        db_editor_pipeline = session.get(editor.Pipeline_, pipeline_id)
         if db_editor_pipeline is None:
-            db_editor_pipeline = editor.Pipeline()
+            db_editor_pipeline = editor.Pipeline_()
             db_editor_pipeline.ID = pipeline_id
 
         db_editor_pipeline.AreaHeight = api_pipeline.editor_params.area_height
@@ -150,7 +150,7 @@ def get_pipeline_by_id(pipeline_id):  # noqa: E501
         api_pipeline.name = db_pipeline.Name
         api_pipeline.begin_pos = db_pipeline.BeginPos
 
-        db_editor_pipeline = session.get(editor.Pipeline, pipeline_id)
+        db_editor_pipeline = session.get(editor.Pipeline_, pipeline_id)
         if db_editor_pipeline is not None:
             api_pipeline.editor_params = EditorPipeline()
             api_pipeline.editor_params.area_height = db_editor_pipeline.AreaHeight
@@ -173,8 +173,8 @@ def list_pipelines(filter_=None, filter=None):  # noqa: E501
     :rtype: List[pipeline]
     """
     try:
-        ln = aliased(lds.Pipeline)
-        en = aliased(editor.Pipeline)
+        ln = aliased(lds.Pipeline, flat=True)
+        en = aliased(editor.Pipeline_, flat=True)
         stmt = select(ln, en).select_from(ln).outerjoin(en, en.ID == ln.ID)
         if filter_ is not None:
             stmt = apply_odata_query(stmt, filter_)        
