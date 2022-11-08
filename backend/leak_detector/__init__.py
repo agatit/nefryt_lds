@@ -1,6 +1,3 @@
 from .config import config
-from .plant import Plant
+from .plant import Pipeline
 from . import method
-
-
-

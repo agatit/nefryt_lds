@@ -1,89 +1,112 @@
+import logging
 from typing import List
+import numpy as np
+from ..tests.plots import global_plot
+from scipy.ndimage import label
 
 from .base import MethodBase, Segment
-from ..plant import Event
+from ..plant import Event, Pipeline, Trend
 
-
+# Obecna wersja zakłada, że segmenty mają stały wave speed.
 class MethodWave(MethodBase):
+    def __init__(self, pipeline: Pipeline, id: int, name: str) -> None:
+        super().__init__(pipeline, id, name)        
+        self._get_params()
+        self._create_segments()
+        self._begin_pos = pipeline.plant.get_distances(pipeline._first_node, self._pipeline.plant.nodes[self._pressure_deriv_trends[0].node_id])[0]
 
-    def __init__(self, pipeline, id, name):
-        super().__init__(pipeline, id, name)
-        # skopiowanie specyficznych parametrów metody:
-        # TODO: rozważyć obsługe błedów przy czytaniu parmatrów, np. przypisanie nieistnijącego trendu
+    def _get_params(self) -> None:
+        try:
+            self._pressure_derivs_string = str(self._params['PRESSURE_DERIV_TRENDS'])
 
-        self._pressure_deriv_trends = []
-        for trend_id in self._params['PRESSURE_DERIV_TRENDS'].split(','):
-            self._pressure_deriv_trends.append(pipeline.plant.trends[int(trend_id)])
-        # etc.
-        
-        self._max_level = float(self._params['MAX_LEVEL'])
-        self._min_level = float(self._params['MIN_LEVEL'])
-        self._alarm_level = float(self._params['ALARM_LEVEL'])
+            self._min_level = float(self._params['MIN_LEVEL'])
+            self._alarm_level = float(self._params['ALARM_LEVEL'])
 
-        self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
+            self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
 
-        # podział na segmenty (jeśli zaimplementujemy więcej niż dwa trendy na metodę)
-        self.create_segments()
-        
+            self._wave_coeff = float(self._params['WAVE_COEFF'])
 
-    def create_segments(self) -> None:
-        self._segments = []
+            self._normal_range = float(self._params['NORMAL_RANGE'])
+        except KeyError as error:
+            logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
+            raise
+        try:
+            self._pressure_deriv_trends : List[Trend] = []
+            for trend_id in self._pressure_derivs_string.split(','):
+                self._pressure_deriv_trends.append(self._pipeline.plant.trends[int(trend_id)])
+        except KeyError as error:
+            logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self._id}, trend {error.args[0]} does not exist', exc_info=False)
+            raise
+
+    def _create_segments(self) -> None:
+        self._segments: List[Segment] = [] 
+        self._length_pipeline = 0
         previous_trend = None
         for current_trend in self._pressure_deriv_trends:
             if (previous_trend is not None):
-                self._segments.append(Segment(self._pipeline.plant, previous_trend, current_trend))
+                segment = Segment(self._pipeline, previous_trend, current_trend,
+                                     self._length_pipeline, self._wave_speed)
+                self._length_pipeline += segment._length
+                self._segments.append(segment)
+
             previous_trend = current_trend
     
+    def get_probability(self, segment: Segment, begin: int, end: int):
+        wave_speed = self._wave_speed
 
-    def calc_wave_speed(self) -> int:
-        return self._wave_speed
+        window_begin = begin - segment.max_window_size
+        window_end = end + segment.max_window_size
 
-    
+        data_start = segment._start.get_trend_data(window_begin, window_end)
+        data_end = segment._end.get_trend_data(window_begin, window_end)
+       
+        time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
+        position = np.arange(0, segment._length, self._pipeline.length_resolution)
+        
+        times, positions = np.meshgrid(time, position)
 
-    def get_probability(self, begin, end) -> List[List[float]]:
-        wave_speed = self.calc_wave_speed()
+        offset_left = positions / wave_speed * 1000
+        offset_right = (segment._length - positions) / wave_speed * 1000
         
-        data_start = data_end = None
-        
-        self._probability = []
-        
+        wave_fading = (1 - self._wave_coeff * positions / segment._length) \
+                    * (1 - self._wave_coeff * (1 - positions / segment._length))
+
+        dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)] / self._normal_range
+        dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)] / self._normal_range
+        dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)] / self._normal_range
+        dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)] / self._normal_range
+
+        probability = dp3 * dp4 - dp1 * dp2
+
+        probability = np.maximum(probability, 0)
+
+        probability = np.where(wave_fading > 0, np.sqrt(probability / wave_fading), 0)
+
+        probability = np.minimum(probability, 1)
+
+        return probability
+
+    def find_leaks_in_range(self, begin: int, end: int) -> List[Event]:
+        events = []
+
         for segment in self._segments:
+            probability = self.get_probability(segment, begin, end)
 
-            # W trakcie pobrania danych musi być jakieś okienko, ze względu na opóźnienie fali
-            # Można wymyśleć jakiś zgrabny sposób na jedno zapytanie do bazy danych
+            leaks, _ = label(probability > 0)
 
-            window_begin = begin - segment.window_size(wave_speed)
-            window_end = end + segment.window_size(wave_speed)
+            probability = np.where(probability > self._min_level, probability, 0)
 
-            data_start = segment.start.get_trend_data(window_begin, window_end)
-            data_end = segment.end.get_trend_data(window_begin, window_end)
+            alarm_labels = np.unique(np.where(probability > self._alarm_level, leaks, 0))[1:]
 
-            for current_time in range(begin, end, self._pipeline.time_resolution):
-                probability_row = []
+            for alarm_label in alarm_labels:
+                alarm_values = np.where(leaks == alarm_label, probability, 0)
+                alarm_point_time = np.argmin(np.sum(alarm_values, axis=0) == 0)
+                alarm_point_position = np.mean(np.nonzero(alarm_values[:,alarm_point_time])) #ewentualnie np.min, np.max, np.median itp.
+                alarm_time = begin + self._pipeline.time_resolution * alarm_point_time
+                alarm_position = self._pipeline.length_resolution * alarm_point_position
+                events.append(Event(self._id, alarm_time, self._begin_pos + segment._begin_pos + alarm_position))
+                
+        return events
 
-                for current_pos in range(0, segment.length, self._pipeline.length_resolution):
-                    l1 = current_pos
-                    l2 = segment.length - l1
-                    offset1 = int(l1/wave_speed * 100)
-                    offset2 = int(l2/wave_speed * 100)
-                    data_point = current_time - window_begin
-                    data_point = data_point // 10
-                    dp1 = min(0, data_start[data_point - offset1])
-                    dp2 = min(0, data_end[data_point - offset2])
-                    dp3 = min(0, data_start[data_point + offset1])
-                    dp4 = min(0, data_end[data_point + offset2])
-                    res = dp1 + dp2 - dp3 - dp4
-                    res = max(0, (res - self._min_level) / (self._max_level - self._min_level))
-                    probability_row.append(res)
-
-                self._probability.append(probability_row)
-        
-        return self._probability
-
-
-    def find_leaks_in_range(self, begin, end) -> List[Event]:
+    def find_leaks_to(self, end: int) -> List[Event]:
         pass
-
-
-    def find_leaks_to(self, end) -> List[Event]:
-        pass       
