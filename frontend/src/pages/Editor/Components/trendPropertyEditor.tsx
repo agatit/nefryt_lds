@@ -1,7 +1,7 @@
 
 import * as React from "react"
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
-import { Trend, TrendDef, TrendParam, useListTrendDefsQuery, useListTrendParamsQuery, useUpdateTrendMutation } from "../../../store/trendApi";
+import { Trend, TrendDef, TrendParam, useCreateTrendMutation, useListTrendDefsQuery, useListTrendParamsQuery, useUpdateTrendMutation } from "../../../store/trendApi";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Checkbox, FormControl, FormControlLabel,  FormGroup,  FormHelperText,  FormLabel,  InputLabel,  MenuItem,  Slider,  Stack, Switch, TextField, Typography } from "@mui/material";
 import { RootState } from "../../../app/store";
 import { NodeState } from "../../../features/editor/nodeEditorSlice";
@@ -10,7 +10,6 @@ import { CollectionsBookmarkOutlined } from "@material-ui/icons";
 
 
  type Prop ={
-    activeElement: any;
     activeTrend : Trend;
 }
   
@@ -34,8 +33,9 @@ export const TrendPropertyEditor: React.FC<Prop> = (p) => {
     var tmp : string = p.activeTrend?.Color ? p.activeTrend?.Color:'#000';
     const [trendColor, setTrendColor] = React.useState(tmp);
 
-    const [updateTrend, { isLoading, isError, error, isSuccess }] =
-    useUpdateTrendMutation();
+    const [updateTrend, updatetrendresponse] = useUpdateTrendMutation();
+
+    const [createTrend, createTrendResponse] = useCreateTrendMutation();
 
     const saveTrend = (e: React.MouseEvent<HTMLElement>) => {
       console.log('DDDD');
@@ -58,7 +58,10 @@ export const TrendPropertyEditor: React.FC<Prop> = (p) => {
         console.log(tmptrend);
             
             if (trendID > 0){
-               updateTrend({trendId:trendID, trend: tmptrend});
+              const updateresp = updateTrend({trendId:trendID, trend: tmptrend});
+              
+            }else{
+                createTrend({trend: tmptrend})
             }
       }
     

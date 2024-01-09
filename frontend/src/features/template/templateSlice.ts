@@ -42,6 +42,7 @@ export const templateSlice = createSlice({
     .addMatcher((action) =>  action.type.endsWith('/rejected'),// && action.payload.status === "FETCH_ERROR",
     (state, action) => {
       if ((action.payload) && (action.payload.status) && (action.payload.status === "FETCH_ERROR")){ 
+       
       for (var x=0; x<state.displayed.length; x++){
         state.notifications = state.notifications.filter((notification: any) => notification.key!=state.displayed[x]);
       }
@@ -50,16 +51,19 @@ export const templateSlice = createSlice({
     }
     })
     .addMatcher((action) =>  action.type.endsWith('/rejected'),  (state, action) => {
-       if ((action.payload) && (action.payload.data) && (action.payload.data.code >=400) && (action.payload.data.code <500)){  
+   
+       if ((action.payload) && (action.payload.data) && ((action.payload.data.code >=400) && (action.payload.data.code <500)|| ((action.payload.data.status >=400) && (action.payload.data.status <500)))){  
+        
         for (var x=0; x<state.displayed.length; x++){
           state.notifications = state.notifications.filter((notification: any) => notification.key!=state.displayed[x]);
         }
-        state.notifications.push({message: 'Brak uprawnień do wykonania zadania!.', options:{variant:'warning'},
+        state.notifications.push({message: action.payload.data.detail? action.payload.data.detail : 'Brak uprawnień do wykonania zadania!.', options:{variant:'warning'},
         key: new Date().getTime() + Math.random()});
        }
     })
     .addMatcher((action) =>  action.type.endsWith('/rejected'),  (state, action) => {
       if ((action.payload) && (action.payload.data)&&(action.payload.data.code >=500) && (action.payload.data.code <600)){  
+       
        for (var x=0; x<state.displayed.length; x++){
          state.notifications = state.notifications.filter((notification: any) => notification.key!=state.displayed[x]);
        }

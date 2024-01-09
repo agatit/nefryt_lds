@@ -269,6 +269,44 @@ export const chartsSlice = createSlice({
         }
       });
 
+    },
+    setTrendList: (state, action) => {
+      var trd : Trend[] = action.payload;
+        var idx=0;
+        if (trd){
+        trd.forEach((element: Trend) => {
+        
+           var tmp : string =  element.Symbol? element.Symbol : element.ID? element.ID.toString():''; 
+           tmp += element.Unit? ' [' + element.Unit + ']' : '';
+           var marks = [];
+           marks.push({value:0, label:tmp});
+           marks.push({value:100, label:tmp});
+           marks.push({value: Math.round((100 - 0) / 2), label:Math.round((100 - 0) / 2).toLocaleString()+element.Unit});
+
+           var elm : ITrend = {
+             ...element,
+             selected: false,
+             axislabel: tmp,
+             trendname: '',
+             disabled: false,
+             autoscale: false,
+             scale: {
+               min: 0,
+               max: 100
+             },
+             marks: marks,
+             step: (100 - 0) / 100
+           };
+
+           state.chart.trends.push(elm);
+           
+           idx++;
+         });
+
+        }
+    },
+    setLoadingData: (state, action) => {
+      state.chart.is_loading_trends = action.payload;
     }
 
   },
@@ -279,7 +317,7 @@ export const chartsSlice = createSlice({
         //console.log('pending');
       })
       .addMatcher(trendApi.endpoints.listTrends.matchFulfilled, (state, action) => {
-        var trd : Trend[] = action.payload;
+       /* var trd : Trend[] = action.payload;
         var idx=0;
         trd.forEach((element: Trend) => {
         
@@ -309,7 +347,7 @@ export const chartsSlice = createSlice({
            
            idx++;
          });
-
+*/
       })
 
       .addMatcher(trendApi.endpoints.listTrends.matchRejected, (state, action) => {
@@ -320,7 +358,7 @@ export const chartsSlice = createSlice({
 
       .addMatcher(trendApi.endpoints.getTrendData.matchPending, (state) => {
         //console.log('pending');
-        state.chart.is_loading_trends = true;
+        /*state.chart.is_loading_trends = true;*/
       })
 
       .addMatcher(trendApi.endpoints.getTrendData.matchFulfilled, (state, action) => {
@@ -358,7 +396,7 @@ export const chartsSlice = createSlice({
            state.chart.data = dat;
            console.log(state.chart.data);
         }
-        state.chart.is_loading_trends = false;
+      /*  state.chart.is_loading_trends = false;*/
 
       })
 
@@ -373,7 +411,7 @@ export const chartsSlice = createSlice({
 export const { setHorizontalLine, setVerticalLine, toggleLiveMode, toggleZoomMode, toggleTooltip, toggleRightPanel, 
                setFromDate,setToDate, setOnlySelected, setTrendScale, setDateRange, setAutoscale,
                addSerie, removeSerie, setBrushRange, setTimer, setTimestampRange,
-               enableTrend, disableTrend } = chartsSlice.actions
+               enableTrend, disableTrend, setTrendList, setLoadingData } = chartsSlice.actions
 
 // The function below is called a thunk and allows us to perform async logic. It
 // can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This

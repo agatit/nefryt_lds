@@ -20,15 +20,10 @@ export const trendEditorSlice = createSlice({
     name: 'trendEditor',
     initialState,
     reducers: {
-      
-    },
-  
-    extraReducers: (builder) => {
-      builder
-      
-      .addMatcher(trendApi.endpoints.listTrendParams.matchFulfilled, (state, action) => {
+      setNodeTrendParams: (state, action) => {
         var trdParams : TrendParam[] = action.payload;
-        state.params = [];
+        state.params = state.params.filter(([param]: any) => param.TrendID != action.payload);
+        //state.params = [];
             var idx=0;
             if (trdParams){
               trdParams.forEach((element: TrendParam) => {
@@ -36,9 +31,21 @@ export const trendEditorSlice = createSlice({
                 idx++;
               });
             }
+      }
+    },
+  
+    extraReducers: (builder) => {
+      builder
+      
+      .addMatcher(trendApi.endpoints.listTrendParams.matchFulfilled, (state, action) => {
+       
       })
   
     }
 });
+
+
+export const { setNodeTrendParams } = trendEditorSlice.actions
+
 
 export default trendEditorSlice.reducer

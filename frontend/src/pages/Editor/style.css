@@ -96,6 +96,7 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
     margin-top: 10%;
   }
 
+
 .node.selected{
   border-color: red!important;
 
@@ -126,12 +127,23 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
   .sidepanel .MuiTypography-root{
     margin-left: 0px!important;
   }
- .sidepanel .MuiBox-root{
+
+  .trendedit-tabpanel div{
+    padding: 0!important;
+    text-align: center;
+  }
+  
+ /*.sidepanel .MuiBox-root{
   padding-right: 24px!important;
   padding-left: 0px!important;
- }
+ }*/
+ /*.sidepanel .MuiFormControl-root div{
+
+ }*/
   .sidepanel .MuiFormControl-root{
     margin-top: 5px;
+    margin-left: 0!important;
+    margin-right: 0;
   }
   
   .sidepanel a {
@@ -169,7 +181,7 @@ div.node .PRESS								{position: absolute; z-index: 100; cursor: pointer; backg
 
 .sidepanel .MuiInputBase-input{
   color:white;
-  padding:10px;
+  padding:10px!important;
 }
 
 #editor-menu label + .MuiInput-formControl {

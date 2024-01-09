@@ -1,18 +1,19 @@
 import { Accordion, AccordionDetails, AccordionSummary, Checkbox, FormControl, FormControlLabel,  FormGroup,  FormHelperText,  FormLabel,  InputLabel,  Slider,  Stack, Switch, TextField, Typography } from "@mui/material";
 import { Box, Tabs, Tab, withStyles, makeStyles, createTheme, MuiThemeProvider,  Button, Select, MenuItem, IconButton, Badge, Tooltip } from "@material-ui/core"
 
-import { Delete, ExpandMore } from "@material-ui/icons";
+import { AccountTreeRounded, Add, Delete, ExpandMore } from "@material-ui/icons";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import * as React from "react"
 import { Dispatch, useEffect, useState } from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../app/store";
 import { NodeDescription, NodeTypes, removeNode } from "../../../features/editor/editorSlice";
+import {setNodeTrendList } from "../../../features/editor/nodeEditorSlice";
 import { Node, useDeleteNodeByIdMutation, useUpdateNodeMutation } from "../../../store/nodeApi";
 import { EditorState, INode, TactiveElement } from "../type";
 import { PropertyEditorTab } from "./PropertyEditor"
-import { NodeState } from "../../../features/editor/nodeEditorSlice";
-import { Trend, TrendDef, useListTrendDefsQuery, useListTrendsQuery } from "../../../store/trendApi"
+import { NodeState, appendTrend } from "../../../features/editor/nodeEditorSlice";
+import { Trend, TrendDef, useListTrendDefsQuery, useListTrendsQuery, useDeleteTrendByIdMutation } from "../../../store/trendApi"
 import { Label } from "recharts";
 import { TabPanel } from "@mui/lab";
 import PropTypes from 'prop-types';
@@ -31,6 +32,15 @@ import { TrendParamsEditor } from "./trendParamsEditor";
    del_prop:{
       width:'auto'  ,
       float:"left" 
+    },
+    del_trend:{
+      width:'auto'  ,
+      float:"left",
+      color:'#0f5295'
+    },
+    add_prop:{
+      width:'auto'  ,
+      float:"right" 
     },
     margin: {
       margin: theme.spacing(1)
@@ -156,7 +166,12 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
   var filter_txt : string = 'NodeID eq ' + node_id; 
   var filter={$filter:filter_txt};
 
-   useListTrendsQuery(filter, {refetchOnMountOrArgChange : true});
+  const nodeTrendsQueryResult =  useListTrendsQuery(filter, {refetchOnMountOrArgChange : true});
+
+
+  React.useEffect(() => {
+    dispatch(setNodeTrendList(nodeTrendsQueryResult.data));
+  },[nodeTrendsQueryResult.data]);
 
    var filterTrdDef={};
    useListTrendDefsQuery(filterTrdDef, {refetchOnMountOrArgChange : true});
@@ -166,6 +181,8 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
   useUpdateNodeMutation();
 
   const [delNode, {}] = useDeleteNodeByIdMutation();
+
+  const [delTrend, {}] = useDeleteTrendByIdMutation();
   
   const handleSubmit  = (e: any ) => {
     
@@ -179,6 +196,19 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
     var tmpID : number = (p.activeElement.node as INode).NodeID? ((p.activeElement.node as INode).NodeID as number):0;
     delNode({nodeId:tmpID});
   }
+
+  const createTrend = (e: React.MouseEvent<HTMLElement>) => {
+    //var tmpID : number = (p.activeElement.node as INode).NodeID? ((p.activeElement.node as INode).NodeID as number):0;
+    //delNode({nodeId:tmpID});
+    dispatch(appendTrend());
+  }
+
+  const deleteTrend = (e: React.MouseEvent<HTMLElement>, id?:number) => {
+    if (id){
+      delTrend({trendId:id});
+    }
+  }
+
 
   const saveTrendData = (e: React.MouseEvent<HTMLElement>) => {
 
@@ -232,7 +262,7 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
     <React.Fragment>
       <MuiThemeProvider theme={theme}>
         <Tooltip title="Usuń węzeł">
-          <IconButton color="inherit" onClick={e => removeNode(e)} className={classes.del_prop}>          
+          <IconButton color="inherit" onClick={e => removeNode(e)} className={"white left small_btn"}>          
               <Delete />
           </IconButton>
         </Tooltip>
@@ -283,39 +313,49 @@ export const NodePropertyEditor: React.FC<Prop> = (p) => {
                 </FormControl>
                 <Button style={{marginTop:'30px'}} onClick={saveNode} variant="contained">Zapisz</Button>
                 
-                <FormLabel style={{marginTop:30}} component="legend">Lista trendów:</FormLabel>
+                <FormLabel style={{marginTop:30}} className={"center"} component="legend">Lista trendów
+                  <Tooltip title="Dodaj trend">
+                    <IconButton color="inherit" onClick={e => createTrend(e)} className={"white right small_btn"}>          
+                      <Add />
+                    </IconButton>
+                  </Tooltip>
+                </FormLabel>
                 <div style={{border: 'solid 1px white' , marginTop:3, maxHeight: 500, overflowY:'hidden', overflowX:'hidden'}}>
                 <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
                   
                   <FormGroup style={{ width:'410px',  }}>
-                    <div style={{ maxHeight: 530, overflowY:'auto', overflowX:'hidden', maxWidth:'410px'}}>
+                    <div style={{ maxHeight: 530, overflowY:'auto', overflowX:'hidden', maxWidth:'410px'}} className="slim_scroll slim_padding">
                       {reducer.trends.map((trend : Trend, index) => (
                       
-                        <Accordion key={"Accordion_" + index} expanded={expanded === "trd_" + (trend.ID as number).toLocaleString() ?? ''} onChange={handleTrendPanelExpanded("trd_" + (trend.ID as number).toLocaleString())}>
+                        <Accordion key={"Accordion_" + index} expanded={expanded === "trd_" + (trend.ID? trend.ID : 0  as number).toLocaleString() ?? ''} onChange={handleTrendPanelExpanded("trd_" + (trend.ID? trend.ID : 0 as number).toLocaleString())}>
                           <AccordionSummary key={"AccordionSummary_" + index}
                             expandIcon={<ExpandMore className="changeAccordionState" />}
-                            aria-controls={"panel_trd_" + (trend.ID as number).toLocaleString() + "-content"}
-                            id={"panel_trd_" + (trend.ID as number).toLocaleString() + "-header"}
+                            aria-controls={"panel_trd_" + (trend.ID?trend.ID : 0 as number).toLocaleString() + "-content"}
+                            id={"panel_trd_" + (trend.ID? trend.ID : 0 as number).toLocaleString() + "-header"}
                             className={"changeAccordionState"}
                           >
-                            {trend.Name}
+                          <Tooltip title="Usuń trend">
+                          <IconButton color="inherit" id={trend.ID?.toLocaleString()} onClick={e => deleteTrend(e, trend.ID)} className={"blue right small_btn"}>          
+                            <Delete />
+                          </IconButton>
+                        </Tooltip> {<div className="vert_content"><span className="vert_element">{trend.Name}</span></div>}
                           </AccordionSummary>
-                          <AccordionDetails key={"AccordionDetails_" + index}>
+                          <AccordionDetails key={"AccordionDetails_" + index} className="block">
                             <Typography component="span" key={"TypographyDetails_" + index}  width="100%" marginLeft={4}>
                             <Box  key={'BoxTrend' + trend.ID} sx={{ borderBottom: 1, borderColor: 'divider' }}>
                               <Tabs key={'tabsTrend_' + trend.ID} value={trdTabIndex} onChange={handleChangeTabIndex} aria-label="basic tabs example">
-                                <Tab key={'tabTrend0_' + trend.ID} label="Dane" {...a11yProps(0)} />
+                                <Tab key={'tabTrend0_' + trend.ID} label="Dane" {...a11yProps(0)} className="trendedit-tabpanel" />
                                 <Tab  key={'tabTrend1_' + trend.ID} label="Parametry" {...a11yProps(1)} />
 
                               </Tabs>
                             </Box>
-                            <TabPanel key={'TabPanel0Trend' + trend.ID} value={trdTabIndex} index={0}>
-                              <TrendPropertyEditor key={'terndEditor' + trend.ID} activeTrend={trend} activeElement={undefined}></TrendPropertyEditor>
+                            <TabPanel key={'TabPanel0Trend' + trend.ID} value={trdTabIndex} index={0} className="trendedit-tabpanel">
+                              <TrendPropertyEditor key={'terndEditor' + trend.ID} activeTrend={trend}></TrendPropertyEditor>
                              
                             </TabPanel>
-                            <TabPanel  key={'TabPanel1Trend' + trend.ID} value={trdTabIndex} index={1}>
+                            <TabPanel  key={'TabPanel1Trend' + trend.ID?trend.ID:0} value={trdTabIndex} index={1} className="trendedit-tabpanel">
                               <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >
-                                  <TrendParamsEditor key={'terndEditor' + trend.ID} activeTrend={trend}></TrendParamsEditor>
+                                  <TrendParamsEditor key={'terndParamEditor' + trend.ID?trend.ID:0} trendID={trend.ID?trend.ID:0}></TrendParamsEditor>
                               </FormControl>
                             </TabPanel>
                                                   

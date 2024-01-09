@@ -65,8 +65,10 @@ export const editorSlice = createSlice({
       state.activeElement.node = action.payload;
       state.activeElement.LinkID = -1;
       state.activeElement.state = NEW_NODE;
-    }
+    },
+   
   },
+  
 
   extraReducers: (builder) => {
     builder

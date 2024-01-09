@@ -7,17 +7,19 @@ import { RootState } from "../../../app/store";
 import { NodeState } from "../../../features/editor/nodeEditorSlice";
 import { Color, ColorPicker, createColor } from "material-ui-color";
 import { CollectionsBookmarkOutlined } from "@material-ui/icons";
-import { TrendParamsState } from "../../../features/editor/trendEditorSlice";
+import { setNodeTrendParams, TrendParamsState } from "../../../features/editor/trendEditorSlice";
+import { useState } from "react";
 
 
  type Prop ={
-    activeTrend : Trend;
+    trendID : number;
 }
   
 
 
 export const TrendParamsEditor: React.FC<Prop> = (p) => {
     const dispatch: React.Dispatch<any> = useDispatch()
+    const [param, setParam] = useState<TrendParam[]>([])
 
     const trendEditor: TrendParamsState = useSelector(
         (state: RootState) => state.trendEditor,
@@ -28,19 +30,29 @@ export const TrendParamsEditor: React.FC<Prop> = (p) => {
 
     }
 
-    var trendID = p.activeTrend? p.activeTrend.ID ? p.activeTrend.ID  : -1 : -1;
     //var filter_txt : string = 'TrendID eq ' + trendID; 
     //var filter={$filter:filter_txt};
-     useListTrendParamsQuery({trendId : trendID}, {refetchOnMountOrArgChange : true});
+    const useListTrendParamsresponse = useListTrendParamsQuery({trendId : p.trendID}, {refetchOnMountOrArgChange : true});
    
+
+    React.useEffect(() => {
+        setParam(useListTrendParamsresponse.data as TrendParam[])  
+        //params = (useListTrendParamsresponse.data as TrendParam[])
+        //console.log(params);
+        //dispatch(setNodeTrendParams(useListTrendParamsresponse.data));
+      },[useListTrendParamsresponse.data]);
+
+     console.log(param);
     return (
         <React.Fragment>
              
             <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" >     
-            {trendEditor.params.map((trend : TrendParam, index) => (      
+            {param?.map((trend : TrendParam, index) => ( 
+                     
                 <TextField
                     required
-                    id="trend_name"
+                    key={trend.TrendParamDefID}
+                    id="param_name"
                     label="Nazwa"
                     value={''}
                     onChange={(e) => {

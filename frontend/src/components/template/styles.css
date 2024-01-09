@@ -19,6 +19,49 @@ a {cursor: pointer}
   /*display: flex;*/
 }
 
+/*.block{
+  display:block!important;
+}*/
+
+.slim_scroll::-webkit-scrollbar { width: 6px; height: 100%; background-color: gray; }
+
+.slim_padding{
+  padding:5px!important;
+}
+
+.vert_content{
+  display: table!important;
+}
+
+.vert_element{
+  display:table-cell;
+  vertical-align:middle;
+}
+
+.blue{
+  color: #0f5295!important;
+}
+.white{
+  color: white!important
+}
+
+.right{
+  float: right!important
+}
+
+.left{
+  float: left!important
+}
+
+
+.small_btn{
+  padding: 4px!important;
+}
+
+.center{
+  text-align: center;
+}
+
 .none-user-select{
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
@@ -96,9 +139,9 @@ body {
   color: white!important;
 }
 
-.MuiIconButton-root{
+/*.MuiIconButton-root{
   color: white!important;
-}
+}*/
 
 .MuiOutlinedInput-root.Mui-error {
   color: white!important;

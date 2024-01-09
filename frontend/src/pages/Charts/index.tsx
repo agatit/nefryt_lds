@@ -1,10 +1,11 @@
 import { Button } from "@material-ui/core";
 import { Dispatch } from "@reduxjs/toolkit";
 import * as React from "react";
+
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import { Layout } from "../../components/template/Layout";
-import { setBrushRange, setTimer, setTimestampRange, toggleRightPanel } from "../../features/charts/chartsSlice";
+import { setBrushRange, setTimer, setTimestampRange, toggleRightPanel, setTrendList, setLoadingData } from "../../features/charts/chartsSlice";
 import { ChartsState, ITrend, ITrendData } from "../../features/charts/types";
 import { useGetTrendDataQuery, useListTrendsQuery } from "../../store/trendApi";
 import { ChartsContent } from "./content";
@@ -15,7 +16,10 @@ import "./style.css";
 
 const ChartsPage: React.FC = () => {
   var filter = {}
-  useListTrendsQuery(filter);
+  const useListTrendsQueryResult = useListTrendsQuery(filter);
+
+
+ 
 
   const dispatch :Dispatch = useDispatch();
 
@@ -27,6 +31,14 @@ const ChartsPage: React.FC = () => {
   const handleToggleRightPanel  = (e: React.MouseEvent<HTMLElement>) => {
     dispatch(toggleRightPanel());
   }
+
+  //if (useListTrendsQueryResult.isSuccess && useListTrendsQueryResult.data){
+    
+  //}
+
+  React.useEffect(() => {
+    dispatch(setTrendList(useListTrendsQueryResult.data));
+  },[useListTrendsQueryResult.data]);
 
   var trdList :number[] = [];
   var trends = reducer.chart.trends.map((obj: any) => ({...obj}));
@@ -43,8 +55,20 @@ const ChartsPage: React.FC = () => {
 
   const SAMPLES_COUNT = reducer.chart.mode.live.active ? 1000 : 4000;
 
-  useGetTrendDataQuery({trendIdList: trdList, begin: reducer.chart.currRange.from, end:reducer.chart.currRange.to, samples :  SAMPLES_COUNT});
+  const seGetTrendDataResult = useGetTrendDataQuery({trendIdList: trdList.length > 0 ? trdList : [0] , begin: reducer.chart.currRange.from, end:reducer.chart.currRange.to, samples :  SAMPLES_COUNT});
     
+
+  React.useEffect(() => {
+    dispatch(setLoadingData(seGetTrendDataResult.isLoading))
+  }, [seGetTrendDataResult.isLoading])
+
+
+
+  React.useEffect(() => {
+    
+  }, [seGetTrendDataResult.data])
+
+
 
   React.useEffect(() => {
     var interval: NodeJS.Timer | undefined;

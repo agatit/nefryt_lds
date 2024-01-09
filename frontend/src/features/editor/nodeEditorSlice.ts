@@ -25,13 +25,7 @@ export const nodeEditorSlice = createSlice({
     name: 'nodeEditor',
     initialState,
     reducers: {
-      
-    },
-  
-    extraReducers: (builder) => {
-      builder
-      .addMatcher(trendApi.endpoints.listTrends.matchFulfilled, (state, action) => {
-        
+      setNodeTrendList:(state, action) => {
         var trd : Trend[] = action.payload;
         state.trends = [];
             var idx=0;
@@ -41,12 +35,45 @@ export const nodeEditorSlice = createSlice({
                 idx++;
               });
             }
-
+      },
+      updateTrend:(state, action) => {
+       
+      },
+      appendTrend:(state) =>{
+        var tmp : Trend = {
+          TrendDefID: '',
+          RawMin: 0,
+          RawMax: 0,
+          ScaledMin: 0,
+          ScaledMax: 0
+        };
+        state.trends.push(tmp)
+      }
+    },
+  
+    extraReducers: (builder) => {
+      builder
+      .addMatcher(trendApi.endpoints.listTrends.matchFulfilled, (state, action) => {
+        
+       /* var trd : Trend[] = action.payload;
+        state.trends = [];
+            var idx=0;
+            if (trd){
+              trd.forEach((element: Trend) => {
+                state.trends.push(element);
+                idx++;
+              });
+            }
+        */
       })
       .addMatcher(trendApi.endpoints.updateTrend.matchRejected, (state, action) => {
           console.log('AAAA');
           console.log(action);
       })
+      .addMatcher(trendApi.endpoints.createTrend.matchRejected, (state, action) => {
+        console.log('AAAA');
+        console.log(action);
+    })
       .addMatcher(trendApi.endpoints.updateTrend.matchFulfilled, (state, action) => {
         console.log('kkkkk');
         console.log(state.trends);
@@ -84,5 +111,8 @@ export const nodeEditorSlice = createSlice({
   
     }
 });
+
+export const { setNodeTrendList, appendTrend } = nodeEditorSlice.actions
+
 
 export default nodeEditorSlice.reducer
