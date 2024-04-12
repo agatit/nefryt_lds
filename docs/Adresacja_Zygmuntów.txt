@@ -1,0 +1,82 @@
+Gate 192.168.18.1/24
+
+Komputer - 192.168.18.11/24
+
+PLC 1/1 - 192.168.18.31/24
+PLC 1/2 - 192.168.18.32/24 (NOE)
+Falownik - 192.168.18.33/24
+
+Kamera - 192.168.18.51/24
+
+
+Oznbaczenia
+
+Zasuwy zbiornikowe
+XV1 - ZB A wyj. (ssawna)
+XV2 - ZB A wej. (t³oczna)
+XV3 - ZB B wyj. (ssawna)
+XV4 - ZB B wej. (t³oczna)
+
+Zasuwy trasowe
+XV11 - stacja 1
+XV10 - stacja 2
+XV9 - stacja 3
+XV8 - stacja 4
+
+Zasuwy wycieków
+XV17 - odc. 1-2 3.61m
+XV16 - odc. 1-2 186.81m
+
+XV15 - odc. 2-3 597.41m
+XV14 - odc. 2-3 804.91m
+
+XV13 - odc. 3-4 1208.71m
+XV12 - odc. 3-4 1427.96m
+
+
+Znaczniki (m)
+0 - œrodek dolnej rury
+3.61
+186.81
+392.41
+597.41
+(797.41) - niezidentyfikowany
+804.91
+1006.91
+1208.71
+1427.96
+
+
+Pozycje na rurociagu (od pocz¹tku):
+- Zbiornik A
+- Zasuwa zb. XV1
+- Trójnik
+- Zbiornik B
+- Zasuwa zb. XV3
+- Pompa
+- Przep³ywomierz FT1
+- Zas. pocz¹tkowa XV11
+- Pomiar PT1
+   3.71	- Wyciek XV17
+ 186.91	- Wyciek XV16
+- Pomiar PT2
+- Zas. trasowa XV10
+ 597.51	- Wyciek XV15
+ 805.01	-  Wyciek XV14
+- Pomiar PT3
+- Zas. trasowa XV9
+1208.81	- Wyciek XV13
+1428.06	- Wyciek XV12
+- Pomiar PT4
+- Zas. koñcowa XV8
+- Prze³ywomierz FT2
+- Zasuwa zb. XV4
+- Zbiornik B
+- Trójnik
+- Zasuwa zb. XV2
+- Zbiornik A
+
+
+
+
+

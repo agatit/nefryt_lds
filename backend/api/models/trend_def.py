@@ -17,41 +17,26 @@ class TrendDef(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, name=None, time_exponent=None, format=None, si_unit_tid=None):  # noqa: E501
+    def __init__(self, id=None, name=None):  # noqa: E501
         """TrendDef - a model defined in OpenAPI
 
         :param id: The id of this TrendDef.  # noqa: E501
-        :type id: int
+        :type id: str
         :param name: The name of this TrendDef.  # noqa: E501
         :type name: str
-        :param time_exponent: The time_exponent of this TrendDef.  # noqa: E501
-        :type time_exponent: int
-        :param format: The format of this TrendDef.  # noqa: E501
-        :type format: str
-        :param si_unit_tid: The si_unit_tid of this TrendDef.  # noqa: E501
-        :type si_unit_tid: str
         """
         self.openapi_types = {
-            'id': int,
-            'name': str,
-            'time_exponent': int,
-            'format': str,
-            'si_unit_tid': str
+            'id': str,
+            'name': str
         }
 
         self.attribute_map = {
             'id': 'ID',
-            'name': 'Name',
-            'time_exponent': 'TimeExponent',
-            'format': 'Format',
-            'si_unit_tid': 'SIUnitTID'
+            'name': 'Name'
         }
 
         self._id = id
         self._name = name
-        self._time_exponent = time_exponent
-        self._format = format
-        self._si_unit_tid = si_unit_tid
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrendDef':
@@ -71,7 +56,7 @@ class TrendDef(Model):
         none  # noqa: E501
 
         :return: The id of this TrendDef.
-        :rtype: int
+        :rtype: str
         """
         return self._id
 
@@ -82,7 +67,7 @@ class TrendDef(Model):
         none  # noqa: E501
 
         :param id: The id of this TrendDef.
-        :type id: int
+        :type id: str
         """
         if id is None:
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
@@ -115,82 +100,3 @@ class TrendDef(Model):
             raise ValueError("Invalid value for `name`, must be a follow pattern or equal to `/^.{0,30}/`")  # noqa: E501
 
         self._name = name
-
-    @property
-    def time_exponent(self):
-        """Gets the time_exponent of this TrendDef.
-
-        none  # noqa: E501
-
-        :return: The time_exponent of this TrendDef.
-        :rtype: int
-        """
-        return self._time_exponent
-
-    @time_exponent.setter
-    def time_exponent(self, time_exponent):
-        """Sets the time_exponent of this TrendDef.
-
-        none  # noqa: E501
-
-        :param time_exponent: The time_exponent of this TrendDef.
-        :type time_exponent: int
-        """
-        if time_exponent is None:
-            raise ValueError("Invalid value for `time_exponent`, must not be `None`")  # noqa: E501
-
-        self._time_exponent = time_exponent
-
-    @property
-    def format(self):
-        """Gets the format of this TrendDef.
-
-        none  # noqa: E501
-
-        :return: The format of this TrendDef.
-        :rtype: str
-        """
-        return self._format
-
-    @format.setter
-    def format(self, format):
-        """Sets the format of this TrendDef.
-
-        none  # noqa: E501
-
-        :param format: The format of this TrendDef.
-        :type format: str
-        """
-        if format is None:
-            raise ValueError("Invalid value for `format`, must not be `None`")  # noqa: E501
-        if format is not None and not re.search(r'^.{0,20}', format):  # noqa: E501
-            raise ValueError("Invalid value for `format`, must be a follow pattern or equal to `/^.{0,20}/`")  # noqa: E501
-
-        self._format = format
-
-    @property
-    def si_unit_tid(self):
-        """Gets the si_unit_tid of this TrendDef.
-
-        none  # noqa: E501
-
-        :return: The si_unit_tid of this TrendDef.
-        :rtype: str
-        """
-        return self._si_unit_tid
-
-    @si_unit_tid.setter
-    def si_unit_tid(self, si_unit_tid):
-        """Sets the si_unit_tid of this TrendDef.
-
-        none  # noqa: E501
-
-        :param si_unit_tid: The si_unit_tid of this TrendDef.
-        :type si_unit_tid: str
-        """
-        if si_unit_tid is None:
-            raise ValueError("Invalid value for `si_unit_tid`, must not be `None`")  # noqa: E501
-        if si_unit_tid is not None and not re.search(r'^.{0,8}', si_unit_tid):  # noqa: E501
-            raise ValueError("Invalid value for `si_unit_tid`, must be a follow pattern or equal to `/^.{0,8}/`")  # noqa: E501
-
-        self._si_unit_tid = si_unit_tid

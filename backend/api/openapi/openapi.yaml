@@ -8,7 +8,43 @@ servers:
   url: http://192.168.1.231:8080/
 - description: Developer's local server
   url: http://localhost:8080/
+security:
+- bearerAuth: []
 paths:
+  /auth/login:
+    post:
+      operationId: auth_login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginPermissions'
+          description: OK
+      security: []
+      summary: Authentication Login
+      tags:
+      - auth
+      x-openapi-router-controller: api.controllers.auth_controller
+  /auth/refresh:
+    post:
+      operationId: auth_refresh
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginPermissions'
+          description: OK
+      summary: Authentication token refresh
+      tags:
+      - auth
+      x-openapi-router-controller: api.controllers.auth_controller
   /event:
     get:
       description: List all events
@@ -96,6 +132,15 @@ paths:
     get:
       description: List all links
       operationId: list_links
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -221,6 +266,15 @@ paths:
     get:
       description: List all nodes
       operationId: list_nodes
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -265,7 +319,7 @@ paths:
       tags:
       - nodes
       x-openapi-router-controller: api.controllers.nodes_controller
-  /node/{linkId}:
+  /node/{nodeId}:
     delete:
       description: Deletes specific node
       operationId: delete_node_by_id
@@ -362,6 +416,15 @@ paths:
     get:
       description: List all pipelines
       operationId: list_pipelines
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -504,6 +567,14 @@ paths:
       description: List all methods
       operationId: list_methods
       parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       - description: The id of the pipeline to retrieve
         explode: false
         in: path
@@ -780,6 +851,14 @@ paths:
       description: List all  pipeline params
       operationId: list_pipeline_params
       parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       - description: The id of the pipeline to retrieve
         explode: false
         in: path
@@ -807,7 +886,7 @@ paths:
       tags:
       - pipelines
       x-openapi-router-controller: api.controllers.pipelines_controller
-  /pipeline/{pipelineId}/param/{methodParamDefId}:
+  /pipeline/{pipelineId}/param/{pipelineParamDefId}:
     put:
       description: Put  pipeline params
       operationId: update_pipeline_param
@@ -856,6 +935,15 @@ paths:
     get:
       description: List all trends
       operationId: list_trends
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -1106,6 +1194,14 @@ paths:
       description: List all trend params
       operationId: list_trend_params
       parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       - description: The id of the trend to retrieve
         explode: false
         in: path
@@ -1217,6 +1313,15 @@ paths:
     get:
       description: List all trend defs
       operationId: list_trend_defs
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -1236,6 +1341,140 @@ paths:
       tags:
       - trends
       x-openapi-router-controller: api.controllers.trends_controller
+  /unit:
+    get:
+      description: List all units
+      operationId: list_units
+      parameters:
+      - description: Query filter in OData standard
+        explode: true
+        in: query
+        name: $filter
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Unit'
+                type: array
+          description: A array of units
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List units
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
+    post:
+      description: Create a units
+      operationId: create_unit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Unit'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unit'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create units
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
+  /unit/{unitId}:
+    delete:
+      description: Deletes specific unit
+      operationId: delete_unit_by_id
+      parameters: []
+      responses:
+        "204":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Information'
+          description: Deleted
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes unit
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
+    get:
+      description: Info for specific unit
+      operationId: get_unit_by_id
+      parameters:
+      - description: The id of the unit to retrieve
+        explode: false
+        in: path
+        name: unitId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unit'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets unit details
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
+    put:
+      description: Updates a units
+      operationId: update_unit
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Unit'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unit'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Updates units
+      tags:
+      - units
+      x-openapi-router-controller: api.controllers.units_controller
 components:
   parameters:
     eventId:
@@ -1310,6 +1549,15 @@ components:
       schema:
         type: integer
       style: simple
+    filter:
+      description: Query filter in OData standard
+      explode: true
+      in: query
+      name: $filter
+      required: false
+      schema:
+        type: string
+      style: form
   responses:
     UnexpectedError:
       content:
@@ -1341,6 +1589,12 @@ components:
           schema:
             $ref: '#/components/schemas/Information'
       description: Deleted
+    Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Unauthorized'
+      description: Unauthorized
   schemas:
     Link:
       example:
@@ -1368,8 +1622,6 @@ components:
           description: none
           title: Length
           type: number
-      required:
-      - ID
       title: Link
       type: object
     Method:
@@ -1401,7 +1653,6 @@ components:
           title: Name
           type: string
       required:
-      - ID
       - MethodDefID
       - PipelineID
       title: Method
@@ -1418,8 +1669,6 @@ components:
           description: none
           pattern: ^.{0,30}
           type: string
-      required:
-      - ID
       type: object
     MethodParam:
       example:
@@ -1486,8 +1735,6 @@ components:
           description: none
           pattern: ^.{0,6}
           type: string
-      required:
-      - ID
       type: object
     Node:
       example:
@@ -1524,7 +1771,6 @@ components:
         EditorParams:
           $ref: '#/components/schemas/EditorNode'
       required:
-      - ID
       - Type
       title: Node
       type: object
@@ -1557,8 +1803,6 @@ components:
           type: number
         EditorParams:
           $ref: '#/components/schemas/EditorPipeline'
-      required:
-      - ID
       title: Pipeline
       type: object
     PipelineParam:
@@ -1619,8 +1863,6 @@ components:
           description: none
           pattern: ^.{0,6}
           type: string
-      required:
-      - ID
       type: object
     PipelineNode:
       properties:
@@ -1637,24 +1879,24 @@ components:
           description: none
           type: boolean
       required:
-      - ID
       - NodeID
       type: object
     Trend:
       example:
-        ScaledMax: 2.3021358869347655
+        ScaledMax: 7.061401241503109
         Symbol: Symbol
         Color: Color
         RawMax: 5
         TrendDefID: TrendDefID
         Unit: Unit
         Name: Name
-        RawMin: 1
-        ScaledMin: 5.637376656633329
+        RawMin: 5
+        ScaledMin: 2.3021358869347655
         TrendGroupID: 0
         Format: Format
+        NodeID: 6
         ID: 0
-        TimeExponent: 6
+        TimeExponent: 1
       properties:
         ID:
           description: none
@@ -1676,6 +1918,10 @@ components:
           description: none
           title: TrendDefID
           type: string
+        NodeID:
+          description: none
+          title: NodeID
+          type: integer
         TimeExponent:
           description: none
           title: TimeExponent
@@ -1709,7 +1955,6 @@ components:
           title: ScaledMax
           type: number
       required:
-      - ID
       - RawMax
       - RawMin
       - ScaledMax
@@ -1735,44 +1980,24 @@ components:
       type: object
     TrendDef:
       example:
-        Format: Format
-        ID: 0
-        TimeExponent: 0
+        ID: "0"
         Name: Name
-        SIUnitTID: SIUnitTID
       properties:
         ID:
           description: none
-          example: 0
+          example: "0"
           nullable: false
           readOnly: true
           title: ID
-          type: integer
+          type: string
         Name:
           description: none
           pattern: ^.{0,30}
           title: Name
           type: string
-        TimeExponent:
-          description: none
-          title: TimeExponent
-          type: integer
-        Format:
-          description: none
-          pattern: ^.{0,20}
-          title: Format
-          type: string
-        SIUnitTID:
-          description: none
-          pattern: ^.{0,8}
-          title: SIUnitTID
-          type: string
       required:
-      - Format
       - ID
       - Name
-      - SIUnitTID
-      - TimeExponent
       title: TrendDef
       type: object
     TrendGroup:
@@ -1792,7 +2017,6 @@ components:
           type: boolean
       required:
       - AnalisisOnly
-      - ID
       - Name
       type: object
     TrendParam:
@@ -1853,7 +2077,6 @@ components:
           pattern: ^.{0,6}
           type: string
       required:
-      - ID
       - TrendDefID
       type: object
     Event:
@@ -1923,9 +2146,33 @@ components:
       required:
       - BeginDate
       - EventDefID
-      - ID
       - MethodID
       title: Event
+      type: object
+    Unit:
+      example:
+        BaseID: BaseID
+        Symbol: Symbol
+        Multiplier: 0.8008281904610115
+        ID: ID
+        Name: Name
+      properties:
+        ID:
+          title: ID
+          type: string
+        Name:
+          title: Name
+          type: string
+        Symbol:
+          title: Symbol
+          type: string
+        BaseID:
+          title: BaseID
+          type: string
+        Multiplier:
+          title: Multiplier
+          type: number
+      title: Unit
       type: object
     EditorPipeline:
       example:
@@ -2023,3 +2270,125 @@ components:
       - status
       title: Information
       type: object
+    Login:
+      example:
+        password: password
+        deviceId: deviceId
+        deviceName: deviceName
+        username: username
+      properties:
+        username:
+          minLength: 1
+          title: username
+          type: string
+        password:
+          minLength: 1
+          title: password
+          type: string
+        deviceId:
+          minLength: 1
+          title: deviceId
+          type: string
+        deviceName:
+          minLength: 1
+          title: deviceName
+          type: string
+      required:
+      - password
+      - username
+      title: Login
+      type: object
+      x-examples:
+        example-1:
+          username: JohnDoe
+          password: _hashed_password_here_
+          deviceId: ad49afd9-ec38-4716-b93f-416bd8c0c684
+          deviceName: model
+    LoginPermissions:
+      example:
+        refreshTokenExpiration: refreshTokenExpiration
+        success: true
+        permissions:
+        - key: '{}'
+        - key: '{}'
+        username: username
+        token: token
+        refreshToken: refreshToken
+      properties:
+        username:
+          minLength: 1
+          title: username
+          type: string
+        success:
+          title: success
+          type: boolean
+        token:
+          minLength: 1
+          title: token
+          type: string
+        refreshToken:
+          minLength: 1
+          title: refreshToken
+          type: string
+        refreshTokenExpiration:
+          minLength: 1
+          title: refreshTokenExpiration
+          type: string
+        permissions:
+          items:
+            additionalProperties: true
+            type: object
+          title: permissions
+          type: array
+      required:
+      - refreshToken
+      - refreshTokenExpiration
+      - token
+      title: LoginPermissions
+      type: object
+      x-examples:
+        example-1:
+          username: JohnDoe
+          success: true
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          refreshTokenExpiration: 2022-03-30T23:59:59.000Z
+          permissions:
+          - TRENDS
+          - ANALYTICS
+          - ADMIN
+    Unauthorized:
+      example:
+        error: Unauthorised
+        status: 401
+        timestamp: 2020-10-29T13:08:16.235Z
+        path: /method.123
+        message: REQUEST_UNAUTHORISED
+        traceId: "1234567890"
+      properties:
+        error:
+          type: string
+        status:
+          format: int32
+          type: integer
+        timestamp:
+          type: string
+        path:
+          type: string
+        message:
+          type: string
+        traceId:
+          type: string
+      required:
+      - error
+      - path
+      - status
+      - timestamp
+      title: Unauthorized
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+      x-bearerInfoFunc: api.controllers.security_controller.decode_token

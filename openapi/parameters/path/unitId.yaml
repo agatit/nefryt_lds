@@ -1,0 +1,6 @@
+name: unitId
+in: path
+required: true
+description: The id of the unit to retrieve
+schema:
+  type: string

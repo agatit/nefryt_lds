@@ -1,4 +1,4 @@
 .vscode
 .vscode/*
 .openapi-generator
-node_modules
+electron

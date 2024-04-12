@@ -4,13 +4,11 @@ import { connect, useDispatch } from "react-redux"
 import { useSelector, shallowEqual } from "react-redux"
 import { actionTypes, Field, reduxForm, SubmissionError, WrappedFieldProps } from 'redux-form';
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
-import { cancelNodeAction, newNode, saveNode } from "../../actions/editor/actions";
-import { RootState } from "../..";
-import {EDITOR_AREA_SETTINGS, NEW_NODE, NodeType as NodeType}  from "../../actions/editor/actionType";
-import { INode, IPipelinesArea } from "./type";
+import {  IPipelinesArea } from "./type";
 import { compose } from "@reduxjs/toolkit";
 import { Area } from "recharts";
 import {reset} from 'redux-form';
+import { RootState } from "../../app/store";
 
 
   /*const renderField = () => (
@@ -33,22 +31,23 @@ import {reset} from 'redux-form';
 const EditorAreaSettings: React.FC<p> = (a: p) => {
   
   const area: IPipelinesArea = useSelector(
-    (state: RootState) => state.pipelineEditorReducer.area ,
+    (state: RootState) => state.editor.area ,
     shallowEqual
   )
 
   const dispatch: Dispatch<any> = useDispatch()
-  const isOpen: boolean = useSelector(
-    (state: RootState) => state.pipelineEditorReducer.action.type == EDITOR_AREA_SETTINGS,
+ /* const isOpen: boolean = useSelector(
+    (state: RootState) => state.editor.action.type == EDITOR_AREA_SETTINGS,
     shallowEqual
 )
-
+*/
+const isOpen=false;
 
 
 
 const handleCancel  = (e: React.MouseEvent<HTMLElement>) => {
   dispatch(reset('EditorAreaSettings'));  // requires form name
-  dispatch(cancelNodeAction());
+ // dispatch(cancelNodeAction());
 }
 
 
@@ -194,10 +193,10 @@ var Export = reduxForm({ form: 'EditorAreaSettings', validate, enableReinitializ
 export default connect(
     (state : RootState) => ({
       initialValues: {
-        areaWidth: state.pipelineEditorReducer.area.Width,
-        areaScaleWidth: state.pipelineEditorReducer.area.ScaleWidth,
-        areaHeight: state.pipelineEditorReducer.area.Height,
-        areaScaleHeight: state.pipelineEditorReducer.area.ScaleHeight
+        areaWidth: state.editor.area.Width,
+        areaScaleWidth: state.editor.area.ScaleWidth,
+        areaHeight: state.editor.area.Height,
+        areaScaleHeight: state.editor.area.ScaleHeight
       } // pull initial values from account reducer
     })
 )(Export);

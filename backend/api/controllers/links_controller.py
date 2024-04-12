@@ -7,12 +7,14 @@ from api.models.information import Information  # noqa: E501
 from api.models.link import Link  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, delete
+from odata_query.sqlalchemy import apply_odata_query
+from sqlalchemy import select, delete
 from ..db import session
 from database.models import lds
+from .security_controller import check_permissions
 
 
-def create_link(link=None):  # noqa: E501
+def create_link(link=None, token_info={}):  # noqa: E501
     """Create links
 
     Create a links # noqa: E501
@@ -24,6 +26,9 @@ def create_link(link=None):  # noqa: E501
     """
 
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_link = Link.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -43,7 +48,7 @@ def create_link(link=None):  # noqa: E501
         error: Error = Error(message=str(e), code=500)
         return error, 500        
 
-def update_link(link_id, link=None):  # noqa: E501
+def update_link(link_id, link=None, token_info={}):  # noqa: E501
     """Create links
 
     Create a links # noqa: E501
@@ -55,6 +60,9 @@ def update_link(link_id, link=None):  # noqa: E501
     """
 
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_link = Link.from_dict(connexion.request.get_json())  # noqa: E501
         else:
@@ -76,7 +84,7 @@ def update_link(link_id, link=None):  # noqa: E501
     except Exception as e:
         return Error(message=str(e), code=500), 500  
 
-def delete_link_by_id(link_id):  # noqa: E501
+def delete_link_by_id(link_id, token_info):  # noqa: E501
     """Detail link
 
     Delete specific link # noqa: E501
@@ -86,7 +94,10 @@ def delete_link_by_id(link_id):  # noqa: E501
 
     :rtype: Information
     """
-    try:        
+    try:     
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403        
+
         db_link = session.get(lds.Link, link_id)
         if db_link is None:
             return Error(message="Not Found", code=404), 404
@@ -125,7 +136,7 @@ def get_link_by_id(link_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def list_links():  # noqa: E501
+def list_links(token_info, filter=None, filter_=None):  # noqa: E501
     """List links
 
     List all links # noqa: E501
@@ -134,11 +145,10 @@ def list_links():  # noqa: E501
     :rtype: List[Link]
     """
     try:
-        links = session.execute(
-            select([lds.Link])
-        )
-
-        print(links)
+        stmt = select([lds.Link])
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)        
+        links = session.execute(stmt)
 
         api_links = []
         for link, in links:
@@ -148,7 +158,6 @@ def list_links():  # noqa: E501
             api_link.end_node_id = link.EndNodeID
             api_link.length = link.Length            
             api_links.append(api_link)        
-
 
         return api_links, 200
 

@@ -9,6 +9,8 @@ from api.models.error import Error
 from api.models.event import Event
 from api.models.information import Information
 from api.models.link import Link
+from api.models.login import Login
+from api.models.login_permissions import LoginPermissions
 from api.models.method import Method
 from api.models.method_def import MethodDef
 from api.models.method_param import MethodParam
@@ -24,3 +26,5 @@ from api.models.trend_def import TrendDef
 from api.models.trend_group import TrendGroup
 from api.models.trend_param import TrendParam
 from api.models.trend_param_def import TrendParamDef
+from api.models.unauthorized import Unauthorized
+from api.models.unit import Unit

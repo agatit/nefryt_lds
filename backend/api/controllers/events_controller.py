@@ -11,8 +11,9 @@ from api import util
 from sqlalchemy import alias, select, delete, and_
 from ..db import session
 from database.models import lds
+from .security_controller import check_permissions
 
-def ack_event(event_id):  # noqa: E501
+def ack_event(event_id, token_info={}):  # noqa: E501
     """Acknowledges ack
 
     Acknowledges an event # noqa: E501
@@ -23,6 +24,9 @@ def ack_event(event_id):  # noqa: E501
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['confirm']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_event: Event = Event.from_dict(connexion.request.get_json())  # noqa: E501
         else:

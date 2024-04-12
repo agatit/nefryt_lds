@@ -32,6 +32,8 @@ TrendParamDef:
   $ref: "./TrendParamDef.yaml"
 Event:
   $ref: "./Event.yaml"
+Unit:
+  $ref: "./Unit.yaml"  
 EditorPipeline:
   $ref: "./EditorPipeline.yaml"
 EditorNode:
@@ -40,3 +42,9 @@ Error:
   $ref: "./Error.yaml"
 Information:
   $ref: "./Information.yaml"
+Login:
+  $ref: "./Login.yaml"
+LoginPermissions:
+  $ref: "./LoginPermissions.yaml"
+Unauthorized:
+  $ref: "./Unauthorized.yaml"

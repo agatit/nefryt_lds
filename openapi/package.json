@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@rtk-query/codegen-openapi": "^1.0.0",
+    "esbuild-runner": "^2.2.1"
+  },
+  "name": "openapi",
+  "description": "python -m venv venv\r source ./venv/bin/activate\r python -m pip install -r requirements.txt",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -1,7 +1,6 @@
 # schemas/orm/PipelineNode.yaml
 type: object
 required:
-  - ID
   - NodeID
 properties:
   ID:

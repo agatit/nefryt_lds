@@ -17,7 +17,7 @@ class Trend(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, name=None, trend_group_id=None, trend_def_id=None, time_exponent=None, format=None, unit=None, color=None, symbol=None, raw_min=None, raw_max=None, scaled_min=None, scaled_max=None):  # noqa: E501
+    def __init__(self, id=None, name=None, trend_group_id=None, trend_def_id=None, node_id=None, time_exponent=None, format=None, unit=None, color=None, symbol=None, raw_min=None, raw_max=None, scaled_min=None, scaled_max=None):  # noqa: E501
         """Trend - a model defined in OpenAPI
 
         :param id: The id of this Trend.  # noqa: E501
@@ -28,6 +28,8 @@ class Trend(Model):
         :type trend_group_id: int
         :param trend_def_id: The trend_def_id of this Trend.  # noqa: E501
         :type trend_def_id: str
+        :param node_id: The node_id of this Trend.  # noqa: E501
+        :type node_id: int
         :param time_exponent: The time_exponent of this Trend.  # noqa: E501
         :type time_exponent: int
         :param format: The format of this Trend.  # noqa: E501
@@ -52,6 +54,7 @@ class Trend(Model):
             'name': str,
             'trend_group_id': int,
             'trend_def_id': str,
+            'node_id': int,
             'time_exponent': int,
             'format': str,
             'unit': str,
@@ -68,6 +71,7 @@ class Trend(Model):
             'name': 'Name',
             'trend_group_id': 'TrendGroupID',
             'trend_def_id': 'TrendDefID',
+            'node_id': 'NodeID',
             'time_exponent': 'TimeExponent',
             'format': 'Format',
             'unit': 'Unit',
@@ -83,6 +87,7 @@ class Trend(Model):
         self._name = name
         self._trend_group_id = trend_group_id
         self._trend_def_id = trend_def_id
+        self._node_id = node_id
         self._time_exponent = time_exponent
         self._format = format
         self._unit = unit
@@ -124,8 +129,6 @@ class Trend(Model):
         :param id: The id of this Trend.
         :type id: int
         """
-        if id is None:
-            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 
@@ -201,6 +204,29 @@ class Trend(Model):
             raise ValueError("Invalid value for `trend_def_id`, must not be `None`")  # noqa: E501
 
         self._trend_def_id = trend_def_id
+
+    @property
+    def node_id(self):
+        """Gets the node_id of this Trend.
+
+        none  # noqa: E501
+
+        :return: The node_id of this Trend.
+        :rtype: int
+        """
+        return self._node_id
+
+    @node_id.setter
+    def node_id(self, node_id):
+        """Sets the node_id of this Trend.
+
+        none  # noqa: E501
+
+        :param node_id: The node_id of this Trend.
+        :type node_id: int
+        """
+
+        self._node_id = node_id
 
     @property
     def time_exponent(self):

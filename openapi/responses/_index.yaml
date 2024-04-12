@@ -8,3 +8,5 @@ Updated:
   $ref: "./Updated.yaml"
 Deleted:
   $ref: "./Deleted.yaml"
+Unauthorized:
+  $ref: "./Unauthorized.yaml"

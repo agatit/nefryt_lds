@@ -1,4 +1,5 @@
 .gitignore
+src/apis/AuthApi.ts
 src/apis/EventsApi.ts
 src/apis/LinksApi.ts
 src/apis/MethodsApi.ts
@@ -12,6 +13,8 @@ src/models/EditorPipeline.ts
 src/models/Event.ts
 src/models/Information.ts
 src/models/Link.ts
+src/models/Login.ts
+src/models/LoginPermissions.ts
 src/models/Method.ts
 src/models/MethodDef.ts
 src/models/MethodParam.ts
@@ -28,5 +31,6 @@ src/models/TrendDef.ts
 src/models/TrendGroup.ts
 src/models/TrendParam.ts
 src/models/TrendParamDef.ts
+src/models/Unauthorized.ts
 src/models/index.ts
 src/runtime.ts

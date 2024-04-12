@@ -1,5 +1,6 @@
 import * as React from "react";
 import ReactDOM from 'react-dom';
+import { Layout } from "../../components/template/Layout";
 
 
 
@@ -7,9 +8,12 @@ import ReactDOM from 'react-dom';
 const NoPageFound: React.FC = () => {
 
   return (
-    <div className={'root'}>
-      Error 404
-    </div>
+    <Layout content={<></>} rPanel={{
+      enable: false,
+      open: false,
+      content: undefined,
+      handleDrawer: undefined
+    }}></Layout>    
   )
 }
 

@@ -9,12 +9,15 @@ from api.models.pipeline_param_def import PipelineParamDef  # noqa: E501
 from api.models.editor_pipeline import EditorPipeline  # noqa: E501
 from api import util
 
-from sqlalchemy import alias, select, delete, and_
+from odata_query.sqlalchemy import apply_odata_query
+from sqlalchemy import select, delete, and_
+from sqlalchemy.orm import aliased
 from ..db import session
 from database.models import editor, lds
+from .security_controller import check_permissions
 
 
-def create_pipeline(pipeline=None):  # noqa: E501
+def create_pipeline(pipeline=None, token_info={}):  # noqa: E501
     """Create pipelines
 
     Create a pipelines # noqa: E501
@@ -26,26 +29,24 @@ def create_pipeline(pipeline=None):  # noqa: E501
     """
 
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_pipeline: Pipeline = Pipeline.from_dict(connexion.request.get_json())  # noqa: E501
         else:
             return Error(message="Expected a JSON request", code=400), 400
 
-        db_pipeline: lds.Pipeline = lds.Pipeline()       
+        db_pipeline: editor.Pipeline = editor.Pipeline()       
         db_pipeline.Name = api_pipeline.name
         db_pipeline.BeginPos = api_pipeline.begin_pos
-        session.add(db_pipeline)
-        session.flush()
-
         if api_pipeline.editor_params is not None:
-            db_editor_pipeline: editor.Pipeline = editor.Pipeline()
-            db_editor_pipeline.ID = api_pipeline.id
-            db_editor_pipeline.AreaHeight = api_pipeline.editor_params.area_height
-            db_editor_pipeline.AreaWidth = api_pipeline.editor_params.area_width
-            db_editor_pipeline.AreaHeightDivision = api_pipeline.editor_params.area_height_division
-            db_editor_pipeline.AreaWidthDivision = api_pipeline.editor_params.area_width_division
-            session.add(db_editor_pipeline)
-        
+            db_pipeline.Pipeline: editor.Pipeline_ = editor.Pipeline_()
+            db_pipeline.Pipeline.AreaHeight = api_pipeline.editor_params.area_height
+            db_pipeline.Pipeline.AreaWidth = api_pipeline.editor_params.area_width
+            db_pipeline.Pipeline.AreaHeightDivision = api_pipeline.editor_params.area_height_division
+            db_pipeline.Pipeline.AreaWidthDivision = api_pipeline.editor_params.area_width_division          
+        session.add(db_pipeline)
         session.commit()
 
         return get_pipeline_by_id(db_pipeline.ID)
@@ -53,7 +54,7 @@ def create_pipeline(pipeline=None):  # noqa: E501
     except Exception as e:
         return Error(message=str(e), code=500), 500        
 
-def update_pipeline(pipeline_id, pipeline=None):  # noqa: E501
+def update_pipeline(pipeline_id, pipeline=None, token_info={}):  # noqa: E501
     """Create pipelines
 
     Create a pipelines # noqa: E501
@@ -65,30 +66,27 @@ def update_pipeline(pipeline_id, pipeline=None):  # noqa: E501
     """
 
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
         if connexion.request.is_json:
             api_pipeline = Pipeline.from_dict(connexion.request.get_json())  # noqa: E501
         else:
             return Error(message="Expected a JSON request", code=400), 400
 
-        db_pipeline = session.get(lds.Pipeline, pipeline_id)
+        db_pipeline: editor.Pipeline = session.get(editor.Pipeline, pipeline_id)
         if db_pipeline is None:
             return Error(message="Not Found", code=404), 404       
         db_pipeline.Name = api_pipeline.name
         db_pipeline.BeginPos = api_pipeline.begin_pos
+        if api_pipeline.editor_params is not None:
+            if db_pipeline.Pipeline is None:
+                db_pipeline.Pipeline = editor.Pipeline_()
+            db_pipeline.Pipeline.AreaHeight = api_pipeline.editor_params.area_height
+            db_pipeline.Pipeline.AreaWidth = api_pipeline.editor_params.area_width
+            db_pipeline.Pipeline.AreaHeightDivision = api_pipeline.editor_params.area_height_division
+            db_pipeline.Pipeline.AreaWidthDivision = api_pipeline.editor_params.area_width_division    
         session.add(db_pipeline)
-        session.flush()
-
-        db_editor_pipeline = session.get(editor.Pipeline, pipeline_id)
-        if db_editor_pipeline is None:
-            db_editor_pipeline = editor.Pipeline()
-            db_editor_pipeline.ID = pipeline_id
-
-        db_editor_pipeline.AreaHeight = api_pipeline.editor_params.area_height
-        db_editor_pipeline.AreaWidth = api_pipeline.editor_params.area_width
-        db_editor_pipeline.AreaHeightDivision = api_pipeline.editor_params.area_height_division
-        db_editor_pipeline.AreaWidthDivision = api_pipeline.editor_params.area_width_division
-        session.add(db_editor_pipeline)
-
         session.commit()
 
         return get_pipeline_by_id(db_pipeline.ID)
@@ -96,7 +94,7 @@ def update_pipeline(pipeline_id, pipeline=None):  # noqa: E501
     except Exception as e:
         return Error(message=str(e), code=500), 500  
 
-def delete_pipeline_by_id(pipeline_id):  # noqa: E501
+def delete_pipeline_by_id(pipeline_id, token_info={}):  # noqa: E501
     """Detail pipeline
 
     Delete specific pipeline # noqa: E501
@@ -107,9 +105,14 @@ def delete_pipeline_by_id(pipeline_id):  # noqa: E501
     :rtype: Information
     """
     try:        
-        db_pipeline = session.get(lds.Pipeline, pipeline_id)
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+
+        db_pipeline: editor.Pipeline = session.get(editor.Pipeline, pipeline_id)
         if db_pipeline is None:
             return Error(message="Not Found", code=404), 404
+        if db_pipeline.Pipeline is not None:
+            session.delete(db_pipeline.Pipeline)
         session.delete(db_pipeline)
         session.commit()
 
@@ -130,21 +133,19 @@ def get_pipeline_by_id(pipeline_id):  # noqa: E501
     :rtype: pipeline
     """
     try:
-        db_pipeline = session.get(lds.Pipeline, pipeline_id)
+        db_pipeline: editor.Pipeline = session.get(editor.Pipeline, pipeline_id)
         if db_pipeline is None:
             return Error(message="Not Found", code=404), 404
         api_pipeline = Pipeline()
         api_pipeline.id = db_pipeline.ID
         api_pipeline.name = db_pipeline.Name
         api_pipeline.begin_pos = db_pipeline.BeginPos
-
-        db_editor_pipeline = session.get(editor.Pipeline, pipeline_id)
-        if db_editor_pipeline is not None:
+        if db_pipeline.Pipeline is not None:
             api_pipeline.editor_params = EditorPipeline()
-            api_pipeline.editor_params.area_height = db_editor_pipeline.AreaHeight
-            api_pipeline.editor_params.area_width = db_editor_pipeline.AreaWidth
-            api_pipeline.editor_params.area_height_division = db_editor_pipeline.AreaHeightDivision
-            api_pipeline.editor_params.area_width_division = db_editor_pipeline.AreaWidthDivision
+            api_pipeline.editor_params.area_height = db_pipeline.Pipeline.AreaHeight
+            api_pipeline.editor_params.area_width = db_pipeline.Pipeline.AreaWidth
+            api_pipeline.editor_params.area_height_division = db_pipeline.Pipeline.AreaHeightDivision
+            api_pipeline.editor_params.area_width_division = db_pipeline.Pipeline.AreaWidthDivision
 
         return api_pipeline, 200
 
@@ -152,7 +153,7 @@ def get_pipeline_by_id(pipeline_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def list_pipelines():  # noqa: E501
+def list_pipelines(filter_=None, filter=None):  # noqa: E501
     """List pipelines
 
     List all pipelines # noqa: E501
@@ -161,27 +162,23 @@ def list_pipelines():  # noqa: E501
     :rtype: List[pipeline]
     """
     try:
-        ln = alias(lds.Pipeline, "ln")
-        en = alias(editor.Pipeline, "en")  
-        db_pipelines = session.execute(
-            select(ln, en).select_from(ln).outerjoin(en, en.c.ID == ln.c.ID )
-        ).fetchall()        
-
-        if db_pipelines is None:
-            return Error(message="Not Found", code=500), 404
+        stmt = select(editor.Pipeline)
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)        
+        db_pipelines = session.execute(stmt)        
 
         api_pipelines = []
-        for db_pipeline in db_pipelines:
+        for db_pipeline, in db_pipelines:
             api_pipeline = Pipeline()
             api_pipeline.id = db_pipeline.ID
             api_pipeline.name = db_pipeline.Name
             api_pipeline.begin_pos = db_pipeline.BeginPos
-            if db_pipeline.ID_1 is not None:
+            if db_pipeline.Pipeline is not None:
                 api_pipeline.editor_params = EditorPipeline()
-                api_pipeline.editor_params.area_height = db_pipeline.AreaHeight
-                api_pipeline.editor_params.area_width = db_pipeline.AreaWidth
-                api_pipeline.editor_params.area_height_division = db_pipeline.AreaHeightDivision
-                api_pipeline.editor_params.area_width_division = db_pipeline.AreaWidthDivision
+                api_pipeline.editor_params.area_height = db_pipeline.Pipeline.AreaHeight
+                api_pipeline.editor_params.area_width = db_pipeline.Pipeline.AreaWidth
+                api_pipeline.editor_params.area_height_division = db_pipeline.Pipeline.AreaHeightDivision
+                api_pipeline.editor_params.area_width_division = db_pipeline.Pipeline.AreaWidthDivision
             api_pipelines.append(api_pipeline)        
 
         return api_pipelines, 200
@@ -218,7 +215,7 @@ def get_pipeline_param_by_id(pipeline_id, pipeline_param_def_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def list_pipeline_params(pipeline_id):  # noqa: E501
+def list_pipeline_params(pipeline_id, filter_=None, filter=None):  # noqa: E501
     """List pipeline params
 
     List all pipeline params # noqa: E501
@@ -230,12 +227,13 @@ def list_pipeline_params(pipeline_id):  # noqa: E501
     """
 
     try:
-
         stmt = select([lds.PipelineParam, lds.PipelineParamDef]) \
             .select_from(lds.PipelineParamDef) \
             .outerjoin(lds.PipelineParam, \
                     and_(lds.PipelineParamDef.ID == lds.PipelineParam.PipelineParamDefID, lds.PipelineParam.PipelineID == pipeline_id) \
                 )  
+        if filter_ is not None:
+            stmt = apply_odata_query(stmt, filter_)                
 
         db_pipeline_params = session.execute(stmt)
 
@@ -256,7 +254,7 @@ def list_pipeline_params(pipeline_id):  # noqa: E501
         return Error(message=str(e), code=500), 500
 
 
-def update_pipeline_param(pipeline_id, pipeline_param_def_id, pipeline_param=None):  # noqa: E501
+def update_pipeline_param(pipeline_id, pipeline_param_def_id, pipeline_param=None, token_info={}):  # noqa: E501
     """Update pipeline params
 
     Updates pipeline param # noqa: E501
@@ -269,6 +267,9 @@ def update_pipeline_param(pipeline_id, pipeline_param_def_id, pipeline_param=Non
     :rtype: Information
     """
     try:
+        if not check_permissions(token_info, ['admin']):
+            return Error(message="Forbidden", code=403), 403
+            
         if connexion.request.is_json:
             api_pipeline_param = PipelineParam.from_dict(connexion.request.get_json())  # noqa: E501
 
