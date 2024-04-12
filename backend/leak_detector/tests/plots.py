@@ -19,15 +19,18 @@ class Plot(object):
         plt.xlabel("Czas [ms]")
         plt.ylabel("Ciśnienie [MPa]")
         
-    def probability_heatmap(self, data, begin, end, length) -> None:
+    def probability_heatmap(self, data, time, position) -> None:
+        dates = list(map(datetime.fromtimestamp, time / 1000))
+        fig, ax = plt.subplots()
+        im = ax.pcolormesh(dates, position, data)
+        ax.set_ylabel("Pozycja")
+        ax.set_xlabel("Czas")
+        cb = fig.colorbar(im, ax=ax)
+        cb.set_label(label='Wartość wskaźnika')
+
+    def scatter_points(self, x, y):
         _, ax = plt.subplots()
-        dates = list(map(datetime.fromtimestamp, [begin / 1000, end / 1000]))
-        dates = mdates.date2num(dates)
-        ax.imshow(data, extent=[dates[0], dates[1], length, 0], aspect='auto')
-        ax.tick_params(length = 0, rotation=75)
-        ax.xaxis_date()
-        ax.set_xlabel("Czas [ms]")
-        ax.set_ylabel("Odległość [m]")
+        ax.scatter(x, y)
 
     def show(self) -> None:
         plt.show()

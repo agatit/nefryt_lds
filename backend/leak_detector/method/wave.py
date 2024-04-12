@@ -1,158 +1,115 @@
+import logging
 from typing import List
-
+import numpy as np
 from ..tests.plots import global_plot
+from scipy.ndimage import label
 
 from .base import MethodBase, Segment
-from ..plant import Event, Pipeline
+from ..plant import Event, Pipeline, Trend
 
+# Obecna wersja zakłada, że segmenty mają stały wave speed.
 class MethodWave(MethodBase):
+    def __init__(self, pipeline: Pipeline, id: int, name: str) -> None:
+        super().__init__(pipeline, id, name)        
+        self._get_params()
+        self._create_segments()
+        self._begin_pos = pipeline.plant.get_distances(pipeline._first_node, self._pipeline.plant.nodes[self._pressure_deriv_trends[0].node_id])[0]
 
-    def __init__(self, pipeline : Pipeline, id, name):
-        super().__init__(pipeline, id, name)
-        # skopiowanie specyficznych parametrów metody:
-        # TODO: rozważyć obsługe błedów przy czytaniu parmatrów, np. przypisanie nieistnijącego trendu
+    def _get_params(self) -> None:
+        try:
+            self._pressure_derivs_string = str(self._params['PRESSURE_DERIV_TRENDS'])
 
-        self._pressure_deriv_trends = []
-        for trend_id in self._params['PRESSURE_DERIV_TRENDS'].split(','):
-            self._pressure_deriv_trends.append(pipeline.plant.trends[int(trend_id)])
-        # etc.
-        
-        self._max_level = float(self._params['MAX_LEVEL'])
-        self._min_level = float(self._params['MIN_LEVEL'])
-        self._alarm_level = float(self._params['ALARM_LEVEL'])
+            self._min_level = float(self._params['MIN_LEVEL'])
+            self._max_level = float(self._params['MAX_LEVEL'])
+            self._alarm_level = float(self._params['ALARM_LEVEL'])
 
-        self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
+            self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
 
+            self._wave_coeff = float(self._params['WAVE_COEFF'])
 
-        self._segments = []
+            self._normal_range = float(self._params['NORMAL_RANGE'])
+        except KeyError as error:
+            logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
+            raise
+        try:
+            self._pressure_deriv_trends : List[Trend] = []
+            for trend_id in self._pressure_derivs_string.split(','):
+                self._pressure_deriv_trends.append(self._pipeline.plant.trends[int(trend_id)])
+        except KeyError as error:
+            logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self._id}, trend {error.args[0]} does not exist', exc_info=False)
+            raise
+
+    def _create_segments(self) -> None:
+        self._segments: List[Segment] = [] 
         self._length_pipeline = 0
-
-        self.create_segments()
-        
-
-    def create_segments(self) -> None:
         previous_trend = None
         for current_trend in self._pressure_deriv_trends:
             if (previous_trend is not None):
                 segment = Segment(self._pipeline, previous_trend, current_trend,
                                      self._length_pipeline, self._wave_speed)
-                self._length_pipeline += segment.length
+                self._length_pipeline += segment._length
                 self._segments.append(segment)
+
             previous_trend = current_trend
     
-    def get_segment(self, position) -> Segment:
-        for segment in self._segments:
-            if (segment._begin_pos <= position <= segment._end_pos):
-                return segment
-        return None
+    def get_probability(self, segment: Segment, begin: int, end: int):
+        wave_speed = self._wave_speed
 
-    
-    def get_probability(self, begin, end) -> List[List[float]]:
-        probability = []
-        previous_segment = None
-        for current_pos in range(0, self._length_pipeline, self._pipeline.length_resolution):
-            probability_pos = []
-            segment = self.get_segment(current_pos)
-            wave_speed = segment.calc_wave_speed(current_pos)
+        window_begin = begin - segment.max_window_size
+        window_end = end + segment.max_window_size
 
-            if (previous_segment != segment):
-                window_begin = begin - segment.max_window_size
-                window_end = end + segment.max_window_size
-                data_start = segment.start.get_trend_data(window_begin, window_end)
-                data_end = segment.end.get_trend_data(window_begin, window_end)
-                global_plot.trend_graph(data_start, window_begin, window_end, self._pipeline.time_resolution)
-                global_plot.trend_graph(data_end, window_begin, window_end, self._pipeline.time_resolution)
+        data_start = segment._start.get_trend_data(window_begin, window_end)
+        data_end = segment._end.get_trend_data(window_begin, window_end)
+       
+        time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
+        position = np.arange(0, segment._length, self._pipeline.length_resolution)
+        
+        times, positions = np.meshgrid(time, position)
 
-            l1 = current_pos - segment._begin_pos
-            l2 = segment._end_pos - current_pos
+        offset_left = positions / wave_speed * 1000
+        offset_right = (segment._length - positions) / wave_speed * 1000
+        
+        friction = (1 - self._wave_coeff * positions / segment._length) \
+                    * (1 - self._wave_coeff * (1 - positions / segment._length))
 
-            for current_time in range(begin, end, self._pipeline.time_resolution):
-                offset1 = l1 / wave_speed * 1000 
-                offset2 = l2 / wave_speed * 1000
-                data_point = current_time - window_begin
-                dp1 = data_start[int((data_point - offset1) / 10)]
-                dp2 = data_end[int((data_point - offset2) / 10)]
-                dp3 = data_start[int((data_point + offset1) / 10)]
-                dp4 = data_end[int((data_point + offset2) / 10)]
-                
-                res = dp1 + dp2 - dp3 - dp4
-                
-                res = (res - self._min_level) / (self._max_level - self._min_level)
+        dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)] / self._normal_range
+        dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)] / self._normal_range
+        dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)] / self._normal_range
+        dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)] / self._normal_range
 
-                res = min(max(0, res), 1)
+        probability = dp3 * dp4 - dp1 * dp2
 
-                probability_pos.append(res)
+        probability = np.maximum(probability, 0)
 
-            previous_segment = segment
-            probability.append(probability_pos)
+        probability = np.where(friction > 0, np.sqrt(probability / friction), 0)
+
+        probability = np.minimum(probability, 1)
 
         return probability
 
-
-    def find_leaks_in_range(self, begin, end) -> List[Event]:
-        probabilities = self.get_probability(begin, end)
-        # Stałe:
-        window_position_size = 10
-        window_time_size = 1500
-
-        start_leak_points = set()
+    def find_leaks_in_range(self, begin: int, end: int) -> List[Event]:
         events = []
 
-        # Pierwszy algorytm
-        # Działa na symulowanych danych w większości przypadków (rozmiar okna powinien być lepiej dobrany)
-        # 1. Wybiera pierwsze punkty w których prawdopodobieńśtwo wycieku jest większe od zera i po których wystąpił wyciek
-        # 2. Dzieli te pierwsze punkty na zbiory punktów reprezentujący jeden wyciek
-        # 3. Wybiera czas w którym proste reprezentujące przez punkty się przecinają
-        # 4. Szacuje punkt wycieku na podstawie czasu
+        for segment in self._segments:
+            probability = self.get_probability(segment, begin, end)
 
-        # Jestem prawie pewien, że trzeba będzie wymyśleć coś lepszego dla rzeczywistych wycieków.
-        # Algorytm czasami przez okno może niedobrze wybrać wycieki
-        # Można również podzielić wydarzenia przez kubełki/na przedziały czasu
+            leaks, _ = label(probability > 0)
 
-        for position in range(len(probabilities)):
-            is_leak = False
-            for time in range(len(probabilities[0])):
-                if probabilities[position][time] > self._alarm_level:
-                    if not is_leak:
-                        is_leak = True
-                        while (time > 0 and probabilities[position][time] > 0):
-                            time -= 1
-                        start_leak_points.add((position, time))
-                else:
-                    is_leak = False
+            alarm_labels = np.unique(np.where(probability > self._alarm_level, leaks, 0))[1:]
 
-        while (len(start_leak_points) != 0):
-            leak = []
-            added = True
-            point = start_leak_points.pop()
-            leak.append(point)
+            for alarm_label in alarm_labels:
+                leak_values = np.where(leaks == alarm_label, probability, 0)
+                leak_values_from_end = np.flip(leak_values, axis=1)
+                is_alarm_after = np.flip(np.logical_or.accumulate(leak_values_from_end > self._alarm_level, axis=1), axis=1)
+                is_alarm_after = is_alarm_after * (leak_values > 0)
+                alarm_point_time = np.argmin(np.max(leak_values, axis=0) == 0)
+                alarm_point_position = np.mean(np.nonzero(leak_values[:, alarm_point_time]))
 
-            min_position = max_position = point[0]
-            min_time = max_time = point[1]
-
-            while (added):
-                added = False
-                for curr_point in start_leak_points:
-                    if (min_position - window_position_size <= curr_point[0] <= max_position + window_position_size and
-                        min_time - window_time_size <= curr_point[1] <= max_time + window_time_size):
-                        start_leak_points.remove(curr_point)
-                        leak.append(curr_point)
-                        min_position = min(min_position, curr_point[0])
-                        max_position = max(max_position, curr_point[0])
-                        min_time = min(min_time, curr_point[1])
-                        max_time = max(max_time, curr_point[1])
-                        added = True
-                        break
-    
-            leak_points = list(map(lambda point: point[0], filter(lambda point: point[1] == max_time, leak)))
-            position = int(sum(leak_points) / len(leak_points))
-            events.append(Event(self._id, begin + max_time * self._pipeline.time_resolution, position))
-
-        global_plot.probability_heatmap(probabilities, begin, end, self._length_pipeline)
-
+                alarm_time = begin + self._pipeline.time_resolution * alarm_point_time
+                alarm_position = self._pipeline.length_resolution * alarm_point_position
+                events.append(Event(self._id, alarm_time, self._begin_pos + segment._begin_pos + alarm_position))
 
         return events
 
-
-    def find_leaks_to(self, end) -> List[Event]:
+    def find_leaks_to(self, end: int) -> List[Event]:
         pass

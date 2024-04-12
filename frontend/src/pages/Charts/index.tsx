@@ -101,7 +101,7 @@ const useStyles  = makeStyles(theme => ({
     
 }));
 
-Configuration.basePath = 'http://192.168.1.231:8080';
+Configuration.basePath = 'http://localhost:8080';
 
 function valuetext(value:any) {
   return `${value}°C`;
