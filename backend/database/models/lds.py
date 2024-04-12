@@ -1,4 +1,4 @@
-from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, ForeignKeyConstraint, Identity, Index, Integer, Numeric, PrimaryKeyConstraint, SmallInteger, String, text
+from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, Float, ForeignKeyConstraint, Identity, Index, Integer, Numeric, PrimaryKeyConstraint, SmallInteger, String, text
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -18,8 +18,6 @@ class EventDef(Base):
     Visible = Column(Boolean, nullable=False, server_default=text('((1))'))
     Enabled = Column(Boolean, nullable=False, server_default=text('((1))'))
 
-    Event = relationship('Event', back_populates='EventDef_')
-
 
 class MethodDef(Base):
     __tablename__ = 'MethodDef'
@@ -30,8 +28,6 @@ class MethodDef(Base):
 
     ID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-
-    Method = relationship('Method', back_populates='MethodDef_')
 
 
 class MethodParamDef(Base):
@@ -58,11 +54,6 @@ class Node(Base):
     Type = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
     Name = Column(String(50, 'SQL_Polish_CP1250_CS_AS'))
 
-    Link = relationship('Link', foreign_keys='[Link.BeginNodeID]', back_populates='Node_')
-    Link_ = relationship('Link', foreign_keys='[Link.EndNodeID]', back_populates='Node1')
-    PipelineNode = relationship('PipelineNode', back_populates='Node_')
-    Trend = relationship('Trend', back_populates='Node_')
-
 
 class Pipeline(Base):
     __tablename__ = 'Pipeline'
@@ -75,10 +66,6 @@ class Pipeline(Base):
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
     BeginPos = Column(Numeric(10, 2))
 
-    Method = relationship('Method', back_populates='Pipeline_')
-    PipelineNode = relationship('PipelineNode', back_populates='Pipeline_')
-    PipelineParam = relationship('PipelineParam', back_populates='Pipeline_')
-
 
 class PipelineParamDef(Base):
     __tablename__ = 'PipelineParamDef'
@@ -90,8 +77,6 @@ class PipelineParamDef(Base):
     ID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'))
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
     DataType = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'))
-
-    PipelineParam = relationship('PipelineParam', back_populates='PipelineParamDef_')
 
 
 class TrendData(Base):
@@ -115,8 +100,6 @@ class TrendDef(Base):
 
     ID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-
-    TrendParamDef = relationship('TrendParamDef', back_populates='TrendDef_')
 
 
 class TrendGroup(Base):
@@ -144,8 +127,6 @@ class Unit(Base):
     BaseID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
     Multiplier = Column(Numeric(20, 10))
 
-    Trend = relationship('Trend', back_populates='Unit_')
-
 
 class Link(Base):
     __tablename__ = 'Link'
@@ -161,8 +142,8 @@ class Link(Base):
     EndNodeID = Column(Integer)
     Length = Column(Numeric(10, 2))
 
-    Node_ = relationship('Node', foreign_keys=[BeginNodeID], back_populates='Link')
-    Node1 = relationship('Node', foreign_keys=[EndNodeID], back_populates='Link_')
+    Node_ = relationship('Node', foreign_keys=[BeginNodeID])
+    Node1 = relationship('Node', foreign_keys=[EndNodeID])
 
 
 class Method(Base):
@@ -179,10 +160,8 @@ class Method(Base):
     PipelineID = Column(Integer, nullable=False)
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
 
-    MethodDef_ = relationship('MethodDef', back_populates='Method')
-    Pipeline_ = relationship('Pipeline', back_populates='Method')
-    Event = relationship('Event', back_populates='Method_')
-    MethodParam = relationship('MethodParam', back_populates='Method_')
+    MethodDef_ = relationship('MethodDef')
+    Pipeline_ = relationship('Pipeline')
 
 
 class PipelineNode(Base):
@@ -198,8 +177,8 @@ class PipelineNode(Base):
     NodeID = Column(Integer, nullable=False)
     First = Column(Boolean, nullable=False, server_default=text('((0))'))
 
-    Node_ = relationship('Node', back_populates='PipelineNode')
-    Pipeline_ = relationship('Pipeline', back_populates='PipelineNode')
+    Node_ = relationship('Node')
+    Pipeline_ = relationship('Pipeline')
 
 
 class PipelineParam(Base):
@@ -215,8 +194,8 @@ class PipelineParam(Base):
     PipelineID = Column(Integer, nullable=False)
     Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
 
-    Pipeline_ = relationship('Pipeline', back_populates='PipelineParam')
-    PipelineParamDef_ = relationship('PipelineParamDef', back_populates='PipelineParam')
+    Pipeline_ = relationship('Pipeline')
+    PipelineParamDef_ = relationship('PipelineParamDef')
 
 
 class Trend(Base):
@@ -230,6 +209,10 @@ class Trend(Base):
 
     ID = Column(Integer, Identity(start=1000, increment=1))
     TrendDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
+    RawMin = Column(Integer, nullable=False)
+    RawMax = Column(Integer, nullable=False)
+    ScaledMin = Column(Float(53), nullable=False)
+    ScaledMax = Column(Float(53), nullable=False)
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
     TrendGroupID = Column(Integer)
     TimeExponent = Column(Integer)
@@ -239,9 +222,8 @@ class Trend(Base):
     Symbol = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
     NodeID = Column(Integer)
 
-    Node_ = relationship('Node', back_populates='Trend')
-    Unit_ = relationship('Unit', back_populates='Trend')
-    TrendParam = relationship('TrendParam', back_populates='Trend_')
+    Node_ = relationship('Node')
+    Unit_ = relationship('Unit')
 
 
 class TrendParamDef(Base):
@@ -257,7 +239,7 @@ class TrendParamDef(Base):
     Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
     DataType = Column(String(6, 'SQL_Polish_CP1250_CS_AS'))
 
-    TrendDef_ = relationship('TrendDef', back_populates='TrendParamDef')
+    TrendDef_ = relationship('TrendDef')
 
 
 class Event(Base):
@@ -278,8 +260,8 @@ class Event(Base):
     Details = Column(String(100, 'SQL_Polish_CP1250_CS_AS'))
     Position = Column(Integer)
 
-    EventDef_ = relationship('EventDef', back_populates='Event')
-    Method_ = relationship('Method', back_populates='Event')
+    EventDef_ = relationship('EventDef')
+    Method_ = relationship('Method')
 
 
 class MethodParam(Base):
@@ -294,7 +276,7 @@ class MethodParam(Base):
     MethodID = Column(Integer, nullable=False)
     Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
 
-    Method_ = relationship('Method', back_populates='MethodParam')
+    Method_ = relationship('Method')
 
 
 class TrendParam(Base):
@@ -309,4 +291,4 @@ class TrendParam(Base):
     TrendID = Column(Integer, nullable=False)
     Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
 
-    Trend_ = relationship('Trend', back_populates='TrendParam')
+    Trend_ = relationship('Trend')
