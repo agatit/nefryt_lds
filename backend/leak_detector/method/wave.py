@@ -95,16 +95,18 @@ class MethodWave(MethodBase):
 
             leaks, _ = label(probability > 0)
 
+            time = np.arange(begin, end, self._pipeline.time_resolution)
+            position = np.arange(segment._begin_pos, segment._end_pos, self._pipeline.length_resolution)
+            global_plot.probability_heatmap(probability, time, position)
             alarm_labels = np.unique(np.where(probability > self._alarm_level, leaks, 0))[1:]
 
             for alarm_label in alarm_labels:
                 leak_values = np.where(leaks == alarm_label, probability, 0)
                 leak_values_from_end = np.flip(leak_values, axis=1)
                 is_alarm_after = np.flip(np.logical_or.accumulate(leak_values_from_end > self._alarm_level, axis=1), axis=1)
-                is_alarm_after = is_alarm_after * (leak_values > 0)
+                is_alarm_after = is_alarm_after * (leak_values > self._min_level)
                 alarm_point_time = np.argmin(np.max(leak_values, axis=0) == 0)
                 alarm_point_position = np.mean(np.nonzero(leak_values[:, alarm_point_time]))
-
                 alarm_time = begin + self._pipeline.time_resolution * alarm_point_time
                 alarm_position = self._pipeline.length_resolution * alarm_point_position
                 events.append(Event(self._id, alarm_time, self._begin_pos + segment._begin_pos + alarm_position))

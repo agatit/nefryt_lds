@@ -9,8 +9,8 @@ from .plant import Plant
 if __name__ == '__main__':
 
     try:
-        pump_time = 180
-        wave_death_time = 300
+        pump_time = 30
+        wave_death_time = 30
         logging.info('Test started')
         plant = Plant()
 

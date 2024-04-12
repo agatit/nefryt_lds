@@ -8,8 +8,8 @@ from .tests.plots import global_plot
 
 # test
 
-detection_time = 60 * 1000 #ms
-time_between_detections = 3 * 60 * 1000 #ms
+detection_time = 120 * 1000 #ms
+time_between_detections = 13 * 60 * 1000 #ms
 time_delay = 10 * 1000 #ms
 plant = Plant()
 
@@ -38,10 +38,10 @@ if __name__ == '__main__':
     try:
         logging.info('Leak detector started...')
         
-        begin_detection_date = datetime(2022, 9, 20, 12, 57, 30)
+        begin_detection_date = datetime(2022, 10, 5, 10, 24)
         begin_detection_time = int(begin_detection_date.timestamp() * 1000)
 
-        while (begin_detection_time < datetime(2022, 9, 20, 13, 15).timestamp() * 1000):
+        while (begin_detection_time < datetime(2022, 10, 5, 11, 30).timestamp() * 1000):
             for pipeline in plant.pipelines.values():
                 begin_detection_date = datetime.fromtimestamp(begin_detection_time / 1000)
             
