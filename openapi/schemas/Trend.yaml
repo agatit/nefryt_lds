@@ -2,10 +2,6 @@
 type: object
 required:  
   - TrendDefID
-  - RawMin
-  - RawMax
-  - ScaledMin
-  - ScaledMax
 properties:
   ID:
     type: integer

@@ -17,7 +17,7 @@ class Trend(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, name=None, trend_group_id=None, trend_def_id=None, node_id=None, time_exponent=None, format=None, unit=None, color=None, symbol=None, raw_min=None, raw_max=None, scaled_min=None, scaled_max=None):  # noqa: E501
+    def __init__(self, id=None, name=None, trend_group_id=None, trend_def_id=None, node_id=None, time_exponent=None, format=None, unit=None, color=None, symbol=None):  # noqa: E501
         """Trend - a model defined in OpenAPI
 
         :param id: The id of this Trend.  # noqa: E501
@@ -40,14 +40,6 @@ class Trend(Model):
         :type color: str
         :param symbol: The symbol of this Trend.  # noqa: E501
         :type symbol: str
-        :param raw_min: The raw_min of this Trend.  # noqa: E501
-        :type raw_min: int
-        :param raw_max: The raw_max of this Trend.  # noqa: E501
-        :type raw_max: int
-        :param scaled_min: The scaled_min of this Trend.  # noqa: E501
-        :type scaled_min: float
-        :param scaled_max: The scaled_max of this Trend.  # noqa: E501
-        :type scaled_max: float
         """
         self.openapi_types = {
             'id': int,
@@ -59,11 +51,7 @@ class Trend(Model):
             'format': str,
             'unit': str,
             'color': str,
-            'symbol': str,
-            'raw_min': int,
-            'raw_max': int,
-            'scaled_min': float,
-            'scaled_max': float
+            'symbol': str
         }
 
         self.attribute_map = {
@@ -76,11 +64,7 @@ class Trend(Model):
             'format': 'Format',
             'unit': 'Unit',
             'color': 'Color',
-            'symbol': 'Symbol',
-            'raw_min': 'RawMin',
-            'raw_max': 'RawMax',
-            'scaled_min': 'ScaledMin',
-            'scaled_max': 'ScaledMax'
+            'symbol': 'Symbol'
         }
 
         self._id = id
@@ -93,10 +77,6 @@ class Trend(Model):
         self._unit = unit
         self._color = color
         self._symbol = symbol
-        self._raw_min = raw_min
-        self._raw_max = raw_max
-        self._scaled_min = scaled_min
-        self._scaled_max = scaled_max
 
     @classmethod
     def from_dict(cls, dikt) -> 'Trend':
@@ -338,95 +318,3 @@ class Trend(Model):
         """
 
         self._symbol = symbol
-
-    @property
-    def raw_min(self):
-        """Gets the raw_min of this Trend.
-
-
-        :return: The raw_min of this Trend.
-        :rtype: int
-        """
-        return self._raw_min
-
-    @raw_min.setter
-    def raw_min(self, raw_min):
-        """Sets the raw_min of this Trend.
-
-
-        :param raw_min: The raw_min of this Trend.
-        :type raw_min: int
-        """
-        if raw_min is None:
-            raise ValueError("Invalid value for `raw_min`, must not be `None`")  # noqa: E501
-
-        self._raw_min = raw_min
-
-    @property
-    def raw_max(self):
-        """Gets the raw_max of this Trend.
-
-
-        :return: The raw_max of this Trend.
-        :rtype: int
-        """
-        return self._raw_max
-
-    @raw_max.setter
-    def raw_max(self, raw_max):
-        """Sets the raw_max of this Trend.
-
-
-        :param raw_max: The raw_max of this Trend.
-        :type raw_max: int
-        """
-        if raw_max is None:
-            raise ValueError("Invalid value for `raw_max`, must not be `None`")  # noqa: E501
-
-        self._raw_max = raw_max
-
-    @property
-    def scaled_min(self):
-        """Gets the scaled_min of this Trend.
-
-
-        :return: The scaled_min of this Trend.
-        :rtype: float
-        """
-        return self._scaled_min
-
-    @scaled_min.setter
-    def scaled_min(self, scaled_min):
-        """Sets the scaled_min of this Trend.
-
-
-        :param scaled_min: The scaled_min of this Trend.
-        :type scaled_min: float
-        """
-        if scaled_min is None:
-            raise ValueError("Invalid value for `scaled_min`, must not be `None`")  # noqa: E501
-
-        self._scaled_min = scaled_min
-
-    @property
-    def scaled_max(self):
-        """Gets the scaled_max of this Trend.
-
-
-        :return: The scaled_max of this Trend.
-        :rtype: float
-        """
-        return self._scaled_max
-
-    @scaled_max.setter
-    def scaled_max(self, scaled_max):
-        """Sets the scaled_max of this Trend.
-
-
-        :param scaled_max: The scaled_max of this Trend.
-        :type scaled_max: float
-        """
-        if scaled_max is None:
-            raise ValueError("Invalid value for `scaled_max`, must not be `None`")  # noqa: E501
-
-        self._scaled_max = scaled_max

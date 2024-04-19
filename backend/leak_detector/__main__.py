@@ -4,7 +4,7 @@ from .plant import Plant
 from datetime import datetime
 
 # Wykresy do sprawdzania wycieku:
-from .tests.plots import global_plot 
+# from .tests.plots import global_plot 
 
 # test
 
@@ -61,6 +61,6 @@ if __name__ == '__main__':
 
             begin_detection_time += time_between_detections
 
-            global_plot.show()
+            # global_plot.show()
     except Exception as error:    
         logging.error(error, exc_info=True)

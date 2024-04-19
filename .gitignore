@@ -2,3 +2,4 @@
 .vscode/*
 .openapi-generator
 electron
+packages

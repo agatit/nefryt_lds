@@ -112,6 +112,7 @@ def delete_node_by_id(node_id, token_info={}):  # noqa: E501
 
         stmt = delete(lds.Link).where(lds.Link.BeginNodeID == node_id or lds.Link.EndNodeID == node_id)
         session.execute(stmt)
+        session.flush()
 
         if db_node.Node is not None:
             session.delete(db_node.Node)

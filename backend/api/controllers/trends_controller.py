@@ -107,6 +107,9 @@ def get_trend_by_id(trend_id):  # noqa: E501
         api_trend.time_exponent = db_trend.TimeExponent
         api_trend.unit = db_trend.UnitID.strip()
         api_trend.node_id = db_trend.NodeID
+        api_trend.symbol = db_trend.Symbol
+        api_trend.unit = db_trend.Unit_.Symbol
+        api_trend.color = db_trend.Color        
         return api_trend, 200
 
     except Exception as e:
@@ -143,6 +146,7 @@ def update_trend(trend_id, trend=None, token_info = {}):  # noqa: E501
         db_trend.UnitID = api_trend.unit
         db_trend.NodeID = api_trend.node_id 
         db_trend.Symbol = api_trend.symbol
+        db_trend.Color = api_trend.color
         session.add(db_trend)
 
         session.commit()

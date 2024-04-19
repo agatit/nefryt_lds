@@ -175,10 +175,6 @@ export type Trend = {
   Unit?: string;
   Color?: string;
   Symbol?: string;
-  RawMin: number;
-  RawMax: number;
-  ScaledMin: number;
-  ScaledMax: number;
 };
 export type Error = {
   code: number;

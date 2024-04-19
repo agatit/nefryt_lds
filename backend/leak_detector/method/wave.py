@@ -1,7 +1,7 @@
 import logging
 from typing import List
 import numpy as np
-from ..tests.plots import global_plot
+# from ..tests.plots import global_plot
 from scipy.ndimage import label
 
 from .base import MethodBase, Segment
