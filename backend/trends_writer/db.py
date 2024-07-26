@@ -5,7 +5,7 @@ from .config import config
 
 # SQLALCHEMY_DATABASE_URI = 'mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo?driver=ODBC+Driver+17+for+SQL+Server'
 SQLALCHEMY_DATABASE_URI = \
-    'mssql+pyodbc://sa:Onyks$us@serverdb:1447/NefrytLDSDemo' \
+    'mssql+pyodbc://@localhost/NefrytLDS_Zygmuntow_2022' \
     '?driver=ODBC+Driver+18+for+SQL+Server' \
     '&TrustServerCertificate=Yes' \
     '&Encrypt=No' 

@@ -90,20 +90,20 @@ class DriverModbus:
 
         if type in ["ovtBool", "ovtBool8", "ovtBool16", "ovtBool32", "ovtBool64"]:
             if value:
-                data = 1 << bit
+                data = value << bit
             else:
-                data = ~(1 << bit)
+                data = ~(value << bit)
         else:
             data = value                
-        format = "<" + "H" *  self.length(type)
-        registers = list(struct.unpack( format, struct.pack(TYPE_FORMAT[type], value)))
+        format = TYPE_FORMAT[type] *  self.length(type)
+        registers = list(struct.unpack( format, struct.pack(TYPE_FORMAT[type], data)))
 
         return registers
 
 
     def _registers_to_value(self, registers, type,  bit=0):
 
-        format = "<" + "H" *  self.length(type)
+        format = TYPE_FORMAT[type] *  self.length(type)
         value = struct.unpack( TYPE_FORMAT[type], struct.pack(format, *registers) )[0]
 
         if type in ["ovtBool", "ovtBool8", "ovtBool16", "ovtBool32", "ovtBool64"]:

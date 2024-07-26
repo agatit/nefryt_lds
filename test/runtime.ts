@@ -13,7 +13,7 @@
  */
 
 
-export const BASE_PATH = "http://192.168.1.231:8080".replace(/\/+$/, "");
+export const BASE_PATH = "http://localhost:8080".replace(/\/+$/, "");
 
 const isBlob = (value: any) => typeof Blob !== 'undefined' && value instanceof Blob;
 

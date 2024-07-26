@@ -78,7 +78,7 @@ class TrendBase(metaclass=TrendBaseMeta):
             .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) \
             .join(lds.TrendParam, lds.TrendParam.TrendID == lds.Trend.ID) \
             .join(lds.TrendParamDef, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID)) \
-            .where(and_(lds.TrendParamDef.DataType == 'TREND', lds.TrendParam.Value == self.id))
+            .where(and_(lds.TrendParamDef.DataType == 'TREND', lds.TrendParam.Value == str(self.id)))
 
         # from .. import trend
 
