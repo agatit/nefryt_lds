@@ -212,17 +212,30 @@ def get_trend_data(trend_id_list, begin, end, samples):  # noqa: E501
     try:                           
 
         # reading trends defnitions neccessary for scaling
-        db_trends = session.execute(select(lds.Trend))
+        db_trends = session.execute(
+            select(lds.Trend)
+            .where(lds.Trend.ID.in_(trend_id_list))
+        )
         
         db_trends_scales = {}
         for db_trend, in db_trends:
-            params = list_trend_params(db_trend.ID)
-            db_trends_scales[db_trend.ID] = {
-                "RawMin": next(x for x in params if x.Name == "RAW_MIN").Value,
-                "RawMax":  next(x for x in params if x.Name == "RAW_MAX").Value,
-                "ScaledMin": next(x for x in params if x.Name == "SCALED_MIN").Value,
-                "ScaledMax": next(x for x in params if x.Name == "SCALED_MAX").Value,
+            params = list_trend_params(db_trend.ID)[0]
+            try:
+                db_trends_scales[db_trend.ID] = {
+                    "RawMin": next(x.value for x in params if x.trend_param_def_id == "RAW_MIN"),
+                    "RawMax":  next(x.value for x in params if x.trend_param_def_id == "RAW_MAX"),
+                    "ScaledMin": next(x.value for x in params if x.trend_param_def_id == "SCALED_MIN"),
+                    "ScaledMax": next(x.value for x in params if x.trend_param_def_id == "SCALED_MAX"),
                 }
+            except StopIteration:
+                db_trends_scales[db_trend.ID] = {
+                    "RawMin": 0,
+                    "RawMax":  1,
+                    "ScaledMin": 0,
+                    "ScaledMax": 1,
+                }
+        
+        print(db_trends_scales)
 
         # readin the trend data
         api_data_list = []
