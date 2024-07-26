@@ -22,8 +22,8 @@ if __name__ == '__main__':
         rest_time_after_pomping_max = 90
 
 
-        cycle_amount_to_generate = 3
-        leaks_amount_to_generate_on_one_cycle = 3
+        cycle_amount_to_generate = 30
+        leaks_amount_to_generate_on_one_cycle = 5
         time_between_cycles = 10
         pipeline_mode = ["stationary"]
 

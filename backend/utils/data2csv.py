@@ -146,10 +146,10 @@ if __name__ == '__main__':
        data = get_trend_data(session, ids, begin_ts, end_ts)
 
     with open(args.filename, 'w', newline='', encoding='utf-8') as csvfile:
-        spamwriter = csv.writer(csvfile, quoting=csv.QUOTE_NONNUMERIC)
-        spamwriter.writerow(['Timstamp', 'TimestampMs'] + db_trends_names)
+        writer = csv.writer(csvfile, quoting=csv.QUOTE_NONNUMERIC)
+        writer.writerow(['Timstamp', 'TimestampMs'] + db_trends_names)
         for row in data:
-            spamwriter.writerow(
+            writer.writerow(
                 [
                     row.get(key,0)
                     for key in ['Timestamp', 'TimestampMs'] + [str(i) for i in ids]
