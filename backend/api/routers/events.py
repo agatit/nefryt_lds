@@ -1,12 +1,11 @@
+from datetime import datetime
 from fastapi import APIRouter
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
-
 from .mapper import map_lds_event_and_lds_event_def_to_event
-from ..repository import get_event_by_id_repository, set_event_ack_date_repository
 from ..schemas import Error, Event, Information
 from ..db import engine
 from database import lds
@@ -23,7 +22,8 @@ async def list_events():
                      .filter(lds.EventDef.Visible))
         with Session(engine) as session:
             events = session.execute(statement).all()
-        events_out = [map_lds_event_and_lds_event_def_to_event(lds_event, lds_event_def) for lds_event, lds_event_def in events]
+        events_out = [map_lds_event_and_lds_event_def_to_event(lds_event, lds_event_def)
+                      for lds_event, lds_event_def in events]
         return events_out
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_events(): ' + str(e))
@@ -33,11 +33,15 @@ async def list_events():
 @router.get('/get/{event_id}', response_model=Event | Error)
 async def get_event_by_id(event_id: int):
     try:
-        result = get_event_by_id_repository(event_id)
-        if not result:
+        statement = (select(lds.Event, lds.EventDef)
+                     .join(lds.EventDef)
+                     .where(lds.Event.ID == event_id))  # noqa
+        with Session(engine) as session:
+            results = session.execute(statement).all()
+        if not results:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No event with id = ' + str(event_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
-        lds_event, lds_event_def = result[0]
+        lds_event, lds_event_def = results[0]
         event_out = map_lds_event_and_lds_event_def_to_event(lds_event, lds_event_def)
         return event_out
     except Exception as e:
@@ -48,7 +52,13 @@ async def get_event_by_id(event_id: int):
 @router.post('/{event_id}/ack', response_model=Information | Error)
 async def ack_event(event_id: int):
     try:
-        set_event_ack_date_repository(event_id)
+        with Session(engine) as session:
+            event = session.get(lds.Event, event_id)
+            if not event:
+                raise NoResultFound()
+            event.AckDate = datetime.now()
+            session.add(event)
+            session.commit()
         return Information(message="Event acknowledged", affected=1, status=status.HTTP_200_OK)
     except NoResultFound:
         error = Error(code=status.HTTP_404_NOT_FOUND, message='No event with id = ' + str(event_id))
