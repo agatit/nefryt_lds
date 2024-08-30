@@ -128,6 +128,98 @@ paths:
       tags:
       - events
       x-openapi-router-controller: api.controllers.events_controller
+  /event_defs:
+    get:
+      description: List all event defs
+      operationId: list_event_defs
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/EventDef'
+                type: array
+          description: An array of event defs
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List event defs
+      tags:
+        - event_def
+    post:
+      description: Create an event def
+      operationId: create_event_def
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventDef'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDef'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create event def
+      tags:
+        - events
+  /event_defs/{eventDefId}:
+    delete:
+      description: Delete specific event def
+      operationId: delete_event_def_by_id
+      parameters: [ ]
+      responses:
+        "204":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Information'
+          description: Deleted
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes event def
+      tags:
+        - events
+    put:
+      description: Update event def
+      operationId: update_event_def
+      parameters: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventDef'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDef'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Updates event def
+      tags:
+        - events
   /link:
     get:
       description: List all links
@@ -2126,6 +2218,45 @@ components:
       - EventDefID
       - MethodID
       title: Event
+      type: object
+    EventDef:
+      example:
+        ID: ANOMALY
+        Verbosity: WARNING
+        Caption: Caption
+        Silent: false
+        Visible: true
+        Enabled: true
+      properties:
+        ID:
+          description: none
+          readOnly: true
+          title: ID
+          type: string
+        Verbosity:
+          description: none
+          title: Verbosity
+          type: string
+        Caption:
+          description: none
+          title: Caption
+          type: string
+        Silent:
+          description: none
+          title: Silent
+          type: boolean
+        Visible:
+          description: none
+          title: Visible
+          type: boolean
+        Enabled:
+          description: none
+          title: Enabled
+          type: boolean
+      required:
+        - ID
+        - Name
+      title: TrendDef
       type: object
     Unit:
       example:

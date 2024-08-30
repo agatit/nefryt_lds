@@ -6,15 +6,6 @@ from ..db import engine
 from database import lds
 
 
-def get_events_repository():
-    statement = (select(lds.Event, lds.EventDef)
-                 .join(lds.EventDef)
-                 .filter(lds.EventDef.Enabled)
-                 .filter(lds.EventDef.Visible))
-    with Session(engine) as session:
-        results = session.execute(statement).all()
-        return results
-
 
 def get_event_by_id_repository(event_id: int):
     statement = (select(lds.Event, lds.EventDef)

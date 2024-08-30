@@ -1,1 +1,2 @@
-from .events import get_events_repository, get_event_by_id_repository, set_event_ack_date_repository
+from .events import get_event_by_id_repository, set_event_ack_date_repository
+from .trends import get_trends_repository, create_trend_repository

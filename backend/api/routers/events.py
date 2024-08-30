@@ -1,22 +1,28 @@
 from fastapi import APIRouter
+from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
 
-from ..repository import get_events_repository, get_event_by_id_repository, set_event_ack_date_repository
+from .mapper import map_lds_event_and_lds_event_def_to_event
+from ..repository import get_event_by_id_repository, set_event_ack_date_repository
 from ..schemas import Error, Event, Information
+from ..db import engine
 from database import lds
 
 router = APIRouter(prefix="/events")
 
 
-# todo: check if mapping correct
-
-
 @router.get('/', response_model=list[Event] | Error)
 async def list_events():
     try:
-        events = get_events_repository()
+        statement = (select(lds.Event, lds.EventDef)
+                     .join(lds.EventDef)
+                     .filter(lds.EventDef.Enabled)
+                     .filter(lds.EventDef.Visible))
+        with Session(engine) as session:
+            events = session.execute(statement).all()
         events_out = [map_lds_event_and_lds_event_def_to_event(lds_event, lds_event_def) for lds_event, lds_event_def in events]
         return events_out
     except Exception as e:
@@ -50,15 +56,3 @@ async def ack_event(event_id: int):
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in ack_event(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-def to_dict(o) -> dict:
-    return {c.name: getattr(o, c.name) for c in o.__table__.columns}
-
-
-def map_lds_event_and_lds_event_def_to_event(lds_event: lds.Event, lds_event_def: lds.EventDef) -> Event:
-    lds_event_dict = to_dict(lds_event)
-    lds_event_def_dict = to_dict(lds_event_def)
-    lds_event_def_dict.pop('ID')
-    lds_event_dict.update(lds_event_def_dict)
-    return Event(**lds_event_dict)
