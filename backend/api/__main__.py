@@ -1,4 +1,6 @@
-from .app import app
+from fastapi import FastAPI
+from .routers import events_router
 
-if __name__ == '__main__':
-    app.run(port=8080)
+
+app = FastAPI(title='Nefryt LDS API')
+app.include_router(events_router)

@@ -9,3 +9,7 @@ jupyter
 pandas 
 sympy 
 nose
+sqlmodel
+pydantic
+fastapi
+starlette
