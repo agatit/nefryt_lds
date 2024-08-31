@@ -7,10 +7,10 @@ from starlette import status
 from starlette.responses import JSONResponse
 from .mapper import to_dict
 from ..db import engine
-from ..schemas import Error, EventDef, Information
+from ..schemas import Error, EventDef, Information, UpdateEventDef
 from database import lds
 
-router = APIRouter(prefix="/event_defs")
+router = APIRouter(prefix="/event_def")
 
 
 @router.get('/', response_model=list[EventDef] | Error, operation_id="list_event_defs")
@@ -62,7 +62,7 @@ async def delete_event_def_by_id(event_def_id: Annotated[str, Path()]):
         return JSONResponse(content=information.model_dump(), status_code=status.HTTP_200_OK)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT,
-                      message='Integrity error when deleting event def with id =' + event_def_id)
+                      message='Integrity error when deleting event def with id = ' + event_def_id)
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in delete_event_def_by_id(): ' + str(e))
@@ -70,7 +70,7 @@ async def delete_event_def_by_id(event_def_id: Annotated[str, Path()]):
 
 
 @router.put('/{event_def_id}', response_model=EventDef | Error)
-async def update_event_def(event_def_id: Annotated[str, Path()], updated_event_def: Annotated[EventDef, Body()]):
+async def update_event_def(event_def_id: Annotated[str, Path()], updated_event_def: Annotated[UpdateEventDef, Body()]):
     try:
         with Session(engine) as session:
             event_def = session.get(lds.EventDef, event_def_id)
@@ -86,7 +86,7 @@ async def update_event_def(event_def_id: Annotated[str, Path()], updated_event_d
         return event_def
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT,
-                      message='Integrity error when updating event def with id =' + event_def_id)
+                      message='Integrity error when updating event def with id = ' + event_def_id)
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in delete_event_def_by_id(): ' + str(e))

@@ -128,7 +128,7 @@ paths:
       tags:
       - events
       x-openapi-router-controller: api.controllers.events_controller
-  /event_defs:
+  /event_def:
     get:
       description: List all event defs
       operationId: list_event_defs
@@ -149,7 +149,7 @@ paths:
           description: unexpected error
       summary: List event defs
       tags:
-        - event_def
+        - events
     post:
       description: Create an event def
       operationId: create_event_def
@@ -174,7 +174,7 @@ paths:
       summary: Create event def
       tags:
         - events
-  /event_defs/{eventDefId}:
+  /event_def/{eventDefId}:
     delete:
       description: Delete specific event def
       operationId: delete_event_def_by_id
