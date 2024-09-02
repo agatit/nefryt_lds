@@ -1,4 +1,4 @@
-from ..schemas import Event, EventDef, TrendDef
+from ..schemas import Event, EventDef, TrendDef, TrendParam
 from database import lds
 from ..schemas.trend import Trend
 
@@ -41,3 +41,12 @@ def map_lds_trend_def_to_trend_def(lds_trend_def: lds.TrendDef) -> TrendDef:
 
 def map_trend_def_to_lds_trend_def(trend_def: TrendDef) -> lds.TrendDef:
     return lds.TrendDef(**trend_def.model_dump(by_alias=True))
+
+
+def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParam:
+    lds_trend_param_dict = to_dict(lds_trend_param)
+    lds_trend_param_def_dict = to_dict(lds_trend_param_def)
+    lds_trend_param_def_dict.pop('TrendDefID')
+    lds_trend_param_def_dict.pop('ID')
+    lds_trend_param_dict.update(lds_trend_param_def_dict)
+    return TrendParam(**lds_trend_param_dict)

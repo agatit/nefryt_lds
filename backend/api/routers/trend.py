@@ -6,9 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
-from .mapper import map_lds_trend_to_trend, map_trend_to_lds_trend
+from .mapper import map_lds_trend_to_trend, map_trend_to_lds_trend, \
+    map_lds_trend_param_and_lds_trend_param_def_to_trend_param
 from ..db import engine
-from ..schemas import Error, TrendData, Information, Trend, UpdateTrend
+from ..schemas import Error, TrendData, Information, Trend, UpdateTrend, TrendParam
 from database import lds
 
 router = APIRouter(prefix="/trend")
@@ -114,4 +115,73 @@ async def update_trend(trend_id: Annotated[str, Path()], updated_trend: Annotate
         return trend
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_trend_def(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get('/trend/{trend_id}/param', response_model=list[TrendParam] | Error)
+async def list_trend_params(trend_id: Annotated[int, Path()], filter: Annotated[str | None, Query()] = None):
+    try:
+        statement = (select(lds.TrendParam, lds.TrendParamDef)
+                     .join(lds.TrendParamDef)
+                     .where(lds.TrendParam.TrendID == trend_id))
+        with Session(engine) as session:
+            results = session.execute(statement).all()
+        if not results:
+            error = Error(code=status.HTTP_404_NOT_FOUND, message='No trend with id = ' + str(trend_id))
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+        trend_params_list = []
+        for result in results:
+            lds_trend_param, lds_trend_param_def = result[0]
+            trend_param_out = map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def)
+            trend_params_list.append(trend_param_out)
+        return trend_params_list
+    except Exception as e:
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_params(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get('/trend/{trend_id}/param/{trend_param_def_id}', response_model=TrendParam | Error)
+async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()]):
+    try:
+        statement = (select(lds.TrendParam, lds.TrendParamDef)
+                     .join(lds.TrendParamDef)
+                     .where(lds.TrendParam.TrendID == trend_id)
+                     .where(lds.TrendParam.TrendParamDefID == trend_param_def_id))
+        with Session(engine) as session:
+            results = session.execute(statement).all()
+        if not results:
+            error = Error(code=status.HTTP_404_NOT_FOUND,
+                          message='No trend param for trend with id = ' + str(trend_id)
+                                  + ' and trendParamDef with id = ' + trend_param_def_id)
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+        lds_trend_param, lds_trend_param_def = results[0]
+        trend_param_out = map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def)
+        return trend_param_out
+    except Exception as e:
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_trend_param_by_id(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.put('/trend/{trend_id}/param/{trend_param_def_id}', response_model=TrendParam | Error)
+async def update_trend_param(trend_id: Annotated[str, Path()], trend_param_def_id: Annotated[str, Path()], updated_trend_param: Annotated[TrendParam, Body()]):
+    try:
+        statement = (select(lds.TrendParam, lds.TrendParamDef)
+                     .join(lds.TrendParamDef)
+                     .where(lds.TrendParam.TrendID == trend_id)
+                     .where(lds.TrendParam.TrendParamDefID == trend_param_def_id))
+        with Session(engine) as session:
+            results = session.execute(statement).all()
+        if not results:
+            error = Error(code=status.HTTP_404_NOT_FOUND,
+                          message='No trend param for trend with id = ' + str(trend_id)
+                                  + ' and trendParamDef with id = ' + trend_param_def_id)
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+        new_value = updated_trend_param.model_dump(by_alias=True)['Value']
+        lds_trend_param = results[0]
+        lds_trend_param.value = new_value
+        session.commit()
+        session.refresh(lds_trend_param)
+        return lds_trend_param
+    except Exception as e:
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_trend_param(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
