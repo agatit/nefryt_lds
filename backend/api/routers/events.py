@@ -35,7 +35,7 @@ async def get_event_by_id(event_id: int):
     try:
         statement = (select(lds.Event, lds.EventDef)
                      .join(lds.EventDef)
-                     .where(lds.Event.ID == event_id))  # noqa
+                     .where(lds.Event.ID == event_id))
         with Session(engine) as session:
             results = session.execute(statement).all()
         if not results:

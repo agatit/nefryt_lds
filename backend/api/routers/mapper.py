@@ -1,5 +1,8 @@
-from ..schemas import Event
+from ..schemas import Event, EventDef, TrendDef
 from database import lds
+from ..schemas.trend import Trend
+
+# todo: czy wszystkie mappery są potrzebne check?
 
 
 def to_dict(o) -> dict:
@@ -14,13 +17,27 @@ def map_lds_event_and_lds_event_def_to_event(lds_event: lds.Event, lds_event_def
     return Event(**lds_event_dict)
 
 
-# def map_lds_trend_to_trend(lds_trend: lds.Trend) -> Trend:
-#     lds_trend_dict = to_dict(lds_trend)
-#     print(lds_trend_dict)
-#     return Trend(**lds_trend_dict)
-#
-#
-# def map_trend_to_lds_trend(trend: Trend) -> lds.Trend:
-#     trend_dict = to_dict(trend)
-#     print(trend_dict)
-#     return lds.Trend(**trend_dict)
+def map_lds_trend_to_trend(lds_trend: lds.Trend) -> Trend:
+    lds_trend_dict = to_dict(lds_trend)
+    return Trend(**lds_trend_dict)
+
+
+def map_trend_to_lds_trend(trend: Trend) -> lds.Trend:
+    trend_dict = to_dict(trend)
+    return lds.Trend(**trend_dict)
+
+
+def map_event_def_to_lds_event_def(event_def: EventDef) -> lds.EventDef:
+    return lds.EventDef(**event_def.model_dump(by_alias=True))
+
+
+def map_lds_event_def_to_event_def(lds_event_def: lds.EventDef) -> EventDef:
+    return EventDef(**to_dict(lds_event_def))
+
+
+def map_lds_trend_def_to_trend_def(lds_trend_def: lds.TrendDef) -> TrendDef:
+    return TrendDef(**to_dict(lds_trend_def[0]))
+
+
+def map_trend_def_to_lds_trend_def(trend_def: TrendDef) -> lds.TrendDef:
+    return lds.TrendDef(**trend_def.model_dump(by_alias=True))
