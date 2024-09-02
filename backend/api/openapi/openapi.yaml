@@ -1082,7 +1082,7 @@ paths:
       x-openapi-router-controller: api.controllers.trends_controller
   /trend/{trendIdList}/current_data/{period}/{samples}:
     get:
-      description: List trend currnet data
+      description: List trend current data
       operationId: get_trend_current_data
       parameters:
       - description: Lost of ids of the trend to retrieve
@@ -1095,7 +1095,7 @@ paths:
             type: integer
           type: array
         style: simple
-      - description: period of data to take since currnet time (timestamp UTC)
+      - description: period of data to take since current time (timestamp UTC)
         explode: false
         in: path
         name: period
@@ -1126,7 +1126,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: List trend currnet data
+      summary: List trend current data
       tags:
       - trends
       x-openapi-router-controller: api.controllers.trends_controller

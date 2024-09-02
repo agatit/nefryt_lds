@@ -203,6 +203,7 @@ class Trend(Base):
     __table_args__ = (
         ForeignKeyConstraint(['NodeID'], ['lds.Node.ID'], ondelete='SET NULL', name='Trend_fk'),
         ForeignKeyConstraint(['UnitID'], ['lds.Unit.ID'], name='Trend_Unit_fk'),
+        ForeignKeyConstraint(['TrendDefID'], ['lds.TrendDef.ID'], ondelete='CASCADE', name='Trend_TrendDef_fk'),
         PrimaryKeyConstraint('ID', name='Trend_pk'),
         {'schema': 'lds'}
     )
@@ -224,6 +225,7 @@ class Trend(Base):
 
     Node_ = relationship('Node')
     Unit_ = relationship('Unit')
+    TrendDef_ = relationship('TrendDef')
 
 
 class TrendParamDef(Base):

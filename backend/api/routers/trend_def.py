@@ -46,7 +46,6 @@ async def create_trend_def(trend_def: Annotated[TrendDef, Body()]):
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# todo: fk trenddef i trend tables
 @router.delete('/{trend_def_id}', response_model=Information | Error)
 async def delete_trend_def_by_id(trend_def_id: Annotated[str, Path()]):
     try:
