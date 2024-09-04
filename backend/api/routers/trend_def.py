@@ -11,7 +11,7 @@ from ..schemas import TrendDef, Error
 router = APIRouter(prefix="/trend_def")
 
 
-@router.get('/', response_model=list[TrendDef] | Error)
+@router.get('', response_model=list[TrendDef] | Error)
 async def list_trend_defs():
     try:
         statement = select(lds.TrendDef)

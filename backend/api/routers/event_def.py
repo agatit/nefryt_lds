@@ -4,7 +4,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 from .mapper import map_event_def_to_lds_event_def, map_lds_event_def_to_event_def, \
     map_lds_event_def_to_event_def
 from ..db import engine
@@ -14,7 +14,7 @@ from database import lds
 router = APIRouter(prefix="/event_def")
 
 
-@router.get('/', response_model=list[EventDef] | Error, operation_id="list_event_defs")
+@router.get('', response_model=list[EventDef] | Error, operation_id="list_event_defs")
 async def list_event_defs():
     try:
         statement = select(lds.EventDef)
@@ -27,7 +27,7 @@ async def list_event_defs():
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.post('/', response_model=EventDef | Error)
+@router.post('', response_model=EventDef | Error)
 async def create_event_def(event_def: Annotated[EventDef, Body()]):
     try:
         lds_event_def = map_event_def_to_lds_event_def(event_def)
@@ -59,14 +59,27 @@ async def delete_event_def_by_id(event_def_id: Annotated[str, Path()]):
             session.execute(statement)
             session.delete(event_def)
             session.commit()
-        information = Information(message="Event def deleted", affected=1, status=status.HTTP_204_NO_CONTENT)
-        return JSONResponse(content=information.model_dump(), status_code=status.HTTP_200_OK)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT,
                       message='Integrity error when deleting event def with id = ' + event_def_id)
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in delete_event_def_by_id(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get('/{event_def_id}', response_model=EventDef | Error)
+async def get_event_def_by_id(event_def_id: Annotated[str, Path()]):
+    try:
+        with Session(engine) as session:
+            event_def = session.get(lds.EventDef, event_def_id)
+        if not event_def:
+            error = Error(code=status.HTTP_404_NOT_FOUND, message='No event def with id = ' + event_def_id)
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+        return map_lds_event_def_to_event_def(event_def)
+    except Exception as e:
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_event_def_by_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -10,10 +10,10 @@ from ..schemas import Error, Event, Information
 from ..db import engine
 from database import lds
 
-router = APIRouter(prefix="/events")
+router = APIRouter(prefix="/event")
 
 
-@router.get('/', response_model=list[Event] | Error)
+@router.get('', response_model=list[Event] | Error)
 async def list_events():
     try:
         statement = (select(lds.Event, lds.EventDef)
@@ -30,7 +30,7 @@ async def list_events():
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/get/{event_id}', response_model=Event | Error)
+@router.get('/{event_id}', response_model=Event | Error)
 async def get_event_by_id(event_id: int):
     try:
         statement = (select(lds.Event, lds.EventDef)

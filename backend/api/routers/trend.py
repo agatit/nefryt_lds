@@ -1,11 +1,12 @@
+import struct
 import traceback
 from datetime import datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Query, Body, Path
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 from starlette import status
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_trend_to_trend, map_trend_to_lds_trend, \
     map_lds_trend_param_and_lds_trend_param_def_to_trend_param
 from ..db import engine
@@ -15,7 +16,7 @@ from database import lds
 router = APIRouter(prefix="/trend")
 
 
-@router.get('/', response_model=list[Trend] | Error)
+@router.get('', response_model=list[Trend] | Error)
 async def list_trends(filter: Annotated[str | None, Query()] = None):
     try:
         statement = select(lds.Trend)
@@ -28,7 +29,7 @@ async def list_trends(filter: Annotated[str | None, Query()] = None):
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.post('/', response_model=Trend | Error)
+@router.post('', response_model=Trend | Error)
 async def create_trend(trend: Annotated[Trend, Body()]):
     try:
         lds_trend = map_trend_to_lds_trend(trend)
@@ -45,18 +46,99 @@ async def create_trend(trend: Annotated[Trend, Body()]):
 
 
 @router.get('/trend/{trend_id_list}/current_data/{period}/{samples}', response_model=list[TrendData] | Error)
-async def get_trend_current_data(trend_id_list: Annotated[list[int], Path()], period: Annotated[int, Path()], samples: Annotated[int, Path()]):
+async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[int, Path()], samples: Annotated[int, Path()]):
     timestamp = int(datetime.now(timezone.utc).timestamp())
     return get_trend_data(trend_id_list, timestamp - period, timestamp, samples)
 
 
 # todo: !!!
 @router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=list[TrendData] | Error)
-async def get_trend_data(trend_id_list: Annotated[list[int], Path()], begin: Annotated[int, Path()], end: Annotated[int, Path()], samples: Annotated[int, Path()]):
+async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[int, Path()], end: Annotated[int, Path()], samples: Annotated[int, Path()]):
     try:
+        lds_trends_scales = {}
+        trend_id_list = trend_id_list.split(",")
         statement = select(lds.Trend).where(lds.Trend.ID.in_(trend_id_list))
         with Session(engine) as session:
-            trends = session.execute(statement).all()
+            lds_trends = session.execute(statement).all()
+            print('wwwww')
+            print(lds_trends)
+
+        params_ids = ['RawMin', 'RawMax', 'ScaledMin', 'ScaledMax']
+        default_lds_trends_scale = {params_ids[0]: 0,
+                                    params_ids[1]: 1,
+                                    params_ids[2]: 0,
+                                    params_ids[3]: 1}
+
+        for lds_trend, in lds_trends:
+            try:
+                lds_trends_scales[lds_trend.ID] = {
+                    param_id:  lds_trend[param_id] for param_id in params_ids
+                }
+            except Exception: # noqa
+                lds_trends_scales[lds_trend.ID] = default_lds_trends_scale
+
+        print(lds_trends_scales)
+
+        samples = samples if samples > 0 else 1
+        inc_samples = (100 * (end - begin + 1)) // samples
+        inc_samples = inc_samples if inc_samples > 0 else 1
+        samples = 100 * (end - begin + 1) // inc_samples
+
+        print(samples, inc_samples)
+
+        trend_datas = []
+        trend_timestamps = []
+        trend_timestamps_ms = []
+        timestamp = begin
+        sample_in_timestamp = 0
+        for _ in range(samples):
+            trend_datas.append({"Timestamp": timestamp, "TimestampMs": sample_in_timestamp * 10})
+            trend_timestamps.append(timestamp)
+            trend_timestamps_ms.append(sample_in_timestamp * 10)
+            timestamp += (sample_in_timestamp + inc_samples) // 100
+            sample_in_timestamp = (sample_in_timestamp + inc_samples) % 100
+
+        print(trend_datas)
+
+        statement = (select(lds.TrendData).
+                     where(lds.TrendData.Time.in_(trend_timestamps)).
+                     where(lds.TrendData.TrendID.in_(trend_id_list)).
+                     order_by(lds.TrendData.Time))
+        with Session(engine) as session:
+            lds_trends_data = session.execute(statement).all()
+
+        lds_trends_data = [trend_data[0] for trend_data in lds_trends_data]
+
+        iter_lds_data = iter(lds_trends_data)
+        iter_time_data = iter(trend_datas)
+
+        lds_data = next(iter_lds_data, None)
+        time_data = next(iter_time_data, None)
+
+        # todo: to check
+        while lds_data and time_data:
+            while lds_data[0].Time < time_data["Timestamp"]:
+                lds_data = next(iter_lds_data)
+
+                one_second_data = {}
+                while lds_data and lds_data[0].Time == time_data["Timestamp"]:
+                    if lds_trends_scales[lds_data[0].TrendID]["RAW_MIN"] >= 0:
+                        one_second_data[lds_data[0].TrendID] = struct.unpack("H" * 100, lds_data[0].Data)
+                    else:
+                        one_second_data[lds_data[0].TrendID] = struct.unpack("h" * 100, lds_data[0].Data)
+                    lds_data = next(iter_lds_data, None)
+
+                current_second = time_data["Timestamp"]
+                while time_data and time_data["Timestamp"] == current_second:
+                    for trend_id in one_second_data.keys():
+                        time_data[str(trend_id)] = ((lds_trends_scales[trend_id]["SCALED_MAX"]
+                                                    - lds_trends_scales[trend_id]["SCALED_MIN"])
+                                                    * (one_second_data[trend_id][-time_data["TimestampMs"] // 10 - 1]
+                                                       - lds_trends_scales[trend_id]["RAW_MIN"])
+                                                    / (lds_trends_scales[trend_id]["RAW_MAX"]
+                                                       - lds_trends_scales[trend_id]["RAW_MIN"])
+                                                    + lds_trends_scales[trend_id]["SCALED_MIN"])
+                    time_data = next(iter_time_data, None)
         return []
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_trend_data(): ' + str(e))
@@ -75,8 +157,7 @@ async def delete_trend_by_id(trend_id: Annotated[int, Path()]):
                 return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
             session.delete(trend)
             session.commit()
-        information = Information(message="Trend deleted", affected=1, status=status.HTTP_204_NO_CONTENT)
-        return JSONResponse(content=information.model_dump(), status_code=status.HTTP_200_OK)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in delete_trend_by_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -118,20 +199,22 @@ async def update_trend(trend_id: Annotated[str, Path()], updated_trend: Annotate
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/trend/{trend_id}/param', response_model=list[TrendParam] | Error)
+@router.get('/{trend_id}/param', response_model=list[TrendParam] | Error)
 async def list_trend_params(trend_id: Annotated[int, Path()], filter: Annotated[str | None, Query()] = None):
     try:
-        statement = (select(lds.TrendParam, lds.TrendParamDef)
-                     .join(lds.TrendParamDef)
-                     .where(lds.TrendParam.TrendID == trend_id))
+        statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
+                     .select_from(lds.Trend))
+                     .outerjoin(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID)) # noqa
+                     .outerjoin(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
+                                                     lds.Trend.ID == lds.TrendParam.TrendID)))
+                     .where(lds.Trend.ID == trend_id))
         with Session(engine) as session:
             results = session.execute(statement).all()
         if not results:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No trend with id = ' + str(trend_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         trend_params_list = []
-        for result in results:
-            lds_trend_param, lds_trend_param_def = result[0]
+        for lds_trend_param, _, lds_trend_param_def in results:
             trend_param_out = map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def)
             trend_params_list.append(trend_param_out)
         return trend_params_list

@@ -178,14 +178,18 @@ paths:
     delete:
       description: Delete specific event def
       operationId: delete_event_def_by_id
-      parameters: [ ]
+      parameters:
+        - description: The id of the event def to retrieve
+          explode: false
+          in: path
+          name: eventDefId
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Deleted
+          description: No content
         default:
           content:
             application/json:
@@ -195,10 +199,46 @@ paths:
       summary: Deletes event def
       tags:
         - events
+    get:
+      description: Info for specific event def
+      operationId: get_event_def_by_id
+      parameters:
+        - description: The id of the event def to retrieve
+          explode: false
+          in: path
+          name: eventDefId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDef'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets event def details
+      tags:
+        - events
     put:
       description: Update event def
       operationId: update_event_def
-      parameters: [ ]
+      parameters:
+        - description: The id of the event def to retrieve
+          explode: false
+          in: path
+          name: eventDefId
+          required: true
+          schema:
+            type: string
+          style: simple
       requestBody:
         content:
           application/json:
@@ -284,11 +324,7 @@ paths:
       parameters: []
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Deleted
+          description: No content
         default:
           content:
             application/json:
@@ -426,11 +462,7 @@ paths:
         style: simple
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Deleted
+          description: No content
         default:
           content:
             application/json:
@@ -576,11 +608,7 @@ paths:
         style: simple
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Deleted
+          description: No content
         default:
           content:
             application/json:
@@ -751,11 +779,7 @@ paths:
         style: simple
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Deleted
+          description: No content
         default:
           content:
             application/json:
@@ -1085,15 +1109,13 @@ paths:
       description: List trend current data
       operationId: get_trend_current_data
       parameters:
-      - description: Lost of ids of the trend to retrieve
+      - description: String of ids of the trend to retrieve, separated by comma
         explode: false
         in: path
         name: trendIdList
         required: true
         schema:
-          items:
-            type: integer
-          type: array
+          type: string
         style: simple
       - description: period of data to take since current time (timestamp UTC)
         explode: false
@@ -1135,15 +1157,13 @@ paths:
       description: List data
       operationId: get_trend_data
       parameters:
-      - description: Lost of ids of the trend to retrieve
+      - description: String of ids of the trend to retrieve, separated by comma
         explode: false
         in: path
         name: trendIdList
         required: true
         schema:
-          items:
-            type: integer
-          type: array
+          type: string
         style: simple
       - description: start of date to take from data (timestamp UTC)
         explode: false
@@ -1203,11 +1223,7 @@ paths:
         style: simple
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Deleted
+          description: No content
         default:
           content:
             application/json:
@@ -1497,11 +1513,7 @@ paths:
       parameters: []
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Deleted
+          description: No content
         default:
           content:
             application/json:
