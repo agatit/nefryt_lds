@@ -1,4 +1,4 @@
-from ..schemas import Event, EventDef, TrendDef, TrendParam, TrendData, TrendValue
+from ..schemas import Event, EventDef, TrendDef, TrendParam, TrendData, TrendValue, Link
 from database import lds
 from ..schemas.trend import Trend
 
@@ -70,3 +70,11 @@ def map_dicts_to_trend_data(timestamps: list[dict], trend_values_dict: dict) -> 
         trend_datas.append(trend_data)
 
     return trend_datas
+
+
+def map_lds_link_to_link(lds_link: lds.Link) -> Link:
+    return Link(**to_dict(lds_link))
+
+
+def map_link_to_lds_link(link: Link) -> lds.Link:
+    return lds.Link(**link.model_dump(by_alias=True))
