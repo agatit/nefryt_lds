@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_trend_to_trend, map_trend_to_lds_trend, \
-    map_lds_trend_param_and_lds_trend_param_def_to_trend_param
+    map_lds_trend_param_and_lds_trend_param_def_to_trend_param, map_dicts_to_trend_data
 from ..db import engine
 from ..schemas import Error, TrendData, Information, Trend, UpdateTrend, TrendParam
 from database import lds
@@ -41,17 +41,16 @@ async def create_trend(trend: Annotated[Trend, Body()]):
         return JSONResponse(content=trend.model_dump(), status_code=status.HTTP_201_CREATED)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in create_trend(): ' + str(e))
-        print(traceback.print_exc())
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/trend/{trend_id_list}/current_data/{period}/{samples}', response_model=list[TrendData] | Error)
+@router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=list[TrendData] | Error)
 async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[int, Path()], samples: Annotated[int, Path()]):
     timestamp = int(datetime.now(timezone.utc).timestamp())
-    return get_trend_data(trend_id_list, timestamp - period, timestamp, samples)
+    return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples)
 
 
-# todo: !!!
+# todo: not enough data between begin and end
 @router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=list[TrendData] | Error)
 async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[int, Path()], end: Annotated[int, Path()], samples: Annotated[int, Path()]):
     try:
@@ -60,8 +59,6 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
         statement = select(lds.Trend).where(lds.Trend.ID.in_(trend_id_list))
         with Session(engine) as session:
             lds_trends = session.execute(statement).all()
-            print('wwwww')
-            print(lds_trends)
 
         params_ids = ['RawMin', 'RawMax', 'ScaledMin', 'ScaledMax']
         default_lds_trends_scale = {params_ids[0]: 0,
@@ -72,19 +69,15 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
         for lds_trend, in lds_trends:
             try:
                 lds_trends_scales[lds_trend.ID] = {
-                    param_id:  lds_trend[param_id] for param_id in params_ids
+                    param_id:  getattr(lds_trend, param_id) for param_id in params_ids
                 }
-            except Exception: # noqa
+            except Exception as e: # noqa
                 lds_trends_scales[lds_trend.ID] = default_lds_trends_scale
-
-        print(lds_trends_scales)
 
         samples = samples if samples > 0 else 1
         inc_samples = (100 * (end - begin + 1)) // samples
         inc_samples = inc_samples if inc_samples > 0 else 1
         samples = 100 * (end - begin + 1) // inc_samples
-
-        print(samples, inc_samples)
 
         trend_datas = []
         trend_timestamps = []
@@ -98,8 +91,6 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
             timestamp += (sample_in_timestamp + inc_samples) // 100
             sample_in_timestamp = (sample_in_timestamp + inc_samples) % 100
 
-        print(trend_datas)
-
         statement = (select(lds.TrendData).
                      where(lds.TrendData.Time.in_(trend_timestamps)).
                      where(lds.TrendData.TrendID.in_(trend_id_list)).
@@ -109,40 +100,55 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
 
         lds_trends_data = [trend_data[0] for trend_data in lds_trends_data]
 
+        if not lds_trends_data:
+            error = Error(code=status.HTTP_404_NOT_FOUND,
+                          message='No data')
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+
         iter_lds_data = iter(lds_trends_data)
         iter_time_data = iter(trend_datas)
 
         lds_data = next(iter_lds_data, None)
         time_data = next(iter_time_data, None)
 
-        # todo: to check
+        result_lists = {str(lds_trend[0].ID): [] for lds_trend in lds_trends}
+
         while lds_data and time_data:
-            while lds_data[0].Time < time_data["Timestamp"]:
+            print(lds_data.Time)
+            print(time_data["Timestamp"])
+            while lds_data.Time < time_data["Timestamp"]:
+                print('okkk')
                 lds_data = next(iter_lds_data)
 
-                one_second_data = {}
-                while lds_data and lds_data[0].Time == time_data["Timestamp"]:
-                    if lds_trends_scales[lds_data[0].TrendID]["RAW_MIN"] >= 0:
-                        one_second_data[lds_data[0].TrendID] = struct.unpack("H" * 100, lds_data[0].Data)
-                    else:
-                        one_second_data[lds_data[0].TrendID] = struct.unpack("h" * 100, lds_data[0].Data)
-                    lds_data = next(iter_lds_data, None)
+            one_second_data = {}
+            while lds_data and lds_data.Time == time_data["Timestamp"]:
+                if lds_trends_scales[lds_data.TrendID]["RawMin"] >= 0:
+                    one_second_data[lds_data.TrendID] = struct.unpack("H" * 100, lds_data.Data)
+                else:
+                    one_second_data[lds_data.TrendID] = struct.unpack("h" * 100, lds_data.Data)
+                print(one_second_data)
+                if not one_second_data:
+                    print(trend_datas)
+                    print('xxxxx')
+                    trend_datas.remove(time_data)
+                    print(trend_datas)
+                lds_data = next(iter_lds_data, None)
 
-                current_second = time_data["Timestamp"]
-                while time_data and time_data["Timestamp"] == current_second:
-                    for trend_id in one_second_data.keys():
-                        time_data[str(trend_id)] = ((lds_trends_scales[trend_id]["SCALED_MAX"]
-                                                    - lds_trends_scales[trend_id]["SCALED_MIN"])
-                                                    * (one_second_data[trend_id][-time_data["TimestampMs"] // 10 - 1]
-                                                       - lds_trends_scales[trend_id]["RAW_MIN"])
-                                                    / (lds_trends_scales[trend_id]["RAW_MAX"]
-                                                       - lds_trends_scales[trend_id]["RAW_MIN"])
-                                                    + lds_trends_scales[trend_id]["SCALED_MIN"])
-                    time_data = next(iter_time_data, None)
-        return []
+            current_second = time_data["Timestamp"]
+            while time_data and time_data["Timestamp"] == current_second:
+                for trend_id in one_second_data.keys():
+                    result_lists[str(trend_id)].append(((lds_trends_scales[trend_id]["ScaledMax"]
+                                                - lds_trends_scales[trend_id]["ScaledMin"])
+                                                * (one_second_data[trend_id][-time_data["TimestampMs"] // 10 - 1]
+                                                   - lds_trends_scales[trend_id]["RawMin"])
+                                                / (lds_trends_scales[trend_id]["RawMax"]
+                                                   - lds_trends_scales[trend_id]["RawMin"])
+                                                + lds_trends_scales[trend_id]["ScaledMin"]))
+                time_data = next(iter_time_data, None)
+
+        return map_dicts_to_trend_data(trend_datas, result_lists)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_trend_data(): ' + str(e))
-        print(traceback.print_exc())
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -6,3 +6,4 @@ from .trend_def import TrendDef
 from .trend_data import TrendData
 from .trend import Trend, UpdateTrend
 from .trend_param import TrendParam
+from .trend_value import TrendValue

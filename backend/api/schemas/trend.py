@@ -12,6 +12,10 @@ class Trend(BaseModel):
     time_exponent: int | None = Field(None, alias='TimeExponent')
     unit: str | None = Field(None, alias='UnitID')
     name: str | None = Field(None, alias='Name')
+    raw_min: int = Field(alias="RawMin")
+    raw_max: int = Field(alias="RawMax")
+    scaled_min: float = Field(alias="ScaledMin")
+    scaled_max: float = Field(alias="ScaledMax")
 
 
 class UpdateTrend(BaseModel):

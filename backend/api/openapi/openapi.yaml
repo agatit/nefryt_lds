@@ -1997,6 +1997,10 @@ components:
         TimeExponent: 1
         Unit: Unit
         Name: Name
+        RawMin: 0
+        RawMax: 10000
+        ScaledMin: -0.5
+        ScaledMax: 1.6
       properties:
         ID:
           description: none
@@ -2040,21 +2044,60 @@ components:
         Symbol:
           title: Symbol
           type: string
+        RawMin:
+          description: none
+          nullable: false
+          title: RawMin
+          type: integer
+        RawMax:
+          description: none
+          nullable: false
+          title: RawMax
+          type: integer
+        ScaledMin:
+          description: none
+          nullable: false
+          title: ScaledMin
+          type: number
+        ScaledMax:
+          description: none
+          nullable: false
+          title: RawMin
+          type: number
       required:
       - TrendDefID
+      - RawMin
+      - RawMax
+      - ScaledMin
+      - ScaledMax
       title: Trend
       type: object
+    TrendValue:
+      type: object
+      properties:
+        trendId:
+          type: integer
+        value:
+          type: number
+      required:
+        - trendId
+        - value
     TrendData:
       additionalProperties:
         type: number
       example:
         TimestampMs: 6
         Timestamp: 0
+        Data: null
       properties:
         Timestamp:
           type: integer
         TimestampMs:
           type: integer
+        Data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrendValue'
       required:
       - Timestamp
       - TimestampMs

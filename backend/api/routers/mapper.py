@@ -1,4 +1,4 @@
-from ..schemas import Event, EventDef, TrendDef, TrendParam
+from ..schemas import Event, EventDef, TrendDef, TrendParam, TrendData, TrendValue
 from database import lds
 from ..schemas.trend import Trend
 
@@ -21,8 +21,7 @@ def map_lds_event_and_lds_event_def_to_event(lds_event: lds.Event, lds_event_def
 
 
 def map_lds_trend_to_trend(lds_trend: lds.Trend) -> Trend:
-    lds_trend_dict = to_dict(lds_trend)
-    return Trend(**lds_trend_dict)
+    return Trend(**strip_strings_in_dict(to_dict(lds_trend)))
 
 
 def map_trend_to_lds_trend(trend: Trend) -> lds.Trend:
@@ -52,3 +51,22 @@ def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: 
     lds_trend_param_def_dict.pop('ID')
     lds_trend_param_dict.update(lds_trend_param_def_dict)
     return TrendParam(**strip_strings_in_dict(lds_trend_param_dict))
+
+
+def map_dicts_to_trend_data(timestamps: list[dict], trend_values_dict: dict) -> list[TrendData]:
+    trend_datas = []
+    print(timestamps)
+    for counter, timestamp in enumerate(timestamps):
+        print(trend_values_dict)
+        trend_values = [
+            TrendValue(ID=trend_id, Value=trend_values_dict[trend_id][counter])
+            for trend_id in trend_values_dict
+        ]
+        trend_data = TrendData(
+            Timestamp=timestamp['Timestamp'],
+            TimestampMs=timestamp['TimestampMs'],
+            Data=trend_values
+        )
+        trend_datas.append(trend_data)
+
+    return trend_datas
