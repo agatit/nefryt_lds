@@ -55,11 +55,9 @@ def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: 
 
 def map_dicts_to_trend_data(timestamps: list[dict], trend_values_dict: dict) -> list[TrendData]:
     trend_datas = []
-    print(timestamps)
     for counter, timestamp in enumerate(timestamps):
-        print(trend_values_dict)
         trend_values = [
-            TrendValue(ID=trend_id, Value=trend_values_dict[trend_id][counter])
+            TrendValue(ID=trend_id, Value=trend_values_dict[trend_id][counter][0])
             for trend_id in trend_values_dict
         ]
         trend_data = TrendData(

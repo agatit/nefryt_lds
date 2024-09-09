@@ -1,3 +1,4 @@
+import copy
 import struct
 import traceback
 from datetime import datetime, timezone
@@ -50,7 +51,6 @@ async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: 
     return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples)
 
 
-# todo: not enough data between begin and end
 @router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=list[TrendData] | Error)
 async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[int, Path()], end: Annotated[int, Path()], samples: Annotated[int, Path()]):
     try:
@@ -114,10 +114,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
         result_lists = {str(lds_trend[0].ID): [] for lds_trend in lds_trends}
 
         while lds_data and time_data:
-            print(lds_data.Time)
-            print(time_data["Timestamp"])
             while lds_data.Time < time_data["Timestamp"]:
-                print('okkk')
                 lds_data = next(iter_lds_data)
 
             one_second_data = {}
@@ -126,26 +123,20 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                     one_second_data[lds_data.TrendID] = struct.unpack("H" * 100, lds_data.Data)
                 else:
                     one_second_data[lds_data.TrendID] = struct.unpack("h" * 100, lds_data.Data)
-                print(one_second_data)
-                if not one_second_data:
-                    print(trend_datas)
-                    print('xxxxx')
-                    trend_datas.remove(time_data)
-                    print(trend_datas)
                 lds_data = next(iter_lds_data, None)
 
             current_second = time_data["Timestamp"]
             while time_data and time_data["Timestamp"] == current_second:
                 for trend_id in one_second_data.keys():
-                    result_lists[str(trend_id)].append(((lds_trends_scales[trend_id]["ScaledMax"]
+                    result_lists[str(trend_id)].append((((lds_trends_scales[trend_id]["ScaledMax"]
                                                 - lds_trends_scales[trend_id]["ScaledMin"])
                                                 * (one_second_data[trend_id][-time_data["TimestampMs"] // 10 - 1]
                                                    - lds_trends_scales[trend_id]["RawMin"])
                                                 / (lds_trends_scales[trend_id]["RawMax"]
                                                    - lds_trends_scales[trend_id]["RawMin"])
-                                                + lds_trends_scales[trend_id]["ScaledMin"]))
+                                                + lds_trends_scales[trend_id]["ScaledMin"]), time_data))
                 time_data = next(iter_time_data, None)
-
+        result_lists = extend_trend_data(result_lists, trend_datas)
         return map_dicts_to_trend_data(trend_datas, result_lists)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_trend_data(): ' + str(e))
@@ -177,7 +168,6 @@ async def get_trend_by_id(trend_id: int):
         if not lds_trend:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No trend with id = ' + str(trend_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
-        lds_trend = lds_trend[0]
         trend = map_lds_trend_to_trend(lds_trend)
         return trend
     except Exception as e:
@@ -199,7 +189,7 @@ async def update_trend(trend_id: Annotated[str, Path()], updated_trend: Annotate
                 setattr(trend, k, v)
             session.commit()
             session.refresh(trend)
-        return trend
+        return map_lds_trend_to_trend(trend)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_trend_def(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -274,3 +264,14 @@ async def update_trend_param(trend_id: Annotated[str, Path()], trend_param_def_i
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_trend_param(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def extend_trend_data(result_lists, trend_datas):
+    for trend_id in result_lists:
+        result = result_lists[trend_id]
+        timestamps_list = [res[1] for res in result]
+        for counter, trend_data in enumerate(trend_datas):
+            if trend_data not in timestamps_list:
+                result.insert(counter, (None, trend_data))
+
+    return result_lists

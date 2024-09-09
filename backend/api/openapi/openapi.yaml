@@ -2081,7 +2081,6 @@ components:
           type: number
       required:
         - trendId
-        - value
     TrendData:
       additionalProperties:
         type: number
@@ -2097,7 +2096,9 @@ components:
         Data:
           type: array
           items:
-            $ref: '#/components/schemas/TrendValue'
+            oneOf:
+              - $ref: '#/components/schemas/TrendValue'
+              - type: 'null'
       required:
       - Timestamp
       - TimestampMs
