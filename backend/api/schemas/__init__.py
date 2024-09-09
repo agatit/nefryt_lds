@@ -8,3 +8,5 @@ from .trend import Trend, UpdateTrend
 from .trend_param import TrendParam
 from .trend_value import TrendValue
 from .link import Link, UpdateLink
+from .login_permissions import LoginPermissions
+from .login import Login

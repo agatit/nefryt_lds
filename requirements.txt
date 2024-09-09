@@ -13,3 +13,5 @@ sqlmodel
 pydantic
 fastapi
 starlette
+passlib
+jwt

@@ -16,7 +16,7 @@ paths:
       operationId: auth_login
       requestBody:
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/Login'
       responses:
@@ -2210,7 +2210,7 @@ components:
         Details: Details
         Position: 1
         ID: 0
-        EventDefID: 0
+        EventDefID: NO_DATA
         Verbosity: Verbosity
         EndDate: 2000-01-23T04:56:07.000+00:00
         Silient: true
@@ -2228,7 +2228,7 @@ components:
         EventDefID:
           description: none
           title: EventDefID
-          type: integer
+          type: string
         MethodID:
           description: none
           title: MethodID
@@ -2496,6 +2496,7 @@ components:
           type: string
         refreshTokenExpiration:
           minLength: 1
+          format: date-time
           title: refreshTokenExpiration
           type: string
         permissions:
@@ -2555,4 +2556,3 @@ components:
       bearerFormat: JWT
       scheme: bearer
       type: http
-      x-bearerInfoFunc: api.controllers.security_controller.decode_token
