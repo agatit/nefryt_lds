@@ -1399,7 +1399,8 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TrendParam'
+              type: string
+              description: String containing number to set as given Trend Param value
       responses:
         "200":
           content:
