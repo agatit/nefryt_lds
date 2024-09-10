@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Body, Path
+from fastapi import APIRouter, Body, Path, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -10,11 +10,11 @@ from ..db import engine
 from ..schemas import Error, Link, UpdateLink
 from database import lds
 
-router = APIRouter(prefix="/link")
+router = APIRouter(prefix="/link", tags=["link"])
 
 
 @router.get('', response_model=list[Link] | Error)
-async def list_links():
+async def list_links(filter: Annotated[str | None, Query()] = None):
     try:
         statement = select(lds.Link)
         with Session(engine) as session:
@@ -45,7 +45,7 @@ async def create_event_def(link: Annotated[Link, Body()]):
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.delete('/{link_id}', response_model=Response | Error)
+@router.delete('/{link_id}', response_model=None | Error)
 async def delete_link_by_id(link_id: Annotated[int, Path()]):
     try:
         with Session(engine) as session:

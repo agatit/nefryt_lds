@@ -11,7 +11,7 @@ from ..db import engine
 from ..schemas import Error, EventDef, Information, UpdateEventDef
 from database import lds
 
-router = APIRouter(prefix="/event_def")
+router = APIRouter(prefix="/event_def", tags=["event_def"])
 
 
 @router.get('', response_model=list[EventDef] | Error, operation_id="list_event_defs")

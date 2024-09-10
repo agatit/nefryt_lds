@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from .routers import events_router, event_defs_router, trend_defs_router, trend_router, auth_router
+from .routers import (events_router, event_defs_router, trend_defs_router, trend_router, auth_router, link_router,
+                      node_router)
 
 
 app = FastAPI(title='Nefryt LDS API')
@@ -9,6 +10,8 @@ app.include_router(event_defs_router)
 app.include_router(trend_defs_router)
 app.include_router(trend_router)
 app.include_router(auth_router)
+app.include_router(link_router)
+app.include_router(node_router)
 
 
 origins = ['http://localhost:8080',

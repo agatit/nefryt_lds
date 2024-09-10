@@ -12,7 +12,7 @@ from ..db import engine
 from ..routers.security import get_user_permissions
 from database import lds
 
-router = APIRouter(prefix="/event")
+router = APIRouter(prefix="/event", tags=["event"])
 
 
 @router.get('', response_model=list[Event] | Error)

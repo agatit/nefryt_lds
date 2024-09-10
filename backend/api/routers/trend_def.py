@@ -8,7 +8,7 @@ from ..db import engine
 from ..routers.mapper import map_lds_trend_def_to_trend_def
 from ..schemas import TrendDef, Error
 
-router = APIRouter(prefix="/trend_def")
+router = APIRouter(prefix="/trend_def", tags=["trend_def"])
 
 
 @router.get('', response_model=list[TrendDef] | Error)

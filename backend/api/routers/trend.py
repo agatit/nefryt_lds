@@ -12,7 +12,7 @@ from ..db import engine
 from ..schemas import Error, TrendData, Information, Trend, UpdateTrend, TrendParam
 from database import lds
 
-router = APIRouter(prefix="/trend")
+router = APIRouter(prefix="/trend", tags=['trend'])
 
 
 @router.get('', response_model=list[Trend] | Error)

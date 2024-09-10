@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from ..routers.security import calculate_expiration_time, generate_token, verify_password, hash_password
 from ..schemas import Login, LoginPermissions
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 # tabela z kontami
