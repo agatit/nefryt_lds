@@ -30,13 +30,15 @@ def calculate_expiration_time(current_time: datetime, hours: int) -> datetime:
 
 def get_user_permissions(encoded_token: Annotated[str, Depends(oauth2_scheme)]) -> list[str]:
     try:
-        print('1')
         decoded_token = decode_token(encoded_token)
-        print('3')
         return decoded_token.get('perms')
     except InvalidTokenError:
-        print('2')
         return []
+
+
+def get_user_token(encoded_token: Annotated[str, Depends(oauth2_scheme)]) -> str:
+    decoded_token = decode_token(encoded_token)
+    return decoded_token
 
 
 def decode_token(encoded_token: str) -> str:
