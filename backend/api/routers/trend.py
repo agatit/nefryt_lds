@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Query, Body, Path
 from sqlalchemy import select, and_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
@@ -38,6 +39,9 @@ async def create_trend(trend: Annotated[Trend, Body()]):
             session.refresh(lds_trend)
         trend = map_lds_trend_to_trend(lds_trend)
         return JSONResponse(content=trend.model_dump(), status_code=status.HTTP_201_CREATED)
+    except IntegrityError:
+        error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating trend')
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in create_trend(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

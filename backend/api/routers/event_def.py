@@ -38,8 +38,7 @@ async def create_event_def(event_def: Annotated[EventDef, Body()]):
         event_def = map_lds_event_def_to_event_def(lds_event_def)
         return event_def
     except IntegrityError:
-        error = Error(code=status.HTTP_409_CONFLICT,
-                      message='Event def with id = ' + event_def.id + ' already exists')
+        error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating event def')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in create_event_def(): ' + str(e))

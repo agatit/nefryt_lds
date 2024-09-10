@@ -27,7 +27,7 @@ async def list_links(filter: Annotated[str | None, Query()] = None):
 
 
 @router.post('', response_model=Link | Error)
-async def create_event_def(link: Annotated[Link, Body()]):
+async def create_link(link: Annotated[Link, Body()]):
     try:
         lds_link = map_link_to_lds_link(link)
         with Session(engine) as session:
@@ -37,8 +37,7 @@ async def create_event_def(link: Annotated[Link, Body()]):
         link = map_lds_link_to_link(lds_link)
         return link
     except IntegrityError:
-        error = Error(code=status.HTTP_409_CONFLICT,
-                      message='Link with id = ' + str(link.id) + ' already exists')
+        error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating link')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in create_link(): ' + str(e))
@@ -81,10 +80,10 @@ async def get_link_by_id(link_id: Annotated[int, Path()]):
 
 
 @router.put('/{link_id}', response_model=Link | Error)
-async def update_event_def(link_id: Annotated[str, Path()], updated_link: Annotated[UpdateLink, Body()]):
+async def update_link(link_id: Annotated[str, Path()], updated_link: Annotated[UpdateLink, Body()]):
     try:
         with Session(engine) as session:
-            link = session.get(lds.EventDef, link_id)
+            link = session.get(lds.Link, link_id)
             if not link:
                 error = Error(code=status.HTTP_404_NOT_FOUND,
                               message='No link with id = ' + str(link_id))

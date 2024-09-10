@@ -1,5 +1,5 @@
-from ..schemas import Event, EventDef, TrendDef, TrendParam, TrendData, TrendValue, Link, Node
-from database import lds
+from ..schemas import Event, EventDef, TrendDef, TrendParam, TrendData, TrendValue, Link, Node, EditorNode
+from database import lds, editor
 from ..schemas.trend import Trend
 
 
@@ -79,8 +79,27 @@ def map_link_to_lds_link(link: Link) -> lds.Link:
 
 
 def map_node_to_lds_node(node: Node) -> lds.Node:
-    return lds.Node(**node.model_dump(by_alias=True))
+    node_dict = node.model_dump(by_alias=True)
+    node_dict.pop('TrendID')
+    node_dict.pop('EditorParams')
+    return lds.Node(**node_dict)
 
 
-def map_lds_node_to_node(lds_node: lds.Node) -> Node:
-    return Node(**strip_strings_in_dict(to_dict(lds_node)))
+def map_node_to_editor_node(node_id: int, node: Node) -> editor.Node:
+    if node.editor_params:
+        editor_node_dict = {'ID': node_id,
+                            'PosX': node.editor_params.pos_x,
+                            'PosY': node.editor_params.pos_y}
+        return editor.Node(**editor_node_dict)
+    return None
+
+
+def map_lds_node_and_editor_node_to_node(lds_node: lds.Node, editor_node: editor.Node) -> Node:
+    lds_node_dict = to_dict(lds_node)
+    editor_params = None
+    if editor_node:
+        editor_node_dict = to_dict(editor_node)
+        editor_node_dict.pop('ID')
+        editor_params = EditorNode(**editor_node_dict)
+    lds_node_dict.update({'EditorParams': editor_params})
+    return Node(**strip_strings_in_dict(lds_node_dict))
