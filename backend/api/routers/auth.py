@@ -11,26 +11,6 @@ from ..schemas import Login, LoginPermissions, Error
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-# tabela z kontami
-# dodawanie kont
-# deviceId i deviceName w polu login
-# czas wygaśnięcia token refresha
-# @router.post("/login")
-# async def auth_login(username: Annotated[str, Form], password: Annotated[str, Form],
-#                      device_id: Annotated[str | None, Form] = None, device_name: Annotated[str | None, Form] = None):
-#     login_data = Login(username=username, password=password, deviceId=device_id, deviceName=device_name)
-#     permissions = []
-#     success = False
-#     username = "guest"
-#
-#     if login_data.username == "admin" and verify_password(login_data.password, hash_password("Kartofel_1410")):
-#         permissions = ["admin", "confirm"]
-#         success = True
-#         username = login_data.username
-#
-#     return prepare_login_permissions(username, permissions, success)
-
-
 @router.post("/login")
 async def auth_login(login_data: Annotated[Login, Depends()]):
     permissions = []

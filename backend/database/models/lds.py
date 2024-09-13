@@ -209,7 +209,7 @@ class Trend(Base):
     )
 
     ID = Column(Integer, Identity(start=1000, increment=1))
-    TrendDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
+    TrendDefID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
     RawMin = Column(Integer, nullable=False)
     RawMax = Column(Integer, nullable=False)
     ScaledMin = Column(Float(53), nullable=False)

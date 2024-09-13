@@ -1,10 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from database import lds
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
-from ..db import engine
+from ..db import get_engine
 from ..routers.mapper import map_lds_trend_def_to_trend_def
 from ..schemas import TrendDef, Error
 
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/trend_def", tags=["trend_def"])
 
 
 @router.get('', response_model=list[TrendDef] | Error)
-async def list_trend_defs():
+async def list_trend_defs(engine=Depends(get_engine)):
     try:
         statement = select(lds.TrendDef)
         with Session(engine) as session:

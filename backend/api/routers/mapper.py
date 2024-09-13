@@ -37,7 +37,7 @@ def map_lds_event_def_to_event_def(lds_event_def: lds.EventDef) -> EventDef:
 
 
 def map_lds_trend_def_to_trend_def(lds_trend_def: lds.TrendDef) -> TrendDef:
-    return TrendDef(**to_dict(lds_trend_def[0]))
+    return TrendDef(**strip_strings_in_dict(to_dict(lds_trend_def[0])))
 
 
 def map_trend_def_to_lds_trend_def(trend_def: TrendDef) -> lds.TrendDef:
