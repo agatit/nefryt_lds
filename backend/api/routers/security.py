@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Annotated
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jwt import InvalidTokenError
+from jwt import InvalidTokenError, InvalidSignatureError
 from passlib.context import CryptContext
 import jwt
+from starlette import status
 
 
 SECRET_KEY = "45bfa25ea5ae73f9f46909ac22e5ff72d51362129e210e3bc2c728957ee18230"
@@ -32,13 +33,16 @@ def get_user_permissions(encoded_token: Annotated[str, Depends(oauth2_scheme)]) 
     try:
         decoded_token = decode_token(encoded_token)
         return decoded_token.get('perms')
-    except InvalidTokenError:
+    except (InvalidTokenError, InvalidSignatureError):
         return []
 
 
 def get_user_token(encoded_token: Annotated[str, Depends(oauth2_scheme)]) -> str:
-    decoded_token = decode_token(encoded_token)
-    return decoded_token
+    try:
+        decoded_token = decode_token(encoded_token)
+        return decoded_token
+    except (InvalidTokenError, InvalidSignatureError):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Token is invalid')
 
 
 def decode_token(encoded_token: str) -> str:

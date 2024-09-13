@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Annotated
-from fastapi import APIRouter, Depends
-from jwt import InvalidTokenError
+from fastapi import APIRouter, Depends, HTTPException
+from jwt import InvalidTokenError, InvalidSignatureError
 from starlette import status
 from starlette.responses import JSONResponse
 from ..routers.security import calculate_expiration_time, generate_token, verify_password, hash_password, \
@@ -27,14 +27,10 @@ async def auth_login(login_data: Annotated[Login, Depends()]):
 
 @router.post("/refresh")
 async def auth_refresh(token: Annotated[str, Depends(get_user_token)]):
-    try:
-        permissions = token.get('perms', [])
-        success = True
-        username = token.get('sub', 'guest')
-        return prepare_login_permissions(username, permissions, success)
-    except InvalidTokenError:
-        error = Error(code=status.HTTP_400_BAD_REQUEST, message='Token is invalid')
-        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_400_BAD_REQUEST)
+    permissions = token.get('perms', [])
+    success = True
+    username = token.get('sub', 'guest')
+    return prepare_login_permissions(username, permissions, success)
 
 
 def prepare_login_permissions(username: str, permissions: list[str], success: bool) -> LoginPermissions:

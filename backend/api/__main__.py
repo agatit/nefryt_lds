@@ -1,9 +1,12 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
 from .db import get_engine
 from .routers import (events_router, event_defs_router, trend_defs_router, trend_router, auth_router, link_router,
                       node_router)
-
+from .schemas import Error
 
 app = FastAPI(title='Nefryt LDS API',
               dependencies=[Depends(get_engine)])
@@ -26,3 +29,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(_request: Request, exc: HTTPException):
+    error = Error(code=exc.status_code, message=exc.detail)
+    return JSONResponse(content=error.model_dump(), status_code=exc.status_code)
+
