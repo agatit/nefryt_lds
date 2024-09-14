@@ -247,8 +247,10 @@ class TrendParamDef(Base):
 class Event(Base):
     __tablename__ = 'Event'
     __table_args__ = (
-        ForeignKeyConstraint(['EventDefID'], ['lds.EventDef.ID'], name='Event_EventDef_fk'),
-        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], name='Event_Method_fk'),
+        ForeignKeyConstraint(['EventDefID'], ['lds.EventDef.ID'], ondelete='CASCADE', onupdate='CASCADE',
+                             name='Event_EventDef_fk'),
+        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], ondelete='CASCADE', onupdate='CASCADE',
+                             name='Event_Method_fk'),
         PrimaryKeyConstraint('ID', name='PK_Event'),
         {'schema': 'lds'}
     )

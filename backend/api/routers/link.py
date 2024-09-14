@@ -35,7 +35,7 @@ async def create_link(link: Annotated[Link, Body()]):
             session.commit()
             session.refresh(lds_link)
         link = map_lds_link_to_link(lds_link)
-        return link
+        return JSONResponse(content=link.model_dump(by_alias=True), status_code=status.HTTP_201_CREATED)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating link')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)

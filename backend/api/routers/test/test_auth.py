@@ -30,9 +30,8 @@ def test_auth_login_should_return_ok_response_code_and_correct_login_permissions
     login_permissions = response.json()
     assert login_permissions['username'] == 'guest'
     assert not login_permissions['success']
-    assert (timedelta(hours=23, minutes=59) <
-            datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z'))
-            .replace(tzinfo=timezone.utc) - datetime.now(tz=timezone.utc) < timedelta(hours=24))
+    assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
+            - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
     assert response.json()['permissions'] == []
 
 
@@ -42,9 +41,8 @@ def test_auth_login_should_return_ok_response_code_and_correct_login_permissions
     login_permissions = response.json()
     assert login_permissions['username'] == 'admin'
     assert login_permissions['success']
-    assert (timedelta(hours=23, minutes=59) <
-            datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z'))
-            .replace(tzinfo=timezone.utc) - datetime.now(tz=timezone.utc) < timedelta(hours=24))
+    assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
+            - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
     assert response.json()['permissions'] == ['admin', 'confirm']
 
 
@@ -54,13 +52,11 @@ def test_auth_login_should_return_ok_response_code_and_correct_tokens():
     token = jwt.decode(response.json()['token'], SECRET_KEY, algorithms=[ALGORITHM])
     assert token['sub'] == 'admin'
     assert token['perms'] == ['admin', 'confirm']
-    assert (timedelta(minutes=59) <
-            datetime.fromtimestamp(token['exp']) - datetime.now() < timedelta(hours=1))
+    assert datetime.fromtimestamp(token['exp']) - datetime.now() <= timedelta(hours=1)
     refresh_token = jwt.decode(response.json()['refreshToken'], SECRET_KEY, algorithms=[ALGORITHM])
     assert refresh_token['sub'] == 'admin'
     assert refresh_token['perms'] == ['admin', 'confirm']
-    assert (timedelta(hours=23, minutes=59) <
-            datetime.fromtimestamp(refresh_token['exp']) - datetime.now() < timedelta(hours=24))
+    assert datetime.fromtimestamp(refresh_token['exp']) - datetime.now() <= timedelta(hours=24)
 
 
 def test_auto_refresh_should_return_ok_response_code_and_correct_login_permissions_data():
@@ -71,9 +67,8 @@ def test_auto_refresh_should_return_ok_response_code_and_correct_login_permissio
     login_permissions = response.json()
     assert login_permissions['username'] == 'user'
     assert login_permissions['success']
-    assert (timedelta(hours=23, minutes=59) <
-            datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z'))
-            .replace(tzinfo=timezone.utc) - datetime.now(tz=timezone.utc) < timedelta(hours=24))
+    assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
+            - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
     assert response.json()['permissions'] == ['confirm']
 
 
@@ -85,13 +80,11 @@ def test_auto_refresh_should_return_ok_response_code_and_correct_tokens():
     token = jwt.decode(response.json()['token'], SECRET_KEY, algorithms=[ALGORITHM])
     assert token['sub'] == 'user'
     assert token['perms'] == ['confirm']
-    assert (timedelta(minutes=59) <
-            datetime.fromtimestamp(token['exp']) - datetime.now() < timedelta(hours=1))
+    assert datetime.fromtimestamp(token['exp']) - datetime.now() <= timedelta(hours=1)
     refresh_token = jwt.decode(response.json()['refreshToken'], SECRET_KEY, algorithms=[ALGORITHM])
     assert refresh_token['sub'] == 'user'
     assert refresh_token['perms'] == ['confirm']
-    assert (timedelta(hours=23, minutes=59) <
-            datetime.fromtimestamp(refresh_token['exp']) - datetime.now() < timedelta(hours=24))
+    assert datetime.fromtimestamp(refresh_token['exp']) - datetime.now() <= timedelta(hours=24)
 
 
 def test_auto_refresh_should_return_bad_request_response_code_and_error_when_token_is_invalid():

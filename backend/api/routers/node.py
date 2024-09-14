@@ -42,7 +42,8 @@ async def create_node(node: Annotated[Node, Body()]):
                 session.add(editor_node)
                 session.commit()
                 session.refresh(editor_node)
-            return map_lds_node_and_editor_node_to_node(lds_node, editor_node)
+            node = map_lds_node_and_editor_node_to_node(lds_node, editor_node)
+            return JSONResponse(content=node.model_dump(by_alias=True), status_code=status.HTTP_201_CREATED)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating node')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
