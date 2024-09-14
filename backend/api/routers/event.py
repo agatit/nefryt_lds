@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import select, Engine
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
 from .mapper import map_lds_event_and_lds_event_def_to_event
 from ..schemas import Error, Event, Information
-from ..db import engine
+from ..db import get_engine
 from ..routers.security import get_user_permissions
 from database import lds
 
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/event", tags=["event"])
 
 
 @router.get('', response_model=list[Event] | Error)
-async def list_events():
+async def list_events(engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = (select(lds.Event, lds.EventDef)
                      .join(lds.EventDef)
@@ -33,7 +33,7 @@ async def list_events():
 
 
 @router.get('/{event_id}', response_model=Event | Error)
-async def get_event_by_id(event_id: int):
+async def get_event_by_id(event_id: int, engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = (select(lds.Event, lds.EventDef)
                      .join(lds.EventDef)
@@ -52,7 +52,8 @@ async def get_event_by_id(event_id: int):
 
 
 @router.post('/{event_id}/ack', response_model=Information | Error)
-async def ack_event(event_id: int, permissions: Annotated[list[str], Depends(get_user_permissions)]):
+async def ack_event(event_id: int, permissions: Annotated[list[str], Depends(get_user_permissions)],
+                    engine: Annotated[Engine, Depends(get_engine)]):
     if 'admin' not in permissions:
         error = Error(code=status.HTTP_403_FORBIDDEN, message='Forbidden')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_403_FORBIDDEN)

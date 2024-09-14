@@ -1,5 +1,6 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import select, Engine
 from database import lds
 from sqlalchemy.orm import Session
 from starlette import status
@@ -12,7 +13,7 @@ router = APIRouter(prefix="/trend_def", tags=["trend_def"])
 
 
 @router.get('', response_model=list[TrendDef] | Error)
-async def list_trend_defs(engine=Depends(get_engine)):
+async def list_trend_defs(engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = select(lds.TrendDef)
         with Session(engine) as session:
