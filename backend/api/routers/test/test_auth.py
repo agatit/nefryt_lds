@@ -32,7 +32,7 @@ def test_auth_login_should_return_ok_response_code_and_correct_login_permissions
     assert not login_permissions['success']
     assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
             - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
-    assert response.json()['permissions'] == []
+    assert login_permissions['permissions'] == []
 
 
 def test_auth_login_should_return_ok_response_code_and_correct_login_permissions_data_for_admin():
@@ -43,7 +43,7 @@ def test_auth_login_should_return_ok_response_code_and_correct_login_permissions
     assert login_permissions['success']
     assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
             - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
-    assert response.json()['permissions'] == ['admin', 'confirm']
+    assert login_permissions['permissions'] == ['admin', 'confirm']
 
 
 def test_auth_login_should_return_ok_response_code_and_correct_tokens():
@@ -69,7 +69,7 @@ def test_auto_refresh_should_return_ok_response_code_and_correct_login_permissio
     assert login_permissions['success']
     assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
             - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
-    assert response.json()['permissions'] == ['confirm']
+    assert login_permissions['permissions'] == ['confirm']
 
 
 def test_auto_refresh_should_return_ok_response_code_and_correct_tokens():

@@ -105,7 +105,8 @@ def test_ack_event_should_return_ok_response_code_and_information_and_set_ack_da
     assert changed_event.AckDate
 
 
-# tested because its only method with authorization other than auth
+# tested because its only method with authorization other than auth,
+# dont know whether it should be tested as its basically checking if fastapi works as expected
 @pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
 def test_ack_event_should_return_unauthorized_response_code_when_header_is_invalid(add_lds_objects):
     token_data = {

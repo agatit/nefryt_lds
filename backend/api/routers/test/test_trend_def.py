@@ -35,5 +35,5 @@ def test_list_trend_def_should_return_ok_response_code_and_correct_trend_defs(ad
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 2
     for expected_trend_def, returned_trend_def in zip(trend_def_list, response.json()):
-        assert expected_trend_def.ID.strip() == returned_trend_def['ID']
-        assert expected_trend_def.Name == returned_trend_def['Name']
+        assert returned_trend_def['ID'] == expected_trend_def.ID.strip()
+        assert returned_trend_def['Name'] == expected_trend_def.Name

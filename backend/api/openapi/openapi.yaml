@@ -321,7 +321,15 @@ paths:
     delete:
       description: Deletes specific link
       operationId: delete_link_by_id
-      parameters: []
+      parameters:
+        - description: The id of the link to retrieve
+          explode: false
+          in: path
+          name: linkId
+          required: true
+          schema:
+            type: integer
+          style: simple
       responses:
         "204":
           description: No content
@@ -367,7 +375,15 @@ paths:
     put:
       description: Updates a links
       operationId: update_link
-      parameters: []
+      parameters:
+        - description: The id of the link to retrieve
+          explode: false
+          in: path
+          name: linkId
+          required: true
+          schema:
+            type: integer
+          style: simple
       requestBody:
         content:
           application/json:

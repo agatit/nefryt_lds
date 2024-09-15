@@ -1,12 +1,12 @@
 from typing import Annotated
-from fastapi import APIRouter, Body, Path, Query
-from sqlalchemy import select
+from fastapi import APIRouter, Body, Path, Query, Depends
+from sqlalchemy import select, Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_link_to_link, map_link_to_lds_link
-from ..db import engine
+from ..db import get_engine
 from ..schemas import Error, Link, UpdateLink
 from database import lds
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/link", tags=["link"])
 
 
 @router.get('', response_model=list[Link] | Error)
-async def list_links(filter: Annotated[str | None, Query()] = None):
+async def list_links(engine: Annotated[Engine, Depends(get_engine)], filter: Annotated[str | None, Query()] = None):
     try:
         statement = select(lds.Link)
         with Session(engine) as session:
@@ -27,7 +27,7 @@ async def list_links(filter: Annotated[str | None, Query()] = None):
 
 
 @router.post('', response_model=Link | Error)
-async def create_link(link: Annotated[Link, Body()]):
+async def create_link(link: Annotated[Link, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_link = map_link_to_lds_link(link)
         with Session(engine) as session:
@@ -45,7 +45,7 @@ async def create_link(link: Annotated[Link, Body()]):
 
 
 @router.delete('/{link_id}', response_model=None | Error)
-async def delete_link_by_id(link_id: Annotated[int, Path()]):
+async def delete_link_by_id(link_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
             link = session.get(lds.Link, link_id)
@@ -56,17 +56,13 @@ async def delete_link_by_id(link_id: Annotated[int, Path()]):
             session.delete(link)
             session.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
-    except IntegrityError:
-        error = Error(code=status.HTTP_409_CONFLICT,
-                      message='Integrity error when deleting link with id = ' + str(link_id))
-        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in delete_link_by_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.get('/{link_id}', response_model=Link | Error)
-async def get_link_by_id(link_id: Annotated[int, Path()]):
+async def get_link_by_id(link_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
             link = session.get(lds.Link, link_id)
@@ -80,7 +76,8 @@ async def get_link_by_id(link_id: Annotated[int, Path()]):
 
 
 @router.put('/{link_id}', response_model=Link | Error)
-async def update_link(link_id: Annotated[str, Path()], updated_link: Annotated[UpdateLink, Body()]):
+async def update_link(link_id: Annotated[int, Path()], updated_link: Annotated[UpdateLink, Body()],
+                      engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
             link = session.get(lds.Link, link_id)

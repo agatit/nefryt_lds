@@ -46,12 +46,12 @@ def test_list_event_def_should_return_ok_response_code_and_correct_event_defs(ad
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 2
     for expected_event_def, returned_event_def in zip(event_def_list, response.json()):
-        assert expected_event_def.ID.strip() == returned_event_def['ID']
-        assert expected_event_def.Verbosity.strip() == returned_event_def['Verbosity']
-        assert expected_event_def.Caption.strip() == returned_event_def['Caption']
-        assert expected_event_def.Silent == returned_event_def['Silent']
-        assert expected_event_def.Enabled == returned_event_def['Enabled']
-        assert expected_event_def.Visible == returned_event_def['Visible']
+        assert returned_event_def['ID'] == expected_event_def.ID.strip()
+        assert returned_event_def['Verbosity'] == expected_event_def.Verbosity.strip()
+        assert returned_event_def['Caption'] == expected_event_def.Caption.strip()
+        assert returned_event_def['Silent'] == expected_event_def.Silent
+        assert returned_event_def['Enabled'] == expected_event_def.Enabled
+        assert returned_event_def['Visible'] == expected_event_def.Visible
 
 
 def test_create_event_def_should_return_created_response_code_and_created_event_def_data():
@@ -60,12 +60,12 @@ def test_create_event_def_should_return_created_response_code_and_created_event_
     response = test_client.post("/event_def", json=event_def_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_event_def = response.json()
-    assert event_def_dict['ID'] == returned_event_def['ID']
-    assert event_def_dict['Verbosity'] == returned_event_def['Verbosity']
-    assert event_def_dict['Caption'] == returned_event_def['Caption']
-    assert event_def_dict['Silent'] == returned_event_def['Silent']
-    assert event_def_dict['Enabled'] == returned_event_def['Enabled']
-    assert event_def_dict['Visible'] == returned_event_def['Visible']
+    assert returned_event_def['ID'] == event_def_dict['ID']
+    assert returned_event_def['Verbosity'] == event_def_dict['Verbosity']
+    assert returned_event_def['Caption'] == event_def_dict['Caption']
+    assert returned_event_def['Silent'] == event_def_dict['Silent']
+    assert returned_event_def['Enabled'] == event_def_dict['Enabled']
+    assert returned_event_def['Visible'] == event_def_dict['Visible']
     with Session(get_test_engine()) as session:
         event_defs_count = session.execute(select(func.count()).select_from(lds.EventDef)).fetchall()[0][0]
     assert event_defs_count == 1
@@ -104,12 +104,12 @@ def test_get_event_def_by_id_should_return_ok_response_code_and_event_def_of_giv
     response = test_client.get("/event_def/" + event_def1.ID)
     assert response.status_code == status.HTTP_200_OK
     returned_event_def = response.json()
-    assert event_def1.ID.strip() == returned_event_def['ID']
-    assert event_def1.Verbosity.strip() == returned_event_def['Verbosity']
-    assert event_def1.Caption.strip() == returned_event_def['Caption']
-    assert event_def1.Silent == returned_event_def['Silent']
-    assert event_def1.Enabled == returned_event_def['Enabled']
-    assert event_def1.Visible == returned_event_def['Visible']
+    assert returned_event_def['ID'] == event_def1.ID.strip()
+    assert returned_event_def['Verbosity'] == event_def1.Verbosity.strip()
+    assert returned_event_def['Caption'] == event_def1.Caption.strip()
+    assert returned_event_def['Silent'] == event_def1.Silent
+    assert returned_event_def['Enabled'] == event_def1.Enabled
+    assert returned_event_def['Visible'] == event_def1.Visible
 
 
 def test_get_event_def_by_id_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id():
@@ -127,12 +127,12 @@ def test_update_event_def_by_id_should_return_ok_response_code_and_event_def_of_
     response = test_client.put("/event_def/" + event_def1.ID, json=update_event_def_dict)
     assert response.status_code == status.HTTP_200_OK
     returned_event_def = response.json()
-    assert event_def1.ID.strip() == returned_event_def['ID']
-    assert update_event_def_dict['Verbosity'] == returned_event_def['Verbosity']
-    assert update_event_def_dict['Caption'] == returned_event_def['Caption']
-    assert update_event_def_dict['Silent'] == returned_event_def['Silent']
-    assert update_event_def_dict['Enabled'] == returned_event_def['Enabled']
-    assert update_event_def_dict['Visible'] == returned_event_def['Visible']
+    assert returned_event_def['ID'] == event_def1.ID.strip()
+    assert returned_event_def['Verbosity'] == update_event_def_dict['Verbosity']
+    assert returned_event_def['Caption'] == update_event_def_dict['Caption']
+    assert returned_event_def['Silent'] == update_event_def_dict['Silent']
+    assert returned_event_def['Enabled'] == update_event_def_dict['Enabled']
+    assert returned_event_def['Visible'] == update_event_def_dict['Visible']
 
 
 def test_update_event_def_by_id_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id():
