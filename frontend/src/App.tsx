@@ -1,91 +1,35 @@
-import './styles.css'
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from "react";
+import {BrowserRouter, Routes, Route} from "react-router-dom";
+import {Appbar} from "./layouts/Appbar";
+import DrawerContainer from "./components/drawer/DrawerContainer";
+import EventTab from "./pages/EventTab";
+import EventDefTab from "./pages/EventDefTab";
+import TrendTab from "./pages/TrendTab";
+import TrendChartTab from "./pages/TrendChartTab";
 
-import {EditorPage} from './pages/Editor'
-import { DashboardPage } from "./pages/Dashboard";
-import { ChartsPage } from "./pages/Charts";
-import { EventsPage } from "./pages/Events";
-import { NoPageFound } from "./pages/Error/404";
-import { useListTrendsQuery } from './store/trendApi';
+const App = () => {
+    const [expanded, setExpanded] = React.useState(true);
 
-import { AuthLoginApiArg, AuthLoginApiResponse, Login, useAuthLoginMutation, useAuthRefreshMutation } from './store/authApi';
-import { UseMutationStateOptions } from '@reduxjs/toolkit/dist/query/react/buildHooks';
-import { Dispatch, useEffect } from 'react';
-import LoginPage from './pages/User/Login';
-import {
-  Link,
-  Navigate,
-  Outlet,
-} from 'react-router-dom';
-import { AuthData, selectIsAuthenticated } from './features/auth/authSlice';
-import {  shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { RootState, store } from './app/store';
-import jwt_decode from "jwt-decode";
-import { SnackbarMessage, SnackbarProvider, useSnackbar } from 'notistack';
-import useNotifier from './components/template/useNotifier';
-import { enqueueSnackbar } from './features/template/templateSlice';
+    const handleDrawerOpen = React.useCallback(() => {
+            setExpanded(!expanded);
+        }, [expanded]
+    );
 
-
-
-const ProtectedRoute = ({ user=false, redirectPath = '/login' }) => {
-  if (!user) {
-    return <Navigate to={redirectPath} replace />;
-  }
-
-  return <Outlet />;
+    return (
+        <BrowserRouter>
+            <div className="app-container">
+                <Appbar onMenuClick={handleDrawerOpen}/>
+                <DrawerContainer expanded={expanded}>
+                    <Routes>
+                        <Route path="/event" element={<EventTab/>}/>
+                        <Route path="/eventdef" element={<EventDefTab/>}/>
+                        <Route path="/trend" element={<TrendTab/>}/>
+                        <Route path="/trendChart" element={<TrendChartTab/>}/>
+                    </Routes>
+                </DrawerContainer>
+            </div>
+        </BrowserRouter>
+    );
 };
 
-
-
-
-
-
-export default function App() {
-  
-
-  const isAuthenticated = useSelector(selectIsAuthenticated)
-  //const isAuthenticated = true;
-
-  
-
-  const auth: AuthData = useSelector(
-    (state: RootState) => state.auth,
-    shallowEqual
-  )
-
-  
-
-  //enqueueSnackbar();
-  
-
-const [
-  refreshTokenPost,          // This is the mutation trigger
-  { isLoading: isUpdating }, // This is the destructured mutation result
-
-] = useAuthRefreshMutation();
-
-
-  useNotifier();
-
-
-  return (
-    <div className="App">
-       <Router>
-          <Routes>
-              <Route element={<ProtectedRoute user={isAuthenticated} />}>
-                  <Route path='/' element={<DashboardPage/>} />
-                
-                  <Route path='/editor' element={<EditorPage/>} />
-                  <Route path='/events' element={<EventsPage/>} />
-                  <Route path='/charts' element={<ChartsPage/>} />
-              </Route> 
-              <Route path='/login' element={<LoginPage/>} />
-              <Route path="*" element={<NoPageFound/>}/>
-              
-          </Routes>
-      </Router>
-    </div>
-  );
-}
-
-
+export default App;

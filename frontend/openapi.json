@@ -1,0 +1,3287 @@
+﻿{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "Database API for Nefryt LDS",
+    "title": "Nefryt LDS API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "description": "Test server",
+      "url": "http://192.168.1.231:8080/"
+    },
+    {
+      "description": "Developer's local server",
+      "url": "http://localhost:8080/"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "auth_login",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginPermissions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [],
+        "summary": "Authentication Login",
+        "tags": [
+          "auth"
+        ],
+        "x-openapi-router-controller": "api.controllers.auth_controller"
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "auth_refresh",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginPermissions"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Authentication token refresh",
+        "tags": [
+          "auth"
+        ],
+        "x-openapi-router-controller": "api.controllers.auth_controller"
+      }
+    },
+    "/event": {
+      "get": {
+        "description": "List all events",
+        "operationId": "list_events",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of events"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List events",
+        "tags": [
+          "events"
+        ],
+        "x-openapi-router-controller": "api.controllers.events_controller"
+      }
+    },
+    "/event/{eventId}": {
+      "get": {
+        "description": "Info for specific event",
+        "operationId": "get_event_by_id",
+        "parameters": [
+          {
+            "description": "The id of the event to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Gets detailed event",
+        "tags": [
+          "events"
+        ],
+        "x-openapi-router-controller": "api.controllers.events_controller"
+      }
+    },
+    "/event/{eventId}/ack": {
+      "post": {
+        "description": "Acknowledges an event",
+        "operationId": "ack_event",
+        "parameters": [
+          {
+            "description": "The id of the event to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Information"
+                }
+              }
+            },
+            "description": "Updated"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Acknowledges ack",
+        "tags": [
+          "events"
+        ],
+        "x-openapi-router-controller": "api.controllers.events_controller"
+      }
+    },
+    "/event_def": {
+      "get": {
+        "description": "List all event defs",
+        "operationId": "list_event_defs",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventDef"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "An array of event defs"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List event defs",
+        "tags": [
+          "events"
+        ]
+      },
+      "post": {
+        "description": "Create an event def",
+        "operationId": "create_event_def",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventDef"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDef"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Create event def",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/event_def/{eventDefId}": {
+      "delete": {
+        "description": "Delete specific event def",
+        "operationId": "delete_event_def_by_id",
+        "parameters": [
+          {
+            "description": "The id of the event def to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "eventDefId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Deletes event def",
+        "tags": [
+          "events"
+        ]
+      },
+      "get": {
+        "description": "Info for specific event def",
+        "operationId": "get_event_def_by_id",
+        "parameters": [
+          {
+            "description": "The id of the event def to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "eventDefId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDef"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Gets event def details",
+        "tags": [
+          "events"
+        ]
+      },
+      "put": {
+        "description": "Update event def",
+        "operationId": "update_event_def",
+        "parameters": [
+          {
+            "description": "The id of the event def to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "eventDefId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventDef"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDef"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Updates event def",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/node": {
+      "get": {
+        "description": "List all nodes",
+        "operationId": "list_nodes",
+        "parameters": [
+          {
+            "description": "Query filter in OData standard",
+            "explode": true,
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Node"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of nodes"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List nodes",
+        "tags": [
+          "nodes"
+        ],
+        "x-openapi-router-controller": "api.controllers.nodes_controller"
+      },
+      "post": {
+        "description": "Create a nodes",
+        "operationId": "create_node",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Node"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Node"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Create nodes",
+        "tags": [
+          "nodes"
+        ],
+        "x-openapi-router-controller": "api.controllers.nodes_controller"
+      }
+    },
+    "/node/{nodeId}": {
+      "delete": {
+        "description": "Deletes specific node",
+        "operationId": "delete_node_by_id",
+        "parameters": [
+          {
+            "description": "The id of the node to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "nodeId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Deletes node",
+        "tags": [
+          "nodes"
+        ],
+        "x-openapi-router-controller": "api.controllers.nodes_controller"
+      },
+      "get": {
+        "description": "Info for specific node",
+        "operationId": "get_node_by_id",
+        "parameters": [
+          {
+            "description": "The id of the node to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "nodeId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Node"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Gets node details",
+        "tags": [
+          "nodes"
+        ],
+        "x-openapi-router-controller": "api.controllers.nodes_controller"
+      },
+      "put": {
+        "description": "Updates a nodes",
+        "operationId": "update_node",
+        "parameters": [
+          {
+            "description": "The id of the node to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "nodeId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Node"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Node"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Updates nodes",
+        "tags": [
+          "nodes"
+        ],
+        "x-openapi-router-controller": "api.controllers.nodes_controller"
+      }
+    },
+    "/pipeline": {
+      "get": {
+        "description": "List all pipelines",
+        "operationId": "list_pipelines",
+        "parameters": [
+          {
+            "description": "Query filter in OData standard",
+            "explode": true,
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Pipeline"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of pipelines"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List pipelines",
+        "tags": [
+          "pipelines"
+        ],
+        "x-openapi-router-controller": "api.controllers.pipelines_controller"
+      },
+      "post": {
+        "description": "Create a pipeline",
+        "operationId": "create_pipeline",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pipeline"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Create pipeline",
+        "tags": [
+          "pipelines"
+        ],
+        "x-openapi-router-controller": "api.controllers.pipelines_controller"
+      }
+    },
+    "/pipeline/{pipelineId}": {
+      "delete": {
+        "description": "Deletes specific pipeline",
+        "operationId": "delete_pipeline_by_id",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Deletes pipeline",
+        "tags": [
+          "pipelines"
+        ],
+        "x-openapi-router-controller": "api.controllers.pipelines_controller"
+      },
+      "get": {
+        "description": "Info for specific pipeline",
+        "operationId": "get_pipeline_by_id",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Gets pipeline details",
+        "tags": [
+          "pipelines"
+        ],
+        "x-openapi-router-controller": "api.controllers.pipelines_controller"
+      },
+      "put": {
+        "description": "Updates pipeline",
+        "operationId": "update_pipeline",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pipeline"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Updates pipeline",
+        "tags": [
+          "pipelines"
+        ],
+        "x-openapi-router-controller": "api.controllers.pipelines_controller"
+      }
+    },
+    "/pipeline/{pipelineId}/method": {
+      "get": {
+        "description": "List all methods",
+        "operationId": "list_methods",
+        "parameters": [
+          {
+            "description": "Query filter in OData standard",
+            "explode": true,
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Method"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of  methods"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List pipelnie methods",
+        "tags": [
+          "methods"
+        ],
+        "x-openapi-router-controller": "api.controllers.methods_controller"
+      },
+      "post": {
+        "description": "Creates a  method",
+        "operationId": "create_method",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Method"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Method"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Creates method",
+        "tags": [
+          "methods"
+        ],
+        "x-openapi-router-controller": "api.controllers.methods_controller"
+      }
+    },
+    "/pipeline/{pipelineId}/method/{methodId}": {
+      "delete": {
+        "description": "Deletes specific  method",
+        "operationId": "delete_method_by_id",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the pipeline method to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "methodId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Deletes  method",
+        "tags": [
+          "methods"
+        ],
+        "x-openapi-router-controller": "api.controllers.methods_controller"
+      },
+      "get": {
+        "description": "Info for specific  method",
+        "operationId": "get_method_by_id",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the pipeline method to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "methodId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Method"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Gets  method details",
+        "tags": [
+          "methods"
+        ],
+        "x-openapi-router-controller": "api.controllers.methods_controller"
+      },
+      "put": {
+        "description": "Updates  method",
+        "operationId": "update_method",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the pipeline method to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "methodId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Method"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Method"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Updates method",
+        "tags": [
+          "methods"
+        ],
+        "x-openapi-router-controller": "api.controllers.methods_controller"
+      }
+    },
+    "/pipeline/{pipelineId}/method/{methodId}/param": {
+      "get": {
+        "description": "List all  method params",
+        "operationId": "list_method_params",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the pipeline method to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "methodId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MethodParam"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of  methods params"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List pipelnie method params",
+        "tags": [
+          "methods"
+        ],
+        "x-openapi-router-controller": "api.controllers.methods_controller"
+      }
+    },
+    "/pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}": {
+      "put": {
+        "description": "Put  method params",
+        "operationId": "update_method_param",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the pipeline method to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "methodId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the param to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "methodParamDefId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/MethodParam"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Information"
+                }
+              }
+            },
+            "description": "Updated"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Put pipelnie method params",
+        "tags": [
+          "methods"
+        ],
+        "x-openapi-router-controller": "api.controllers.methods_controller"
+      }
+    },
+    "/pipeline/{pipelineId}/param": {
+      "get": {
+        "description": "List all  pipeline params",
+        "operationId": "list_pipeline_params",
+        "parameters": [
+          {
+            "description": "Query filter in OData standard",
+            "explode": true,
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PipelineParam"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of  pipelines params"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List pipelnie pipeline params",
+        "tags": [
+          "pipelines"
+        ],
+        "x-openapi-router-controller": "api.controllers.pipelines_controller"
+      }
+    },
+    "/pipeline/{pipelineId}/param/{pipelineParamDefId}": {
+      "put": {
+        "description": "Put  pipeline params",
+        "operationId": "update_pipeline_param",
+        "parameters": [
+          {
+            "description": "The id of the pipeline to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the param to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "pipelineParamDefId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/PipelineParam"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Information"
+                }
+              }
+            },
+            "description": "Updated"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Put pipelnie pipeline params",
+        "tags": [
+          "pipelines"
+        ],
+        "x-openapi-router-controller": "api.controllers.pipelines_controller"
+      }
+    },
+    "/trend": {
+      "get": {
+        "description": "List all trends",
+        "operationId": "list_trends",
+        "parameters": [
+          {
+            "description": "Query filter in OData standard",
+            "explode": true,
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Trend"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of trends"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List trends",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      },
+      "post": {
+        "description": "Create a trend",
+        "operationId": "create_trend",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Trend"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Trend"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Create trend",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      }
+    },
+    "/trend/{trendIdList}/current_data/{period}/{samples}": {
+      "get": {
+        "description": "List trend current data",
+        "operationId": "get_trend_current_data",
+        "parameters": [
+          {
+            "description": "String of ids of the trend to retrieve, separated by comma",
+            "explode": false,
+            "in": "path",
+            "name": "trendIdList",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "period of data to take since current time (timestamp UTC)",
+            "explode": false,
+            "in": "path",
+            "name": "period",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "number of data samples to take (resolution)",
+            "explode": false,
+            "in": "path",
+            "name": "samples",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrendData"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of trend data"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List trend current data",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      }
+    },
+    "/trend/{trendIdList}/data/{begin}/{end}/{samples}": {
+      "get": {
+        "description": "List data",
+        "operationId": "get_trend_data",
+        "parameters": [
+          {
+            "description": "String of ids of the trend to retrieve, separated by comma",
+            "explode": false,
+            "in": "path",
+            "name": "trendIdList",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "start of date to take from data (timestamp UTC)",
+            "explode": false,
+            "in": "path",
+            "name": "begin",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "end of date to take from data (timestamp UTC)",
+            "explode": false,
+            "in": "path",
+            "name": "end",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "number of data samples to take (resolution)",
+            "explode": false,
+            "in": "path",
+            "name": "samples",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrendData"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of trend data"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List trend data",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      }
+    },
+    "/trend/{trendId}": {
+      "delete": {
+        "description": "Deletes specific trend",
+        "operationId": "delete_trend_by_id",
+        "parameters": [
+          {
+            "description": "The id of the trend to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "trendId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Deletes trend",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      },
+      "get": {
+        "description": "Info for specific trend",
+        "operationId": "get_trend_by_id",
+        "parameters": [
+          {
+            "description": "The id of the trend to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "trendId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Trend"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Detail trend",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      },
+      "put": {
+        "description": "Update a trend",
+        "operationId": "update_trend",
+        "parameters": [
+          {
+            "description": "The id of the trend to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "trendId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Trend"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Trend"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Update trend",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      }
+    },
+    "/trend/{trendId}/param": {
+      "get": {
+        "description": "List all trend params",
+        "operationId": "list_trend_params",
+        "parameters": [
+          {
+            "description": "Query filter in OData standard",
+            "explode": true,
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "description": "The id of the trend to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "trendId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrendParam"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of params"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List trend params",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      }
+    },
+    "/trend/{trendId}/param/{trendParamDefId}": {
+      "get": {
+        "description": "Info for specific trend param",
+        "operationId": "get_trend_param_by_id",
+        "parameters": [
+          {
+            "description": "The id of the trend to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "trendId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the param to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "trendParamDefId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrendParam"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Gets trend param detail",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      },
+      "put": {
+        "description": "Updates trend param",
+        "operationId": "update_trend_param",
+        "parameters": [
+          {
+            "description": "The id of the trend to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "trendId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "simple"
+          },
+          {
+            "description": "The id of the param to retrieve",
+            "explode": false,
+            "in": "path",
+            "name": "trendParamDefId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "description": "String containing number to set as given Trend Param value"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrendParam"
+                }
+              }
+            },
+            "description": "Expected response to a valid request"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "Update trend params",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      }
+    },
+    "/trend_def": {
+      "get": {
+        "description": "List all trend defs",
+        "operationId": "list_trend_defs",
+        "parameters": [
+          {
+            "description": "Query filter in OData standard",
+            "explode": true,
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrendDef"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A array of trend defs"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "unexpected error"
+          }
+        },
+        "summary": "List trend defs",
+        "tags": [
+          "trends"
+        ],
+        "x-openapi-router-controller": "api.controllers.trends_controller"
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "eventId": {
+        "description": "The id of the event to retrieve",
+        "explode": false,
+        "in": "path",
+        "name": "eventId",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "nodeId": {
+        "description": "The id of the node to retrieve",
+        "explode": false,
+        "in": "path",
+        "name": "nodeId",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "pipelineId": {
+        "description": "The id of the pipeline to retrieve",
+        "explode": false,
+        "in": "path",
+        "name": "pipelineId",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "methodId": {
+        "description": "The id of the pipeline method to retrieve",
+        "explode": false,
+        "in": "path",
+        "name": "methodId",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "trendId": {
+        "description": "The id of the trend to retrieve",
+        "explode": false,
+        "in": "path",
+        "name": "trendId",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "trendParamDefId": {
+        "description": "The id of the param to retrieve",
+        "explode": false,
+        "in": "path",
+        "name": "trendParamDefId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "style": "simple"
+      },
+      "editorNodeId": {
+        "description": "The id of the editor node to retrieve",
+        "explode": false,
+        "in": "path",
+        "name": "editorNodeId",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "editorPipelineId": {
+        "description": "The id of the editor pipeline to retrieve",
+        "explode": false,
+        "in": "path",
+        "name": "editorPipelineId",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "filter": {
+        "description": "Query filter in OData standard",
+        "explode": true,
+        "in": "query",
+        "name": "$filter",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      }
+    },
+    "responses": {
+      "UnexpectedError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        },
+        "description": "unexpected error"
+      },
+      "NullResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Information"
+            }
+          }
+        },
+        "description": "Null response"
+      },
+      "Created": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Information"
+            }
+          }
+        },
+        "description": "Created"
+      },
+      "Updated": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Information"
+            }
+          }
+        },
+        "description": "Updated"
+      },
+      "Deleted": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Information"
+            }
+          }
+        },
+        "description": "Deleted"
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Unauthorized"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      }
+    },
+    "schemas": {
+      "Link": {
+        "example": {
+          "BeginNodeID": 0,
+          "Length": 1.4658129805029452,
+          "ID": 0,
+          "EndNodeID": 6
+        },
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "title": "ID",
+            "type": "integer"
+          },
+          "BeginNodeID": {
+            "description": "none",
+            "title": "BeginNodeID",
+            "type": "integer"
+          },
+          "EndNodeID": {
+            "description": "none",
+            "title": "EndNodeID",
+            "type": "integer"
+          },
+          "Length": {
+            "description": "none",
+            "title": "Length",
+            "type": "number"
+          }
+        },
+        "title": "Link",
+        "type": "object"
+      },
+      "Method": {
+        "example": {
+          "PipelineID": 0,
+          "MethodDefID": 0,
+          "ID": 0,
+          "Name": "Arthur Dent"
+        },
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "readOnly": true,
+            "title": "ID",
+            "type": "integer"
+          },
+          "MethodDefID": {
+            "example": 0,
+            "nullable": false,
+            "title": "MethodDefID",
+            "type": "integer"
+          },
+          "PipelineID": {
+            "example": 0,
+            "nullable": false,
+            "title": "PipelineID",
+            "type": "integer"
+          },
+          "Name": {
+            "example": "Arthur Dent",
+            "pattern": "^.{0,30}",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "MethodDefID",
+          "PipelineID"
+        ],
+        "title": "Method",
+        "type": "object"
+      },
+      "MethodDef": {
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MethodParam": {
+        "example": {
+          "MethodID": 0,
+          "Value": "Value",
+          "PipelineID": 0,
+          "DataType": "DataType",
+          "MethodParamDefID": 0,
+          "Name": "Name"
+        },
+        "properties": {
+          "PipelineID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "title": "PipelineID",
+            "type": "integer"
+          },
+          "MethodID": {
+            "description": "none",
+            "nullable": false,
+            "title": "MethodID",
+            "type": "integer"
+          },
+          "MethodParamDefID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "title": "MethodParamDefID",
+            "type": "integer"
+          },
+          "DataType": {
+            "description": "none",
+            "pattern": "^.{0,6}",
+            "title": "DataType",
+            "type": "string"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "title": "Name",
+            "type": "string"
+          },
+          "Value": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "MethodID",
+          "PipelineID"
+        ],
+        "title": "MethodParam",
+        "type": "object"
+      },
+      "MethodParamDef": {
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "MethodDefID": {
+            "description": "none",
+            "type": "integer"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "type": "string"
+          },
+          "DataType": {
+            "description": "none",
+            "pattern": "^.{0,6}",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Node": {
+        "example": {
+          "Type": "Type",
+          "EditorParams": {
+            "PosX": 6,
+            "PosY": 1
+          },
+          "ID": 0,
+          "TrendID": 0,
+          "Name": "Name"
+        },
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "readOnly": true,
+            "title": "ID",
+            "type": "integer"
+          },
+          "Type": {
+            "description": "none",
+            "nullable": false,
+            "pattern": "^.{0,6}",
+            "title": "Type",
+            "type": "string"
+          },
+          "TrendID": {
+            "description": "none",
+            "nullable": true,
+            "title": "TrendID",
+            "type": "integer"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,50}",
+            "title": "Name",
+            "type": "string"
+          },
+          "EditorParams": {
+            "$ref": "#/components/schemas/EditorNode"
+          }
+        },
+        "required": [
+          "Type"
+        ],
+        "title": "Node",
+        "type": "object"
+      },
+      "Pipeline": {
+        "example": {
+          "EditorParams": {
+            "AreaWidthDivision": 5,
+            "AreaHeightDivision": 5,
+            "AreaWidth": 6,
+            "AreaHeight": 1
+          },
+          "ID": 0,
+          "BeginPos": 0.8008281904610115,
+          "Name": "Name"
+        },
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "title": "ID",
+            "type": "integer"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "title": "Name",
+            "type": "string"
+          },
+          "BeginPos": {
+            "description": "none",
+            "title": "BeginPos",
+            "type": "number"
+          },
+          "EditorParams": {
+            "$ref": "#/components/schemas/EditorPipeline"
+          }
+        },
+        "title": "Pipeline",
+        "type": "object"
+      },
+      "PipelineParam": {
+        "example": {
+          "PipelineParamDefID": 0,
+          "Value": "Value",
+          "PipelineID": 0,
+          "DataType": "DataType",
+          "Name": "Name"
+        },
+        "properties": {
+          "PipelineID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "title": "PipelineID",
+            "type": "integer"
+          },
+          "PipelineParamDefID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "title": "PipelineParamDefID",
+            "type": "integer"
+          },
+          "DataType": {
+            "description": "none",
+            "pattern": "^.{0,6}",
+            "title": "DataType",
+            "type": "string"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "title": "Name",
+            "type": "string"
+          },
+          "Value": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "PipelineID"
+        ],
+        "title": "PipelineParam",
+        "type": "object"
+      },
+      "PipelineParamDef": {
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "PipelineDefID": {
+            "description": "none",
+            "type": "integer"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "type": "string"
+          },
+          "DataType": {
+            "description": "none",
+            "pattern": "^.{0,6}",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PipelineNode": {
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "NodeID": {
+            "description": "none",
+            "type": "integer"
+          },
+          "First": {
+            "description": "none",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "NodeID"
+        ],
+        "type": "object"
+      },
+      "Trend": {
+        "example": {
+          "TrendGroupID": 0,
+          "Format": "Format",
+          "Symbol": "Symbol",
+          "Color": "Color",
+          "NodeID": 6,
+          "TrendDefID": "TrendDefID",
+          "ID": 0,
+          "TimeExponent": 1,
+          "Unit": "Unit",
+          "Name": "Name",
+          "RawMin": 0,
+          "RawMax": 10000,
+          "ScaledMin": -0.5,
+          "ScaledMax": 1.6
+        },
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "title": "ID",
+            "type": "integer"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "title": "Name",
+            "type": "string"
+          },
+          "TrendGroupID": {
+            "description": "none",
+            "title": "TrendGroupID",
+            "type": "integer"
+          },
+          "TrendDefID": {
+            "description": "none",
+            "title": "TrendDefID",
+            "type": "string"
+          },
+          "NodeID": {
+            "description": "none",
+            "title": "NodeID",
+            "type": "integer"
+          },
+          "TimeExponent": {
+            "description": "none",
+            "title": "TimeExponent",
+            "type": "integer"
+          },
+          "Format": {
+            "description": "none",
+            "title": "Format",
+            "type": "string"
+          },
+          "Unit": {
+            "description": "none",
+            "title": "Unit",
+            "type": "string"
+          },
+          "Color": {
+            "title": "Color",
+            "type": "string"
+          },
+          "Symbol": {
+            "title": "Symbol",
+            "type": "string"
+          },
+          "RawMin": {
+            "description": "none",
+            "nullable": false,
+            "title": "RawMin",
+            "type": "integer"
+          },
+          "RawMax": {
+            "description": "none",
+            "nullable": false,
+            "title": "RawMax",
+            "type": "integer"
+          },
+          "ScaledMin": {
+            "description": "none",
+            "nullable": false,
+            "title": "ScaledMin",
+            "type": "number"
+          },
+          "ScaledMax": {
+            "description": "none",
+            "nullable": false,
+            "title": "RawMin",
+            "type": "number"
+          }
+        },
+        "required": [
+          "TrendDefID",
+          "RawMin",
+          "RawMax",
+          "ScaledMin",
+          "ScaledMax"
+        ],
+        "title": "Trend",
+        "type": "object"
+      },
+      "TrendValue": {
+        "type": "object",
+        "properties": {
+          "trendId": {
+            "type": "integer"
+          },
+          "Value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "trendId"
+        ]
+      },
+      "TrendData": {
+        "additionalProperties": {
+          "type": "number"
+        },
+        "example": {
+          "TimestampMs": 6,
+          "Timestamp": 0,
+          "Data": null
+        },
+        "properties": {
+          "Timestamp": {
+            "type": "integer"
+          },
+          "TimestampMs": {
+            "type": "integer"
+          },
+          "Data": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TrendValue"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "Timestamp",
+          "TimestampMs"
+        ],
+        "title": "TrendData",
+        "type": "object"
+      },
+      "TrendDef": {
+        "example": {
+          "ID": "0",
+          "Name": "Name"
+        },
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": "0",
+            "nullable": false,
+            "readOnly": true,
+            "title": "ID",
+            "type": "string"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ID",
+          "Name"
+        ],
+        "title": "TrendDef",
+        "type": "object"
+      },
+      "TrendGroup": {
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,100}",
+            "type": "string"
+          },
+          "AnalisisOnly": {
+            "description": "none",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "AnalisisOnly",
+          "Name"
+        ],
+        "type": "object"
+      },
+      "TrendParam": {
+        "example": {
+          "TrendParamDefID": "TrendParamDefID",
+          "Value": "Value",
+          "DataType": "DataType",
+          "TrendID": 0,
+          "Name": "Name"
+        },
+        "properties": {
+          "TrendID": {
+            "description": "none",
+            "readOnly": true,
+            "title": "TrendID",
+            "type": "integer"
+          },
+          "TrendParamDefID": {
+            "readOnly": true,
+            "title": "TrendParamDefID",
+            "type": "string"
+          },
+          "Name": {
+            "pattern": "^.{0,30}",
+            "readOnly": true,
+            "title": "Name",
+            "type": "string"
+          },
+          "DataType": {
+            "pattern": "^.{0,6}",
+            "readOnly": true,
+            "title": "DataType",
+            "type": "string"
+          },
+          "Value": {
+            "pattern": "^.{0,30}",
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "TrendID",
+          "TrendParamDefID",
+          "Value"
+        ],
+        "title": "TrendParam",
+        "type": "object"
+      },
+      "TrendParamDef": {
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "nullable": false,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "TrendDefID": {
+            "description": "none",
+            "nullable": false,
+            "type": "integer"
+          },
+          "Name": {
+            "description": "none",
+            "pattern": "^.{0,30}",
+            "type": "string"
+          },
+          "DataType": {
+            "description": "none",
+            "pattern": "^.{0,6}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "TrendDefID"
+        ],
+        "type": "object"
+      },
+      "Event": {
+        "example": {
+          "MethodID": 6,
+          "Details": "Details",
+          "Position": 1,
+          "ID": 0,
+          "EventDefID": "NO_DATA",
+          "Verbosity": "Verbosity",
+          "EndDate": "2000-01-23T04:56:07.000Z",
+          "Silient": true,
+          "AckDate": "2000-01-23T04:56:07.000Z",
+          "Caption": "Caption",
+          "BeginDate": "2000-01-23T04:56:07.000Z"
+        },
+        "properties": {
+          "ID": {
+            "description": "none",
+            "example": 0,
+            "format": "int64",
+            "readOnly": true,
+            "title": "ID",
+            "type": "integer"
+          },
+          "EventDefID": {
+            "description": "none",
+            "title": "EventDefID",
+            "type": "string"
+          },
+          "MethodID": {
+            "description": "none",
+            "title": "MethodID",
+            "type": "integer"
+          },
+          "BeginDate": {
+            "description": "none",
+            "format": "date-time",
+            "title": "BeginDate",
+            "type": "string"
+          },
+          "AckDate": {
+            "description": "none",
+            "format": "date-time",
+            "title": "AckDate",
+            "type": "string"
+          },
+          "EndDate": {
+            "description": "none",
+            "format": "date-time",
+            "title": "EndDate",
+            "type": "string"
+          },
+          "Details": {
+            "description": "none",
+            "title": "Details",
+            "type": "string"
+          },
+          "Position": {
+            "description": "none",
+            "title": "Position",
+            "type": "integer"
+          },
+          "Caption": {
+            "description": "none",
+            "title": "Caption",
+            "type": "string"
+          },
+          "Verbosity": {
+            "description": "none",
+            "title": "Verbosity",
+            "type": "string"
+          },
+          "Silient": {
+            "description": "none",
+            "title": "Silient",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "BeginDate",
+          "EventDefID",
+          "MethodID"
+        ],
+        "title": "Event",
+        "type": "object"
+      },
+      "EventDef": {
+        "example": {
+          "ID": "ANOMALY",
+          "Verbosity": "WARNING",
+          "Caption": "Caption",
+          "Silent": false,
+          "Visible": true,
+          "Enabled": true
+        },
+        "properties": {
+          "ID": {
+            "description": "none",
+            "readOnly": true,
+            "title": "ID",
+            "type": "string"
+          },
+          "Verbosity": {
+            "description": "none",
+            "title": "Verbosity",
+            "type": "string"
+          },
+          "Caption": {
+            "description": "none",
+            "title": "Caption",
+            "type": "string"
+          },
+          "Silent": {
+            "description": "none",
+            "title": "Silent",
+            "type": "boolean"
+          },
+          "Visible": {
+            "description": "none",
+            "title": "Visible",
+            "type": "boolean"
+          },
+          "Enabled": {
+            "description": "none",
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ID",
+          "Name"
+        ],
+        "title": "TrendDef",
+        "type": "object"
+      },
+      "Unit": {
+        "example": {
+          "BaseID": "BaseID",
+          "Symbol": "Symbol",
+          "Multiplier": 0.8008281904610115,
+          "ID": "ID",
+          "Name": "Name"
+        },
+        "properties": {
+          "ID": {
+            "title": "ID",
+            "type": "string"
+          },
+          "Name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "Symbol": {
+            "title": "Symbol",
+            "type": "string"
+          },
+          "BaseID": {
+            "title": "BaseID",
+            "type": "string"
+          },
+          "Multiplier": {
+            "title": "Multiplier",
+            "type": "number"
+          }
+        },
+        "title": "Unit",
+        "type": "object"
+      },
+      "EditorPipeline": {
+        "example": {
+          "AreaWidthDivision": 5,
+          "AreaHeightDivision": 5,
+          "AreaWidth": 6,
+          "AreaHeight": 1
+        },
+        "properties": {
+          "AreaWidth": {
+            "description": "none",
+            "nullable": false,
+            "pattern": "^.{0,6}",
+            "title": "AreaWidth",
+            "type": "integer"
+          },
+          "AreaHeight": {
+            "description": "none",
+            "nullable": false,
+            "title": "AreaHeight",
+            "type": "integer"
+          },
+          "AreaWidthDivision": {
+            "description": "none",
+            "nullable": false,
+            "title": "AreaWidthDivision",
+            "type": "integer"
+          },
+          "AreaHeightDivision": {
+            "description": "none",
+            "nullable": false,
+            "title": "AreaHeightDivision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "AreaHeight",
+          "AreaHeightDivision",
+          "AreaWidth",
+          "AreaWidthDivision"
+        ],
+        "title": "EditorPipeline",
+        "type": "object"
+      },
+      "EditorNode": {
+        "example": {
+          "PosX": 6,
+          "PosY": 1
+        },
+        "properties": {
+          "PosX": {
+            "description": "none",
+            "nullable": false,
+            "pattern": "^.{0,6}",
+            "title": "PosX",
+            "type": "integer"
+          },
+          "PosY": {
+            "description": "none",
+            "nullable": false,
+            "title": "PosY",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "PosX",
+          "PosY"
+        ],
+        "title": "EditorNode",
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "code": {
+            "format": "int32",
+            "title": "code",
+            "type": "integer"
+          },
+          "message": {
+            "title": "message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Error",
+        "type": "object"
+      },
+      "Information": {
+        "example": {
+          "message": "message",
+          "affected": 6,
+          "status": 0
+        },
+        "properties": {
+          "status": {
+            "format": "int32",
+            "nullable": false,
+            "title": "status",
+            "type": "integer"
+          },
+          "affected": {
+            "format": "int32",
+            "nullable": false,
+            "title": "affected",
+            "type": "integer"
+          },
+          "message": {
+            "nullable": true,
+            "title": "message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "affected",
+          "message",
+          "status"
+        ],
+        "title": "Information",
+        "type": "object"
+      },
+      "Login": {
+        "example": {
+          "password": "password",
+          "deviceId": "deviceId",
+          "deviceName": "deviceName",
+          "username": "username"
+        },
+        "properties": {
+          "username": {
+            "minLength": 1,
+            "title": "username",
+            "type": "string"
+          },
+          "password": {
+            "minLength": 1,
+            "title": "password",
+            "type": "string"
+          },
+          "deviceId": {
+            "minLength": 1,
+            "title": "deviceId",
+            "type": "string"
+          },
+          "deviceName": {
+            "minLength": 1,
+            "title": "deviceName",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password",
+          "username"
+        ],
+        "title": "Login",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "username": "JohnDoe",
+            "password": "_hashed_password_here_",
+            "deviceId": "ad49afd9-ec38-4716-b93f-416bd8c0c684",
+            "deviceName": "model"
+          }
+        }
+      },
+      "LoginPermissions": {
+        "example": {
+          "refreshTokenExpiration": "refreshTokenExpiration",
+          "success": true,
+          "permissions": [
+            {
+              "key": "{}"
+            },
+            {
+              "key": "{}"
+            }
+          ],
+          "username": "username",
+          "token": "token",
+          "refreshToken": "refreshToken"
+        },
+        "properties": {
+          "username": {
+            "minLength": 1,
+            "title": "username",
+            "type": "string"
+          },
+          "success": {
+            "title": "success",
+            "type": "boolean"
+          },
+          "token": {
+            "minLength": 1,
+            "title": "token",
+            "type": "string"
+          },
+          "refreshToken": {
+            "minLength": 1,
+            "title": "refreshToken",
+            "type": "string"
+          },
+          "refreshTokenExpiration": {
+            "minLength": 1,
+            "format": "date-time",
+            "title": "refreshTokenExpiration",
+            "type": "string"
+          },
+          "permissions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "permissions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "refreshToken",
+          "refreshTokenExpiration",
+          "token"
+        ],
+        "title": "LoginPermissions",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "username": "JohnDoe",
+            "success": true,
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+            "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+            "refreshTokenExpiration": "2022-03-30T23:59:59.000Z",
+            "permissions": [
+              "TRENDS",
+              "ANALYTICS",
+              "ADMIN"
+            ]
+          }
+        }
+      },
+      "Unauthorized": {
+        "example": {
+          "error": "Unauthorised",
+          "status": 401,
+          "timestamp": "2020-10-29T13:08:16.235Z",
+          "path": "/method.123",
+          "message": "REQUEST_UNAUTHORISED",
+          "traceId": "1234567890"
+        },
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "path",
+          "status",
+          "timestamp"
+        ],
+        "title": "Unauthorized",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  }
+}
