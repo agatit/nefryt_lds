@@ -1,13 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Grid, GridColumn, GridToolbar } from '@progress/kendo-react-grid';
-import { Button } from '@progress/kendo-react-buttons';
-import { Configuration, EventsApiFactory, EventDef } from "../services/api";
+import React, {useEffect, useState, useCallback} from 'react';
+import {Grid, GridColumn, GridToolbar} from '@progress/kendo-react-grid';
+import {Button} from '@progress/kendo-react-buttons';
+import {EventsApiFactory, EventDef} from "../services/api";
 import EventDefDialog from "../components/dialog/EventDefDialog";
 import "../assets/pages/EventDefTab.scss";
-
-const apiConfig = new Configuration({
-    basePath: 'http://192.168.30.36:8080',
-});
+import apiConfig from "../services/apiConfig";
 
 const eventsApi = EventsApiFactory(apiConfig);
 
@@ -60,23 +57,30 @@ const EventDefTab = () => {
     }, []);
 
     const openEventDefDialog = useCallback((data?: EventDef) => {
-        setEventDefFormData(data || { ID: '', Verbosity: '', Caption: '', Silent: false, Visible: false, Enabled: false });
+        setEventDefFormData(data || {
+            ID: '',
+            Verbosity: '',
+            Caption: '',
+            Silent: false,
+            Visible: false,
+            Enabled: false
+        });
         setIsEventDefDialogOpen(true);
     }, []);
 
     return (
         <div>
             <h2>Event Definitions</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p style={{color: 'red'}}>{error}</p>}
 
             <GridToolbar>
                 <Button onClick={() => openEventDefDialog()}>Add Event Definition</Button>
             </GridToolbar>
 
             <Grid data={eventDefs}>
-                <GridColumn field="ID" title="ID" />
-                <GridColumn field="Caption" title="Caption" />
-                <GridColumn field="Verbosity" title="Verbosity" />
+                <GridColumn field="ID" title="ID"/>
+                <GridColumn field="Caption" title="Caption"/>
+                <GridColumn field="Verbosity" title="Verbosity"/>
                 <GridColumn
                     field="Actions"
                     title="Actions"

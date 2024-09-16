@@ -1,16 +1,13 @@
 import React, {useEffect, useState, useCallback} from 'react';
 import {Grid, GridColumn, GridToolbar} from '@progress/kendo-react-grid';
 import '@progress/kendo-theme-default/dist/all.css';
-import {Configuration, TrendsApiFactory, Trend, TrendDef, TrendParam} from "../services/api";
+import {TrendsApiFactory, Trend, TrendDef, TrendParam} from "../services/api";
 import {Button} from '@progress/kendo-react-buttons';
 import '@progress/kendo-theme-default/dist/all.css';
 import "../assets/pages/TrendTab.scss";
 import TrendDialog from "../components/dialog/TrendDialog";
 import TrendParamDialog from "../components/dialog/TrendParamDialog";
-
-const apiConfig = new Configuration({
-    basePath: 'http://192.168.30.36:8080',
-});
+import apiConfig from "../services/apiConfig";
 
 const trendsApi = TrendsApiFactory(apiConfig);
 

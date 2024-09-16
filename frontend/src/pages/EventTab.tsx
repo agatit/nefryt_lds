@@ -1,13 +1,10 @@
 import React, {useEffect, useState, useCallback} from 'react';
 import {Grid, GridColumn} from '@progress/kendo-react-grid';
 import '@progress/kendo-theme-default/dist/all.css';
-import {Configuration, EventsApiFactory, Event, EventDef} from "../services/api";
+import {EventsApiFactory, Event, EventDef} from "../services/api";
 import {Button} from '@progress/kendo-react-buttons';
 import "../assets/pages/EventTab.scss";
-
-const apiConfig = new Configuration({
-    basePath: 'http://192.168.30.36:8080',
-});
+import apiConfig from "../services/apiConfig";
 
 const eventsApi = EventsApiFactory(apiConfig);
 

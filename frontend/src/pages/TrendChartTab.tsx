@@ -9,16 +9,13 @@ import {
     ChartValueAxisItem
 } from '@progress/kendo-react-charts';
 import '@progress/kendo-theme-default/dist/all.css';
-import {Configuration, TrendData, TrendsApiFactory, Trend} from "../services/api";
+import {TrendData, TrendsApiFactory, Trend} from "../services/api";
 import {Form, Field, FormElement, FormRenderProps, FieldWrapper} from '@progress/kendo-react-form';
 import {Input} from '@progress/kendo-react-inputs';
 import {DateTimePicker, DateTimePickerChangeEvent} from '@progress/kendo-react-dateinputs';
 import {Button} from '@progress/kendo-react-buttons';
 import '../assets/pages/TrendChartTab.scss';
-
-const apiConfig = new Configuration({
-    basePath: 'http://192.168.30.36:8080',
-});
+import apiConfig from "../services/apiConfig";
 
 const trendsApi = TrendsApiFactory(apiConfig);
 
