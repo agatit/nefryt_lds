@@ -21,7 +21,7 @@ def reset_link_objects():
     links_list = [link1, link2]
     lds_objects = [node1, node2, link1, link2]
 
-    return lds_objects
+    return [lds_objects]
 
 
 def reset_node_objects():
@@ -31,7 +31,7 @@ def reset_node_objects():
     node2 = lds.Node(ID=2, Type='type', Name='name')
     lds_objects = [node1, node2]
 
-    return lds_objects
+    return [lds_objects]
 
 
 app.dependency_overrides[get_engine] = get_test_engine
@@ -129,7 +129,7 @@ def test_update_link_by_id_should_return_ok_response_code_and_link_of_given_id(a
     assert returned_link['Length'] == updated_link_dict['Length']
 
 
-def test_update_event_def_by_id_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id():
+def test_update_link_by_id_should_return_not_found_response_code_and_error_when_no_link_with_given_id():
     updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 99.99}
     response = test_client.put("/link/" + str(link2.ID), json=updated_link_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -139,7 +139,7 @@ def test_update_event_def_by_id_should_return_not_found_response_code_and_error_
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_update_event_def_by_id_should_return_conflict_response_code_and_error_when_no_node_with_given_id(add_lds_objects):
+def test_update_link_by_id_should_return_conflict_response_code_and_error_when_no_node_with_given_id(add_lds_objects):
     updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 5, 'Length': 99.999}
     response = test_client.put("/link/" + str(link2.ID), json=updated_link_dict)
     assert response.status_code == status.HTTP_409_CONFLICT

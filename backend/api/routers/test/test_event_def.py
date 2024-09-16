@@ -27,7 +27,7 @@ def reset_event_def_objects():
                               Silent=False, Visible=False, Enabled=False)
     event_def_list = [event_def1, event_def2]
 
-    return event_def_list
+    return [event_def_list]
 
 
 app.dependency_overrides[get_engine] = get_test_engine

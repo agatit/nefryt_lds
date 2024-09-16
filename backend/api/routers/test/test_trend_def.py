@@ -16,7 +16,7 @@ def reset_trend_def_objects():
     trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
     trend_def_list = [trend_def1, trend_def2]
 
-    return trend_def_list
+    return [trend_def_list]
 
 
 app.dependency_overrides[get_engine] = get_test_engine

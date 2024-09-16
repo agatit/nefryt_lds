@@ -17,11 +17,12 @@ login_data1: dict = {'username': 'user1',
                      'password': 'abc'}
 login_data2: dict = {'username': 'admin',
                      'password': 'Kartofel_1410'}
+datetime_now = datetime.now(timezone.utc)
 token_data = {
     'iss': 'https://api.nefrytlds.local/',
     'sub': 'user',
-    'iat': datetime.now(tz=timezone.utc).timestamp(),
-    'exp': (datetime.now(tz=timezone.utc) + timedelta(hours=24)).timestamp(),
+    'iat': datetime_now.timestamp(),
+    'exp': (datetime_now + timedelta(hours=24)).timestamp(),
     'perms': ['confirm', 'admin']
 }
 password = 'abc'

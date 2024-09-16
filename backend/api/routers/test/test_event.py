@@ -34,7 +34,7 @@ def reset_event_objects():
                    event_visible, event_invisible, event_disabled]
     events = [event_visible, event_invisible, event_disabled]
 
-    return lds_objects
+    return [lds_objects]
 
 
 app.dependency_overrides[get_engine] = get_test_engine

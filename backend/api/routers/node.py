@@ -1,12 +1,12 @@
 from typing import Annotated
-from fastapi import APIRouter, Body, Path, Query
-from sqlalchemy import select, delete, or_
+from fastapi import APIRouter, Body, Path, Query, Depends
+from sqlalchemy import select, Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, aliased
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_node_and_editor_node_to_node, map_node_to_lds_node, map_node_to_editor_node
-from ..db import engine
+from ..db import get_engine
 from ..schemas import Error, Node, UpdateNode
 from database import lds, editor
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/node", tags=["node"])
 
 
 @router.get('', response_model=list[Node] | Error)
-async def list_nodes(filter: Annotated[str | None, Query()] = None):
+async def list_nodes(engine: Annotated[Engine, Depends(get_engine)], filter: Annotated[str | None, Query()] = None):
     try:
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
@@ -30,7 +30,7 @@ async def list_nodes(filter: Annotated[str | None, Query()] = None):
 
 
 @router.post('', response_model=Node | Error)
-async def create_node(node: Annotated[Node, Body()]):
+async def create_node(node: Annotated[Node, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_node = map_node_to_lds_node(node)
         with Session(engine) as session:
@@ -53,7 +53,7 @@ async def create_node(node: Annotated[Node, Body()]):
 
 
 @router.delete('/{node_id}', response_model=None | Error)
-async def delete_node_by_id(node_id: Annotated[int, Path()]):
+async def delete_node_by_id(node_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
@@ -73,7 +73,7 @@ async def delete_node_by_id(node_id: Annotated[int, Path()]):
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT,
-                      message='Integrity error when deleting node with id = ' + str(node))
+                      message='Integrity error when deleting node with id = ' + str(node_id))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in delete_node_by_id(): ' + str(e))
@@ -81,7 +81,7 @@ async def delete_node_by_id(node_id: Annotated[int, Path()]):
 
 
 @router.get('/{node_id}', response_model=Node | Error)
-async def get_node_by_id(node_id: Annotated[int, Path()]):
+async def get_node_by_id(node_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
@@ -101,7 +101,8 @@ async def get_node_by_id(node_id: Annotated[int, Path()]):
 
 
 @router.put('/{node_id}', response_model=Node | Error)
-async def update_node(node_id: Annotated[int, Path()], updated_node: Annotated[UpdateNode, Body()]):
+async def update_node(node_id: Annotated[int, Path()], updated_node: Annotated[UpdateNode, Body()],
+                      engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
             lds_node = aliased(lds.Node)
@@ -127,10 +128,6 @@ async def update_node(node_id: Annotated[int, Path()], updated_node: Annotated[U
             session.refresh(lds_node)
             session.refresh(editor_node)
             return map_lds_node_and_editor_node_to_node(lds_node, editor_node)
-    except IntegrityError:
-        error = Error(code=status.HTTP_409_CONFLICT,
-                      message='Integrity error when updating node with id = ' + str(node))
-        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_node(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
