@@ -7,4 +7,5 @@
 
 db_uri: mssql+pyodbc://sa:Onyks$us@owl.agatit.pl:1449/NefrytLDS_Zygmuntow_2024?driver=ODBC+Driver+17+for+SQL+Server
 test_db_uri: mssql+pyodbc://sa:praktyka@localhost/NefrytLDS_Test_Database?driver=ODBC+Driver+17+for+SQL+Server
+test_db_name: NefrytLDS_Test_Database
 verbosity: INFO # DEBUG, WARNING, ERROR, ...
