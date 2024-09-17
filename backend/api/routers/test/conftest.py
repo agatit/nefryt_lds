@@ -60,9 +60,8 @@ def add_lds_objects(reset_lds_objects):
         for lds_objects_list in lds_objects:
             session.add_all(lds_objects_list)
             session.commit()
-        for lds_objects_list in lds_objects:
-            for lds_object in lds_objects_list:
-                session.refresh(lds_object)
+        for lds_object in (obj for sublist in lds_objects for obj in sublist):
+            session.refresh(lds_object)
 
 
 @pytest.fixture(autouse=True)

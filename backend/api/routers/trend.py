@@ -1,15 +1,15 @@
 import struct
 from datetime import datetime, timezone
 from typing import Annotated
-from fastapi import APIRouter, Query, Body, Path
-from sqlalchemy import select, and_
+from fastapi import APIRouter, Query, Body, Path, Depends
+from sqlalchemy import select, and_, Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_trend_to_trend, map_trend_to_lds_trend, \
     map_lds_trend_param_and_lds_trend_param_def_to_trend_param, map_dicts_to_trend_data
-from ..db import engine
+from ..db import get_engine
 from ..schemas import Error, TrendData, Information, Trend, UpdateTrend, TrendParam
 from database import lds
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/trend", tags=['trend'])
 
 
 @router.get('', response_model=list[Trend] | Error)
-async def list_trends(filter: Annotated[str | None, Query()] = None):
+async def list_trends(engine: Annotated[Engine, Depends(get_engine)], filter: Annotated[str | None, Query()] = None):
     try:
         statement = select(lds.Trend)
         with Session(engine) as session:
@@ -30,7 +30,7 @@ async def list_trends(filter: Annotated[str | None, Query()] = None):
 
 
 @router.post('', response_model=Trend | Error)
-async def create_trend(trend: Annotated[Trend, Body()]):
+async def create_trend(trend: Annotated[Trend, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_trend = map_trend_to_lds_trend(trend)
         with Session(engine) as session:
@@ -38,7 +38,7 @@ async def create_trend(trend: Annotated[Trend, Body()]):
             session.commit()
             session.refresh(lds_trend)
         trend = map_lds_trend_to_trend(lds_trend)
-        return JSONResponse(content=trend.model_dump(), status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=trend.model_dump(by_alias=True), status_code=status.HTTP_201_CREATED)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating trend')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
@@ -49,14 +49,15 @@ async def create_trend(trend: Annotated[Trend, Body()]):
 
 @router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=list[TrendData] | Error)
 async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[int, Path()],
-                                 samples: Annotated[int, Path()]):
+                                 samples: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     timestamp = int(datetime.now(timezone.utc).timestamp())
-    return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples)
+    return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples, engine)
 
 
 @router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=list[TrendData] | Error)
 async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[int, Path()],
-                         end: Annotated[int, Path()], samples: Annotated[int, Path()]):
+                         end: Annotated[int, Path()], samples: Annotated[int, Path()],
+                         engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_trends_scales = {}
         trend_id_list = trend_id_list.split(",")
@@ -149,7 +150,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
 
 
 @router.delete('/{trend_id}', response_model=Information | Error)
-async def delete_trend_by_id(trend_id: Annotated[int, Path()]):
+async def delete_trend_by_id(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
             trend = session.get(lds.Trend, trend_id)
@@ -167,7 +168,7 @@ async def delete_trend_by_id(trend_id: Annotated[int, Path()]):
 
 
 @router.get('/{trend_id}', response_model=Trend | Error)
-async def get_trend_by_id(trend_id: int):
+async def get_trend_by_id(trend_id: int, engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
             lds_trend = session.get(lds.Trend, trend_id)
@@ -182,7 +183,8 @@ async def get_trend_by_id(trend_id: int):
 
 
 @router.put('/{trend_id}', response_model=Trend | Error)
-async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotated[UpdateTrend, Body()]):
+async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotated[UpdateTrend, Body()],
+                       engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
             trend = session.get(lds.Trend, trend_id)
@@ -197,17 +199,18 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
                 if k in trend_params_ids:
                     trend_param_id = [char.upper() if char.islower() else '_' + char.upper() for char in k]
                     trend_param_id = ''.join(trend_param_id).lstrip('_')
-                    await update_trend_param(trend_id, trend_param_id, str(v))
+                    await update_trend_param(trend_id, trend_param_id, str(v), engine)
             session.commit()
             session.refresh(trend)
         return map_lds_trend_to_trend(trend)
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_trend_def(): ' + str(e))
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_trend(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.get('/{trend_id}/param', response_model=list[TrendParam] | Error)
-async def list_trend_params(trend_id: Annotated[int, Path()], filter: Annotated[str | None, Query()] = None):
+async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
+                            filter: Annotated[str | None, Query()] = None):
     try:
         statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
                         .select_from(lds.Trend))
@@ -222,6 +225,8 @@ async def list_trend_params(trend_id: Annotated[int, Path()], filter: Annotated[
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         trend_params_list = []
         for lds_trend_param, _, lds_trend_param_def in results:
+            if not lds_trend_param or not lds_trend_param_def:
+                continue
             trend_param_out = (
                 map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def))
             trend_params_list.append(trend_param_out)
@@ -232,7 +237,8 @@ async def list_trend_params(trend_id: Annotated[int, Path()], filter: Annotated[
 
 
 @router.get('/{trend_id}/param/{trend_param_def_id}', response_model=TrendParam | Error)
-async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()]):
+async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()],
+                                engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
                         .select_from(lds.Trend))
@@ -246,7 +252,7 @@ async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_de
         if not results:
             error = Error(code=status.HTTP_404_NOT_FOUND,
                           message='No trend param for trend with id = ' + str(trend_id)
-                                  + ' and trendParamDef with id = ' + trend_param_def_id)
+                                  + ' and trendParamDef with id = ' + trend_param_def_id.strip())
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         lds_trend_param, _, lds_trend_param_def = results[0]
         return map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def)
@@ -258,24 +264,25 @@ async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_de
 
 @router.put('/{trend_id}/param/{trend_param_def_id}', response_model=TrendParam | Error)
 async def update_trend_param(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()],
-                             updated_trend_value: Annotated[str, Body()]):
+                             updated_trend_value: Annotated[str, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = (select(lds.TrendParam).
                      where(lds.TrendParam.TrendParamDefID == trend_param_def_id).
                      where(lds.TrendParam.TrendID == trend_id))
         with Session(engine) as session:
-            lds_trend_param = session.execute(statement).all()[0][0]
+            lds_trend_param = session.execute(statement).all()
             lds_trend = session.get(lds.Trend, trend_id)
             if not lds_trend_param or not lds_trend:
                 error = Error(code=status.HTTP_404_NOT_FOUND,
                               message='No trend param for trend with id = ' + str(trend_id)
-                                      + ' and trendParamDef with id = ' + trend_param_def_id)
+                                      + ' and trendParamDef with id = ' + trend_param_def_id.strip())
                 return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+            lds_trend_param = lds_trend_param[0][0]
             lds_trend_param.Value = updated_trend_value
             field_name = ''.join(word.capitalize() for word in trend_param_def_id.lower().split('_'))
             setattr(lds_trend, field_name, updated_trend_value)
             session.commit()
-        return await get_trend_param_by_id(trend_id, trend_param_def_id)
+        return await get_trend_param_by_id(trend_id, trend_param_def_id, engine)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                       message='Exception in update_trend_param(): ' + str(e))
