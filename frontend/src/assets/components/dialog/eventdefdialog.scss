@@ -1,0 +1,46 @@
+.event-def-dialog {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.k-checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+.k-form-field {
+  margin-bottom: 10px;
+}
+
+.save-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100px;
+  text-align: center;
+
+  &:hover {
+    background-color: #218838;
+  }
+}
+
+.cancel-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100px;
+  text-align: center;
+
+  &:hover {
+    background-color: #c82333;
+  }
+}

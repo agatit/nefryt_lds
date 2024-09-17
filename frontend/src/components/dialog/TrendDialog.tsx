@@ -6,6 +6,7 @@ import {DropDownList, DropDownListChangeEvent} from "@progress/kendo-react-dropd
 import {Button} from '@progress/kendo-react-buttons';
 import {Label, Error} from "@progress/kendo-react-labels";
 import {Trend, TrendDef} from "../../services/api";
+import "../../assets/components/dialog/trenddialogs.scss"
 
 interface TrendDialogProps {
     data: Trend;
@@ -46,8 +47,6 @@ const NumericTextBoxField = (fieldRenderProps: FieldRenderProps) => {
 
 const DropDownListField = (fieldRenderProps: FieldRenderProps) => {
     const {validationMessage, visited, label, id, onChange, ...others} = fieldRenderProps;
-    console.log("PROPS: ", fieldRenderProps.data);
-
 
     const handleChange = (event: DropDownListChangeEvent) => {
         const newValue = event.target.value;
@@ -80,11 +79,7 @@ const TrendDialog = ({data, trendDefs, onSubmit, onCancel}: TrendDialogProps) =>
         <Dialog title="Trend" onClose={onCancel}>
             <Form
                 initialValues={data}
-                onSubmit={(formData) => {
-                    console.log('DATA:', formData);
-                    onSubmit(formData);
-                }}
-                // onSubmit={onSubmit}
+                onSubmit={onSubmit}
                 render={(formRenderProps) => (
                     <FormElement>
                         <FieldWrapper>
@@ -135,6 +130,7 @@ const TrendDialog = ({data, trendDefs, onSubmit, onCancel}: TrendDialogProps) =>
                         <DialogActionsBar>
                             <Button
                                 type={"submit"}
+                                className="save-button"
                                 themeColor={"primary"}
                                 disabled={!formRenderProps.allowSubmit}
                                 onClick={formRenderProps.onSubmit}
@@ -142,6 +138,7 @@ const TrendDialog = ({data, trendDefs, onSubmit, onCancel}: TrendDialogProps) =>
                                 Save
                             </Button>
                             <Button
+                                className="cancel-button"
                                 onClick={onCancel}
                             >
                                 Cancel

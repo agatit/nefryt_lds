@@ -5,6 +5,7 @@ import {TextBox} from "@progress/kendo-react-inputs";
 import {Button} from '@progress/kendo-react-buttons';
 import {TrendParam} from '../../services/api';
 import {Error, Label} from "@progress/kendo-react-labels";
+import "../../assets/components/dialog/trenddialogs.scss"
 
 interface TrendParamDialogProps {
     data: TrendParam | null;
@@ -50,6 +51,7 @@ const TrendParamDialog = ({data, onSubmit, onCancel}: TrendParamDialogProps) => 
                         <DialogActionsBar>
                             <Button
                                 type={"submit"}
+                                className="save-button"
                                 themeColor={"primary"}
                                 disabled={!formRenderProps.allowSubmit}
                                 onClick={formRenderProps.onSubmit}
@@ -57,6 +59,7 @@ const TrendParamDialog = ({data, onSubmit, onCancel}: TrendParamDialogProps) => 
                                 Save
                             </Button>
                             <Button
+                                className="cancel-button"
                                 onClick={onCancel}
                             >
                                 Cancel

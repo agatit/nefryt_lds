@@ -1,0 +1,65 @@
+.event-def-tab {
+  padding: 20px;
+}
+
+.event-def-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.event-def-dashboard {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.grid-toolbar {
+  margin-top: 20px;
+}
+
+.custom-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.k-grid {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.k-grid .k-grid-content tr {
+  transition: background-color 0.3s ease;
+}
+
+.k-grid td .k-button {
+  margin-right: 10px;
+}
+
+.k-grid td .k-button:last-child {
+  margin-right: 0;
+}
+
+.k-grid .edit-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.k-grid .edit-button:hover {
+  background-color: #218838;
+}
+
+.k-grid .delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.k-grid .delete-button:hover {
+  background-color: #c82333;
+}

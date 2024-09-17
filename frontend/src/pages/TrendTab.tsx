@@ -129,13 +129,13 @@ const TrendTab = () => {
     );
 
     return (
-        <div>
-            <h2>Trends</h2>
+        <div className="trend-tab">
+            <h2 className="trend-title">Trends</h2>
             {error && <p style={{color: 'red'}}>{error}</p>}
 
             <div className="trend-dashboard">
                 <GridToolbar>
-                    <Button onClick={() => openTrendDialog()}>Add New Trend</Button>
+                    <Button className="custom-button" onClick={() => openTrendDialog()}>Add New Trend</Button>
                 </GridToolbar>
 
                 <Grid data={trends} className="grid-toolbar" onRowClick={(e) => handleTrendSelection(e.dataItem)}>
@@ -154,8 +154,8 @@ const TrendTab = () => {
                         title="Actions"
                         cell={(props) => (
                             <td>
-                                <Button onClick={() => openTrendDialog(props.dataItem)}>Edit</Button>
-                                <Button onClick={() => handleDeleteTrend(props.dataItem.ID)}>Delete</Button>
+                                <Button className="edit-button" onClick={() => openTrendDialog(props.dataItem)}>Edit</Button>
+                                <Button className="delete-button" onClick={() => handleDeleteTrend(props.dataItem.ID)}>Delete</Button>
                             </td>
                         )}
                     />
@@ -174,7 +174,7 @@ const TrendTab = () => {
                                 title="Actions"
                                 cell={(props) => (
                                     <td>
-                                        <Button onClick={() => openTrendParamDialog(props.dataItem)}>Edit</Button>
+                                        <Button className="edit-button" onClick={() => openTrendParamDialog(props.dataItem)}>Edit</Button>
                                     </td>
                                 )}
                             />

@@ -64,8 +64,8 @@ const EventTab = () => {
     }, [events]);
 
     return (
-        <div>
-            <h2>Events</h2>
+        <div className="event-tab">
+            <h2 className="event-title">Events</h2>
             {error && <p style={{color: 'red'}}>{error}</p>}
 
             <div className="event-dashboard">

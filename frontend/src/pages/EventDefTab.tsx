@@ -69,29 +69,31 @@ const EventDefTab = () => {
     }, []);
 
     return (
-        <div>
-            <h2>Event Definitions</h2>
+        <div className="event-def-tab">
+            <h2 className="event-def-title">Event Definitions</h2>
             {error && <p style={{color: 'red'}}>{error}</p>}
 
-            <GridToolbar>
-                <Button onClick={() => openEventDefDialog()}>Add Event Definition</Button>
-            </GridToolbar>
+            <div className="event-def-dashboard">
+                <GridToolbar>
+                    <Button className="custom-button" onClick={() => openEventDefDialog()}>Add Event Definition</Button>
+                </GridToolbar>
 
-            <Grid data={eventDefs}>
-                <GridColumn field="ID" title="ID"/>
-                <GridColumn field="Caption" title="Caption"/>
-                <GridColumn field="Verbosity" title="Verbosity"/>
-                <GridColumn
-                    field="Actions"
-                    title="Actions"
-                    cell={(props) => (
-                        <td>
-                            <Button onClick={() => openEventDefDialog(props.dataItem)}>Edit</Button>
-                            <Button onClick={() => handleDeleteEventDef(props.dataItem.ID)}>Delete</Button>
-                        </td>
-                    )}
-                />
-            </Grid>
+                <Grid data={eventDefs} className="grid-toolbar">
+                    <GridColumn field="ID" title="ID"/>
+                    <GridColumn field="Caption" title="Caption"/>
+                    <GridColumn field="Verbosity" title="Verbosity"/>
+                    <GridColumn
+                        field="Actions"
+                        title="Actions"
+                        cell={(props) => (
+                            <td>
+                                <Button className="edit-button" onClick={() => openEventDefDialog(props.dataItem)}>Edit</Button>
+                                <Button className="delete-button" onClick={() => handleDeleteEventDef(props.dataItem.ID)}>Delete</Button>
+                            </td>
+                        )}
+                    />
+                </Grid>
+            </div>
 
             {isEventDefDialogOpen && eventDefFormData && (
                 <EventDefDialog

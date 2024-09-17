@@ -12,7 +12,7 @@ export function Appbar({onMenuClick}: {onMenuClick: () => void}) {
 
     return (
         <React.Fragment>
-            <AppBar>
+            <AppBar className="k-appbar">
                 <AppBarSection>
                     <Button
                         className="menu-icon"

@@ -8,7 +8,7 @@ import {
     DrawerSelectEvent,
     DrawerItem,
 } from "@progress/kendo-react-layout";
-import "../../assets/components/drawercontainer.scss";
+import "../../assets/components/drawer/drawercontainer.scss";
 
 const items = [
     {title: "Tab1", text: "Event", selected: true, route: "/event"},

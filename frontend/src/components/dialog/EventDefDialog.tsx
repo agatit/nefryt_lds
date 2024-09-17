@@ -5,7 +5,7 @@ import { Input } from '@progress/kendo-react-inputs';
 import { Button } from '@progress/kendo-react-buttons';
 import { Label, Error } from "@progress/kendo-react-labels";
 import { EventDef } from "../../services/api";
-import "../../assets/components/eventdefdialog.scss"
+import "../../assets/components/dialog/eventdefdialog.scss"
 
 interface EventDefDialogProps {
     onClose: () => void;
@@ -96,6 +96,7 @@ const EventDefDialog = ({ onClose, onSubmit, initialValues }: EventDefDialogProp
                         <DialogActionsBar layout="start">
                             <Button
                                 type={"submit"}
+                                className="save-button"
                                 themeColor={"primary"}
                                 disabled={!formRenderProps.allowSubmit}
                                 onClick={formRenderProps.onSubmit}
@@ -103,6 +104,7 @@ const EventDefDialog = ({ onClose, onSubmit, initialValues }: EventDefDialogProp
                                 Save
                             </Button>
                             <Button
+                                className="cancel-button"
                                 onClick={onClose}
                             >
                                 Cancel
