@@ -10,3 +10,6 @@ numpy >= 1.14.3
 scipy >= 1.8.1
 pyodbc >= 4.0.22
 pyjwt >= 2.4.0
+fastapi==0.115.12
+passlib==1.7.4
+uvicorn==0.34.0
