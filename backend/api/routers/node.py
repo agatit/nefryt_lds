@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session, aliased
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_node_and_editor_node_to_node, map_node_to_lds_node, map_node_to_editor_node
+from .security import get_user_token
 from ..db import get_engine
 from ..schemas import Error, Node, UpdateNode
 from database import lds, editor
 
-router = APIRouter(prefix="/node", tags=["node"])
+router = APIRouter(prefix="/node", tags=["node"], dependencies=[Depends(get_user_token)])
 
 
 @router.get('', response_model=list[Node] | Error)

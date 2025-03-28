@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_link_to_link, map_link_to_lds_link
+from .security import get_user_token
 from ..db import get_engine
 from ..schemas import Error, Link, UpdateLink
 from database import lds
 
-router = APIRouter(prefix="/link", tags=["link"])
+router = APIRouter(prefix="/link", tags=["link"], dependencies=[Depends(get_user_token)])
 
 
 @router.get('', response_model=list[Link] | Error)

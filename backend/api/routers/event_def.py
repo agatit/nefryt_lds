@@ -7,11 +7,12 @@ from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_event_def_to_lds_event_def, \
     map_lds_event_def_to_event_def
+from .security import get_user_token
 from ..db import get_engine
 from ..schemas import Error, EventDef, Information, UpdateEventDef
 from database import lds
 
-router = APIRouter(prefix="/event_def", tags=["event_def"])
+router = APIRouter(prefix="/event_def", tags=["event_def"], dependencies=[Depends(get_user_token)])
 
 
 @router.get('', response_model=list[EventDef] | Error, operation_id="list_event_defs")

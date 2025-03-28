@@ -5,11 +5,12 @@ from database import lds
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
+from .security import get_user_token
 from ..db import get_engine
 from ..routers.mapper import map_lds_trend_def_to_trend_def
 from ..schemas import TrendDef, Error
 
-router = APIRouter(prefix="/trend_def", tags=["trend_def"])
+router = APIRouter(prefix="/trend_def", tags=["trend_def"], dependencies=[Depends(get_user_token)])
 
 
 @router.get('', response_model=list[TrendDef] | Error)

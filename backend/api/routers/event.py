@@ -9,10 +9,10 @@ from starlette.responses import JSONResponse
 from .mapper import map_lds_event_and_lds_event_def_to_event
 from ..schemas import Error, Event, Information
 from ..db import get_engine
-from ..routers.security import get_user_permissions
+from ..routers.security import get_user_permissions, get_user_token
 from database import lds
 
-router = APIRouter(prefix="/event", tags=["event"])
+router = APIRouter(prefix="/event", tags=["event"], dependencies=[Depends(get_user_token)])
 
 
 @router.get('', response_model=list[Event] | Error)
@@ -55,7 +55,7 @@ async def get_event_by_id(event_id: int, engine: Annotated[Engine, Depends(get_e
 async def ack_event(event_id: int, permissions: Annotated[list[str], Depends(get_user_permissions)],
                     engine: Annotated[Engine, Depends(get_engine)]):
     if 'admin' not in permissions:
-        error = Error(code=status.HTTP_403_FORBIDDEN, message='Forbidden')
+        error = Error(code=status.HTTP_403_FORBIDDEN, message='Action requires admin permissions')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_403_FORBIDDEN)
     try:
         with Session(engine) as session:

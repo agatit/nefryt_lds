@@ -16,7 +16,7 @@ paths:
       operationId: auth_login
       requestBody:
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
               $ref: '#/components/schemas/Login'
       responses:
@@ -41,6 +41,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/LoginPermissions'
           description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
       summary: Authentication token refresh
       tags:
       - auth

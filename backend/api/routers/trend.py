@@ -9,11 +9,12 @@ from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_trend_to_trend, map_trend_to_lds_trend, \
     map_lds_trend_param_and_lds_trend_param_def_to_trend_param, map_dicts_to_trend_data
+from .security import get_user_token
 from ..db import get_engine
 from ..schemas import Error, TrendData, Information, Trend, UpdateTrend, TrendParam
 from database import lds
 
-router = APIRouter(prefix="/trend", tags=['trend'])
+router = APIRouter(prefix="/trend", tags=['trend'], dependencies=[Depends(get_user_token)])
 
 
 @router.get('', response_model=list[Trend] | Error)
