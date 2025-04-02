@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api import app
+from api.app import app
 from api.db import get_engine, get_test_engine
+from api.routers.security import get_user_token
 from database import lds
 import pytest
 from api.routers.security import SECRET_KEY, ALGORITHM
@@ -38,6 +39,7 @@ def reset_event_objects():
 
 
 app.dependency_overrides[get_engine] = get_test_engine
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
 test_client = TestClient(app)
 
 
@@ -105,8 +107,6 @@ def test_ack_event_should_return_ok_response_code_and_information_and_set_ack_da
     assert changed_event.AckDate
 
 
-# tested because its only method with authorization other than auth,
-# dont know whether it should be tested as its basically checking if fastapi works as expected
 @pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
 def test_ack_event_should_return_unauthorized_response_code_when_header_is_invalid(add_lds_objects):
     token_data = {
@@ -129,7 +129,7 @@ def test_ack_event_should_return_forbidden_response_code_and_error_when_permissi
     assert response.status_code == status.HTTP_403_FORBIDDEN
     error = response.json()
     assert error['code'] == status.HTTP_403_FORBIDDEN
-    assert error['message'] == 'Forbidden'
+    assert error['message'] == 'Action requires admin permissions'
 
 
 def test_ack_event_should_return_not_found_response_code_and_error_when_no_event_with_given_id():

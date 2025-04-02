@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api import app
+from api.app import app
 from api.db import get_engine, get_test_engine
+from api.routers.security import get_user_token
 from database import lds
 import pytest
 
@@ -35,6 +36,7 @@ def reset_node_objects():
 
 
 app.dependency_overrides[get_engine] = get_test_engine
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
 test_client = TestClient(app)
 
 

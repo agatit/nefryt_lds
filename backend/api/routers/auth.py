@@ -20,7 +20,7 @@ async def auth_login(login_data: Annotated[Login, Body()]):
 
 
 @router.post("/refresh")
-async def auth_refresh(token: Annotated[str, Depends(get_refresh_token)]):
+async def auth_refresh(token: Annotated[dict, Depends(get_refresh_token)]):
     permissions = token.get('perms')
     permissions.remove('refresh')
     success = True

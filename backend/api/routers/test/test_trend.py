@@ -7,8 +7,9 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+from api.routers.security import get_user_token
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api import app
+from api.app import app
 from api.db import get_engine, get_test_engine
 from database import lds
 import pytest
@@ -83,6 +84,7 @@ def reset_trend_objects():
 
 
 app.dependency_overrides[get_engine] = get_test_engine
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
 test_client = TestClient(app)
 
 

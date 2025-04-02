@@ -4,12 +4,13 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt import InvalidTokenError, InvalidSignatureError, ExpiredSignatureError
 import jwt
+from passlib.context import CryptContext
 from starlette import status
 from ..schemas import LoginPermissions
 
 SECRET_KEY = "45bfa25ea5ae73f9f46909ac22e5ff72d51362129e210e3bc2c728957ee18230"
 ALGORITHM = "HS256"
-# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer(auto_error=False)
 _iss = 'https://api.nefrytlds.local/'
 
@@ -30,7 +31,7 @@ def get_expiration_time(current_time: datetime, hours: int) -> datetime:
     return current_time + timedelta(hours=hours)
 
 
-def is_refresh(token: str) -> bool:
+def is_refresh(token: dict) -> bool:
     permissions = token.get('perms', [])
     return 'refresh' in permissions
 
@@ -45,7 +46,7 @@ def get_user_permissions(user_credentials: Annotated[HTTPAuthorizationCredential
         return []
 
 
-def get_user_token(user_credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> str:
+def get_user_token(user_credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> dict:
     if user_credentials is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='No token given or is in wrong format')
     try:
@@ -59,7 +60,7 @@ def get_user_token(user_credentials: Annotated[HTTPAuthorizationCredentials, Dep
     return decoded_token
 
 
-def get_refresh_token(user_credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> str:
+def get_refresh_token(user_credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> dict:
     if user_credentials is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='No token given or is in wrong format')
     try:
@@ -73,7 +74,7 @@ def get_refresh_token(user_credentials: Annotated[HTTPAuthorizationCredentials, 
     return decoded_token
 
 
-def decode_token(encoded_token: str) -> str:
+def decode_token(encoded_token: str) -> dict:
     return jwt.decode(encoded_token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
@@ -95,9 +96,10 @@ def prepare_login_permissions(username: str, permissions: list[str], success: bo
     }
     return LoginPermissions(**login_permissions)
 
-# def verify_password(plain_password: str, hashed_password: str):
-#     return pwd_context.verify(plain_password, hashed_password)
-#
-#
-# def hash_password(password: str):
-#     return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def hash_password(password: str):
+    return pwd_context.hash(password)
