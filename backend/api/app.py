@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi_pagination import add_pagination
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-
 from .db import get_engine
 from .routers import (events_router, event_defs_router, trend_defs_router, trend_router, auth_router, link_router,
                       node_router)
@@ -10,6 +10,7 @@ from .schemas import Error
 
 app = FastAPI(title='Nefryt LDS API',
               dependencies=[Depends(get_engine)])
+add_pagination(app)
 app.include_router(events_router)
 app.include_router(event_defs_router)
 app.include_router(trend_defs_router)

@@ -2,6 +2,8 @@ import struct
 from datetime import datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Query, Body, Path, Depends
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, and_, Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -17,14 +19,15 @@ from database import lds
 router = APIRouter(prefix="/trend", tags=['trend'], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=list[Trend] | Error)
-async def list_trends(engine: Annotated[Engine, Depends(get_engine)], filter: Annotated[str | None, Query()] = None):
+@router.get('', response_model=Page[Trend] | Error)
+async def list_trends(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[Params, Depends()],
+                      filter: Annotated[str | None, Query()] = None):
     try:
-        statement = select(lds.Trend)
+        statement = select(lds.Trend).order_by(lds.Trend.ID)
         with Session(engine) as session:
-            trends = session.execute(statement).all()
-        trends_out = [map_lds_trend_to_trend(lds_trend[0]) for lds_trend in trends]
-        return trends_out
+            page = paginate(session, statement, params=params)
+        page.items = [map_lds_trend_to_trend(lds_trend) for lds_trend in page.items]
+        return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trends(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -51,6 +54,7 @@ async def create_trend(trend: Annotated[Trend, Body()], engine: Annotated[Engine
 @router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=list[TrendData] | Error)
 async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[int, Path()],
                                  samples: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
+    # TODO: paginate
     timestamp = int(datetime.now(timezone.utc).timestamp())
     return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples, engine)
 
@@ -59,6 +63,7 @@ async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: 
 async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[int, Path()],
                          end: Annotated[int, Path()], samples: Annotated[int, Path()],
                          engine: Annotated[Engine, Depends(get_engine)]):
+    # TODO: paginate
     try:
         lds_trends_scales = {}
         trend_id_list = trend_id_list.split(",")
@@ -212,6 +217,7 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
 @router.get('/{trend_id}/param', response_model=list[TrendParam] | Error)
 async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
                             filter: Annotated[str | None, Query()] = None):
+    # TODO: paginate
     try:
         statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
                         .select_from(lds.Trend))

@@ -91,21 +91,48 @@ test_client = TestClient(app)
 def test_list_trends_should_return_ok_response_code_and_empty_list_when_no_trends():
     response = test_client.get("/trend")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 0
+    assert len(response.json()['items']) == 0
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_should_return_ok_response_code_and_correct_trends(add_lds_objects):
+def test_list_trends_should_return_ok_response_code_and_correct_trends(add_lds_objects):
     response = test_client.get("/trend")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 2
-    for expected_trend, returned_trend in zip(trend_list, response.json()):
+    items = response.json()['items']
+    assert len(items) == len(trend_list)
+    for expected_trend, returned_trend in zip(trend_list, items):
         assert returned_trend['ID'] == expected_trend.ID
         assert returned_trend['TrendDefID'] == expected_trend.TrendDefID.strip()
         assert returned_trend['RawMin'] == expected_trend.RawMin
         assert returned_trend['RawMax'] == expected_trend.RawMax
         assert returned_trend['ScaledMin'] == expected_trend.ScaledMin
         assert returned_trend['ScaledMax'] == expected_trend.ScaledMax
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trends_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 1
+    page = 1
+    response = test_client.get(f"/trend?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == size
+    assert response.json()['total'] == len(trend_list)
+    assert response.json()['pages'] == len(trend_list) // size if len(trend_list) // size > 0 else 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trends_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/trend")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(trend_list)
+    assert response.json()['total'] == len(trend_list)
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)

@@ -1,11 +1,13 @@
 from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, Engine
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
+from fastapi_pagination import Params, Page
 from .mapper import map_lds_event_and_lds_event_def_to_event
 from ..schemas import Error, Event, Information
 from ..db import get_engine
@@ -15,18 +17,19 @@ from database import lds
 router = APIRouter(prefix="/event", tags=["event"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=list[Event] | Error)
-async def list_events(engine: Annotated[Engine, Depends(get_engine)]):
+@router.get('', response_model=Page[Event] | Error)
+async def list_events(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[Params, Depends()]):
     try:
         statement = (select(lds.Event, lds.EventDef)
                      .join(lds.EventDef)
                      .filter(lds.EventDef.Enabled)
-                     .filter(lds.EventDef.Visible))
+                     .filter(lds.EventDef.Visible)
+                     .order_by(lds.Event.ID))
         with Session(engine) as session:
-            events = session.execute(statement).all()
-        events_out = [map_lds_event_and_lds_event_def_to_event(lds_event, lds_event_def)
-                      for lds_event, lds_event_def in events]
-        return events_out
+            page = paginate(session, statement, params=params)
+        page.items = [map_lds_event_and_lds_event_def_to_event(lds_event, lds_event_def)
+                      for lds_event, lds_event_def in page.items]
+        return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_events(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

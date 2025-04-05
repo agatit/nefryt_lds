@@ -26,6 +26,7 @@ token_data = {
 test_client = TestClient(app)
 
 
+# TODO: insert into openapi params & return values
 def test_auth_login_should_return_ok_response_code_and_correct_login_permissions_data_for_guest():
     response = test_client.post("/auth/login", json=login_data1)
     assert response.status_code == status.HTTP_200_OK

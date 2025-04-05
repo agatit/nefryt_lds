@@ -25,17 +25,44 @@ app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
 test_client = TestClient(app)
 
 
-def test_list_trend_def_should_return_ok_response_code_and_empty_list_when_no_trend_defs():
+def test_list_trend_defs_should_return_ok_response_code_and_empty_list_when_no_trend_defs():
     response = test_client.get("/trend_def")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 0
+    assert len(response.json()['items']) == 0
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
-def test_list_trend_def_should_return_ok_response_code_and_correct_trend_defs(add_lds_objects):
+def test_list_trend_defs_should_return_ok_response_code_and_correct_trend_defs(add_lds_objects):
     response = test_client.get("/trend_def")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 2
-    for expected_trend_def, returned_trend_def in zip(trend_def_list, response.json()):
+    items = response.json()['items']
+    assert len(items) == len(trend_def_list)
+    for expected_trend_def, returned_trend_def in zip(trend_def_list, items):
         assert returned_trend_def['ID'] == expected_trend_def.ID.strip()
         assert returned_trend_def['Name'] == expected_trend_def.Name
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
+def test_list_trend_defs_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 2
+    page = 3
+    response = test_client.get(f"/trend_def?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == 0
+    assert response.json()['total'] == len(trend_def_list)
+    assert response.json()['pages'] == len(trend_def_list) // size if len(trend_def_list) // size > 0 else 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
+def test_list_trend_defs_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/trend_def")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(trend_def_list)
+    assert response.json()['total'] == len(trend_def_list)
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1

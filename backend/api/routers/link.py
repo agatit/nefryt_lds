@@ -1,5 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Query, Depends
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -14,14 +16,15 @@ from database import lds
 router = APIRouter(prefix="/link", tags=["link"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=list[Link] | Error)
-async def list_links(engine: Annotated[Engine, Depends(get_engine)], filter: Annotated[str | None, Query()] = None):
+@router.get('', response_model=Page[Link] | Error)
+async def list_links(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[Params, Depends()],
+                     filter: Annotated[str | None, Query()] = None):
     try:
-        statement = select(lds.Link)
+        statement = select(lds.Link).order_by(lds.Link.ID)
         with Session(engine) as session:
-            links = session.execute(statement).all()
-        links_out = [map_lds_link_to_link(lds_link[0]) for lds_link in links]
-        return links_out
+            page = paginate(session, statement, params=params)
+        page.items = [map_lds_link_to_link(lds_link) for lds_link in page.items]
+        return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_links(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

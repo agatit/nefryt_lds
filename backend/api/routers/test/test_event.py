@@ -43,26 +43,52 @@ app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
 test_client = TestClient(app)
 
 
-def test_list_event_def_should_return_ok_response_code_and_empty_list_when_no_events():
+def test_list_events_should_return_ok_response_code_and_empty_list_when_no_events():
     response = test_client.get("/event")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 0
+    assert len(response.json()['items']) == 0
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
-def test_list_trend_def_should_return_ok_response_code_and_correct_visible_and_enabled_events(add_lds_objects):
+def test_list_events_should_return_ok_response_code_and_correct_visible_and_enabled_events(add_lds_objects):
     response = test_client.get("/event")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    returned_event = response.json()[0]
-    assert returned_event['ID'] == event_visible.ID
-    assert returned_event['EventDefID'] == event_visible.EventDefID.strip()
-    assert returned_event['Verbosity'] == event_def_visible.Verbosity.strip()
-    assert returned_event['Caption'] == event_def_visible.Caption
-    assert returned_event['MethodID'] == event_visible.MethodID
-    assert returned_event['BeginDate']
-    assert not returned_event['AckDate']
-    assert not returned_event['EndDate']
+    items = response.json()['items']
+    assert len(items) == 1
+    assert items[0]['ID'] == event_visible.ID
+    assert items[0]['EventDefID'] == event_visible.EventDefID.strip()
+    assert items[0]['Verbosity'] == event_def_visible.Verbosity.strip()
+    assert items[0]['Caption'] == event_def_visible.Caption
+    assert items[0]['MethodID'] == event_visible.MethodID
+    assert items[0]['BeginDate']
+    assert not items[0]['AckDate']
+    assert not items[0]['EndDate']
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
+def test_list_events_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 1
+    page = 2
+    response = test_client.get(f"/event?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == 0
+    assert response.json()['total'] == 1
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
+def test_list_events_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/event")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == 1
+    assert response.json()['total'] == 1
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)

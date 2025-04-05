@@ -1,5 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Depends
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, delete, Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -15,14 +17,14 @@ from database import lds
 router = APIRouter(prefix="/event_def", tags=["event_def"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=list[EventDef] | Error, operation_id="list_event_defs")
-async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)]):
+@router.get('', response_model=Page[EventDef] | Error, operation_id="list_event_defs")
+async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[Params, Depends()]):
     try:
-        statement = select(lds.EventDef)
+        statement = select(lds.EventDef).order_by(lds.EventDef.ID)
         with Session(engine) as session:
-            event_defs = session.execute(statement).all()
-        event_defs_out = [map_lds_event_def_to_event_def(lds_event_def[0]) for lds_event_def in event_defs]
-        return event_defs_out
+            page = paginate(session, statement, params=params)
+        page.items = [map_lds_event_def_to_event_def(lds_event_def) for lds_event_def in page.items]
+        return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_event_defs(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

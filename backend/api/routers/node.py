@@ -1,5 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Query, Depends
+from fastapi_pagination import Params, Page
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, aliased
@@ -14,19 +16,22 @@ from database import lds, editor
 router = APIRouter(prefix="/node", tags=["node"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=list[Node] | Error)
-async def list_nodes(engine: Annotated[Engine, Depends(get_engine)], filter: Annotated[str | None, Query()] = None):
+@router.get('', response_model=Page[Node] | Error)
+async def list_nodes(engine: Annotated[Engine, Depends(get_engine)],  params: Annotated[Params, Depends()],
+                     filter: Annotated[str | None, Query()] = None):
     try:
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
         statement = (select(lds_node, editor_node)
-                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)) # noqa
+                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)  # noqa
+                     .order_by(lds_node.ID))
         with Session(engine) as session:
-            nodes = session.execute(statement).all()
-        nodes_out = [map_lds_node_and_editor_node_to_node(lds_node, editor_node) for lds_node, editor_node in nodes]
-        return nodes_out
+            page = paginate(session, statement, params=params)
+        page.items = [map_lds_node_and_editor_node_to_node(lds_node, editor_node) for lds_node, editor_node in page.items]
+        return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_nodes(): ' + str(e))
+        print(error.message)
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
