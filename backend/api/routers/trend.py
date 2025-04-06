@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Body, Path, Depends
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import select, and_, Engine
+from sqlalchemy import select, and_, Engine, exists
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
@@ -51,19 +51,18 @@ async def create_trend(trend: Annotated[Trend, Body()], engine: Annotated[Engine
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=list[TrendData] | Error)
+@router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=Page[TrendData] | Error)
 async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[int, Path()],
-                                 samples: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
-    # TODO: paginate
+                                 samples: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
+                                 params: Annotated[Params, Depends()]):
     timestamp = int(datetime.now(timezone.utc).timestamp())
-    return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples, engine)
+    return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples, engine, params)
 
 
-@router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=list[TrendData] | Error)
+@router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=Page[TrendData] | Error)
 async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[int, Path()],
                          end: Annotated[int, Path()], samples: Annotated[int, Path()],
-                         engine: Annotated[Engine, Depends(get_engine)]):
-    # TODO: paginate
+                         engine: Annotated[Engine, Depends(get_engine)], params: Annotated[Params, Depends()]):
     try:
         lds_trends_scales = {}
         trend_id_list = trend_id_list.split(",")
@@ -82,7 +81,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                 lds_trends_scales[lds_trend.ID] = {
                     param_id: getattr(lds_trend, param_id) for param_id in params_ids
                 }
-            except Exception as e:  # noqa
+            except:  # noqa
                 lds_trends_scales[lds_trend.ID] = default_lds_trends_scale
 
         samples = samples if samples > 0 else 1
@@ -90,17 +89,28 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
         inc_samples = inc_samples if inc_samples > 0 else 1
         samples = 100 * (end - begin + 1) // inc_samples
 
-        trend_datas = []
         trend_timestamps = []
         trend_timestamps_ms = []
         timestamp = begin
         sample_in_timestamp = 0
         for _ in range(samples):
-            trend_datas.append({"Timestamp": timestamp, "TimestampMs": sample_in_timestamp * 10})
             trend_timestamps.append(timestamp)
             trend_timestamps_ms.append(sample_in_timestamp * 10)
             timestamp += (sample_in_timestamp + inc_samples) // 100
             sample_in_timestamp = (sample_in_timestamp + inc_samples) % 100
+
+        total_size = len(trend_timestamps)
+        page_no = params.page
+        page_size = params.size
+        start_pos = (page_no - 1) * page_size
+        pages = total_size // page_size + 1 if total_size % page_size != 0 else total_size // page_size
+        if start_pos >= len(trend_timestamps):
+            trend_timestamps = []
+            trend_timestamps_ms = []
+        else:
+            end_pos = start_pos + page_size if start_pos + page_size < len(trend_timestamps) else None
+            trend_timestamps = trend_timestamps[start_pos:end_pos] if end_pos else trend_timestamps[start_pos:]
+            trend_timestamps_ms = trend_timestamps_ms[start_pos:end_pos] if end_pos else trend_timestamps_ms[start_pos:]
 
         statement = (select(lds.TrendData).
                      where(lds.TrendData.Time.in_(trend_timestamps)).
@@ -109,15 +119,17 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
         with Session(engine) as session:
             lds_trends_data = session.execute(statement).all()
 
-        lds_trends_data = [trend_data[0] for trend_data in lds_trends_data]
-
-        if not lds_trends_data:
+        if len(lds_trends_data) == 0 and len(trend_timestamps) == 0:
+            return Page(items=[], total=total_size, pages=total_size // page_size + 1, page=page_no, size=page_size)
+        elif len(lds_trends_data) == 0:
             error = Error(code=status.HTTP_404_NOT_FOUND,
                           message='No data')
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
 
+        lds_trends_data = [trend_data[0] for trend_data in lds_trends_data]
+
         iter_lds_data = iter(lds_trends_data)
-        iter_time_data = iter(trend_datas)
+        iter_time_data = zip(trend_timestamps, trend_timestamps_ms)
 
         lds_data = next(iter_lds_data, None)
         time_data = next(iter_time_data, None)
@@ -125,31 +137,33 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
         result_lists = {str(lds_trend[0].ID): [] for lds_trend in lds_trends}
 
         while lds_data and time_data:
-            while lds_data.Time < time_data["Timestamp"]:
+            while lds_data.Time < time_data[0]:
                 lds_data = next(iter_lds_data)
 
             one_second_data = {}
-            while lds_data and lds_data.Time == time_data["Timestamp"]:
+            while lds_data and lds_data.Time == time_data[0]:
                 if lds_trends_scales[lds_data.TrendID]["RawMin"] >= 0:
                     one_second_data[lds_data.TrendID] = struct.unpack("H" * 100, lds_data.Data)
                 else:
                     one_second_data[lds_data.TrendID] = struct.unpack("h" * 100, lds_data.Data)
                 lds_data = next(iter_lds_data, None)
 
-            current_second = time_data["Timestamp"]
-            while time_data and time_data["Timestamp"] == current_second:
+            current_second = time_data[0]
+            while time_data and time_data[0] == current_second:
                 for trend_id in one_second_data.keys():
                     result_lists[str(trend_id)].append((((lds_trends_scales[trend_id]["ScaledMax"]
                                                           - lds_trends_scales[trend_id]["ScaledMin"])
                                                          * (one_second_data[trend_id][
-                                                                -time_data["TimestampMs"] // 10 - 1]
+                                                                -time_data[1] // 10 - 1]
                                                             - lds_trends_scales[trend_id]["RawMin"])
                                                          / (lds_trends_scales[trend_id]["RawMax"]
                                                             - lds_trends_scales[trend_id]["RawMin"])
-                                                         + lds_trends_scales[trend_id]["ScaledMin"]), time_data))
+                                                         + lds_trends_scales[trend_id]["ScaledMin"]),
+                                                        time_data[0], time_data[1]))
                 time_data = next(iter_time_data, None)
-        result_lists = extend_trend_data(result_lists, trend_datas)
-        return map_dicts_to_trend_data(trend_datas, result_lists)
+        result_lists = extend_trend_data(result_lists, trend_timestamps, trend_timestamps_ms)
+        items = map_dicts_to_trend_data(zip(trend_timestamps, trend_timestamps_ms), result_lists)
+        return Page(items=items, total=total_size, pages=pages, page=page_no, size=page_size)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_trend_data(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -214,30 +228,30 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id}/param', response_model=list[TrendParam] | Error)
+@router.get('/{trend_id}/param', response_model=Page[TrendParam] | Error)
 async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
-                            filter: Annotated[str | None, Query()] = None):
-    # TODO: paginate
+                            params: Annotated[Params, Depends()], filter: Annotated[str | None, Query()] = None):
     try:
-        statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
-                        .select_from(lds.Trend))
-                       .outerjoin(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID))  # noqa
-                      .outerjoin(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
-                                                      lds.Trend.ID == lds.TrendParam.TrendID)))
-                     .where(lds.Trend.ID == trend_id))
+        statement = select(1).where(lds.Trend.ID == trend_id)
         with Session(engine) as session:
-            results = session.execute(statement).all()
-        if not results:
+            trend_exists = session.execute(statement).first()
+        if not trend_exists:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No trend with id = ' + str(trend_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
-        trend_params_list = []
-        for lds_trend_param, _, lds_trend_param_def in results:
-            if not lds_trend_param or not lds_trend_param_def:
-                continue
-            trend_param_out = (
-                map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def))
-            trend_params_list.append(trend_param_out)
-        return trend_params_list
+        statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
+                        .select_from(lds.Trend))
+                       .join(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID))  # noqa
+                      .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
+                                                      lds.Trend.ID == lds.TrendParam.TrendID)))
+                     .where(lds.Trend.ID == trend_id)
+                     .order_by(lds.Trend.ID))
+        with Session(engine) as session:
+            page = paginate(session, statement, params=params)
+        page.items = [
+            map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def)
+            for lds_trend_param, _, lds_trend_param_def in page.items
+        ]
+        return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_params(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -271,7 +285,8 @@ async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_de
 
 @router.put('/{trend_id}/param/{trend_param_def_id}', response_model=TrendParam | Error)
 async def update_trend_param(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()],
-                             updated_trend_value: Annotated[str, Body()], engine: Annotated[Engine, Depends(get_engine)]):
+                             updated_trend_value: Annotated[str, Body()],
+                             engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = (select(lds.TrendParam).
                      where(lds.TrendParam.TrendParamDefID == trend_param_def_id).
@@ -296,12 +311,12 @@ async def update_trend_param(trend_id: Annotated[int, Path()], trend_param_def_i
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def extend_trend_data(result_lists, trend_datas):
+def extend_trend_data(result_lists, trend_timestamps, trend_timestamps_ms):
     for trend_id in result_lists:
         result = result_lists[trend_id]
-        timestamps_list = [res[1] for res in result]
-        for counter, trend_data in enumerate(trend_datas):
-            if trend_data not in timestamps_list:
-                result.insert(counter, (None, trend_data))
+        timestamps_list = [(res[1], res[2]) for res in result]
+        for counter, (trend_timestamp, trend_timestamp_ms) in enumerate(zip(trend_timestamps, trend_timestamps_ms)):
+            if (trend_timestamp, trend_timestamp_ms) not in timestamps_list:
+                result.insert(counter, (None, trend_timestamp, trend_timestamp_ms))
 
     return result_lists

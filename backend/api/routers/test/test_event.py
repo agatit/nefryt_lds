@@ -5,6 +5,7 @@ import jwt
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from api.db import get_engine, get_test_engine
@@ -12,6 +13,22 @@ from api.routers.security import get_user_token
 from database import lds
 import pytest
 from api.routers.security import SECRET_KEY, ALGORITHM
+
+event_def_visible = lds.EventDef(ID='VISIBLE', Verbosity='verbosity', Caption='caption',
+                                 Silent=False, Visible=True, Enabled=True)
+event_def_invisible = lds.EventDef(ID='INVISIBLE', Verbosity='verbosity', Caption='caption',
+                                   Silent=False, Visible=False, Enabled=True)
+event_def_disabled = lds.EventDef(ID='DISABLED', Verbosity='verbosity', Caption='caption',
+                                  Silent=False, Visible=True, Enabled=False)
+method_def = lds.MethodDef(ID='METHODDEF')
+pipeline = lds.Pipeline(ID=10)
+method = lds.Method(ID=1, MethodDefID='METHODDEF', PipelineID=10)
+event_visible = lds.Event(ID=1, EventDefID='VISIBLE', MethodID=1, BeginDate=datetime.now())
+event_invisible = lds.Event(ID=2, EventDefID='INVISIBLE', MethodID=1, BeginDate=datetime.now())
+event_disabled = lds.Event(ID=3, EventDefID='DISABLED', MethodID=1, BeginDate=datetime.now())
+lds_objects = [event_def_visible, event_def_invisible, event_def_disabled, method_def, pipeline, method,
+               event_visible, event_invisible, event_disabled]
+events = [event_visible, event_invisible, event_disabled]
 
 
 def reset_event_objects():
@@ -38,8 +55,8 @@ def reset_event_objects():
     return [lds_objects]
 
 
-app.dependency_overrides[get_engine] = get_test_engine
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
+app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
 
@@ -93,7 +110,7 @@ def test_list_events_should_return_ok_response_code_and_default_page_data(add_ld
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
 def test_get_event_by_id_should_return_ok_response_code_and_correct_event(add_lds_objects):
-    response = test_client.get("/event/"+str(event_invisible.ID))
+    response = test_client.get("/event/" + str(event_invisible.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_event = response.json()
     assert returned_event['ID'] == event_invisible.ID

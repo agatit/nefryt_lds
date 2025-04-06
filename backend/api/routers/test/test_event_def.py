@@ -30,8 +30,8 @@ def reset_event_def_objects():
     return [event_def_list]
 
 
-app.dependency_overrides[get_engine] = get_test_engine
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
+app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
 
@@ -65,7 +65,8 @@ def test_list_event_defs_should_return_ok_response_code_and_correct_page_data(ad
     assert len(response.json()) == 5
     assert len(response.json()['items']) == size
     assert response.json()['total'] == len(event_def_list)
-    assert response.json()['pages'] == len(event_def_list) // size if len(event_def_list) // size > 0 else 1
+    assert response.json()['pages'] == len(event_def_list) // size if len(event_def_list) % size == 0 \
+        else len(event_def_list) // size + 1
     assert response.json()['size'] == size
     assert response.json()['page'] == page
 

@@ -8,11 +8,12 @@ from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from jwt import InvalidSignatureError, InvalidTokenError
 from starlette.testclient import TestClient
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from api.routers.security import (SECRET_KEY, ALGORITHM, generate_token, get_expiration_time,
                                   get_user_permissions, get_user_token, decode_token, pwd_context,
-                                  verify_password, hash_password, is_refresh, security, get_refresh_token,
+                                  verify_password, hash_password, is_refresh, get_refresh_token,
                                   prepare_login_permissions)
 
 login_data1: dict = {'username': 'user1',
@@ -23,24 +24,26 @@ datetime_now = datetime.now(timezone.utc)
 token_data = {
     'iss': 'https://api.nefrytlds.local/',
     'sub': 'user',
-    'nbf': datetime_now.timestamp(),
-    'iat': datetime_now.timestamp(),
-    'exp': (datetime_now + timedelta(hours=24)).timestamp(),
+    'nbf': int(datetime_now.timestamp()),
+    'iat': int(datetime_now.timestamp()),
+    'exp': int((datetime_now + timedelta(hours=24)).timestamp()),
     'perms': ['confirm', 'admin']
 }
 refresh_token_data = copy.deepcopy(token_data)
 refresh_token_data['perms'] = ['confirm', 'refresh']
 expired_token_data = copy.deepcopy(token_data)
-expired_token_data['exp'] = (datetime_now - timedelta(hours=24)).timestamp()
+expired_token_data['exp'] = int((datetime_now - timedelta(hours=24)).timestamp())
 expired_refresh_token_data = copy.deepcopy(refresh_token_data)
-expired_refresh_token_data['exp'] = (datetime_now - timedelta(hours=24)).timestamp()
+expired_refresh_token_data['exp'] = int((datetime_now - timedelta(hours=24)).timestamp())
 password = 'abc'
 
 test_client = TestClient(app)
 
 
 def test_generate_token_should_return_encoded_token_with_correct_data():
-    encoded_token = generate_token(token_data['sub'], token_data['perms'], token_data['iat'], token_data['exp'])
+    encoded_token = generate_token(token_data['sub'], token_data['perms'],
+                                   datetime.fromtimestamp(token_data['iat'], timezone.utc),
+                                   datetime.fromtimestamp(token_data['exp'], timezone.utc))
     token = jwt.decode(encoded_token, SECRET_KEY, algorithms=[ALGORITHM])
     for key in token_data:
         assert token[key] == token_data[key]
@@ -66,12 +69,11 @@ def test_get_user_permissions_should_return_correct_permissions():
 
 def test_get_user_permissions_should_return_empty_list_when_token_is_invalid():
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
-    permissions = get_user_permissions(HTTPAuthorizationCredentials(credentials=encoded_token+'1', scheme=''))
+    permissions = get_user_permissions(HTTPAuthorizationCredentials(credentials=encoded_token + '1', scheme=''))
     assert permissions == []
 
 
 def test_get_user_permissions_should_raise_http_exception_when_no_token_is_given():
-    # app.dependency_overrides[security] = lambda x: None
     with pytest.raises(HTTPException):
         get_user_permissions(None)
 
@@ -86,7 +88,7 @@ def test_get_user_token_should_return_correct_token():
 def test_get_user_token_should_raise_http_exception_when_token_is_invalid():
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     with pytest.raises(HTTPException):
-        get_user_token(HTTPAuthorizationCredentials(credentials=encoded_token+'1', scheme=''))
+        get_user_token(HTTPAuthorizationCredentials(credentials=encoded_token + '1', scheme=''))
 
 
 def test_get_user_token_should_raise_http_exception_when_token_is_expired():
@@ -111,7 +113,7 @@ def test_get_refresh_token_should_return_correct_token():
 def test_get_refresh_token_should_raise_http_exception_when_token_is_invalid():
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     with pytest.raises(HTTPException):
-        get_refresh_token(HTTPAuthorizationCredentials(credentials=encoded_token+'1', scheme=''))
+        get_refresh_token(HTTPAuthorizationCredentials(credentials=encoded_token + '1', scheme=''))
 
 
 def test_get_refresh_token_should_raise_http_exception_when_token_is_expired():
@@ -149,7 +151,7 @@ def test_decode_token_should_raise_invalid_signature_error_when_token_is_invalid
 
 
 def test_decode_token_should_raise_invalid_token_error_when_token_is_expired():
-    token_data['exp'] = (datetime.now(tz=timezone.utc) - timedelta(hours=24)).timestamp()
+    token_data['exp'] = int((datetime.now(tz=timezone.utc) - timedelta(hours=24)).timestamp())
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     with pytest.raises(InvalidTokenError):
         decode_token(encoded_token)

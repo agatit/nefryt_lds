@@ -36,7 +36,7 @@ def is_refresh(token: dict) -> bool:
     return 'refresh' in permissions
 
 
-def get_user_permissions(user_credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> list[str]:
+def get_user_permissions(user_credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)]) -> list[str]: # noqa
     if user_credentials is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='No token given')
     try:

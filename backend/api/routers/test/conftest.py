@@ -12,6 +12,11 @@ from database.models.lds import Base as ldsBase
 from database.models.editor import Base as editorBase
 
 
+TEST_DATABASE_URI = str()
+TEST_DATABASE_NAME = str()
+SERVER_URL = str()
+
+
 def prepare_test_db_data():
     global TEST_DATABASE_URI, TEST_DATABASE_NAME, SERVER_URL
     if not os.path.exists(".env"):

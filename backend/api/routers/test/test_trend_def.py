@@ -9,6 +9,10 @@ from api.routers.security import get_user_token
 from database import lds
 import pytest
 
+trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
+trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
+trend_def_list = [trend_def1, trend_def2]
+
 
 def reset_trend_def_objects():
     global trend_def1, trend_def2, trend_def_list
@@ -20,8 +24,8 @@ def reset_trend_def_objects():
     return [trend_def_list]
 
 
-app.dependency_overrides[get_engine] = get_test_engine
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
+app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
 
@@ -51,7 +55,8 @@ def test_list_trend_defs_should_return_ok_response_code_and_correct_page_data(ad
     assert len(response.json()) == 5
     assert len(response.json()['items']) == 0
     assert response.json()['total'] == len(trend_def_list)
-    assert response.json()['pages'] == len(trend_def_list) // size if len(trend_def_list) // size > 0 else 1
+    assert response.json()['pages'] == len(trend_def_list) // size if len(trend_def_list) % size == 0 \
+        else len(trend_def_list) // size + 1
     assert response.json()['size'] == size
     assert response.json()['page'] == page
 

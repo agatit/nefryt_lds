@@ -11,6 +11,13 @@ from api.routers.security import get_user_token
 from database import lds
 import pytest
 
+node1 = lds.Node(ID=1, Type='type', Name='name')
+node2 = lds.Node(ID=2, Type='type', Name='name')
+link1 = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
+link2 = lds.Link(ID=2, BeginNodeID=2, EndNodeID=1)
+links_list = [link1, link2]
+lds_objects = [node1, node2, link1, link2]
+
 
 def reset_link_objects():
     global node1, node2, link1, link2, links_list, lds_objects
@@ -35,8 +42,8 @@ def reset_node_objects():
     return [lds_objects]
 
 
-app.dependency_overrides[get_engine] = get_test_engine
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
+app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
 
@@ -68,7 +75,8 @@ def test_list_links_should_return_ok_response_code_and_correct_page_data(add_lds
     assert len(response.json()) == 5
     assert len(response.json()['items']) == len(links_list)
     assert response.json()['total'] == len(links_list)
-    assert response.json()['pages'] == len(links_list) // size if len(links_list) // size > 0 else 1
+    assert response.json()['pages'] == len(links_list) // size if len(links_list) % size == 0 \
+        else len(links_list) // size + 1
     assert response.json()['size'] == size
     assert response.json()['page'] == page
 

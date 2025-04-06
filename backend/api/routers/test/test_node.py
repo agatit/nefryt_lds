@@ -4,12 +4,23 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from api.db import get_engine, get_test_engine
 from api.routers.security import get_user_token
 from database import lds, editor
 import pytest
+
+lds_node1 = lds.Node(ID=1, Type='type1', Name='name1')
+lds_node2 = lds.Node(ID=2, Type='type2', Name='name2')
+editor_node1 = editor.Node(ID=1, PosX=10, PosY=100)
+editor_node2 = editor.Node(ID=2, PosX=-10, PosY=-100)
+link = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
+
+nodes_list = [lds_node1, lds_node2, editor_node1, editor_node2]
+lds_nodes_list = [lds_node1, lds_node2]
+editor_nodes_list = [editor_node1, editor_node2]
 
 
 def reset_node_objects():
@@ -28,7 +39,7 @@ def reset_node_objects():
 
 
 def reset_node_and_link_objects():
-    global lds_node1, lds_node2, editor_node1, editor_node2, nodes_list, lds_nodes_list, editor_nodes_list
+    global lds_node1, lds_node2, editor_node1, editor_node2, link, nodes_list, lds_nodes_list, editor_nodes_list
 
     lds_node1 = lds.Node(ID=1, Type='type1', Name='name1')
     lds_node2 = lds.Node(ID=2, Type='type2', Name='name2')
@@ -43,8 +54,8 @@ def reset_node_and_link_objects():
     return [lds_nodes_list, editor_nodes_list, [link]]
 
 
-app.dependency_overrides[get_engine] = get_test_engine
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}
+app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
 
@@ -78,7 +89,8 @@ def test_list_nodes_should_return_ok_response_code_and_correct_page_data(add_lds
     assert len(response.json()) == 5
     assert len(response.json()['items']) == 0
     assert response.json()['total'] == len(lds_nodes_list)
-    assert response.json()['pages'] == len(lds_nodes_list) // size if len(lds_nodes_list) // size > 0 else 1
+    assert response.json()['pages'] == len(lds_nodes_list) // size if len(lds_nodes_list) % size == 0 \
+        else len(lds_nodes_list) // size + 1
     assert response.json()['size'] == size
     assert response.json()['page'] == page
 
@@ -96,7 +108,7 @@ def test_list_nodes_should_return_ok_response_code_and_default_page_data(add_lds
 
 
 def test_create_node_should_return_created_response_code_and_created_node_data():
-    node_dict = {'ID': 1, 'Type': 'type', 'Name': 'name', 'EditorParams':{'PosX': 22, 'PosY': 122}}
+    node_dict = {'ID': 1, 'Type': 'type', 'Name': 'name', 'EditorParams': {'PosX': 22, 'PosY': 122}}
     response = test_client.post("/node", json=node_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_node = response.json()
@@ -134,7 +146,8 @@ def test_delete_node_by_id_should_return_no_content_response_code_and_remove_nod
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_node_and_link_objects], indirect=True)
-def test_delete_node_by_id_should_return_conflict_response_code_and_error_when_node_used_in_link_record(add_lds_objects): # noqa
+def test_delete_node_by_id_should_return_conflict_response_code_and_error_when_node_used_in_link_record(
+        add_lds_objects):  # noqa
     response = test_client.delete("/node/" + str(lds_node1.ID))
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()
