@@ -5,7 +5,6 @@ import jwt
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from api.db import get_engine, get_test_engine

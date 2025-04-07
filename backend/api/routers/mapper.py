@@ -44,7 +44,7 @@ def map_trend_def_to_lds_trend_def(trend_def: TrendDef) -> lds.TrendDef:
     return lds.TrendDef(**trend_def.model_dump(by_alias=True))
 
 
-def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParam:
+def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParam: # noqa
     lds_trend_param_dict = to_dict(lds_trend_param)
     lds_trend_param_def_dict = to_dict(lds_trend_param_def)
     lds_trend_param_def_dict.pop('TrendDefID')
@@ -85,7 +85,7 @@ def map_node_to_lds_node(node: Node) -> lds.Node:
     return lds.Node(**node_dict)
 
 
-def map_node_to_editor_node(node_id: int, node: Node) -> editor.Node:
+def map_node_to_editor_node(node_id: int, node: Node) -> editor.Node | None:
     if node.editor_params:
         editor_node_dict = {'ID': node_id,
                             'PosX': node.editor_params.pos_x,

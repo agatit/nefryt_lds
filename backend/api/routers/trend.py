@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Body, Path, Depends
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import select, and_, Engine, exists
+from sqlalchemy import select, and_, Engine, literal
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
@@ -81,7 +81,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                 lds_trends_scales[lds_trend.ID] = {
                     param_id: getattr(lds_trend, param_id) for param_id in params_ids
                 }
-            except:  # noqa
+            except (AttributeError, TypeError):
                 lds_trends_scales[lds_trend.ID] = default_lds_trends_scale
 
         samples = samples if samples > 0 else 1
@@ -191,7 +191,7 @@ async def delete_trend_by_id(trend_id: Annotated[int, Path()], engine: Annotated
 async def get_trend_by_id(trend_id: int, engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
-            lds_trend = session.get(lds.Trend, trend_id)
+            lds_trend: lds.Trend = session.get(lds.Trend, trend_id)  # type: ignore
         if not lds_trend:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No trend with id = ' + str(trend_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
@@ -207,7 +207,7 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
                        engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
-            trend = session.get(lds.Trend, trend_id)
+            trend: lds.Trend = session.get(lds.Trend, trend_id)  # type: ignore
             if not trend:
                 error = Error(code=status.HTTP_404_NOT_FOUND,
                               message='No trend with id = ' + str(trend_id))
@@ -232,7 +232,7 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
 async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
                             params: Annotated[Params, Depends()], filter: Annotated[str | None, Query()] = None):
     try:
-        statement = select(1).where(lds.Trend.ID == trend_id)
+        statement = select(1).where(lds.Trend.ID == literal(trend_id))
         with Session(engine) as session:
             trend_exists = session.execute(statement).first()
         if not trend_exists:
@@ -240,10 +240,10 @@ async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
                         .select_from(lds.Trend))
-                       .join(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID))  # noqa
+                       .join(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID))
                       .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
                                                       lds.Trend.ID == lds.TrendParam.TrendID)))
-                     .where(lds.Trend.ID == trend_id)
+                     .where(lds.Trend.ID == literal(trend_id))
                      .order_by(lds.Trend.ID))
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
@@ -263,11 +263,11 @@ async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_de
     try:
         statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
                         .select_from(lds.Trend))
-                       .outerjoin(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID))  # noqa
+                       .outerjoin(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID))
                       .outerjoin(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
                                                       lds.Trend.ID == lds.TrendParam.TrendID)))
-                     .where(lds.Trend.ID == trend_id)
-                     .where(lds.TrendParam.TrendParamDefID == trend_param_def_id))
+                     .where(lds.Trend.ID == literal(trend_id))
+                     .where(lds.TrendParam.TrendParamDefID == literal(trend_param_def_id)))
         with Session(engine) as session:
             results = session.execute(statement).all()
         if not results:
@@ -289,8 +289,8 @@ async def update_trend_param(trend_id: Annotated[int, Path()], trend_param_def_i
                              engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = (select(lds.TrendParam).
-                     where(lds.TrendParam.TrendParamDefID == trend_param_def_id).
-                     where(lds.TrendParam.TrendID == trend_id))
+                     where(lds.TrendParam.TrendParamDefID == literal(trend_param_def_id)).
+                     where(lds.TrendParam.TrendID == literal(trend_id)))
         with Session(engine) as session:
             lds_trend_param = session.execute(statement).all()
             lds_trend = session.get(lds.Trend, trend_id)

@@ -25,5 +25,4 @@ async def list_trend_defs(engine: Annotated[Engine, Depends(get_engine)], params
         return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_defs(): ' + str(e))
-        print(error.message)
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

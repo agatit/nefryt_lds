@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import select, Engine
+from sqlalchemy import select, Engine, literal
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette import status
@@ -40,7 +40,7 @@ async def get_event_by_id(event_id: int, engine: Annotated[Engine, Depends(get_e
     try:
         statement = (select(lds.Event, lds.EventDef)
                      .join(lds.EventDef)
-                     .where(lds.Event.ID == event_id))
+                     .where(lds.Event.ID == literal(event_id)))
         with Session(engine) as session:
             results = session.execute(statement).all()
         if not results:

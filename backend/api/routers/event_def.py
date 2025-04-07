@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Path, Depends
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import select, delete, Engine
+from sqlalchemy import select, delete, Engine, literal
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
@@ -17,7 +17,7 @@ from database import lds
 router = APIRouter(prefix="/event_def", tags=["event_def"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=Page[EventDef] | Error, operation_id="list_event_defs")
+@router.get('', response_model=Page[EventDef] | Error)
 async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[Params, Depends()]):
     try:
         statement = select(lds.EventDef).order_by(lds.EventDef.ID)
@@ -34,7 +34,6 @@ async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)], params
 async def create_event_def(event_def: Annotated[EventDef, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_event_def = map_event_def_to_lds_event_def(event_def)
-        print(lds_event_def)
         with Session(engine) as session:
             session.add(lds_event_def)
             session.commit()
@@ -58,13 +57,13 @@ async def delete_event_def_by_id(event_def_id: Annotated[str, Path()], engine: A
                 error = Error(code=status.HTTP_404_NOT_FOUND,
                               message='No event def with id = ' + event_def_id)
                 return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
-            statement = delete(lds.Event).where(lds.Event.EventDefID == event_def_id)
+            statement = delete(lds.Event).where(lds.Event.EventDefID == literal(event_def_id))
             session.execute(statement)
             session.delete(event_def)
             session.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in delete_event_def_by_id(): ' + str(e))
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f'Exception in delete_event_def_by_id(): {e}')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -72,13 +71,13 @@ async def delete_event_def_by_id(event_def_id: Annotated[str, Path()], engine: A
 async def get_event_def_by_id(event_def_id: Annotated[str, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
-            event_def = session.get(lds.EventDef, event_def_id)
+            event_def: lds.EventDef = session.get(lds.EventDef, event_def_id)  # type: ignore
         if not event_def:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No event def with id = ' + event_def_id)
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         return map_lds_event_def_to_event_def(event_def)
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_event_def_by_id(): ' + str(e))
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f'Exception in get_event_def_by_id(): {e}')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

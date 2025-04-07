@@ -69,7 +69,7 @@ async def delete_link_by_id(link_id: Annotated[int, Path()], engine: Annotated[E
 async def get_link_by_id(link_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
-            link = session.get(lds.Link, link_id)
+            link: lds.Link = session.get(lds.Link, link_id)  # type: ignore
         if not link:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No link with id = ' + str(link_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)

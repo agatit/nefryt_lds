@@ -8,7 +8,6 @@ from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from jwt import InvalidSignatureError, InvalidTokenError
 from starlette.testclient import TestClient
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from api.routers.security import (SECRET_KEY, ALGORITHM, generate_token, get_expiration_time,

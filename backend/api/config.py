@@ -4,7 +4,6 @@ import pathlib
 import os
 import logging
 
-config = {}
 
 path = pathlib.Path(__file__).parent.resolve()
 with open(os.path.join(path, "config.yaml")) as f:
@@ -12,4 +11,4 @@ with open(os.path.join(path, "config.yaml")) as f:
 if config is None:
     config = {}
 
-logging.basicConfig(stream=sys.stdout, level=config.get("verbosity","INFO"), force=True)
+logging.basicConfig(stream=sys.stdout, level=config.get("verbosity", "INFO"), force=True)

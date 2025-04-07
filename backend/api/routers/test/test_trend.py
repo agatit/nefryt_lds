@@ -508,8 +508,7 @@ def test_update_trend_by_id_should_return_not_found_response_code_and_error_when
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
-def test_list_trend_params_should_return_ok_response_code_and_empty_list_when_no_trend_params_for_given_trend_id(
-        add_lds_objects):  # noqa
+def test_list_trend_params_should_return_ok_response_code_and_empty_list_when_no_trend_params_for_given_trend_id(add_lds_objects):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0

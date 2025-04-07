@@ -4,7 +4,6 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from api.db import get_engine, get_test_engine
@@ -146,8 +145,7 @@ def test_delete_node_by_id_should_return_no_content_response_code_and_remove_nod
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_node_and_link_objects], indirect=True)
-def test_delete_node_by_id_should_return_conflict_response_code_and_error_when_node_used_in_link_record(
-        add_lds_objects):  # noqa
+def test_delete_node_by_id_should_return_conflict_response_code_and_error_when_node_used_in_link_record(add_lds_objects):  # noqa
     response = test_client.delete("/node/" + str(lds_node1.ID))
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()
