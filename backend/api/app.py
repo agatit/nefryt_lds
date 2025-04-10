@@ -21,7 +21,8 @@ app.include_router(node_router)
 
 
 origins = ['http://localhost:8080',
-           'http://192.168.30.52:3000']
+           'http://192.168.30.52:3000',
+           'http://localhost:3000']
 
 app.add_middleware(
     CORSMiddleware, # noqa
