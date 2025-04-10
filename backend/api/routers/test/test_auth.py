@@ -5,99 +5,102 @@ import jwt
 from starlette import status
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api import app
+from api.app import app
 from api.routers.security import SECRET_KEY, ALGORITHM
 
 
 login_data1: dict = {'username': 'user1',
                      'password': 'abc'}
 login_data2: dict = {'username': 'admin',
-                     'password': 'Kartofel_1410'}
+                     'password': 'xyz'}
+datetime_now = datetime.now(timezone.utc)
 token_data = {
     'iss': 'https://api.nefrytlds.local/',
     'sub': 'user',
-    'iat': datetime.now(tz=timezone.utc),
-    'exp': datetime.now(tz=timezone.utc) + timedelta(hours=24),
-    'perms': ['confirm']
+    'nbf': datetime_now.timestamp(),
+    'iat': datetime_now.timestamp(),
+    'exp': (datetime_now + timedelta(hours=24)).timestamp(),
+    'perms': ['confirm', 'refresh']
 }
 
 test_client = TestClient(app)
 
 
+# TODO: insert into openapi params & return values
 def test_auth_login_should_return_ok_response_code_and_correct_login_permissions_data_for_guest():
-    response = test_client.post("/auth/login", data=login_data1)
+    response = test_client.post("/auth/login", json=login_data1)
     assert response.status_code == status.HTTP_200_OK
     login_permissions = response.json()
-    assert login_permissions['username'] == 'guest'
-    assert not login_permissions['success']
+    assert login_permissions['username'] == login_data1['username']
+    assert login_permissions['success']
     assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
             - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
     assert login_permissions['permissions'] == []
 
 
 def test_auth_login_should_return_ok_response_code_and_correct_login_permissions_data_for_admin():
-    response = test_client.post("/auth/login", data=login_data2)
+    response = test_client.post("/auth/login", json=login_data2)
     assert response.status_code == status.HTTP_200_OK
     login_permissions = response.json()
-    assert login_permissions['username'] == 'admin'
+    assert login_permissions['username'] == login_data2['username']
     assert login_permissions['success']
     assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
             - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
-    assert login_permissions['permissions'] == ['admin', 'confirm']
+    assert set(login_permissions['permissions']) == {'admin', 'confirm'}
 
 
 def test_auth_login_should_return_ok_response_code_and_correct_tokens():
-    response = test_client.post("/auth/login", data=login_data2)
+    response = test_client.post("/auth/login", json=login_data2)
     assert response.status_code == status.HTTP_200_OK
     token = jwt.decode(response.json()['token'], SECRET_KEY, algorithms=[ALGORITHM])
-    assert token['sub'] == 'admin'
-    assert token['perms'] == ['admin', 'confirm']
+    assert token['sub'] == login_data2['username']
+    assert set(token['perms']) == {'admin', 'confirm'}
     assert datetime.fromtimestamp(token['exp']) - datetime.now() <= timedelta(hours=1)
     refresh_token = jwt.decode(response.json()['refreshToken'], SECRET_KEY, algorithms=[ALGORITHM])
-    assert refresh_token['sub'] == 'admin'
-    assert refresh_token['perms'] == ['admin', 'confirm']
+    assert refresh_token['sub'] == login_data2['username']
+    assert set(refresh_token['perms']) == {'refresh', 'admin', 'confirm'}
     assert datetime.fromtimestamp(refresh_token['exp']) - datetime.now() <= timedelta(hours=24)
 
 
-def test_auto_refresh_should_return_ok_response_code_and_correct_login_permissions_data():
+def test_auth_refresh_should_return_ok_response_code_and_correct_login_permissions_data():
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     header = {"Authorization": f"Bearer {encoded_token}"}
     response = test_client.post("/auth/refresh", headers=header)
     assert response.status_code == status.HTTP_200_OK
     login_permissions = response.json()
-    assert login_permissions['username'] == 'user'
+    assert login_permissions['username'] == token_data['sub']
     assert login_permissions['success']
     assert (datetime.fromisoformat(login_permissions['refreshTokenExpiration'].rstrip('Z')).replace(tzinfo=timezone.utc)
             - datetime.now(tz=timezone.utc) <= timedelta(hours=24))
-    assert login_permissions['permissions'] == ['confirm']
+    assert set(login_permissions['permissions']) == set([perm for perm in token_data['perms'] if perm != 'refresh'])
 
 
-def test_auto_refresh_should_return_ok_response_code_and_correct_tokens():
+def test_auth_refresh_should_return_ok_response_code_and_correct_tokens():
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     header = {"Authorization": f"Bearer {encoded_token}"}
     response = test_client.post("/auth/refresh", headers=header)
     assert response.status_code == status.HTTP_200_OK
     token = jwt.decode(response.json()['token'], SECRET_KEY, algorithms=[ALGORITHM])
-    assert token['sub'] == 'user'
-    assert token['perms'] == ['confirm']
+    assert token['sub'] == token_data['sub']
+    assert set(token['perms']) == set([perm for perm in token_data['perms'] if perm != 'refresh'])
     assert datetime.fromtimestamp(token['exp']) - datetime.now() <= timedelta(hours=1)
     refresh_token = jwt.decode(response.json()['refreshToken'], SECRET_KEY, algorithms=[ALGORITHM])
-    assert refresh_token['sub'] == 'user'
-    assert refresh_token['perms'] == ['confirm']
+    assert refresh_token['sub'] == token_data['sub']
+    assert set(refresh_token['perms']) == set(token_data['perms'])
     assert datetime.fromtimestamp(refresh_token['exp']) - datetime.now() <= timedelta(hours=24)
 
 
-def test_auto_refresh_should_return_bad_request_response_code_and_error_when_token_is_invalid():
+def test_auth_refresh_should_return_bad_request_response_code_and_error_when_token_is_invalid():
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     header = {"Authorization": f"Bearer {encoded_token}1"}
     response = test_client.post("/auth/refresh", headers=header)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
     error = response.json()
-    assert error['code'] == status.HTTP_400_BAD_REQUEST
-    assert error['message'] == 'Token is invalid'
+    assert error['code'] == status.HTTP_401_UNAUTHORIZED
+    assert error['message'] == 'Invalid token'
 
 
-def test_auto_refresh_should_return_unauthorized_response_code_when_header_is_invalid():
+def test_auth_refresh_should_return_unauthorized_response_code_when_header_is_invalid():
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     header = {"Authorization": f"Bear {encoded_token}"}
     response = test_client.post("/auth/refresh", headers=header)

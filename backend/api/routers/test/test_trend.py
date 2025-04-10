@@ -7,12 +7,12 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+from api.routers.security import get_user_token
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api import app
+from api.app import app
 from api.db import get_engine, get_test_engine
 from database import lds
 import pytest
-
 
 binary_data = os.urandom(200)
 trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
@@ -26,8 +26,8 @@ trend_data2 = lds.TrendData(TrendID=1, Time=2, Data=binary_data)
 trend_data3 = lds.TrendData(TrendID=1, Time=3, Data=binary_data)
 trend_data4 = lds.TrendData(TrendID=2, Time=2, Data=binary_data)
 trend_data_list = [trend_data1, trend_data2, trend_data3, trend_data4]
-trend_param1 = lds.TrendParam(TrendParamDefID='RAW_MIN', TrendID=1, Value=1)
-trend_param2 = lds.TrendParam(TrendParamDefID='RAW_MAX', TrendID=1, Value=2)
+trend_param1 = lds.TrendParam(TrendParamDefID='RAW_MIN', TrendID=1, Value='1')
+trend_param2 = lds.TrendParam(TrendParamDefID='RAW_MAX', TrendID=1, Value='2')
 trend_param_list = [trend_param1, trend_param2]
 trend_param_def1 = lds.TrendParamDef(ID='RAW_MIN', TrendDefID='ID_1', Name='name', DataType='INT')
 trend_param_def2 = lds.TrendParamDef(ID='RAW_MAX', TrendDefID='ID_1', Name='name2', DataType='INT')
@@ -37,7 +37,7 @@ trend_param_def_list = [trend_param_def1, trend_param_def2]
 def reset_all_trend_objects():
     global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend_list, \
         trend_data1, trend_data2, trend_data3, trend_data4, trend_data_list, \
-        trend_param1, trend_param2, trend_param_list,\
+        trend_param1, trend_param2, trend_param_list, \
         trend_param_def1, trend_param_def2, trend_param_def_list
     trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
@@ -50,8 +50,8 @@ def reset_all_trend_objects():
     trend_data3 = lds.TrendData(TrendID=1, Time=3, Data=binary_data)
     trend_data4 = lds.TrendData(TrendID=2, Time=2, Data=binary_data)
     trend_data_list = [trend_data1, trend_data2, trend_data3, trend_data4]
-    trend_param1 = lds.TrendParam(TrendParamDefID='RAW_MIN', TrendID=1, Value=1)
-    trend_param2 = lds.TrendParam(TrendParamDefID='RAW_MAX', TrendID=1, Value=2)
+    trend_param1 = lds.TrendParam(TrendParamDefID='RAW_MIN', TrendID=1, Value='1')
+    trend_param2 = lds.TrendParam(TrendParamDefID='RAW_MAX', TrendID=1, Value='2')
     trend_param_list = [trend_param1, trend_param2]
     trend_param_def1 = lds.TrendParamDef(ID='RAW_MIN', TrendDefID='ID_1', Name='name', DataType='INT')
     trend_param_def2 = lds.TrendParamDef(ID='RAW_MAX', TrendDefID='ID_1', Name='name2', DataType='INT')
@@ -82,28 +82,57 @@ def reset_trend_objects():
     return [trend_def_list, trend_list]
 
 
-app.dependency_overrides[get_engine] = get_test_engine
+app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
 
 def test_list_trends_should_return_ok_response_code_and_empty_list_when_no_trends():
     response = test_client.get("/trend")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 0
+    assert len(response.json()['items']) == 0
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_should_return_ok_response_code_and_correct_trends(add_lds_objects):
+def test_list_trends_should_return_ok_response_code_and_correct_trends(add_lds_objects):
     response = test_client.get("/trend")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 2
-    for expected_trend, returned_trend in zip(trend_list, response.json()):
+    items = response.json()['items']
+    assert len(items) == len(trend_list)
+    for expected_trend, returned_trend in zip(trend_list, items):
         assert returned_trend['ID'] == expected_trend.ID
         assert returned_trend['TrendDefID'] == expected_trend.TrendDefID.strip()
         assert returned_trend['RawMin'] == expected_trend.RawMin
         assert returned_trend['RawMax'] == expected_trend.RawMax
         assert returned_trend['ScaledMin'] == expected_trend.ScaledMin
         assert returned_trend['ScaledMax'] == expected_trend.ScaledMax
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trends_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 1
+    page = 1
+    response = test_client.get(f"/trend?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == size
+    assert response.json()['total'] == len(trend_list)
+    assert response.json()['pages'] == len(trend_list) // size if len(trend_list) % size == 0 \
+        else len(trend_list) // size + 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trends_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/trend")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(trend_list)
+    assert response.json()['total'] == len(trend_list)
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
@@ -151,7 +180,7 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()
+    returned_trend_datas = response.json()['items']
     for returned_trend_data, expected_trend_data in zip(returned_trend_datas, trend_data_list[:3]):
         assert returned_trend_data['Timestamp'] == expected_trend_data.Time
         assert returned_trend_data['TimestampMs'] == 0
@@ -165,7 +194,7 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()
+    returned_trend_datas = response.json()['items']
     for count, returned_trend_data in enumerate(returned_trend_datas):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
@@ -181,7 +210,7 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()
+    returned_trend_datas = response.json()['items']
     for count, returned_trend_data in enumerate(returned_trend_datas):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
@@ -197,7 +226,7 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time + 1) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()
+    returned_trend_datas = response.json()['items']
     for count, returned_trend_data in enumerate(returned_trend_datas):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time + 1, samples)
         assert returned_trend_data['Timestamp'] == count + 1
@@ -215,13 +244,43 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend2.ID) + ",10/data/" + str(trend_data4.Time) +
                                "/" + str(trend_data4.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()
+    returned_trend_datas = response.json()['items']
     for count, returned_trend_data in enumerate(returned_trend_datas):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data4.Time, trend_data4.Time, samples)
         assert returned_trend_data['Timestamp'] == 2
         assert returned_trend_data['TimestampMs'] == timestamp_ms
         assert returned_trend_data['Data'][0]['ID'] == trend2.ID
         assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend2, timestamp_ms)
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_get_trend_data_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    samples = 3
+    size = 2
+    page = 2
+    response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
+                               "/" + str(trend_data3.Time) + "/" + str(samples) + f'?size={size}&page={page}')
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == 1
+    assert response.json()['total'] == samples
+    assert response.json()['pages'] == samples // size if samples % size == 0 else samples // size + 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_get_trend_data_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    samples = 3
+    response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
+                               "/" + str(trend_data3.Time) + "/" + str(samples))
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == samples
+    assert response.json()['total'] == samples
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
@@ -245,12 +304,11 @@ def test_get_trend_data_should_return_not_found_response_code_and_error_when_no_
 def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_equal_to_time_delta(add_lds_objects):  # noqa
     with patch('api.routers.trend.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
-
         samples = 3
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
                                    str(trend_data3.Time - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()
+        returned_trend_datas = response.json()['items']
         for returned_trend_data, expected_trend_data in zip(returned_trend_datas, trend_data_list[:3]):
             assert returned_trend_data['Timestamp'] == expected_trend_data.Time
             assert returned_trend_data['TimestampMs'] == 0
@@ -262,12 +320,11 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
 def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_higher_than_time_delta(add_lds_objects):  # noqa
     with patch('api.routers.trend.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
-
         samples = 9
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
                                    str(trend_data3.Time - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()
+        returned_trend_datas = response.json()['items']
         for count, returned_trend_data in enumerate(returned_trend_datas):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
             trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
@@ -281,12 +338,11 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
 def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_lower_than_time_delta(add_lds_objects):  # noqa
     with patch('api.routers.trend.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
-
         samples = 2
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
                                    str(trend_data3.Time - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()
+        returned_trend_datas = response.json()['items']
         for count, returned_trend_data in enumerate(returned_trend_datas):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
             trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
@@ -300,12 +356,11 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
 def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(add_lds_objects):  # noqa
     with patch('api.routers.trend.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=4, tzinfo=timezone.utc)
-
         samples = 4
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
-                                   str(trend_data3.Time+1 - trend_data1.Time) + "/" + str(samples))
+                                   str(trend_data3.Time + 1 - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()
+        returned_trend_datas = response.json()['items']
         for count, returned_trend_data in enumerate(returned_trend_datas):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time + 1, samples)
             assert returned_trend_data['Timestamp'] == count + 1
@@ -321,12 +376,11 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
 def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trends_exists(add_lds_objects):  # noqa
     with patch('api.routers.trend.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=2, tzinfo=timezone.utc)
-
         samples = 2
         response = test_client.get("/trend/" + str(trend2.ID) + ",10/current_data/" +
                                    str(trend_data4.Time - trend_data4.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()
+        returned_trend_datas = response.json()['items']
         for count, returned_trend_data in enumerate(returned_trend_datas):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data4.Time, trend_data4.Time, samples)
             assert returned_trend_data['Timestamp'] == 2
@@ -336,10 +390,44 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    with patch('api.routers.trend.datetime') as mock_datetime:
+        mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
+        samples = 3
+        size = 2
+        page = 1
+        response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/"
+                                   + str(trend_data3.Time - trend_data1.Time)
+                                   + "/" + str(samples) + f'?size={size}&page={page}')
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 5
+        assert len(response.json()['items']) == size
+        assert response.json()['total'] == samples
+        assert response.json()['pages'] == samples // size if samples % size == 0 else samples // size + 1
+        assert response.json()['size'] == size
+        assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_get_trend_current_data_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    with patch('api.routers.trend.datetime') as mock_datetime:
+        mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
+        samples = 3
+        response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/"
+                                   + str(trend_data3.Time - trend_data1.Time) + "/" + str(samples))
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == samples
+    assert response.json()['total'] == samples
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
 def test_get_trend_current_data_should_return_not_found_response_code_and_error_when_no_trend_data_exists(add_lds_objects):  # noqa
     with patch('api.routers.trend.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
-
         samples = 2
         response = test_client.get("/trend/10/current_data/" +
                                    str(trend_data4.Time - trend_data4.Time) + "/" + str(samples))
@@ -348,7 +436,6 @@ def test_get_trend_current_data_should_return_not_found_response_code_and_error_
         assert error['code'] == status.HTTP_404_NOT_FOUND
         assert error['message'] == 'No data'
         mock_datetime.now.return_value = datetime(1980, 1, 1, tzinfo=timezone.utc)
-
         response = test_client.get("/trend/" + str(trend2.ID) + "/current_data/" +
                                    str(trend_data3.Time + 100 - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -421,10 +508,10 @@ def test_update_trend_by_id_should_return_not_found_response_code_and_error_when
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
-def test_list_trend_params_should_return_ok_response_code_and_empty_list_when_no_trend_params_for_given_trend_id(add_lds_objects): # noqa
+def test_list_trend_params_should_return_ok_response_code_and_empty_list_when_no_trend_params_for_given_trend_id(add_lds_objects):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 0
+    assert len(response.json()['items']) == 0
 
 
 def test_list_trend_params_should_return_ok_response_code_and_error_when_no_trend_with_given_id():
@@ -439,9 +526,10 @@ def test_list_trend_params_should_return_ok_response_code_and_error_when_no_tren
 def test_list_trend_params_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(add_lds_objects):
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 2
+    items = response.json()['items']
+    assert len(items) == 2
     for expected_trend_param_def, expected_trend_param, returned_trend_param in (
-            zip(trend_param_def_list, trend_param_list, reversed(response.json()))):
+            zip(trend_param_def_list, trend_param_list, reversed(items))):
         assert returned_trend_param['TrendID'] == expected_trend_param.TrendID
         assert returned_trend_param['Value'] == expected_trend_param.Value
         assert returned_trend_param['TrendParamDefID'] == expected_trend_param.TrendParamDefID.strip()
@@ -450,7 +538,34 @@ def test_list_trend_params_should_return_ok_response_code_and_correct_trend_para
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_param_by_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(add_lds_objects): # noqa
+def test_list_trend_params_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 3
+    page = 1
+    response = test_client.get("/trend/" + str(trend1.ID) + f"/param?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(trend_param_list)
+    assert response.json()['total'] == len(trend_param_list)
+    assert response.json()['pages'] == len(trend_param_list) // size if len(trend_param_list) % size == 0 \
+        else len(trend_param_list) // size + 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trend_params_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/trend/" + str(trend1.ID) + "/param")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(trend_param_list)
+    assert response.json()['total'] == len(trend_param_list)
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_get_trend_param_by_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(add_lds_objects):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID)
     assert response.status_code == status.HTTP_200_OK
     returned_trend_param = response.json()

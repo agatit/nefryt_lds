@@ -37,14 +37,14 @@ def map_lds_event_def_to_event_def(lds_event_def: lds.EventDef) -> EventDef:
 
 
 def map_lds_trend_def_to_trend_def(lds_trend_def: lds.TrendDef) -> TrendDef:
-    return TrendDef(**strip_strings_in_dict(to_dict(lds_trend_def[0])))
+    return TrendDef(**strip_strings_in_dict(to_dict(lds_trend_def)))
 
 
 def map_trend_def_to_lds_trend_def(trend_def: TrendDef) -> lds.TrendDef:
     return lds.TrendDef(**trend_def.model_dump(by_alias=True))
 
 
-def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParam:
+def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParam: # noqa
     lds_trend_param_dict = to_dict(lds_trend_param)
     lds_trend_param_def_dict = to_dict(lds_trend_param_def)
     lds_trend_param_def_dict.pop('TrendDefID')
@@ -53,7 +53,7 @@ def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: 
     return TrendParam(**strip_strings_in_dict(lds_trend_param_dict))
 
 
-def map_dicts_to_trend_data(timestamps: list[dict], trend_values_dict: dict) -> list[TrendData]:
+def map_dicts_to_trend_data(timestamps: zip, trend_values_dict: dict) -> list[TrendData]:
     trend_datas = []
     for counter, timestamp in enumerate(timestamps):
         trend_values = [
@@ -61,8 +61,8 @@ def map_dicts_to_trend_data(timestamps: list[dict], trend_values_dict: dict) -> 
             for trend_id in trend_values_dict
         ]
         trend_data = TrendData(
-            Timestamp=timestamp['Timestamp'],
-            TimestampMs=timestamp['TimestampMs'],
+            Timestamp=timestamp[0],
+            TimestampMs=timestamp[1],
             Data=trend_values
         )
         trend_datas.append(trend_data)
@@ -85,7 +85,7 @@ def map_node_to_lds_node(node: Node) -> lds.Node:
     return lds.Node(**node_dict)
 
 
-def map_node_to_editor_node(node_id: int, node: Node) -> editor.Node:
+def map_node_to_editor_node(node_id: int, node: Node) -> editor.Node | None:
     if node.editor_params:
         editor_node_dict = {'ID': node_id,
                             'PosX': node.editor_params.pos_x,

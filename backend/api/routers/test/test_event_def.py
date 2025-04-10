@@ -5,16 +5,16 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api import app
+from api.app import app
 from api.db import get_engine, get_test_engine
+from api.routers.security import get_user_token
 from database import lds
 import pytest
 
-
 event_def1 = lds.EventDef(ID='EVENT_DEF1', Verbosity='verbosity', Caption='caption',
-                              Silent=True, Visible=True, Enabled=True)
+                          Silent=True, Visible=True, Enabled=True)
 event_def2 = lds.EventDef(ID='EVENT_DEF2', Verbosity='verbosity', Caption='caption',
-                              Silent=False, Visible=False, Enabled=False)
+                          Silent=False, Visible=False, Enabled=False)
 event_def_list = [event_def1, event_def2]
 
 
@@ -30,28 +30,57 @@ def reset_event_def_objects():
     return [event_def_list]
 
 
-app.dependency_overrides[get_engine] = get_test_engine
+app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
+app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
 
-def test_list_event_def_should_return_ok_response_code_and_empty_list_when_no_event_defs():
+def test_list_event_defs_should_return_ok_response_code_and_empty_list_when_no_event_defs():
     response = test_client.get("/event_def")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 0
+    assert len(response.json()['items']) == 0
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_list_event_def_should_return_ok_response_code_and_correct_event_defs(add_lds_objects):
+def test_list_event_defs_should_return_ok_response_code_and_correct_event_defs(add_lds_objects):
     response = test_client.get("/event_def")
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 2
-    for expected_event_def, returned_event_def in zip(event_def_list, response.json()):
+    items = response.json()['items']
+    assert len(items) == len(event_def_list)
+    for expected_event_def, returned_event_def in zip(event_def_list, items):
         assert returned_event_def['ID'] == expected_event_def.ID.strip()
         assert returned_event_def['Verbosity'] == expected_event_def.Verbosity.strip()
         assert returned_event_def['Caption'] == expected_event_def.Caption.strip()
         assert returned_event_def['Silent'] == expected_event_def.Silent
         assert returned_event_def['Enabled'] == expected_event_def.Enabled
         assert returned_event_def['Visible'] == expected_event_def.Visible
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
+def test_list_event_defs_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 1
+    page = 2
+    response = test_client.get(f"/event_def?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == size
+    assert response.json()['total'] == len(event_def_list)
+    assert response.json()['pages'] == len(event_def_list) // size if len(event_def_list) % size == 0 \
+        else len(event_def_list) // size + 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
+def test_list_event_defs_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/event_def")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(event_def_list)
+    assert response.json()['total'] == len(event_def_list)
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
 
 
 def test_create_event_def_should_return_created_response_code_and_created_event_def_data():
@@ -121,7 +150,7 @@ def test_get_event_def_by_id_should_return_not_found_response_code_and_error_whe
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_update_event_def_by_id_should_return_ok_response_code_and_event_def_of_given_id(add_lds_objects):
+def test_update_event_def_should_return_ok_response_code_and_event_def_of_given_id(add_lds_objects):
     update_event_def_dict = {'Verbosity': 'verbosity2', 'Caption': 'caption2',
                              'Silent': False, 'Visible': True, 'Enabled': False}
     response = test_client.put("/event_def/" + event_def1.ID, json=update_event_def_dict)
@@ -135,7 +164,7 @@ def test_update_event_def_by_id_should_return_ok_response_code_and_event_def_of_
     assert returned_event_def['Visible'] == update_event_def_dict['Visible']
 
 
-def test_update_event_def_by_id_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id():
+def test_update_event_def_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id():
     update_event_def_dict = {'Verbosity': 'verbosity2', 'Caption': 'caption2',
                              'Silent': False, 'Visible': True, 'Enabled': False}
     response = test_client.put("/event_def/" + event_def1.ID, json=update_event_def_dict)

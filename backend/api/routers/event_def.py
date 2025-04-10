@@ -1,27 +1,30 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Depends
-from sqlalchemy import select, delete, Engine
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy import select, delete, Engine, literal
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_event_def_to_lds_event_def, \
     map_lds_event_def_to_event_def
+from .security import get_user_token
 from ..db import get_engine
 from ..schemas import Error, EventDef, Information, UpdateEventDef
 from database import lds
 
-router = APIRouter(prefix="/event_def", tags=["event_def"])
+router = APIRouter(prefix="/event_def", tags=["event_def"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=list[EventDef] | Error, operation_id="list_event_defs")
-async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)]):
+@router.get('', response_model=Page[EventDef] | Error)
+async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[Params, Depends()]):
     try:
-        statement = select(lds.EventDef)
+        statement = select(lds.EventDef).order_by(lds.EventDef.ID)
         with Session(engine) as session:
-            event_defs = session.execute(statement).all()
-        event_defs_out = [map_lds_event_def_to_event_def(lds_event_def[0]) for lds_event_def in event_defs]
-        return event_defs_out
+            page = paginate(session, statement, params=params)
+        page.items = [map_lds_event_def_to_event_def(lds_event_def) for lds_event_def in page.items]
+        return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_event_defs(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -31,7 +34,6 @@ async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)]):
 async def create_event_def(event_def: Annotated[EventDef, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_event_def = map_event_def_to_lds_event_def(event_def)
-        print(lds_event_def)
         with Session(engine) as session:
             session.add(lds_event_def)
             session.commit()
@@ -55,13 +57,13 @@ async def delete_event_def_by_id(event_def_id: Annotated[str, Path()], engine: A
                 error = Error(code=status.HTTP_404_NOT_FOUND,
                               message='No event def with id = ' + event_def_id)
                 return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
-            statement = delete(lds.Event).where(lds.Event.EventDefID == event_def_id)
+            statement = delete(lds.Event).where(lds.Event.EventDefID == literal(event_def_id))
             session.execute(statement)
             session.delete(event_def)
             session.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in delete_event_def_by_id(): ' + str(e))
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f'Exception in delete_event_def_by_id(): {e}')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -69,13 +71,13 @@ async def delete_event_def_by_id(event_def_id: Annotated[str, Path()], engine: A
 async def get_event_def_by_id(event_def_id: Annotated[str, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
-            event_def = session.get(lds.EventDef, event_def_id)
+            event_def: lds.EventDef = session.get(lds.EventDef, event_def_id)  # type: ignore
         if not event_def:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No event def with id = ' + event_def_id)
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         return map_lds_event_def_to_event_def(event_def)
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_event_def_by_id(): ' + str(e))
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f'Exception in get_event_def_by_id(): {e}')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

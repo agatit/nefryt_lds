@@ -1,29 +1,35 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Query, Depends
-from sqlalchemy import select, Engine
+from fastapi_pagination import Params, Page
+from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy import select, Engine, literal
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, aliased
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_node_and_editor_node_to_node, map_node_to_lds_node, map_node_to_editor_node
+from .security import get_user_token
 from ..db import get_engine
 from ..schemas import Error, Node, UpdateNode
 from database import lds, editor
 
-router = APIRouter(prefix="/node", tags=["node"])
+router = APIRouter(prefix="/node", tags=["node"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=list[Node] | Error)
-async def list_nodes(engine: Annotated[Engine, Depends(get_engine)], filter: Annotated[str | None, Query()] = None):
+@router.get('', response_model=Page[Node] | Error)
+async def list_nodes(engine: Annotated[Engine, Depends(get_engine)],  params: Annotated[Params, Depends()],
+                     filter: Annotated[str | None, Query()] = None):
     try:
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
         statement = (select(lds_node, editor_node)
-                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)) # noqa
+                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)
+                     .order_by(lds_node.ID))
         with Session(engine) as session:
-            nodes = session.execute(statement).all()
-        nodes_out = [map_lds_node_and_editor_node_to_node(lds_node, editor_node) for lds_node, editor_node in nodes]
-        return nodes_out
+            page = paginate(session, statement, params=params)
+        page.items = [map_lds_node_and_editor_node_to_node(lds_node, editor_node)
+                      for lds_node, editor_node in page.items]
+        return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_nodes(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -58,8 +64,8 @@ async def delete_node_by_id(node_id: Annotated[int, Path()], engine: Annotated[E
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
         statement = (select(lds_node, editor_node)
-                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)  # noqa
-                     .where(lds_node.ID == node_id))
+                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)
+                     .where(lds_node.ID == literal(node_id)))
         with Session(engine) as session:
             node = session.execute(statement).all()
         if not node:
@@ -86,8 +92,8 @@ async def get_node_by_id(node_id: Annotated[int, Path()], engine: Annotated[Engi
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
         statement = (select(lds_node, editor_node)
-                     .outerjoin(editor_node, lds_node.ID == editor_node.ID) # noqa
-                     .where(lds_node.ID == node_id))
+                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)
+                     .where(lds_node.ID == literal(node_id)))
         with Session(engine) as session:
             node = session.execute(statement).all()
         if not node:
@@ -108,8 +114,8 @@ async def update_node(node_id: Annotated[int, Path()], updated_node: Annotated[U
             lds_node = aliased(lds.Node)
             editor_node = aliased(editor.Node)
             statement = (select(lds_node, editor_node)
-                         .outerjoin(editor_node, lds_node.ID == editor_node.ID)  # noqa
-                         .where(lds_node.ID == node_id))
+                         .outerjoin(editor_node, lds_node.ID == editor_node.ID)
+                         .where(lds_node.ID == literal(node_id)))
             node = session.execute(statement).all()
             if not node:
                 error = Error(code=status.HTTP_404_NOT_FOUND, message='No node with id = ' + str(node_id))
