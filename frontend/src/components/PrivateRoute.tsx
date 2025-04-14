@@ -1,13 +1,11 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../contexts/authContext";
+import { useCookies } from "react-cookie";
 
 export default function PrivateRoute(props: React.PropsWithChildren) {
-  const auth = React.useContext(AuthContext);
+  const [cookies, setCookie] = useCookies(["auth"]);
 
-  console.log(auth?.permissions);
-
-  if (auth?.getToken() == null) return <Navigate to="/login" />;
+  if (typeof cookies.auth == "undefined") return <Navigate to="/login" />;
 
   return props.children;
 }

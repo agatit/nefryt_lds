@@ -41,22 +41,13 @@ function PasswordField(props: FieldRenderProps) {
   );
 }
 
-interface LoginProps {
-  setToken: (token: string | null) => void;
-  setPermissions: (permissions: string[] | null) => void;
-}
-
-export default function Login(props: LoginProps) {
+export default function Login() {
   const authApiRef = React.useRef(new AuthApi(config, host, axiosInstance));
 
-  const [cookies, setCookie] = useCookies([
-    "token",
-    "permissions",
-    "refreshToken",
-  ]);
+  const [cookies, setCookie] = useCookies(["auth"]);
   const [showLoading, setShowLoading] = React.useState<boolean>(false);
 
-  if (cookies.token && cookies.permissions) return <Navigate to="/" />;
+  if (typeof cookies.auth !== "undefined") return <Navigate to="/" />;
 
   function handleSubmit(dataItem: any) {
     setShowLoading(true);
@@ -67,16 +58,7 @@ export default function Login(props: LoginProps) {
         password: dataItem.password,
       })
       .then((response: AxiosResponse<LoginPermissions>) => {
-        props.setToken(response.data.token);
-        if (response.data.permissions)
-          props.setPermissions(response.data.permissions);
-        setCookie("token", JSON.stringify(response.data.token), {
-          expires: 0 as any,
-        });
-        setCookie("permissions", JSON.stringify(response.data.permissions), {
-          expires: 0 as any,
-        });
-        setCookie("refreshToken", JSON.stringify(response.data.refreshToken), {
+        setCookie("auth", JSON.stringify(response.data), {
           expires: 0 as any,
         });
       });
