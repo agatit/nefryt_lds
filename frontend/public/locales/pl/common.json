@@ -1,0 +1,13 @@
+{
+  "error_occured": "Wystąpił błąd!",
+  "connection_error": "Błąd połączenia z serwerem",
+  "edit": "Edytuj",
+  "save": "Zapisz",
+  "cancel": "Anuluj",
+  "zoom": "ZOOM",
+  "brightness": "JASNOŚĆ",
+  "contrast": "KONTRAST",
+  "none": "Brak",
+  "date": "Data",
+  "time": "Czas"
+}

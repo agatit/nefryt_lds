@@ -1,35 +1,41 @@
 import React from "react";
-import {BrowserRouter, Routes, Route} from "react-router-dom";
-import {Appbar} from "./layouts/Appbar";
-import DrawerContainer from "./components/drawer/DrawerContainer";
-import EventTab from "./pages/EventTab";
-import EventDefTab from "./pages/EventDefTab";
-import TrendTab from "./pages/TrendTab";
-import TrendChartTab from "./pages/TrendChartTab";
+import "./App.scss";
+import Navbar from "./layouts/Navbar";
+import { Route, Routes, useLocation } from "react-router-dom";
+import { LoadingPanel } from "onyks_shared_kendo";
+import { useTranslation } from "react-i18next";
+import Login from "./features/auth/login";
+import LDS from "./features/lds/LDS";
+import { NavbarContextProvider } from "./contexts/navbarContext";
+import PrivateRoute from "./components/PrivateRoute";
 
-const App = () => {
-    const [expanded, setExpanded] = React.useState(true);
+function App() {
+  const { t } = useTranslation(["common", "titles"]);
+  const { pathname } = useLocation();
 
-    const handleDrawerOpen = React.useCallback(() => {
-            setExpanded(!expanded);
-        }, [expanded]
-    );
+  // Navbar stuff if any
+  const [title, setTitle] = React.useState<string>(t("titles:" + pathname));
 
-    return (
-        <BrowserRouter>
-            <div className="app-container">
-                <Appbar onMenuClick={handleDrawerOpen}/>
-                <DrawerContainer expanded={expanded}>
-                    <Routes>
-                        <Route path="/event" element={<EventTab/>}/>
-                        <Route path="/eventdef" element={<EventDefTab/>}/>
-                        <Route path="/trend" element={<TrendTab/>}/>
-                        <Route path="/trendChart" element={<TrendChartTab/>}/>
-                    </Routes>
-                </DrawerContainer>
-            </div>
-        </BrowserRouter>
-    );
-};
+  return (
+    <div className="App">
+      <Navbar title={title} />
+      <React.Suspense fallback={<LoadingPanel querySelectorString=".App" />}>
+        <NavbarContextProvider setTitle={setTitle}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/*"
+              element={
+                <PrivateRoute>
+                  <LDS />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </NavbarContextProvider>
+      </React.Suspense>
+    </div>
+  );
+}
 
 export default App;

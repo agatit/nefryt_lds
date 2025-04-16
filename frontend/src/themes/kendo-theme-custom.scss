@@ -1,2 +1,5 @@
-// $primary: #53D2FA;
-@import '~@progress/kendo-theme-default/dist/all.scss';
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+
+@use "./variables.scss" as var;
+
+// Kendo customization
