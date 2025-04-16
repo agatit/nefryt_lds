@@ -70,7 +70,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
       responses:
@@ -171,7 +171,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
       responses:
@@ -321,7 +321,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
         - description: Query filter in OData standard
@@ -484,7 +484,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
         - description: Query filter in OData standard
@@ -1158,7 +1158,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
         - description: Query filter in OData standard
@@ -1232,7 +1232,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
         - description: String of ids of the trend to retrieve, separated by comma
@@ -1265,7 +1265,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/TrendData'
+                  $ref: '#/components/schemas/TrendDataMultiple'
                 type: array
           description: A array of trend data
         default:
@@ -1280,7 +1280,7 @@ paths:
       x-openapi-router-controller: api.controllers.trends_controller
   /trend/{trendIdList}/data/{begin}/{end}/{samples}:
     get:
-      description: List data
+      description: List multiple trends data
       operationId: get_trend_data
       parameters:
         - description: Page number
@@ -1297,7 +1297,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
         - description: String of ids of the trend to retrieve, separated by comma
@@ -1338,7 +1338,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/TrendData'
+                  $ref: '#/components/schemas/TrendDataMultiple'
                 type: array
           description: A array of trend data
         default:
@@ -1347,10 +1347,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: List trend data
+      summary: List multiple trends data
       tags:
       - trends
       x-openapi-router-controller: api.controllers.trends_controller
+  /trend/{trendId}/single_data/{begin}/{end}/{samples}:
+    get:
+      description: List single trend data
+      operationId: get_single_trend_data
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Trend id to retrieve
+          explode: false
+          in: path
+          name: trendId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: start of date to take from data (timestamp UTC)
+          explode: false
+          in: path
+          name: begin
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: end of date to take from data (timestamp UTC)
+          explode: false
+          in: path
+          name: end
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: number of data samples to take (resolution)
+          explode: false
+          in: path
+          name: samples
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TrendDataSingle'
+                type: array
+          description: A array of trend data
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List single trend data
+      tags:
+        - trends
   /trend/{trendId}:
     delete:
       description: Deletes specific trend
@@ -1459,7 +1531,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
         - description: Query filter in OData standard
@@ -1597,7 +1669,7 @@ paths:
           required: false
           schema:
             type: integer
-            maximum: 100
+            maximum: 10000
             minimum: 1
             default: 50
         - description: Query filter in OData standard
@@ -2259,7 +2331,20 @@ components:
           type: number
       required:
         - trendId
-    TrendData:
+    TrendDataSingle:
+      type: object
+      properties:
+        Timestamp:
+          type: integer
+        TimestampMs:
+          type: integer
+        Value:
+          type: number
+      required:
+        - Timestamp
+        - TimestampMs
+        - Value
+    TrendDataMultiple:
       additionalProperties:
         type: number
       example:

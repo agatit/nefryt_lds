@@ -1,6 +1,6 @@
-from ..schemas import Event, EventDef, TrendDef, TrendParam, TrendData, TrendValue, Link, Node, EditorNode
+from ..schemas import Event, EventDef, TrendDef, TrendParam, TrendDataMultiple, TrendValue, Link, Node, EditorNode, \
+    TrendDataSingle, Trend
 from database import lds, editor
-from ..schemas.trend import Trend
 
 
 def to_dict(o) -> dict:
@@ -53,14 +53,14 @@ def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: 
     return TrendParam(**strip_strings_in_dict(lds_trend_param_dict))
 
 
-def map_dicts_to_trend_data(timestamps: zip, trend_values_dict: dict) -> list[TrendData]:
+def map_dicts_to_trend_data_multiple(timestamps: zip, trend_values_dict: dict) -> list[TrendDataMultiple]:
     trend_datas = []
     for counter, timestamp in enumerate(timestamps):
         trend_values = [
             TrendValue(ID=trend_id, Value=trend_values_dict[trend_id][counter][0])
             for trend_id in trend_values_dict
         ]
-        trend_data = TrendData(
+        trend_data = TrendDataMultiple(
             Timestamp=timestamp[0],
             TimestampMs=timestamp[1],
             Data=trend_values
@@ -68,6 +68,14 @@ def map_dicts_to_trend_data(timestamps: zip, trend_values_dict: dict) -> list[Tr
         trend_datas.append(trend_data)
 
     return trend_datas
+
+
+def map_tuple_to_trend_data_single(values: tuple) -> TrendDataSingle:
+    return TrendDataSingle(
+        Timestamp=values[1],
+        TimestampMs=values[2],
+        Value=values[0]
+    )
 
 
 def map_lds_link_to_link(lds_link: lds.Link) -> Link:

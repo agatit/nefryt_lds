@@ -1002,7 +1002,7 @@ class TTrendData(typing.Protocol):
         ...
 
 
-TrendData: typing.Type[TTrendData] = models.TrendData  # type: ignore
+TrendData: typing.Type[TTrendData] = models.TrendDataMultiple  # type: ignore
 
 
 class TrendDefDict(typing.TypedDict, total=True):
