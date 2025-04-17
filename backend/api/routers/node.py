@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Query, Depends
-from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, Engine, literal
 from sqlalchemy.exc import IntegrityError
@@ -9,7 +8,7 @@ from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_node_and_editor_node_to_node, map_node_to_lds_node, map_node_to_editor_node
 from .security import get_user_token
-from ..custom_page import CustomParams
+from ..custom_page import CustomParams, CustomPage, use_custom_page
 from ..db import get_engine
 from ..schemas import Error, Node, UpdateNode
 from database import lds, editor
@@ -17,9 +16,9 @@ from database import lds, editor
 router = APIRouter(prefix="/node", tags=["node"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=Page[Node] | Error)
+@router.get('', response_model=CustomPage[Node] | Error)
 async def list_nodes(engine: Annotated[Engine, Depends(get_engine)],  params: Annotated[CustomParams, Depends()],
-                     filter: Annotated[str | None, Query()] = None):
+                     _: Annotated[None, Depends(use_custom_page)], filter: Annotated[str | None, Query()] = None):
     try:
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)

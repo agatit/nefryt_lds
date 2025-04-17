@@ -7,9 +7,8 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
-from fastapi_pagination import Page
 from .mapper import map_lds_event_and_lds_event_def_to_event
-from ..custom_page import CustomParams
+from ..custom_page import CustomParams, use_custom_page, CustomPage
 from ..schemas import Error, Event, Information
 from ..db import get_engine
 from ..routers.security import get_user_permissions, get_user_token
@@ -18,8 +17,9 @@ from database import lds
 router = APIRouter(prefix="/event", tags=["event"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=Page[Event] | Error)
-async def list_events(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()]):
+@router.get('', response_model=CustomPage[Event] | Error)
+async def list_events(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
+                      _: Annotated[None, Depends(use_custom_page)]):
     try:
         statement = (select(lds.Event, lds.EventDef)
                      .join(lds.EventDef)

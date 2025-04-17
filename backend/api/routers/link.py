@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Query, Depends
-from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, Engine
 from sqlalchemy.exc import IntegrityError
@@ -9,7 +8,7 @@ from starlette import status
 from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_link_to_link, map_link_to_lds_link
 from .security import get_user_token
-from ..custom_page import CustomParams
+from ..custom_page import CustomParams, use_custom_page, CustomPage
 from ..db import get_engine
 from ..schemas import Error, Link, UpdateLink
 from database import lds
@@ -17,9 +16,9 @@ from database import lds
 router = APIRouter(prefix="/link", tags=["link"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=Page[Link] | Error)
+@router.get('', response_model=CustomPage[Link] | Error)
 async def list_links(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
-                     filter: Annotated[str | None, Query()] = None):
+                     _: Annotated[None, Depends(use_custom_page)], filter: Annotated[str | None, Query()] = None):
     try:
         statement = select(lds.Link).order_by(lds.Link.ID)
         with Session(engine) as session:
