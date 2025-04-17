@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Depends
-from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, delete, Engine, literal
 from sqlalchemy.exc import IntegrityError
@@ -10,7 +9,7 @@ from starlette.responses import JSONResponse, Response
 from .mapper import map_event_def_to_lds_event_def, \
     map_lds_event_def_to_event_def
 from .security import get_user_token
-from ..custom_page import CustomParams
+from ..custom_page import CustomParams, CustomPage, use_custom_page
 from ..db import get_engine
 from ..schemas import Error, EventDef, Information, UpdateEventDef
 from database import lds
@@ -18,8 +17,9 @@ from database import lds
 router = APIRouter(prefix="/event_def", tags=["event_def"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=Page[EventDef] | Error)
-async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()]):
+@router.get('', response_model=CustomPage[EventDef] | Error)
+async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
+                          _: Annotated[None, Depends(use_custom_page)]):
     try:
         statement = select(lds.EventDef).order_by(lds.EventDef.ID)
         with Session(engine) as session:

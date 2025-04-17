@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, Engine
 from database import lds
@@ -8,7 +7,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
 from .security import get_user_token
-from ..custom_page import CustomParams
+from ..custom_page import CustomParams, use_custom_page, CustomPage
 from ..db import get_engine
 from ..routers.mapper import map_lds_trend_def_to_trend_def
 from ..schemas import TrendDef, Error
@@ -16,8 +15,9 @@ from ..schemas import TrendDef, Error
 router = APIRouter(prefix="/trend_def", tags=["trend_def"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=Page[TrendDef] | Error)
-async def list_trend_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()]):
+@router.get('', response_model=CustomPage[TrendDef] | Error)
+async def list_trend_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
+                          _: Annotated[None, Depends(use_custom_page)]):
     try:
         statement = select(lds.TrendDef).order_by(lds.TrendDef.ID)
         with Session(engine) as session:

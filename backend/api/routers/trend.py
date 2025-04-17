@@ -2,7 +2,6 @@ import struct
 from datetime import datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Query, Body, Path, Depends
-from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, and_, Engine, literal, func
 from sqlalchemy.exc import IntegrityError
@@ -13,7 +12,7 @@ from .mapper import map_lds_trend_to_trend, map_trend_to_lds_trend, \
     map_lds_trend_param_and_lds_trend_param_def_to_trend_param, map_dicts_to_trend_data_multiple, \
     map_tuple_to_trend_data_single
 from .security import get_user_token
-from ..custom_page import CustomParams
+from ..custom_page import CustomParams, CustomPage, use_custom_page
 from ..db import get_engine
 from ..schemas import Error, TrendDataMultiple, Information, Trend, UpdateTrend, TrendParam, TrendDataSingle
 from database import lds
@@ -21,9 +20,9 @@ from database import lds
 router = APIRouter(prefix="/trend", tags=['trend'], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=Page[Trend] | Error)
+@router.get('', response_model=CustomPage[Trend] | Error)
 async def list_trends(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
-                      filter: Annotated[str | None, Query()] = None):
+                      _: Annotated[None, Depends(use_custom_page)], filter: Annotated[str | None, Query()] = None):
     try:
         statement = select(lds.Trend).order_by(lds.Trend.ID)
         with Session(engine) as session:
@@ -53,18 +52,20 @@ async def create_trend(trend: Annotated[Trend, Body()], engine: Annotated[Engine
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=Page[TrendDataMultiple] | Error)
+@router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=CustomPage[TrendDataMultiple] | Error)
 async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[int, Path()],
                                  samples: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
-                                 params: Annotated[CustomParams, Depends()]):
+                                 params: Annotated[CustomParams, Depends()],
+                                 _: Annotated[None, Depends(use_custom_page)]):
     timestamp = int(datetime.now(timezone.utc).timestamp())
-    return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples, engine, params)
+    return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples, engine, params, _)
 
 
-@router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=Page[TrendDataMultiple] | Error)
+@router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=CustomPage[TrendDataMultiple] | Error)
 async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[int, Path()],
                          end: Annotated[int, Path()], samples: Annotated[int, Path()],
-                         engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()]):
+                         engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
+                         _: Annotated[None, Depends(use_custom_page)]):
     try:
         lds_trends_scales = {}
         trend_id_list = trend_id_list.split(",")
@@ -115,7 +116,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
             lds_trends_data = session.execute(statement).all()
 
         if len(lds_trends_data) == 0 and len(trend_timestamps) == 0:
-            return Page(items=[], total=samples, pages=pages, page=params.page, size=params.size)
+            return CustomPage(items=[], total=samples, pages=pages, page=params.page, size=params.size)
 
         lds_trends_data, iter_lds_data, iter_time_data, lds_data, time_data = (
             prepare_iterators_for_trend_data_getter(lds_trends_data, trend_timestamps, trend_timestamps_ms))
@@ -148,16 +149,18 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                 time_data = next(iter_time_data, None)
         result_lists = extend_trend_data_dicts(result_lists, trend_timestamps, trend_timestamps_ms)
         items = map_dicts_to_trend_data_multiple(zip(trend_timestamps, trend_timestamps_ms), result_lists)
-        return Page(items=items, total=samples, pages=pages, page=params.page, size=params.size)
+        return CustomPage(items=items, total=samples, pages=pages, page=params.page, size=params.size)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_trend_data(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id}/single_data/{begin}/{end}/{samples}', response_model=Page[TrendDataSingle] | Error)
+@router.get('/{trend_id}/single_data/{begin}/{end}/{samples}', response_model=CustomPage[TrendDataSingle] | Error)
 async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotated[int, Path()],
                                 end: Annotated[int, Path()], samples: Annotated[int, Path()],
-                                engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()]):
+                                engine: Annotated[Engine, Depends(get_engine)],
+                                _: Annotated[None, Depends(use_custom_page)],
+                                params: Annotated[CustomParams, Depends()]):
     try:
         with Session(engine) as session:
             lds_trend = session.get(lds.Trend, trend_id)
@@ -208,7 +211,7 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
             lds_trends_data = session.execute(statement).all()
 
         if len(lds_trends_data) == 0:
-            return Page(items=[], total=samples, pages=pages, page=params.page, size=params.size)
+            return CustomPage(items=[], total=samples, pages=pages, page=params.page, size=params.size)
 
         lds_trends_data, iter_lds_data, iter_time_data, lds_data, time_data = (
             prepare_iterators_for_trend_data_getter(lds_trends_data, trend_timestamps, trend_timestamps_ms))
@@ -236,9 +239,9 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
                                         time_data[0], time_data[1]))
                 time_data = next(iter_time_data, None)
         items = [map_tuple_to_trend_data_single(val) for val in result_list]
-        return Page(items=items, total=samples, pages=pages, page=params.page, size=params.size)
+        return CustomPage(items=items, total=samples, pages=pages, page=params.page, size=params.size)
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_single_trend_data(): ' + str(e))
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_single_trend_data(): ' + str(e))  # noqa
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -301,9 +304,10 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id}/param', response_model=Page[TrendParam] | Error)
+@router.get('/{trend_id}/param', response_model=CustomPage[TrendParam] | Error)
 async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
-                            params: Annotated[CustomParams, Depends()], filter: Annotated[str | None, Query()] = None):
+                            params: Annotated[CustomParams, Depends()], _: Annotated[None, Depends(use_custom_page)],
+                            filter: Annotated[str | None, Query()] = None):
     try:
         statement = select(1).where(lds.Trend.ID == literal(trend_id))
         with Session(engine) as session:
