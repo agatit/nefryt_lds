@@ -83,7 +83,8 @@ export default function LDS() {
       <DrawerRouterContainer
         items={routerItems}
         navigate={navigate}
-        expandOnHover={true}
+        expandOnHover={false}
+        expanded={true}
         position="start"
         mode="push"
         mini

@@ -545,37 +545,74 @@ export interface PageTrend {
 /**
  * 
  * @export
- * @interface PageTrendData
+ * @interface PageTrendDataMultiple
  */
-export interface PageTrendData {
+export interface PageTrendDataMultiple {
     /**
      * 
-     * @type {Array<TrendData>}
-     * @memberof PageTrendData
+     * @type {Array<TrendDataMultiple>}
+     * @memberof PageTrendDataMultiple
      */
-    'items': Array<TrendData>;
+    'items': Array<TrendDataMultiple>;
     /**
      * 
      * @type {number}
-     * @memberof PageTrendData
+     * @memberof PageTrendDataMultiple
      */
     'total': number | null;
     /**
      * 
      * @type {number}
-     * @memberof PageTrendData
+     * @memberof PageTrendDataMultiple
      */
     'page': number | null;
     /**
      * 
      * @type {number}
-     * @memberof PageTrendData
+     * @memberof PageTrendDataMultiple
      */
     'size': number | null;
     /**
      * 
      * @type {number}
-     * @memberof PageTrendData
+     * @memberof PageTrendDataMultiple
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface PageTrendDataSingle
+ */
+export interface PageTrendDataSingle {
+    /**
+     * 
+     * @type {Array<TrendDataSingle>}
+     * @memberof PageTrendDataSingle
+     */
+    'items': Array<TrendDataSingle>;
+    /**
+     * 
+     * @type {number}
+     * @memberof PageTrendDataSingle
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof PageTrendDataSingle
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof PageTrendDataSingle
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof PageTrendDataSingle
      */
     'pages'?: number | null;
 }
@@ -1231,6 +1268,55 @@ export interface ResponseGetNodeByIdNodeNodeIdGet {
 /**
  * 
  * @export
+ * @interface ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet
+ */
+export interface ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet {
+    /**
+     * 
+     * @type {Array<TrendDataSingle>}
+     * @memberof ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet
+     */
+    'items': Array<TrendDataSingle>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseGetTrendByIdTrendTrendIdGet
  */
 export interface ResponseGetTrendByIdTrendTrendIdGet {
@@ -1339,10 +1425,10 @@ export interface ResponseGetTrendByIdTrendTrendIdGet {
 export interface ResponseGetTrendCurrentDataTrendTrendIdListCurrentDataPeriodSamplesGet {
     /**
      * 
-     * @type {Array<TrendData>}
+     * @type {Array<TrendDataMultiple>}
      * @memberof ResponseGetTrendCurrentDataTrendTrendIdListCurrentDataPeriodSamplesGet
      */
-    'items': Array<TrendData>;
+    'items': Array<TrendDataMultiple>;
     /**
      * 
      * @type {number}
@@ -1388,10 +1474,10 @@ export interface ResponseGetTrendCurrentDataTrendTrendIdListCurrentDataPeriodSam
 export interface ResponseGetTrendDataTrendTrendIdListDataBeginEndSamplesGet {
     /**
      * 
-     * @type {Array<TrendData>}
+     * @type {Array<TrendDataMultiple>}
      * @memberof ResponseGetTrendDataTrendTrendIdListDataBeginEndSamplesGet
      */
-    'items': Array<TrendData>;
+    'items': Array<TrendDataMultiple>;
     /**
      * 
      * @type {number}
@@ -2214,27 +2300,52 @@ export interface Trend {
 /**
  * 
  * @export
- * @interface TrendData
+ * @interface TrendDataMultiple
  */
-export interface TrendData {
+export interface TrendDataMultiple {
     /**
      * 
      * @type {number}
-     * @memberof TrendData
+     * @memberof TrendDataMultiple
      */
     'TimestampMs': number;
     /**
      * 
      * @type {number}
-     * @memberof TrendData
+     * @memberof TrendDataMultiple
      */
     'Timestamp': number;
     /**
      * 
      * @type {Array<TrendValue>}
-     * @memberof TrendData
+     * @memberof TrendDataMultiple
      */
     'Data'?: Array<TrendValue> | null;
+}
+/**
+ * 
+ * @export
+ * @interface TrendDataSingle
+ */
+export interface TrendDataSingle {
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendDataSingle
+     */
+    'TimestampMs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendDataSingle
+     */
+    'Timestamp': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendDataSingle
+     */
+    'Value': number;
 }
 /**
  * 
@@ -4339,6 +4450,66 @@ export const TrendApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Get Single Trend Data
+         * @param {string} trendId 
+         * @param {number} begin 
+         * @param {number} end 
+         * @param {number} samples 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet: async (trendId: string, begin: number, end: number, samples: number, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendId' is not null or undefined
+            assertParamExists('getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet', 'trendId', trendId)
+            // verify required parameter 'begin' is not null or undefined
+            assertParamExists('getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet', 'begin', begin)
+            // verify required parameter 'end' is not null or undefined
+            assertParamExists('getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet', 'end', end)
+            // verify required parameter 'samples' is not null or undefined
+            assertParamExists('getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet', 'samples', samples)
+            const localVarPath = `/trend/{trend_id}/single_data/{begin}/{end}/{samples}`
+                .replace(`{${"trend_id"}}`, encodeURIComponent(String(trendId)))
+                .replace(`{${"begin"}}`, encodeURIComponent(String(begin)))
+                .replace(`{${"end"}}`, encodeURIComponent(String(end)))
+                .replace(`{${"samples"}}`, encodeURIComponent(String(samples)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Get Trend By Id
          * @param {number} trendId 
          * @param {*} [options] Override http request option.
@@ -4765,6 +4936,24 @@ export const TrendApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Get Single Trend Data
+         * @param {string} trendId 
+         * @param {number} begin 
+         * @param {number} end 
+         * @param {number} samples 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet(trendId: string, begin: number, end: number, samples: number, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet(trendId, begin, end, samples, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendApi.getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Get Trend By Id
          * @param {number} trendId 
          * @param {*} [options] Override http request option.
@@ -4917,6 +5106,21 @@ export const TrendApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
+         * @summary Get Single Trend Data
+         * @param {string} trendId 
+         * @param {number} begin 
+         * @param {number} end 
+         * @param {number} samples 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet(trendId: string, begin: number, end: number, samples: number, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet> {
+            return localVarFp.getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet(trendId, begin, end, samples, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Get Trend By Id
          * @param {number} trendId 
          * @param {*} [options] Override http request option.
@@ -5045,6 +5249,23 @@ export class TrendApi extends BaseAPI {
      */
     public deleteTrendByIdTrendTrendIdDelete(trendId: number, options?: RawAxiosRequestConfig) {
         return TrendApiFp(this.configuration).deleteTrendByIdTrendTrendIdDelete(trendId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Single Trend Data
+     * @param {string} trendId 
+     * @param {number} begin 
+     * @param {number} end 
+     * @param {number} samples 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendApi
+     */
+    public getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet(trendId: string, begin: number, end: number, samples: number, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return TrendApiFp(this.configuration).getSingleTrendDataTrendTrendIdSingleDataBeginEndSamplesGet(trendId, begin, end, samples, page, size, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
