@@ -6,7 +6,7 @@ import sys
 from typing import List
 
 import numpy as np
-from sqlalchemy import select, insert, and_
+from sqlalchemy import select, insert, and_, literal
 
 from ..db import global_session, Session
 from database import lds
@@ -60,12 +60,12 @@ class TrendBase(metaclass=TrendBaseMeta):
 
 
     def _read_params(self):
-        stmt = select([lds.TrendParamDef, lds.TrendParam]) \
+        stmt = select(lds.TrendParamDef, lds.TrendParam) \
             .select_from(lds.Trend) \
             .join(lds.TrendDef, lds.Trend.TrendDefID == lds.TrendDef.ID) \
             .join(lds.TrendParamDef, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID) \
             .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.Trend.ID == lds.TrendParam.TrendID)) \
-            .where(lds.Trend.ID == self.id)
+            .where(lds.Trend.ID == literal(self.id))
 
         self.params = {}
         for tpd, tp in global_session.execute(stmt):
@@ -74,14 +74,13 @@ class TrendBase(metaclass=TrendBaseMeta):
 
     def _read_children(self):
 
-        stmt = select([lds.Trend, lds.TrendDef]) \
+        stmt = select(lds.Trend, lds.TrendDef) \
             .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) \
             .join(lds.TrendParam, lds.TrendParam.TrendID == lds.Trend.ID) \
             .join(lds.TrendParamDef, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID)) \
             .where(and_(lds.TrendParamDef.DataType == 'TREND', lds.TrendParam.Value == str(self.id)))
 
         # from .. import trend
-
         for trend, trend_def in global_session.execute(stmt):
             trend_class = getattr(sys.modules["trends_writer.trend"], TREND_CLASSES[trend_def.ID.strip()])
             trend = trend_class(trend.ID, self.id)
