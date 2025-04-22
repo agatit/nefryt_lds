@@ -2,7 +2,6 @@ from typing import List
 import logging
 import numpy as np
 
-from ..db import Session
 from . import TrendBase
 
 
@@ -23,14 +22,14 @@ class TrendDiff(TrendBase):
         }
 
 
-    def update(self, data: List[int], timestamp: int, session: Session, parent_id: int = None):
+    def update(self, data: List[int], timestamp: int, parent_id: int = None):
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating...")
 
         with self.lock:
             calculated_data = self.calculate(data, timestamp, parent_id)
             
         if calculated_data is not None:
-            super().update(calculated_data, timestamp, session, parent_id)
+            super().update(calculated_data, timestamp, parent_id)
         else:
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
 

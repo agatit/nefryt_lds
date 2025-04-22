@@ -181,9 +181,6 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
         samples, inc_samples = calculate_samples_count(samples, begin, end)
         trend_timestamps, trend_timestamps_ms = calculate_full_timestamps_lists(samples, begin, inc_samples)
 
-        print(trend_timestamps)
-        print(trend_timestamps_ms)
-
         statement = (
             select(func.count()).
             select_from(lds.TrendData).
@@ -201,8 +198,6 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
         start_pos, pages = calculate_page_data(samples, params)
         trend_timestamps, trend_timestamps_ms = calculate_page_timestamps_lists(start_pos, trend_timestamps,
                                                                                 trend_timestamps_ms, params.size)
-        print(trend_timestamps)
-        print(trend_timestamps_ms)
         statement = (select(lds.TrendData).
                      where(lds.TrendData.Time.in_(trend_timestamps)).
                      where(lds.TrendData.TrendID == literal(trend_id)).

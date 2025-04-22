@@ -4,3 +4,4 @@
 electron
 packages
 backend/api/.env
+backend/trends_writer/.env

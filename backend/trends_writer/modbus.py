@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 from pymodbus.server import StartAsyncTcpServer
@@ -11,21 +12,31 @@ class PipePlantDataBlock(ModbusSequentialDataBlock):
         self.pipe_plant = pipe_plant
 
     def setValues(self, address, values):
-        logging.info(f"setValues: address={address}, values={values}")
-        self.pipe_plant.update(address, values)
-        super().setValues(address, values)
+        logging.info(f"setValues: address={address}, relative = {address - self.address}, values={values}")
+        try:
+            self.pipe_plant.update(address - self.address, values)
+            super().setValues(address, values)
+        except Exception as e:
+            logging.warning("setValues exception: " + str(e))
 
     def getValues(self, address, count=1):
-        logging.info("getValues: address={address}, count={count}")
-        return super().getValues(address, count)
+        logging.info(f"getValues: address={address}, relative = {address - self.address}, count={count}")
+        return super().getValues(address - self.address, count)
 
 
-async def run_server(pipe_plant):
-    datablock = PipePlantDataBlock(0, [0]*1000, pipe_plant)
-    slave_context = ModbusSlaveContext(hr=datablock)
-    server_context = ModbusServerContext(slaves=slave_context, single=True)
-
-    await StartAsyncTcpServer(
-        context=server_context,
-        address=('', config.get("modbus_port", 502)),
+async def run_server(pipe_plant: PipePlant, port: int | None = None):
+    datablock = PipePlantDataBlock(1, [0] * 1000, pipe_plant)
+    slave_context = ModbusSlaveContext(
+        hr=datablock,
+        di=ModbusSequentialDataBlock.create(),
+        co=ModbusSequentialDataBlock.create(),
+        ir=ModbusSequentialDataBlock.create()
     )
+    server_context = ModbusServerContext(slaves=slave_context, single=True)
+    try:
+        await StartAsyncTcpServer(
+            context=server_context,
+            address=('', port if port else config.get("modbus_port", 502)),
+        )
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        logging.info("Modbus server stopped")
