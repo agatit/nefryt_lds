@@ -1,14 +1,7 @@
-from ..schemas import Event, EventDef, TrendDef, TrendParam, TrendDataMultiple, TrendValue, Link, Node, EditorNode, \
+from .utils import to_dict, strip_strings_in_dict
+from ..schemas import Event, TrendDef, TrendParam, TrendDataMultiple, TrendValue, Link, Node, EditorNode, \
     TrendDataSingle, Trend
 from database import lds, editor
-
-
-def to_dict(o) -> dict:
-    return {c.name: getattr(o, c.name) for c in o.__table__.columns}
-
-
-def strip_strings_in_dict(d: dict) -> dict:
-    return {k: v.strip() if isinstance(v, str) else v for k, v in d.items()}
 
 
 def map_lds_event_and_lds_event_def_to_event(lds_event: lds.Event, lds_event_def: lds.EventDef) -> Event:
@@ -26,14 +19,6 @@ def map_lds_trend_to_trend(lds_trend: lds.Trend) -> Trend:
 
 def map_trend_to_lds_trend(trend: Trend) -> lds.Trend:
     return lds.Trend(**trend.model_dump(by_alias=True))
-
-
-def map_event_def_to_lds_event_def(event_def: EventDef) -> lds.EventDef:
-    return lds.EventDef(**event_def.model_dump(by_alias=True))
-
-
-def map_lds_event_def_to_event_def(lds_event_def: lds.EventDef) -> EventDef:
-    return EventDef(**strip_strings_in_dict(to_dict(lds_event_def)))
 
 
 def map_lds_trend_def_to_trend_def(lds_trend_def: lds.TrendDef) -> TrendDef:

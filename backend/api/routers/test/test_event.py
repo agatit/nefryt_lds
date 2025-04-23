@@ -5,6 +5,7 @@ import jwt
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from api.db import get_engine, get_test_engine
@@ -25,8 +26,8 @@ method = lds.Method(ID=1, MethodDefID='METHODDEF', PipelineID=10)
 event_visible = lds.Event(ID=1, EventDefID='VISIBLE', MethodID=1, BeginDate=datetime.now())
 event_invisible = lds.Event(ID=2, EventDefID='INVISIBLE', MethodID=1, BeginDate=datetime.now())
 event_disabled = lds.Event(ID=3, EventDefID='DISABLED', MethodID=1, BeginDate=datetime.now())
-lds_objects = [event_def_visible, event_def_invisible, event_def_disabled, method_def, pipeline, method,
-               event_visible, event_invisible, event_disabled]
+lds_objects = [[event_def_visible, event_def_invisible, event_def_disabled], [method_def], [pipeline], [method],
+               [event_visible, event_invisible, event_disabled]]
 events = [event_visible, event_invisible, event_disabled]
 
 
@@ -47,11 +48,11 @@ def reset_event_objects():
     event_visible = lds.Event(ID=1, EventDefID='VISIBLE', MethodID=1, BeginDate=datetime.now())
     event_invisible = lds.Event(ID=2, EventDefID='INVISIBLE', MethodID=1, BeginDate=datetime.now())
     event_disabled = lds.Event(ID=3, EventDefID='DISABLED', MethodID=1, BeginDate=datetime.now())
-    lds_objects = [event_def_visible, event_def_invisible, event_def_disabled, method_def, pipeline, method,
-                   event_visible, event_invisible, event_disabled]
+    lds_objects = [[event_def_visible, event_def_invisible, event_def_disabled], [method_def], [pipeline], [method],
+                   [event_visible, event_invisible, event_disabled]]
     events = [event_visible, event_invisible, event_disabled]
 
-    return [lds_objects]
+    return lds_objects
 
 
 app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
@@ -74,7 +75,7 @@ def test_list_events_should_return_ok_response_code_and_correct_visible_and_enab
     assert items[0]['ID'] == event_visible.ID
     assert items[0]['EventDefID'] == event_visible.EventDefID.strip()
     assert items[0]['Verbosity'] == event_def_visible.Verbosity.strip()
-    assert items[0]['Caption'] == event_def_visible.Caption
+    assert items[0]['Caption'] == event_def_visible.Caption.strip()
     assert items[0]['MethodID'] == event_visible.MethodID
     assert items[0]['BeginDate']
     assert not items[0]['AckDate']
@@ -115,7 +116,7 @@ def test_get_event_by_id_should_return_ok_response_code_and_correct_event(add_ld
     assert returned_event['ID'] == event_invisible.ID
     assert returned_event['EventDefID'] == event_invisible.EventDefID.strip()
     assert returned_event['Verbosity'] == event_def_invisible.Verbosity.strip()
-    assert returned_event['Caption'] == event_def_invisible.Caption
+    assert returned_event['Caption'] == event_def_invisible.Caption.strip()
     assert returned_event['MethodID'] == event_invisible.MethodID
     assert returned_event['BeginDate']
     assert not returned_event['AckDate']

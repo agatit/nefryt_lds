@@ -23,9 +23,9 @@ async def list_events(engine: Annotated[Engine, Depends(get_engine)], params: An
     try:
         statement = (select(lds.Event, lds.EventDef)
                      .join(lds.EventDef)
-                     .filter(lds.EventDef.Enabled)
-                     .filter(lds.EventDef.Visible)
-                     .order_by(lds.Event.ID))
+                     .filter(lds.EventDef.Enabled)  # noqa
+                     .filter(lds.EventDef.Visible)  # noqa
+                     .order_by(lds.Event.ID))  # noqa
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [map_lds_event_and_lds_event_def_to_event(lds_event, lds_event_def)
@@ -41,7 +41,7 @@ async def get_event_by_id(event_id: int, engine: Annotated[Engine, Depends(get_e
     try:
         statement = (select(lds.Event, lds.EventDef)
                      .join(lds.EventDef)
-                     .where(lds.Event.ID == literal(event_id)))
+                     .where(lds.Event.ID == literal(event_id))) # noqa
         with Session(engine) as session:
             results = session.execute(statement).all()
         if not results:

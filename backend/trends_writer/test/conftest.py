@@ -98,7 +98,6 @@ async def add_lds_objects(reset_lds_objects):
     lds_objects = reset_lds_objects
     with Session(get_engine()) as session:
         for lds_objects_list in lds_objects:
-            print(lds_objects_list)
             session.add_all(lds_objects_list)
             session.commit()
         for lds_object in (obj for sublist in lds_objects for obj in sublist):

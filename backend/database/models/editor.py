@@ -1,8 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import declarative_base
+from sqlmodel import SQLModel
 from . import lds
 
-Base = declarative_base()
+Base = declarative_base(metadata=SQLModel.metadata)
 
 
 class Node(Base):

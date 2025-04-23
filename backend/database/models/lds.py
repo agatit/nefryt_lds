@@ -1,22 +1,22 @@
-from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, DateTime, Float, ForeignKeyConstraint, Identity, Index, Integer, Numeric, PrimaryKeyConstraint, SmallInteger, String, text
+from datetime import datetime
+
+from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, Float, ForeignKeyConstraint, Identity, \
+    Integer, Numeric, PrimaryKeyConstraint, SmallInteger, String, text, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
+from sqlmodel import SQLModel, Field
 
-Base = declarative_base()
+from api.schemas import EventDefBase
+
+Base = declarative_base(metadata=SQLModel.metadata)
 
 
-class EventDef(Base):
+class EventDef(EventDefBase, table=True):
     __tablename__ = 'EventDef'
     __table_args__ = (
-        PrimaryKeyConstraint('ID', name='PK_EventDef'),
         {'schema': 'lds'}
     )
 
-    ID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
-    Verbosity = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    Caption = Column(String(60, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    Silent = Column(Boolean, nullable=False, server_default=text('((0))'))
-    Visible = Column(Boolean, nullable=False, server_default=text('((1))'))
-    Enabled = Column(Boolean, nullable=False, server_default=text('((1))'))
+    ID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), primary_key=True))
 
 
 class MethodDef(Base):
@@ -149,8 +149,10 @@ class Link(Base):
 class Method(Base):
     __tablename__ = 'Method'
     __table_args__ = (
-        ForeignKeyConstraint(['MethodDefID'], ['lds.MethodDef.ID'], ondelete='CASCADE', onupdate='CASCADE', name='Method_MethodDef_fk'),
-        ForeignKeyConstraint(['PipelineID'], ['lds.Pipeline.ID'], ondelete='CASCADE', onupdate='CASCADE', name='MethodPipeline_fk'),
+        ForeignKeyConstraint(['MethodDefID'], ['lds.MethodDef.ID'], ondelete='CASCADE', onupdate='CASCADE',
+                             name='Method_MethodDef_fk'),
+        ForeignKeyConstraint(['PipelineID'], ['lds.Pipeline.ID'], ondelete='CASCADE', onupdate='CASCADE',
+                             name='MethodPipeline_fk'),
         PrimaryKeyConstraint('ID', name='Method_pk'),
         {'schema': 'lds'}
     )
@@ -167,8 +169,10 @@ class Method(Base):
 class PipelineNode(Base):
     __tablename__ = 'PipelineNode'
     __table_args__ = (
-        ForeignKeyConstraint(['NodeID'], ['lds.Node.ID'], ondelete='CASCADE', onupdate='CASCADE', name='PipelineNodeNode_fk'),
-        ForeignKeyConstraint(['PipelineID'], ['lds.Pipeline.ID'], ondelete='CASCADE', onupdate='CASCADE', name='PipelineNodePipeline_fk'),
+        ForeignKeyConstraint(['NodeID'], ['lds.Node.ID'], ondelete='CASCADE', onupdate='CASCADE',
+                             name='PipelineNodeNode_fk'),
+        ForeignKeyConstraint(['PipelineID'], ['lds.Pipeline.ID'], ondelete='CASCADE', onupdate='CASCADE',
+                             name='PipelineNodePipeline_fk'),
         PrimaryKeyConstraint('PipelineID', 'NodeID', name='PipelineNode_pk'),
         {'schema': 'lds'}
     )
@@ -185,7 +189,8 @@ class PipelineParam(Base):
     __tablename__ = 'PipelineParam'
     __table_args__ = (
         ForeignKeyConstraint(['PipelineID'], ['lds.Pipeline.ID'], name='PipelineParamPipeline_fk'),
-        ForeignKeyConstraint(['PipelineParamDefID'], ['lds.PipelineParamDef.ID'], ondelete='CASCADE', onupdate='CASCADE', name='PipelineParamPipelineParamDef_fk'),
+        ForeignKeyConstraint(['PipelineParamDefID'], ['lds.PipelineParamDef.ID'], ondelete='CASCADE',
+                             onupdate='CASCADE', name='PipelineParamPipelineParamDef_fk'),
         PrimaryKeyConstraint('PipelineParamDefID', 'PipelineID', name='PipelineParam_pk'),
         {'schema': 'lds'}
     )
@@ -244,28 +249,30 @@ class TrendParamDef(Base):
     TrendDef_ = relationship('TrendDef')
 
 
-class Event(Base):
+class Event(SQLModel, table=True):
     __tablename__ = 'Event'
     __table_args__ = (
-        ForeignKeyConstraint(['EventDefID'], ['lds.EventDef.ID'], ondelete='CASCADE', onupdate='CASCADE',
-                             name='Event_EventDef_fk'),
-        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], ondelete='CASCADE', onupdate='CASCADE',
-                             name='Event_Method_fk'),
-        PrimaryKeyConstraint('ID', name='PK_Event'),
         {'schema': 'lds'}
     )
 
-    ID = Column(BigInteger, Identity(start=1, increment=1))
-    EventDefID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    MethodID = Column(Integer, nullable=False)
-    BeginDate = Column(DateTime, nullable=False)
-    AckDate = Column(DateTime)
-    EndDate = Column(DateTime)
-    Details = Column(String(100, 'SQL_Polish_CP1250_CS_AS'))
-    Position = Column(Integer)
-
-    EventDef_ = relationship('EventDef')
-    Method_ = relationship('Method')
+    ID: int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
+    EventDefID: str = (
+        Field(sa_column=Column(
+            CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
+            ForeignKey("lds.EventDef.ID", ondelete="CASCADE", onupdate="CASCADE"),
+            nullable=False)
+        ))
+    MethodID: int = Field(
+        sa_column=Column(
+            Integer,
+            ForeignKey("lds.Method.ID", ondelete="CASCADE", onupdate="CASCADE"),
+            nullable=False
+        ))
+    BeginDate: datetime = Field(nullable=False)
+    AckDate: datetime | None = Field(None)
+    EndDate: datetime | None = Field(None)
+    Details: str | None = Field(None, sa_column=Column(String(100, 'SQL_Polish_CP1250_CS_AS')))
+    Position: int | None = Field(None)
 
 
 class MethodParam(Base):
@@ -286,7 +293,8 @@ class MethodParam(Base):
 class TrendParam(Base):
     __tablename__ = 'TrendParam'
     __table_args__ = (
-        ForeignKeyConstraint(['TrendID'], ['lds.Trend.ID'], ondelete='CASCADE', onupdate='CASCADE', name='TrendParam_Trend_fk'),
+        ForeignKeyConstraint(['TrendID'], ['lds.Trend.ID'], ondelete='CASCADE', onupdate='CASCADE',
+                             name='TrendParam_Trend_fk'),
         PrimaryKeyConstraint('TrendParamDefID', 'TrendID', name='TrendParam_pk'),
         {'schema': 'lds'}
     )

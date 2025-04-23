@@ -4,6 +4,7 @@ import pytest
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text, Connection
 from sqlalchemy.orm import Session
+from sqlmodel import SQLModel
 from testcontainers.mssql import SqlServerContainer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.config import config
@@ -57,6 +58,7 @@ def setup_test_database(request):
         engine.dispose()
 
         test_engine = create_engine(url=TEST_DATABASE_URI, echo=False)
+        SQLModel.metadata.create_all(test_engine)
         ldsBase.metadata.create_all(bind=test_engine)
         editorBase.metadata.create_all(bind=test_engine)
         set_test_engine(test_engine)
@@ -77,6 +79,7 @@ def setup_test_database(request):
                 conn.execute(text("CREATE SCHEMA lds"))
                 conn.execute(text("CREATE SCHEMA editor"))
 
+            SQLModel.metadata.create_all(test_engine)
             ldsBase.metadata.create_all(bind=test_engine)
             editorBase.metadata.create_all(bind=test_engine)
 
