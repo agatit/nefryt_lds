@@ -6,28 +6,28 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, aliased
 from starlette import status
 from starlette.responses import JSONResponse, Response
-from .mapper import map_lds_node_and_editor_node_to_node, map_node_to_lds_node, map_node_to_editor_node
+from .mapper import map_lds_node_and_editor_node_to_node_out, map_node_to_lds_node, map_node_to_editor_node
 from .security import get_user_token
 from ..custom_page import CustomParams, CustomPage, use_custom_page
 from ..db import get_engine
-from ..schemas import Error, Node, UpdateNode
+from ..schemas import Error, NodeOut, UpdateNode, Node
 from database import lds, editor
 
 router = APIRouter(prefix="/node", tags=["node"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=CustomPage[Node] | Error)
+@router.get('', response_model=CustomPage[NodeOut] | Error)
 async def list_nodes(engine: Annotated[Engine, Depends(get_engine)],  params: Annotated[CustomParams, Depends()],
                      _: Annotated[None, Depends(use_custom_page)], filter: Annotated[str | None, Query()] = None):
     try:
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
         statement = (select(lds_node, editor_node)
-                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)
+                     .outerjoin(editor_node, lds_node.ID == editor_node.ID) # noqa
                      .order_by(lds_node.ID))
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
-        page.items = [map_lds_node_and_editor_node_to_node(lds_node, editor_node)
+        page.items = [map_lds_node_and_editor_node_to_node_out(lds_node, editor_node)
                       for lds_node, editor_node in page.items]
         return page
     except Exception as e:
@@ -35,7 +35,7 @@ async def list_nodes(engine: Annotated[Engine, Depends(get_engine)],  params: An
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.post('', response_model=Node | Error)
+@router.post('', response_model=NodeOut | Error)
 async def create_node(node: Annotated[Node, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_node = map_node_to_lds_node(node)
@@ -48,7 +48,7 @@ async def create_node(node: Annotated[Node, Body()], engine: Annotated[Engine, D
                 session.add(editor_node)
                 session.commit()
                 session.refresh(editor_node)
-            node = map_lds_node_and_editor_node_to_node(lds_node, editor_node)
+            node = map_lds_node_and_editor_node_to_node_out(lds_node, editor_node)
             return JSONResponse(content=node.model_dump(by_alias=True), status_code=status.HTTP_201_CREATED)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating node')
@@ -86,13 +86,13 @@ async def delete_node_by_id(node_id: Annotated[int, Path()], engine: Annotated[E
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{node_id}', response_model=Node | Error)
+@router.get('/{node_id}', response_model=NodeOut | Error)
 async def get_node_by_id(node_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
         statement = (select(lds_node, editor_node)
-                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)
+                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)  # noqa
                      .where(lds_node.ID == literal(node_id)))
         with Session(engine) as session:
             node = session.execute(statement).all()
@@ -100,13 +100,13 @@ async def get_node_by_id(node_id: Annotated[int, Path()], engine: Annotated[Engi
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No node with id = ' + str(node_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         lds_node, editor_node = node[0]
-        return map_lds_node_and_editor_node_to_node(lds_node, editor_node)
+        return map_lds_node_and_editor_node_to_node_out(lds_node, editor_node)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_node_by_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.put('/{node_id}', response_model=Node | Error)
+@router.put('/{node_id}', response_model=NodeOut | Error)
 async def update_node(node_id: Annotated[int, Path()], updated_node: Annotated[UpdateNode, Body()],
                       engine: Annotated[Engine, Depends(get_engine)]):
     try:
@@ -114,7 +114,7 @@ async def update_node(node_id: Annotated[int, Path()], updated_node: Annotated[U
             lds_node = aliased(lds.Node)
             editor_node = aliased(editor.Node)
             statement = (select(lds_node, editor_node)
-                         .outerjoin(editor_node, lds_node.ID == editor_node.ID)
+                         .outerjoin(editor_node, lds_node.ID == editor_node.ID) # noqa
                          .where(lds_node.ID == literal(node_id)))
             node = session.execute(statement).all()
             if not node:
@@ -126,14 +126,12 @@ async def update_node(node_id: Annotated[int, Path()], updated_node: Annotated[U
                 editor_params = updated_node_dict.pop('EditorParams')
                 for k, v in editor_params.items():
                     setattr(editor_node, k, v)
-            if 'TrendID' in updated_node_dict.keys():
-                updated_node_dict.pop('TrendID')
             for k, v in updated_node_dict.items():
                 setattr(lds_node, k, v)
             session.commit()
             session.refresh(lds_node)
             session.refresh(editor_node)
-            return map_lds_node_and_editor_node_to_node(lds_node, editor_node)
+            return map_lds_node_and_editor_node_to_node_out(lds_node, editor_node)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_node(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

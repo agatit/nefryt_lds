@@ -16,7 +16,7 @@ node2 = lds.Node(ID=2, Type='type', Name='name')
 link1 = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
 link2 = lds.Link(ID=2, BeginNodeID=2, EndNodeID=1)
 links_list = [link1, link2]
-lds_objects = [node1, node2, link1, link2]
+lds_objects = [[node1, node2], [link1, link2]]
 
 
 def reset_link_objects():
@@ -27,9 +27,9 @@ def reset_link_objects():
     link1 = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
     link2 = lds.Link(ID=2, BeginNodeID=2, EndNodeID=1)
     links_list = [link1, link2]
-    lds_objects = [node1, node2, link1, link2]
+    lds_objects = [[node1, node2], [link1, link2]]
 
-    return [lds_objects]
+    return lds_objects
 
 
 def reset_node_objects():

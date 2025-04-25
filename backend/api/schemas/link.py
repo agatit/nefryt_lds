@@ -1,14 +1,11 @@
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field
 
 
-class Link(BaseModel):
-    id: int | None = Field(None, alias='ID')
-    begin_node_id: int | None = Field(None, alias='BeginNodeID')
-    end_node_id: int | None = Field(None, alias='EndNodeID')
-    length: float | None = Field(None, alias='Length')
+class LinkBase(SQLModel):
+    BeginNodeID: int | None = Field(None, foreign_key='lds.Node.ID')
+    EndNodeID: int | None = Field(None, foreign_key='lds.Node.ID')
+    Length: float | None = Field(None)
 
 
-class UpdateLink(BaseModel):
-    begin_node_id: int | None = Field(None, alias='BeginNodeID')
-    end_node_id: int | None = Field(None, alias='EndNodeID')
-    length: float | None = Field(None, alias='Length')
+class UpdateLink(LinkBase):
+    pass

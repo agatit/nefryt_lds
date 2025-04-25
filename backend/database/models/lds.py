@@ -1,11 +1,9 @@
 from datetime import datetime
-
 from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, Float, ForeignKeyConstraint, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, SmallInteger, String, text, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from sqlmodel import SQLModel, Field
-
-from api.schemas import EventDefBase
+from api.schemas import EventDefBase, LdsNodeBase, LinkBase
 
 Base = declarative_base(metadata=SQLModel.metadata)
 
@@ -19,40 +17,36 @@ class EventDef(EventDefBase, table=True):
     ID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), primary_key=True))
 
 
-class MethodDef(Base):
+# TODO: test relations between method tables & how they react to cascade deleting
+class MethodDef(SQLModel, table=True):
     __tablename__ = 'MethodDef'
     __table_args__ = (
-        PrimaryKeyConstraint('ID', name='MethodDef_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
-    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
+    ID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), primary_key=True))
+    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-class MethodParamDef(Base):
+class MethodParamDef(SQLModel, table=True):
     __tablename__ = 'MethodParamDef'
     __table_args__ = (
-        PrimaryKeyConstraint('ID', 'MethodDefID', name='MethodParamDef_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False, index=True)
-    MethodDefID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-    DataType = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'))
+    ID: str = Field(sa_column=Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False, primary_key=True))
+    MethodDefID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
+    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    DataType: str | None = Field(None, sa_column=Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-class Node(Base):
+class Node(LdsNodeBase, table=True):
     __tablename__ = 'Node'
     __table_args__ = (
-        PrimaryKeyConstraint('ID', name='Node_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(Integer, Identity(start=1000, increment=1))
-    Type = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    Name = Column(String(50, 'SQL_Polish_CP1250_CS_AS'))
+    ID: int = Field(sa_column=Column(Integer, Identity(start=1000, increment=1), primary_key=True))
 
 
 class Pipeline(Base):
@@ -128,42 +122,35 @@ class Unit(Base):
     Multiplier = Column(Numeric(20, 10))
 
 
-class Link(Base):
+class Link(LinkBase, table=True):
     __tablename__ = 'Link'
     __table_args__ = (
-        ForeignKeyConstraint(['BeginNodeID'], ['lds.Node.ID'], name='LinkBegineNode_fk'),
-        ForeignKeyConstraint(['EndNodeID'], ['lds.Node.ID'], name='LinkEndNode_fk'),
-        PrimaryKeyConstraint('ID', name='Link_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(Integer, Identity(start=1, increment=1))
-    BeginNodeID = Column(Integer)
-    EndNodeID = Column(Integer)
-    Length = Column(Numeric(10, 2))
-
-    Node_ = relationship('Node', foreign_keys=[BeginNodeID])
-    Node1 = relationship('Node', foreign_keys=[EndNodeID])
+    ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))
 
 
-class Method(Base):
+class Method(SQLModel, table=True):
     __tablename__ = 'Method'
     __table_args__ = (
-        ForeignKeyConstraint(['MethodDefID'], ['lds.MethodDef.ID'], ondelete='CASCADE', onupdate='CASCADE',
-                             name='Method_MethodDef_fk'),
-        ForeignKeyConstraint(['PipelineID'], ['lds.Pipeline.ID'], ondelete='CASCADE', onupdate='CASCADE',
-                             name='MethodPipeline_fk'),
-        PrimaryKeyConstraint('ID', name='Method_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(Integer, Identity(start=1000, increment=1))
-    MethodDefID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    PipelineID = Column(Integer, nullable=False)
-    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-
-    MethodDef_ = relationship('MethodDef')
-    Pipeline_ = relationship('Pipeline')
+    ID: int = Field(sa_column=Column(Integer, Identity(start=1000, increment=1), primary_key=True))
+    MethodDefID: str = Field(
+        sa_column=Column(
+            CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
+            ForeignKey("lds.MethodDef.ID", ondelete="CASCADE", onupdate="CASCADE"),
+            nullable=False
+        ))
+    PipelineID: int = Field(
+        sa_column=Column(
+            Integer,
+            ForeignKey("lds.Pipeline.ID", ondelete="CASCADE", onupdate="CASCADE"),
+            nullable=False
+        ))
+    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
 class PipelineNode(Base):
@@ -181,7 +168,7 @@ class PipelineNode(Base):
     NodeID = Column(Integer, nullable=False)
     First = Column(Boolean, nullable=False, server_default=text('((0))'))
 
-    Node_ = relationship('Node')
+    Node_ = relationship(Node)
     Pipeline_ = relationship('Pipeline')
 
 
@@ -228,7 +215,7 @@ class Trend(Base):
     Symbol = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
     NodeID = Column(Integer)
 
-    Node_ = relationship('Node')
+    Node_ = relationship(Node)
     Unit_ = relationship('Unit')
     TrendDef_ = relationship('TrendDef')
 
@@ -275,19 +262,21 @@ class Event(SQLModel, table=True):
     Position: int | None = Field(None)
 
 
-class MethodParam(Base):
+class MethodParam(SQLModel, table=True):
     __tablename__ = 'MethodParam'
     __table_args__ = (
-        ForeignKeyConstraint(['MethodID'], ['lds.Method.ID'], name='MethodParamMethod_fk'),
-        PrimaryKeyConstraint('MethodParamDefID', 'MethodID', name='MethodParam_pk'),
         {'schema': 'lds'}
     )
 
-    MethodParamDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    MethodID = Column(Integer, nullable=False)
-    Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-
-    Method_ = relationship('Method')
+    MethodParamDefID: str = Field(sa_column=Column(
+        CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False, primary_key=True))
+    MethodID: int = Field(
+        sa_column=Column(
+            Integer,
+            ForeignKey("lds.Method.ID", ondelete="CASCADE", onupdate="CASCADE"),
+            nullable=False
+        ))
+    Value: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
 class TrendParam(Base):

@@ -6,40 +6,37 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
-from .mapper import map_lds_link_to_link, map_link_to_lds_link
 from .security import get_user_token
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from ..db import get_engine
-from ..schemas import Error, Link, UpdateLink
+from ..schemas import Error, UpdateLink
 from database import lds
 
 router = APIRouter(prefix="/link", tags=["link"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=CustomPage[Link] | Error)
+@router.get('', response_model=CustomPage[lds.Link] | Error)
 async def list_links(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
                      _: Annotated[None, Depends(use_custom_page)], filter: Annotated[str | None, Query()] = None):
     try:
-        statement = select(lds.Link).order_by(lds.Link.ID)
+        statement = select(lds.Link).order_by(lds.Link.ID) # noqa
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
-        page.items = [map_lds_link_to_link(lds_link) for lds_link in page.items]
         return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_links(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.post('', response_model=Link | Error)
-async def create_link(link: Annotated[Link, Body()], engine: Annotated[Engine, Depends(get_engine)]):
+@router.post('', response_model=lds.Link | Error)
+async def create_link(link: Annotated[lds.Link, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
-        lds_link = map_link_to_lds_link(link)
         with Session(engine) as session:
-            session.add(lds_link)
+            session.add(link)
             session.commit()
-            session.refresh(lds_link)
-        link = map_lds_link_to_link(lds_link)
-        return JSONResponse(content=link.model_dump(by_alias=True), status_code=status.HTTP_201_CREATED)
+            session.refresh(link)
+        content = link.model_dump(by_alias=True)
+        return JSONResponse(content=content, status_code=status.HTTP_201_CREATED)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating link')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
@@ -65,21 +62,21 @@ async def delete_link_by_id(link_id: Annotated[int, Path()], engine: Annotated[E
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{link_id}', response_model=Link | Error)
+@router.get('/{link_id}', response_model=lds.Link | Error)
 async def get_link_by_id(link_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
-            link: lds.Link = session.get(lds.Link, link_id)  # type: ignore
+            link = session.get(lds.Link, link_id)
         if not link:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No link with id = ' + str(link_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
-        return map_lds_link_to_link(link)
+        return link
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_link_by_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.put('/{link_id}', response_model=Link | Error)
+@router.put('/{link_id}', response_model=lds.Link | Error)
 async def update_link(link_id: Annotated[int, Path()], updated_link: Annotated[UpdateLink, Body()],
                       engine: Annotated[Engine, Depends(get_engine)]):
     try:

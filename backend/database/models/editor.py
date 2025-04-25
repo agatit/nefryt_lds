@@ -1,18 +1,20 @@
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import declarative_base
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, Field
+from api.schemas import EditorNodeBase
 from . import lds
 
 Base = declarative_base(metadata=SQLModel.metadata)
 
 
-class Node(Base):
+class Node(EditorNodeBase, table=True):
     __tablename__ = 'Node'
-    __table_args__ = {'schema': 'editor'}
+    __table_args__ = (
+        {'schema': 'editor'}
+    )
 
-    ID = Column(ForeignKey(lds.Node.ID, ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
-    PosX = Column(Integer)
-    PosY = Column(Integer)
+    ID: int = Field(sa_column=Column(ForeignKey('lds.Node.ID', ondelete='CASCADE', onupdate='CASCADE'),
+                                     primary_key=True))
 
 
 class Pipeline(Base):

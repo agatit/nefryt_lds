@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
-class Event(BaseModel):
+class EventOut(BaseModel):
     id: int | None = Field(None, alias='ID')
     method_id: int = Field(alias='MethodID')
     details: str | None = Field(None, alias='Details')

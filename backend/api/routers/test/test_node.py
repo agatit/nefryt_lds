@@ -107,11 +107,11 @@ def test_list_nodes_should_return_ok_response_code_and_default_page_data(add_lds
 
 
 def test_create_node_should_return_created_response_code_and_created_node_data():
-    node_dict = {'ID': 1, 'Type': 'type', 'Name': 'name', 'EditorParams': {'PosX': 22, 'PosY': 122}}
+    node_dict = {'Type': 'type', 'Name': 'name', 'EditorParams': {'PosX': 22, 'PosY': 122}}
     response = test_client.post("/node", json=node_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_node = response.json()
-    assert returned_node['ID'] == node_dict['ID']
+    assert returned_node['ID'] == 1000
     assert returned_node['Type'] == node_dict['Type']
     assert returned_node['Name'] == node_dict['Name']
     assert returned_node['EditorParams']['PosX'] == node_dict['EditorParams']['PosX']
@@ -121,16 +121,6 @@ def test_create_node_should_return_created_response_code_and_created_node_data()
         editor_nodes_count = session.execute(select(func.count()).select_from(editor.Node)).fetchall()[0][0]
     assert lds_nodes_count == 1
     assert editor_nodes_count == 1
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_create_node_should_return_conflict_response_code_and_error_when_id_not_unique(add_lds_objects):
-    node_dict = {'ID': 1, 'Type': 'type', 'Name': 'name', 'PosX': 22, 'PosY': 122}
-    response = test_client.post("/node", json=node_dict)
-    assert response.status_code == status.HTTP_409_CONFLICT
-    error = response.json()
-    assert error['code'] == status.HTTP_409_CONFLICT
-    assert error['message'] == 'Integrity error when creating node'
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)

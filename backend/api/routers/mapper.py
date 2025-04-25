@@ -1,16 +1,16 @@
 from .utils import to_dict, strip_strings_in_dict
-from ..schemas import Event, TrendDef, TrendParam, TrendDataMultiple, TrendValue, Link, Node, EditorNode, \
-    TrendDataSingle, Trend
+from ..schemas import EventOut, TrendDef, TrendParam, TrendDataMultiple, TrendValue, TrendDataSingle, Trend, Node, \
+    NodeOut, EditorNodeBase
 from database import lds, editor
 
 
-def map_lds_event_and_lds_event_def_to_event(lds_event: lds.Event, lds_event_def: lds.EventDef) -> Event:
+def map_lds_event_and_lds_event_def_to_event_out(lds_event: lds.Event, lds_event_def: lds.EventDef) -> EventOut:
     lds_event_dict = to_dict(lds_event)
     lds_event_def_dict = to_dict(lds_event_def)
     lds_event_def_dict.pop('ID')
     lds_event_dict.update(lds_event_def_dict)
     lds_event_dict = strip_strings_in_dict(lds_event_dict)
-    return Event(**lds_event_dict)
+    return EventOut(**lds_event_dict)
 
 
 def map_lds_trend_to_trend(lds_trend: lds.Trend) -> Trend:
@@ -63,36 +63,25 @@ def map_tuple_to_trend_data_single(values: tuple) -> TrendDataSingle:
     )
 
 
-def map_lds_link_to_link(lds_link: lds.Link) -> Link:
-    return Link(**to_dict(lds_link))
-
-
-def map_link_to_lds_link(link: Link) -> lds.Link:
-    return lds.Link(**link.model_dump(by_alias=True))
-
-
 def map_node_to_lds_node(node: Node) -> lds.Node:
-    node_dict = node.model_dump(by_alias=True)
-    node_dict.pop('TrendID')
-    node_dict.pop('EditorParams')
-    return lds.Node(**node_dict)
+    return lds.Node(**node.model_dump(exclude={'TrendID', 'EditorParams'}))
 
 
 def map_node_to_editor_node(node_id: int, node: Node) -> editor.Node | None:
-    if node.editor_params:
+    if node.EditorParams:
         editor_node_dict = {'ID': node_id,
-                            'PosX': node.editor_params.pos_x,
-                            'PosY': node.editor_params.pos_y}
+                            'PosX': node.EditorParams.PosX,
+                            'PosY': node.EditorParams.PosY}
         return editor.Node(**editor_node_dict)
     return None
 
 
-def map_lds_node_and_editor_node_to_node(lds_node: lds.Node, editor_node: editor.Node) -> Node:
-    lds_node_dict = to_dict(lds_node)
+def map_lds_node_and_editor_node_to_node_out(lds_node: lds.Node, editor_node: editor.Node) -> NodeOut:
+    node_out_dict = to_dict(lds_node)
     editor_params = None
     if editor_node:
         editor_node_dict = to_dict(editor_node)
         editor_node_dict.pop('ID')
-        editor_params = EditorNode(**editor_node_dict)
-    lds_node_dict.update({'EditorParams': editor_params})
-    return Node(**strip_strings_in_dict(lds_node_dict))
+        editor_params = EditorNodeBase(**editor_node_dict)
+    node_out_dict.update({'EditorParams': editor_params})
+    return NodeOut(**strip_strings_in_dict(node_out_dict))
