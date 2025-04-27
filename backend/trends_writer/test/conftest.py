@@ -5,14 +5,11 @@ import pytest_asyncio
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text, Connection
 from sqlalchemy.orm import Session
+from sqlmodel import SQLModel
 from testcontainers.mssql import SqlServerContainer
-
 from trends_writer.trend.base import TrendBaseMeta
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))  # noqa: E402
 from trends_writer.db import clear_test_db, set_new_engine, get_engine
-from database.models.lds import Base as ldsBase
-from database.models.editor import Base as editorBase
 from trends_writer.config import config
 
 
@@ -60,8 +57,7 @@ def setup_test_database(request):
         engine.dispose()
 
         test_engine = create_engine(url=TEST_DATABASE_URI, echo=False)
-        ldsBase.metadata.create_all(bind=test_engine)
-        editorBase.metadata.create_all(bind=test_engine)
+        SQLModel.metadata.create_all(test_engine)
         set_new_engine(test_engine)
 
         yield
@@ -80,9 +76,7 @@ def setup_test_database(request):
                 conn.execute(text("CREATE SCHEMA lds"))
                 conn.execute(text("CREATE SCHEMA editor"))
 
-            ldsBase.metadata.create_all(bind=test_engine)
-            editorBase.metadata.create_all(bind=test_engine)
-
+            SQLModel.metadata.create_all(test_engine)
             set_new_engine(test_engine)
 
             yield

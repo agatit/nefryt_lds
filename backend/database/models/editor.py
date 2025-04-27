@@ -1,10 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import declarative_base
 from sqlmodel import SQLModel, Field
 from api.schemas import EditorNodeBase
-from . import lds
-
-Base = declarative_base(metadata=SQLModel.metadata)
 
 
 class Node(EditorNodeBase, table=True):
@@ -13,16 +9,25 @@ class Node(EditorNodeBase, table=True):
         {'schema': 'editor'}
     )
 
-    ID: int = Field(sa_column=Column(ForeignKey('lds.Node.ID', ondelete='CASCADE', onupdate='CASCADE'),
-                                     primary_key=True))
+    ID: int = Field(sa_column=Column(
+        Integer,
+        ForeignKey('lds.Node.ID', ondelete='CASCADE', onupdate='CASCADE'),
+        primary_key=True
+    ))
 
 
-class Pipeline(Base):
+class Pipeline(SQLModel, table=True):
     __tablename__ = 'Pipeline'
-    __table_args__ = {'schema': 'editor'}
+    __table_args__ = (
+        {'schema': 'editor'}
+    )
 
-    ID = Column(ForeignKey(lds.Pipeline.ID, ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
-    AreaWidth = Column(Integer, nullable=False)
-    AreaWidthDivision = Column(Integer, nullable=False)
-    AreaHeight = Column(Integer, nullable=False)
-    AreaHeightDivision = Column(Integer, nullable=False)
+    ID: int = Field(sa_column=Column(
+        Integer,
+        ForeignKey('lds.Pipeline.ID', ondelete='CASCADE', onupdate='CASCADE'),
+        primary_key=True
+    ))
+    AreaWidth: int = Field(Integer, nullable=False)
+    AreaWidthDivision: int = Field(Integer, nullable=False)
+    AreaHeight: int = Field(Integer, nullable=False)
+    AreaHeightDivision: int = Field(Integer, nullable=False)
