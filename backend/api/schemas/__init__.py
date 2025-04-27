@@ -2,10 +2,10 @@ from .event import EventOut
 from .error import Error
 from .information import Information
 from .event_def import EventDefBase, UpdateEventDef
-from .trend_def import TrendDef
+from .trend_def import TrendDefBase
 from .trend_data_multiple import TrendDataMultiple
-from .trend import Trend, UpdateTrend
-from .trend_param import TrendParam
+from .trend import TrendBase, UpdateTrend
+from .trend_param import TrendParamBase, TrendParamOut
 from .trend_value import TrendValue
 from .link import LinkBase, UpdateLink
 from .login_permissions import LoginPermissions

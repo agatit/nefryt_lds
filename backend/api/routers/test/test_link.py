@@ -95,27 +95,17 @@ def test_list_links_should_return_ok_response_code_and_default_page_data(add_lds
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
 def test_create_link_should_return_created_response_code_and_created_link_data(add_lds_objects):
-    link_dict = {'ID': 1, 'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 100.11}
+    link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 100.11}
     response = test_client.post("/link", json=link_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_link = response.json()
-    assert returned_link['ID'] == link_dict['ID']
+    assert returned_link['ID'] == 3
     assert returned_link['BeginNodeID'] == link_dict['BeginNodeID']
     assert returned_link['EndNodeID'] == link_dict['EndNodeID']
     assert returned_link['Length'] == link_dict['Length']
     with Session(get_test_engine()) as session:
         links_count = session.execute(select(func.count()).select_from(lds.Link)).fetchall()[0][0]
     assert links_count == 1
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_create_link_should_return_conflict_response_code_and_error_when_id_not_unique(add_lds_objects):
-    link_dict = {'ID': link1.ID, 'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 100.11}
-    response = test_client.post("/link", json=link_dict)
-    assert response.status_code == status.HTTP_409_CONFLICT
-    error = response.json()
-    assert error['code'] == status.HTTP_409_CONFLICT
-    assert error['message'] == 'Integrity error when creating link'
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)

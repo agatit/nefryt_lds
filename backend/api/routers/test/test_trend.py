@@ -723,7 +723,7 @@ def test_list_trend_params_should_return_ok_response_code_and_correct_trend_para
         assert returned_trend_param['TrendID'] == expected_trend_param.TrendID
         assert returned_trend_param['Value'] == expected_trend_param.Value
         assert returned_trend_param['TrendParamDefID'] == expected_trend_param.TrendParamDefID.strip()
-        assert returned_trend_param['DataType'] == expected_trend_param_def.DataType
+        assert returned_trend_param['DataType'] == expected_trend_param_def.DataType.strip()
         assert returned_trend_param['Name'] == expected_trend_param_def.Name.strip()
 
 
@@ -762,7 +762,7 @@ def test_get_trend_param_by_id_should_return_ok_response_code_and_trend_param_of
     assert returned_trend_param['TrendID'] == trend_param1.TrendID
     assert returned_trend_param['Value'] == trend_param1.Value
     assert returned_trend_param['TrendParamDefID'] == trend_param1.TrendParamDefID.strip()
-    assert returned_trend_param['DataType'] == trend_param_def1.DataType
+    assert returned_trend_param['DataType'] == trend_param_def1.DataType.strip()
     assert returned_trend_param['Name'] == trend_param_def1.Name.strip()
 
 
@@ -778,20 +778,20 @@ def test_get_trend_param_by_id_should_return_not_found_response_code_and_error_w
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
 def test_update_trend_param_should_return_ok_response_code_and_trend_param_of_given_id(add_lds_objects):
     update_trend_param_value = '1444'
-    response = test_client.put("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID,
+    response = test_client.put("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID.strip(),
                                json=update_trend_param_value)
     assert response.status_code == status.HTTP_200_OK
     returned_trend_param = response.json()
     assert returned_trend_param['TrendID'] == trend_param1.TrendID
     assert returned_trend_param['Value'] == update_trend_param_value
     assert returned_trend_param['TrendParamDefID'] == trend_param1.TrendParamDefID.strip()
-    assert returned_trend_param['DataType'] == trend_param_def1.DataType
+    assert returned_trend_param['DataType'] == trend_param_def1.DataType.strip()
     assert returned_trend_param['Name'] == trend_param_def1.Name.strip()
 
 
 def test_update_trend_param_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id():
     update_trend_param_value = '1444'
-    response = test_client.put("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID,
+    response = test_client.put("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID.strip(),
                                json=update_trend_param_value)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()

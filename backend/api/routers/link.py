@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse, Response
 from .security import get_user_token
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from ..db import get_engine
-from ..schemas import Error, UpdateLink
+from ..schemas import Error, UpdateLink, LinkBase
 from database import lds
 
 router = APIRouter(prefix="/link", tags=["link"], dependencies=[Depends(get_user_token)])
@@ -29,8 +29,9 @@ async def list_links(engine: Annotated[Engine, Depends(get_engine)], params: Ann
 
 
 @router.post('', response_model=lds.Link | Error)
-async def create_link(link: Annotated[lds.Link, Body()], engine: Annotated[Engine, Depends(get_engine)]):
+async def create_link(link: Annotated[LinkBase, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
+        link = lds.Link(**link.model_dump())
         with Session(engine) as session:
             session.add(link)
             session.commit()

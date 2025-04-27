@@ -1,9 +1,9 @@
 from datetime import datetime
-from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, Float, ForeignKeyConstraint, Identity, \
-    Integer, Numeric, PrimaryKeyConstraint, SmallInteger, String, text, ForeignKey
+from sqlalchemy import BINARY, BigInteger, Boolean, CHAR, Column, ForeignKeyConstraint, Identity, \
+    Integer, Numeric, PrimaryKeyConstraint, String, text, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from sqlmodel import SQLModel, Field
-from api.schemas import EventDefBase, LdsNodeBase, LinkBase
+from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase
 
 Base = declarative_base(metadata=SQLModel.metadata)
 
@@ -73,39 +73,34 @@ class PipelineParamDef(Base):
     DataType = Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'))
 
 
-class TrendData(Base):
+class TrendData(SQLModel, table=True):
     __tablename__ = 'TrendData'
     __table_args__ = (
         PrimaryKeyConstraint('Time', 'TrendID', name='TrendData_pk'),
         {'schema': 'lds'}
     )
 
-    TrendID = Column(Integer, nullable=False)
-    Time = Column(BigInteger, nullable=False)
-    Data = Column(BINARY(200), nullable=False)
+    TrendID: int = Field(sa_column=Column(Integer, nullable=False))
+    Time: int = Field(sa_column=Column(BigInteger, nullable=False))
+    Data: bytes = Field(sa_column=Column(BINARY(200), nullable=False))
 
 
-class TrendDef(Base):
+class TrendDef(TrendDefBase, table=True):
     __tablename__ = 'TrendDef'
     __table_args__ = (
-        PrimaryKeyConstraint('ID', name='TrendDef_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
-    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
 
-
-class TrendGroup(Base):
+class TrendGroup(SQLModel, table=True):
     __tablename__ = 'TrendGroup'
     __table_args__ = (
-        PrimaryKeyConstraint('ID', name='TrendGroup_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(Integer, Identity(start=1, increment=1))
-    Name = Column(String(100, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    AnalisisOnly = Column(Boolean, nullable=False, server_default=text('((0))'))
+    ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True, nullable=False))
+    Name: str = Field(sa_column=Column(String(100, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
+    AnalisisOnly: bool = Field(default=False, nullable=False)
 
 
 class Unit(Base):
@@ -190,50 +185,27 @@ class PipelineParam(Base):
     PipelineParamDef_ = relationship('PipelineParamDef')
 
 
-class Trend(Base):
+class Trend(TrendBase, table=True):
     __tablename__ = 'Trend'
     __table_args__ = (
-        ForeignKeyConstraint(['NodeID'], ['lds.Node.ID'], ondelete='SET NULL', name='Trend_fk'),
-        ForeignKeyConstraint(['UnitID'], ['lds.Unit.ID'], name='Trend_Unit_fk'),
-        ForeignKeyConstraint(['TrendDefID'], ['lds.TrendDef.ID'], ondelete='CASCADE', name='Trend_TrendDef_fk'),
-        PrimaryKeyConstraint('ID', name='Trend_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(Integer, Identity(start=1000, increment=1))
-    TrendDefID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    RawMin = Column(Integer, nullable=False)
-    RawMax = Column(Integer, nullable=False)
-    ScaledMin = Column(Float(53), nullable=False)
-    ScaledMax = Column(Float(53), nullable=False)
-    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-    TrendGroupID = Column(Integer)
-    TimeExponent = Column(Integer)
-    Format = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-    UnitID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'))
-    Color = Column(SmallInteger)
-    Symbol = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-    NodeID = Column(Integer)
 
-    Node_ = relationship(Node)
-    Unit_ = relationship('Unit')
-    TrendDef_ = relationship('TrendDef')
-
-
-class TrendParamDef(Base):
+class TrendParamDef(SQLModel, table=True):
     __tablename__ = 'TrendParamDef'
     __table_args__ = (
-        ForeignKeyConstraint(['TrendDefID'], ['lds.TrendDef.ID'], name='TrendParamDef_TrendDef_fk'),
         PrimaryKeyConstraint('ID', 'TrendDefID', name='TrendParamDef_pk'),
         {'schema': 'lds'}
     )
 
-    ID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    TrendDefID = Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False, index=True)
-    Name = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-    DataType = Column(String(6, 'SQL_Polish_CP1250_CS_AS'))
-
-    TrendDef_ = relationship('TrendDef')
+    ID: str = Field(sa_column=Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
+    TrendDefID: str = Field(sa_column=Column(
+        CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
+        ForeignKey('lds.TrendDef.ID'),
+        nullable=False, index=True))
+    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    DataType: str | None = Field(None, sa_column=Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
 class Event(SQLModel, table=True):
@@ -279,17 +251,9 @@ class MethodParam(SQLModel, table=True):
     Value: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-class TrendParam(Base):
+class TrendParam(TrendParamBase, table=True):
     __tablename__ = 'TrendParam'
     __table_args__ = (
-        ForeignKeyConstraint(['TrendID'], ['lds.Trend.ID'], ondelete='CASCADE', onupdate='CASCADE',
-                             name='TrendParam_Trend_fk'),
         PrimaryKeyConstraint('TrendParamDefID', 'TrendID', name='TrendParam_pk'),
         {'schema': 'lds'}
     )
-
-    TrendParamDefID = Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False)
-    TrendID = Column(Integer, nullable=False)
-    Value = Column(String(30, 'SQL_Polish_CP1250_CS_AS'))
-
-    Trend_ = relationship('Trend')

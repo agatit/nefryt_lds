@@ -1,6 +1,6 @@
 from .utils import to_dict, strip_strings_in_dict
-from ..schemas import EventOut, TrendDef, TrendParam, TrendDataMultiple, TrendValue, TrendDataSingle, Trend, Node, \
-    NodeOut, EditorNodeBase
+from ..schemas import EventOut, TrendDataMultiple, TrendValue, TrendDataSingle, Node, \
+    NodeOut, EditorNodeBase, TrendParamOut
 from database import lds, editor
 
 
@@ -13,29 +13,13 @@ def map_lds_event_and_lds_event_def_to_event_out(lds_event: lds.Event, lds_event
     return EventOut(**lds_event_dict)
 
 
-def map_lds_trend_to_trend(lds_trend: lds.Trend) -> Trend:
-    return Trend(**strip_strings_in_dict(to_dict(lds_trend)))
-
-
-def map_trend_to_lds_trend(trend: Trend) -> lds.Trend:
-    return lds.Trend(**trend.model_dump(by_alias=True))
-
-
-def map_lds_trend_def_to_trend_def(lds_trend_def: lds.TrendDef) -> TrendDef:
-    return TrendDef(**strip_strings_in_dict(to_dict(lds_trend_def)))
-
-
-def map_trend_def_to_lds_trend_def(trend_def: TrendDef) -> lds.TrendDef:
-    return lds.TrendDef(**trend_def.model_dump(by_alias=True))
-
-
-def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParam: # noqa
+def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParamOut: # noqa
     lds_trend_param_dict = to_dict(lds_trend_param)
     lds_trend_param_def_dict = to_dict(lds_trend_param_def)
     lds_trend_param_def_dict.pop('TrendDefID')
     lds_trend_param_def_dict.pop('ID')
     lds_trend_param_dict.update(lds_trend_param_def_dict)
-    return TrendParam(**strip_strings_in_dict(lds_trend_param_dict))
+    return TrendParamOut(**strip_strings_in_dict(lds_trend_param_dict))
 
 
 def map_dicts_to_trend_data_multiple(timestamps: zip, trend_values_dict: dict) -> list[TrendDataMultiple]:

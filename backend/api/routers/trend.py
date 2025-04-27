@@ -8,42 +8,42 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
-from .mapper import map_lds_trend_to_trend, map_trend_to_lds_trend, \
-    map_lds_trend_param_and_lds_trend_param_def_to_trend_param, map_dicts_to_trend_data_multiple, \
+from .mapper import map_lds_trend_param_and_lds_trend_param_def_to_trend_param, map_dicts_to_trend_data_multiple, \
     map_tuple_to_trend_data_single
 from .security import get_user_token
+from .utils import strip_strings
 from ..custom_page import CustomParams, CustomPage, use_custom_page
 from ..db import get_engine
-from ..schemas import Error, TrendDataMultiple, Information, Trend, UpdateTrend, TrendParam, TrendDataSingle
+from ..schemas import Error, TrendDataMultiple, Information, UpdateTrend, TrendParamOut, TrendDataSingle, TrendBase
 from database import lds
 
 router = APIRouter(prefix="/trend", tags=['trend'], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=CustomPage[Trend] | Error)
+@router.get('', response_model=CustomPage[lds.Trend] | Error)
 async def list_trends(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
                       _: Annotated[None, Depends(use_custom_page)], filter: Annotated[str | None, Query()] = None):
     try:
         statement = select(lds.Trend).order_by(lds.Trend.ID)
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
-        page.items = [map_lds_trend_to_trend(lds_trend) for lds_trend in page.items]
+        page.items = [strip_strings(lds_trend) for lds_trend in page.items]
         return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trends(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.post('', response_model=Trend | Error)
-async def create_trend(trend: Annotated[Trend, Body()], engine: Annotated[Engine, Depends(get_engine)]):
+@router.post('', response_model=lds.Trend | Error)
+async def create_trend(trend: Annotated[TrendBase, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
-        lds_trend = map_trend_to_lds_trend(trend)
+        trend = lds.Trend(**trend.model_dump())
         with Session(engine) as session:
-            session.add(lds_trend)
+            session.add(trend)
             session.commit()
-            session.refresh(lds_trend)
-        trend = map_lds_trend_to_trend(lds_trend)
-        return JSONResponse(content=trend.model_dump(by_alias=True), status_code=status.HTTP_201_CREATED)
+            session.refresh(trend)
+        content = strip_strings(trend).model_dump(by_alias=True)
+        return JSONResponse(content=content, status_code=status.HTTP_201_CREATED)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating trend')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
@@ -69,7 +69,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
     try:
         lds_trends_scales = {}
         trend_id_list = trend_id_list.split(",")
-        statement = select(lds.Trend).where(lds.Trend.ID.in_(trend_id_list))
+        statement = select(lds.Trend).where(lds.Trend.ID.in_(trend_id_list)) # noqa
         with Session(engine) as session:
             lds_trends = session.execute(statement).all()
 
@@ -93,8 +93,8 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
         statement = (
             select(func.count()).
             select_from(lds.TrendData).
-            where(lds.TrendData.Time.in_(trend_timestamps)).
-            where(lds.TrendData.TrendID.in_(trend_id_list))
+            where(lds.TrendData.Time.in_(trend_timestamps)). # noqa
+            where(lds.TrendData.TrendID.in_(trend_id_list)) # noqa
         )
         with Session(engine) as session:
             all_data_count = session.execute(statement).scalar()
@@ -109,9 +109,9 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                                                                                 trend_timestamps_ms, params.size)
 
         statement = (select(lds.TrendData).
-                     where(lds.TrendData.Time.in_(trend_timestamps)).
-                     where(lds.TrendData.TrendID.in_(trend_id_list)).
-                     order_by(lds.TrendData.Time))
+                     where(lds.TrendData.Time.in_(trend_timestamps)). # noqa
+                     where(lds.TrendData.TrendID.in_(trend_id_list)). # noqa
+                     order_by(lds.TrendData.Time)) # noqa
         with Session(engine) as session:
             lds_trends_data = session.execute(statement).all()
 
@@ -184,8 +184,8 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
         statement = (
             select(func.count()).
             select_from(lds.TrendData).
-            where(lds.TrendData.Time.in_(trend_timestamps)).
-            where(lds.TrendData.TrendID == literal(trend_id))
+            where(lds.TrendData.Time.in_(trend_timestamps)). # noqa
+            where(lds.TrendData.TrendID == literal(trend_id)) # noqa
         )
         with Session(engine) as session:
             all_data_count = session.execute(statement).scalar()
@@ -199,9 +199,9 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
         trend_timestamps, trend_timestamps_ms = calculate_page_timestamps_lists(start_pos, trend_timestamps,
                                                                                 trend_timestamps_ms, params.size)
         statement = (select(lds.TrendData).
-                     where(lds.TrendData.Time.in_(trend_timestamps)).
-                     where(lds.TrendData.TrendID == literal(trend_id)).
-                     order_by(lds.TrendData.Time))
+                     where(lds.TrendData.Time.in_(trend_timestamps)). # noqa
+                     where(lds.TrendData.TrendID == literal(trend_id)). # noqa
+                     order_by(lds.TrendData.Time)) # noqa
         with Session(engine) as session:
             lds_trends_data = session.execute(statement).all()
 
@@ -258,27 +258,26 @@ async def delete_trend_by_id(trend_id: Annotated[int, Path()], engine: Annotated
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id}', response_model=Trend | Error)
+@router.get('/{trend_id}', response_model=lds.Trend | Error)
 async def get_trend_by_id(trend_id: int, engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
-            lds_trend: lds.Trend = session.get(lds.Trend, trend_id)  # type: ignore
+            lds_trend = session.get(lds.Trend, trend_id)
         if not lds_trend:
             error = Error(code=status.HTTP_404_NOT_FOUND, message='No trend with id = ' + str(trend_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
-        trend = map_lds_trend_to_trend(lds_trend)
-        return trend
+        return strip_strings(lds_trend)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_trend_by_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.put('/{trend_id}', response_model=Trend | Error)
+@router.put('/{trend_id}', response_model=lds.Trend | Error)
 async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotated[UpdateTrend, Body()],
                        engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:
-            trend: lds.Trend = session.get(lds.Trend, trend_id)  # type: ignore
+            trend = session.get(lds.Trend, trend_id)
             if not trend:
                 error = Error(code=status.HTTP_404_NOT_FOUND,
                               message='No trend with id = ' + str(trend_id))
@@ -293,18 +292,18 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
                     await update_trend_param(trend_id, trend_param_id, str(v), engine)
             session.commit()
             session.refresh(trend)
-        return map_lds_trend_to_trend(trend)
+        return strip_strings(trend)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_trend(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id}/param', response_model=CustomPage[TrendParam] | Error)
+@router.get('/{trend_id}/param', response_model=CustomPage[TrendParamOut] | Error)
 async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
                             params: Annotated[CustomParams, Depends()], _: Annotated[None, Depends(use_custom_page)],
                             filter: Annotated[str | None, Query()] = None):
     try:
-        statement = select(1).where(lds.Trend.ID == literal(trend_id))
+        statement = select(1).where(lds.Trend.ID == literal(trend_id)) # noqa
         with Session(engine) as session:
             trend_exists = session.execute(statement).first()
         if not trend_exists:
@@ -312,11 +311,11 @@ async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
                         .select_from(lds.Trend))
-                       .join(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID))
+                       .join(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID)) # noqa
                       .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
-                                                 lds.Trend.ID == lds.TrendParam.TrendID)))
-                     .where(lds.Trend.ID == literal(trend_id))
-                     .order_by(lds.Trend.ID))
+                                                 lds.Trend.ID == lds.TrendParam.TrendID))) # noqa
+                     .where(lds.Trend.ID == literal(trend_id)) # noqa
+                     .order_by(lds.Trend.ID)) # noqa
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [
@@ -329,16 +328,16 @@ async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id}/param/{trend_param_def_id}', response_model=TrendParam | Error)
+@router.get('/{trend_id}/param/{trend_param_def_id}', response_model=TrendParamOut | Error)
 async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()],
                                 engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = ((((select(lds.TrendParam, lds.Trend, lds.TrendParamDef)
                         .select_from(lds.Trend))
-                       .outerjoin(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID))
+                       .outerjoin(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID)) # noqa
                       .outerjoin(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
-                                                      lds.Trend.ID == lds.TrendParam.TrendID)))
-                     .where(lds.Trend.ID == literal(trend_id))
+                                                      lds.Trend.ID == lds.TrendParam.TrendID))) # noqa
+                     .where(lds.Trend.ID == literal(trend_id)) # noqa
                      .where(lds.TrendParam.TrendParamDefID == literal(trend_param_def_id)))
         with Session(engine) as session:
             results = session.execute(statement).all()
@@ -355,13 +354,13 @@ async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_de
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.put('/{trend_id}/param/{trend_param_def_id}', response_model=TrendParam | Error)
+@router.put('/{trend_id}/param/{trend_param_def_id}', response_model=TrendParamOut | Error)
 async def update_trend_param(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()],
                              updated_trend_value: Annotated[str, Body()],
                              engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = (select(lds.TrendParam).
-                     where(lds.TrendParam.TrendParamDefID == literal(trend_param_def_id)).
+                     where(lds.TrendParam.TrendParamDefID == literal(trend_param_def_id)). # noqa
                      where(lds.TrendParam.TrendID == literal(trend_id)))
         with Session(engine) as session:
             lds_trend_param = session.execute(statement).all()
