@@ -10,7 +10,7 @@ from starlette.testclient import TestClient
 from api.routers.security import get_user_token
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
-from api.db import get_engine, get_test_engine
+from db import get_engine
 from database import lds
 import pytest
 
@@ -82,7 +82,6 @@ def reset_trend_objects():
     return [trend_def_list, trend_list]
 
 
-app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
@@ -148,7 +147,7 @@ def test_create_trend_should_return_created_response_code_and_created_trend_data
     assert returned_trend['RawMax'] == trend_dict['RawMax']
     assert returned_trend['ScaledMin'] == trend_dict['ScaledMin']
     assert returned_trend['ScaledMax'] == trend_dict['ScaledMax']
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         trends_count = session.execute(select(func.count()).select_from(lds.Trend)).fetchall()[0][0]
     assert trends_count == 1
 
@@ -638,7 +637,7 @@ def test_get_single_trend_data_should_return_not_found_response_code_and_error_w
 def test_delete_trend_by_id_should_return_no_content_response_code_and_remove_trend(add_lds_objects):
     response = test_client.delete("/trend/" + str(trend1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         trends_count = session.execute(select(func.count()).select_from(lds.Trend)).fetchall()[0][0]
     assert trends_count == 1
 

@@ -1,4 +1,3 @@
-import traceback
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Depends
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -10,7 +9,7 @@ from starlette.responses import JSONResponse, Response
 from .security import get_user_token
 from .utils import strip_strings
 from ..custom_page import CustomParams, CustomPage, use_custom_page
-from ..db import get_engine
+from db import get_engine
 from ..schemas import Error, Information, UpdateEventDef
 from database import lds
 
@@ -63,7 +62,6 @@ async def delete_event_def_by_id(event_def_id: Annotated[str, Path()], engine: A
             session.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
-        traceback.print_exc()
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f'Exception in delete_event_def_by_id(): {e}')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -78,7 +76,6 @@ async def get_event_def_by_id(event_def_id: Annotated[str, Path()], engine: Anno
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         return strip_strings(event_def)
     except Exception as e:
-        traceback.print_exc()
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f'Exception in get_event_def_by_id(): {e}')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

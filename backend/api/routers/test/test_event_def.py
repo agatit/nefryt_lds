@@ -4,11 +4,9 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
-
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
-from api.db import get_engine, get_test_engine
+from db import get_engine
 from api.routers.security import get_user_token
 from database import lds
 import pytest
@@ -32,7 +30,6 @@ def reset_event_def_objects():
     return [event_def_list]
 
 
-app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
@@ -97,7 +94,7 @@ def test_create_event_def_should_return_created_response_code_and_created_event_
     assert returned_event_def['Silent'] == event_def_dict['Silent']
     assert returned_event_def['Enabled'] == event_def_dict['Enabled']
     assert returned_event_def['Visible'] == event_def_dict['Visible']
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         event_defs_count = session.execute(select(func.count()).select_from(lds.EventDef)).fetchall()[0][0]
     assert event_defs_count == 1
 
@@ -117,7 +114,7 @@ def test_create_event_def_should_return_conflict_response_code_and_error_when_id
 def test_delete_event_def_by_id_should_return_no_content_response_code_and_remove_event_def(add_lds_objects):
     response = test_client.delete("/event_def/" + event_def1.ID)
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         event_defs_count = session.execute(select(func.count()).select_from(lds.EventDef)).fetchall()[0][0]
     assert event_defs_count == 1
 

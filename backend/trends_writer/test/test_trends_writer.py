@@ -9,7 +9,7 @@ import sys
 import os
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
-from trends_writer.db import get_engine
+from db import get_engine
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))  # noqa: E402
 from database.models import lds
 from trends_writer.plant import PipePlant

@@ -3,11 +3,13 @@ from fastapi_pagination import add_pagination
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from .db import get_engine
+from db import get_engine
+from .config import setup_engine
 from .routers import (events_router, event_defs_router, trend_defs_router, trend_router, auth_router, link_router,
                       node_router)
 from .schemas import Error
 
+setup_engine()
 app = FastAPI(title='Nefryt LDS API',
               dependencies=[Depends(get_engine)])
 add_pagination(app)

@@ -5,10 +5,9 @@ import jwt
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
-from api.db import get_engine, get_test_engine
+from db import get_engine
 from api.routers.security import get_user_token
 from database import lds
 import pytest
@@ -55,7 +54,6 @@ def reset_event_objects():
     return lds_objects
 
 
-app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
@@ -145,7 +143,7 @@ def test_ack_event_should_return_ok_response_code_and_information_and_set_ack_da
     assert information['message'] == "Event acknowledged"
     assert information['affected'] == 1
     assert information['status'] == status.HTTP_200_OK
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         changed_event = session.get(lds.Event, event_invisible.ID)
     assert changed_event.AckDate
 

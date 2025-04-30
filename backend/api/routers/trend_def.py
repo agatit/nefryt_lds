@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse
 from .security import get_user_token
 from .utils import strip_strings
 from ..custom_page import CustomParams, use_custom_page, CustomPage
-from ..db import get_engine
+from db import get_engine
 from ..schemas import Error, TrendDefBase
 
 router = APIRouter(prefix="/trend_def", tags=["trend_def"], dependencies=[Depends(get_user_token)])

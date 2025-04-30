@@ -8,10 +8,9 @@ from sqlalchemy.orm import Session
 
 from database import lds
 from . import TrendBase
-from ..db import get_engine
+from db import get_engine
 
 
-# TODO: discuss storage & lock between processes
 class TrendFilter(TrendBase):
 
     def __init__(self, id: int, parent_id: int = None):

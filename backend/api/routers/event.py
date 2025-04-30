@@ -10,7 +10,7 @@ from starlette.responses import JSONResponse
 from .mapper import map_lds_event_and_lds_event_def_to_event_out
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from ..schemas import Error, EventOut, Information
-from ..db import get_engine
+from db import get_engine
 from ..routers.security import get_user_permissions, get_user_token
 from database import lds
 

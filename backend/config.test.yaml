@@ -1,0 +1,3 @@
+db_uri: mssql+pyodbc://sa:{db_password}@localhost:7768/NefrytLDS_Test_Database?driver=ODBC+Driver+17+for+SQL+Server
+server_url: mssql+pyodbc://sa:{db_password}@localhost:7768/master?driver=ODBC+Driver+17+for+SQL+Server
+db_name: NefrytLDS_Test_Database

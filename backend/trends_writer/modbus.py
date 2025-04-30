@@ -2,7 +2,7 @@ import asyncio
 import logging
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 from pymodbus.server import StartAsyncTcpServer
-from .config import config
+from .config import Settings
 from .plant import PipePlant
 
 
@@ -36,7 +36,7 @@ async def run_server(pipe_plant: PipePlant, port: int | None = None):
     try:
         await StartAsyncTcpServer(
             context=server_context,
-            address=('', port if port else config.get("modbus_port", 502)),
+            address=('', port if port else Settings.modbus_port),
         )
     except (KeyboardInterrupt, asyncio.CancelledError):
         logging.info("Modbus server stopped")

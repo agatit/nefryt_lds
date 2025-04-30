@@ -9,7 +9,7 @@ from sqlalchemy import select, insert, and_, literal, literal_column, cast, Stri
 from sqlalchemy.orm import sessionmaker, Session
 
 from database import lds
-from trends_writer.db import get_engine
+from db import get_engine
 
 # klasy zapisane stringiem, aby uniknąć cyklicznych importów 
 TREND_CLASSES = {

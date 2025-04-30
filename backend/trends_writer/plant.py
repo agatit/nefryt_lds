@@ -6,7 +6,7 @@ import numpy as np
 import threading
 from sqlalchemy.orm import Session
 from database import lds
-from .db import get_engine
+from db import get_engine
 from .profiler import Profiler
 from .trend import TrendQuick
 

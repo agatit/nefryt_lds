@@ -13,7 +13,7 @@ from .mapper import map_lds_trend_param_and_lds_trend_param_def_to_trend_param, 
 from .security import get_user_token
 from .utils import strip_strings
 from ..custom_page import CustomParams, CustomPage, use_custom_page
-from ..db import get_engine
+from db import get_engine
 from ..schemas import Error, TrendDataMultiple, Information, UpdateTrend, TrendParamOut, TrendDataSingle, TrendBase
 from database import lds
 

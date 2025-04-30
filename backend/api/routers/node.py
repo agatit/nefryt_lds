@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse, Response
 from .mapper import map_lds_node_and_editor_node_to_node_out, map_node_to_lds_node, map_node_to_editor_node
 from .security import get_user_token
 from ..custom_page import CustomParams, CustomPage, use_custom_page
-from ..db import get_engine
+from db import get_engine
 from ..schemas import Error, NodeOut, UpdateNode, Node
 from database import lds, editor
 
