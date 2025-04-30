@@ -11,6 +11,7 @@ from . import TrendBase
 from ..db import get_engine
 
 
+# TODO: discuss storage & lock between processes
 class TrendFilter(TrendBase):
 
     def __init__(self, id: int, parent_id: int = None):
@@ -29,17 +30,16 @@ class TrendFilter(TrendBase):
             logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) wrong parent id!")
             return None, None
 
-        with self.lock:
-            if timestamp == self.storage_timstamp + 1:
-                self.storage = np.append(self.storage[100:], np.flip(data))
-            elif timestamp > self.storage_timstamp + 1:
-                logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timstamp}")
-                self.initiate_buffer(self.window_size, timestamp, parent_id)
-            else:
-                logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage alredy exists {self.storage_timstamp}")
-                self.storage = np.append(self.storage[:-100], np.flip(data))
-        
-            self.storage_timstamp = timestamp        
+        if timestamp == self.storage_timstamp + 1:
+            self.storage = np.append(self.storage[100:], np.flip(data))
+        elif timestamp > self.storage_timstamp + 1:
+            logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timstamp}")
+            self.initiate_buffer(self.window_size, timestamp, parent_id)
+        else:
+            logging.warning(f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage alredy exists {self.storage_timstamp}")
+            self.storage = np.append(self.storage[:-100], np.flip(data))
+
+        self.storage_timstamp = timestamp
 
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) calculating...")          
 

@@ -1,5 +1,4 @@
 import logging
-import threading
 import struct
 import time
 import sys
@@ -40,7 +39,6 @@ class TrendBase(metaclass=TrendBaseMeta):
         self.children: List[TrendBase] = []
         self.params = {}
         self.block_size = 100
-        self.lock = threading.Lock()
 
         self._read_params()
         self._read_children()
@@ -56,7 +54,9 @@ class TrendBase(metaclass=TrendBaseMeta):
             try:          
                 child.update(data, timestamp, self.id)
             except Exception as e:
-                logging.exception(f"{timestamp} {self.__class__.__name__} ({self.id}) child {child.__class__.__name__} ({child.id}) update error: {e}", exc_info=True)               
+                logging.exception(f"{timestamp} {self.__class__.__name__} ({self.id}) child {child.__class__.__name__} ({child.id}) update error: {e}", exc_info=True)
+
+        return timestamp
 
 
     def _read_params(self):

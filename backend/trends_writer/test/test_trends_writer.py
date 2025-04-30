@@ -1,18 +1,15 @@
 import asyncio
 import math
+import multiprocessing
 import time
 from random import randint
-from unittest.mock import Mock
 import pytest
 from pymodbus.client import AsyncModbusTcpClient
 import sys
 import os
-
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
-
 from trends_writer.db import get_engine
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))  # noqa: E402
 from database.models import lds
 from trends_writer.plant import PipePlant
@@ -67,7 +64,8 @@ async def _send_data(port: int, addr: int, data: list[int]):
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
 async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_objects):
     port = 5022
-    server_task = asyncio.create_task(run_server(PipePlant(), port))
+    pool = multiprocessing.Pool()
+    server_task = asyncio.create_task(run_server(PipePlant(pool), port))
     await asyncio.sleep(0.5)
     calls = 10
 
@@ -86,9 +84,9 @@ async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_o
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
 async def test_trend_data_should_write_only_when_correct_address(add_lds_objects):
     port = 5023
-    server_task = asyncio.create_task(run_server(PipePlant(), port))
+    pool = multiprocessing.Pool()
+    server_task = asyncio.create_task(run_server(PipePlant(pool), port))
     await asyncio.sleep(0.5)
-
     calls = 10
     tasks = 3
 
@@ -110,9 +108,9 @@ async def test_trend_data_should_write_only_when_correct_address(add_lds_objects
 @pytest.mark.asyncio
 @pytest.mark.parametrize('reset_lds_objects', [add_objects_with_children], indirect=True)
 async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_objects):
-    print("TrendData count:", _get_trend_data_records_count())
     port = 5024
-    server_task = asyncio.create_task(run_server(PipePlant(), port))
+    pool = multiprocessing.Pool()
+    server_task = asyncio.create_task(run_server(PipePlant(pool), port))
     await asyncio.sleep(0.5)
     calls = 10
 
