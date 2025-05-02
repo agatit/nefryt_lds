@@ -1,24 +1,21 @@
 import atexit
-import logging
 import time
+from multiprocessing import Queue
 from sqlalchemy import select, literal
-import numpy as np
-import threading
 from sqlalchemy.orm import Session
 from database import lds
 from db import get_engine
+from .config import Settings
 from .profiler import Profiler
 from .trend import TrendQuick
 
 
 class PipePlant:
-    def __init__(self, pool, use_asyncio=False, use_profiler=False):
+    def __init__(self):
         self.trends = []
+        self.queues = {}
         self.read_trends()
-        self.use_profiler = use_profiler
-        self.use_asyncio = use_asyncio
-        self.pool = pool
-        atexit.register(self.shutdown_pool)
+        atexit.register(self.shutdown_processes)
 
     def read_trends(self):
         stmt = (select(lds.Trend)
@@ -27,38 +24,21 @@ class PipePlant:
         with Session(get_engine()) as session:
             result = session.execute(stmt).fetchall()
 
-        self.trends = [TrendQuick(trend[0].ID) for trend in result]
+        for trend in result:
+            queue = Queue()
+            new_trend_quick = TrendQuick(trend[0].ID, queue)
+            self.trends.append(new_trend_quick)
+            self.queues[new_trend_quick.register] = new_trend_quick.queue
 
     def update(self, register, data):
-        trend: TrendQuick
+            if Settings.use_profiler:
+                timestamp = round(time.time())
+                Profiler.queue.put((1, timestamp))
+                self.queues[register].put((data, timestamp))
+            else:
+                self.queues[register].put((data, round(time.time())))
+
+    def shutdown_processes(self):
         for trend in self.trends:
-            if trend.register == register:
-                if self.use_asyncio:
-                    if self.use_profiler:
-                        timestamp = round(time.time())
-                        Profiler.add_update(timestamp)
-                        self.pool.apply_async(trend.update, args=(np.array(data), timestamp), callback=return_callback, error_callback=error_callback)
-                    else:
-                        self.pool.apply_async(trend.update, args=(np.array(data), round(time.time())), callback=return_callback, error_callback=error_callback)
-                else:
-                    if self.use_profiler:
-                        threading.Thread(target=update_with_callback, args=(trend, data)).start()
-                    else:
-                        threading.Thread(target=trend.update, args=(np.array(data), round(time.time()))).start()
-
-    def shutdown_pool(self):
-        self.pool.close()
-        self.pool.join()
-
-
-def update_with_callback(trend, data):
-    timestamp = round(time.time())
-    Profiler.add_update(timestamp)
-    trend.update(np.array(data), timestamp)
-    Profiler.remove_update(timestamp)
-
-def return_callback(timestamp):
-    Profiler.remove_update(timestamp)
-
-def error_callback(e):
-    logging.error(f'Error in trend update process: {e}')
+           trend.queue.put(None)
+           trend.process.join()

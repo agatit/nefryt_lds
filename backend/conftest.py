@@ -10,6 +10,8 @@ from sqlmodel import SQLModel
 from testcontainers.mssql import SqlServerContainer
 from config_utils import load_yaml, clear_test_db
 from db import set_new_engine, get_engine
+from trends_writer.config import Settings
+from trends_writer.trend.base import TrendBaseMeta, TrendBase
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 
@@ -35,7 +37,7 @@ class TestConfig(BaseModel):
 
 _config_test = load_yaml(path, "config.test.yaml")
 TestSettings = TestConfig(test_model=TestModel(**_config_test), password_settings=PasswordSettings()) # type: ignore
-
+Settings.use_profiler = False
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -65,6 +67,7 @@ def setup_test_database(request):
     test_db_uri = TestSettings.test_model.db_uri.format(db_password=TestSettings.password_settings.password_test)
     test_db_name = TestSettings.test_model.db_name
     server_url = TestSettings.test_model.server_url.format(db_password=TestSettings.password_settings.password_test)
+    Settings.db_uri = test_db_uri
     if db_type == 'temp':
         engine = create_engine(server_url)
         with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
@@ -130,3 +133,8 @@ def reset_db_status():
 @pytest.fixture(autouse=True)
 def set_log_level(caplog):
     caplog.set_level("WARNING")
+
+
+@pytest.fixture(autouse=True)
+def reset_trend_cache():
+    TrendBaseMeta.reset_cache(TrendBase)

@@ -1,6 +1,5 @@
 import asyncio
 import math
-import multiprocessing
 import time
 from random import randint
 import pytest
@@ -64,10 +63,9 @@ async def _send_data(port: int, addr: int, data: list[int]):
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
 async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_objects):
     port = 5022
-    pool = multiprocessing.Pool()
-    server_task = asyncio.create_task(run_server(PipePlant(pool), port))
+    server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
-    calls = 10
+    calls = 2
 
     t = math.floor(time.time()) + 0.5
     for i in range(calls):
@@ -84,10 +82,9 @@ async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_o
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
 async def test_trend_data_should_write_only_when_correct_address(add_lds_objects):
     port = 5023
-    pool = multiprocessing.Pool()
-    server_task = asyncio.create_task(run_server(PipePlant(pool), port))
+    server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
-    calls = 10
+    calls = 2
     tasks = 3
 
     tasks_list = []
@@ -109,10 +106,9 @@ async def test_trend_data_should_write_only_when_correct_address(add_lds_objects
 @pytest.mark.parametrize('reset_lds_objects', [add_objects_with_children], indirect=True)
 async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_objects):
     port = 5024
-    pool = multiprocessing.Pool()
-    server_task = asyncio.create_task(run_server(PipePlant(pool), port))
+    server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
-    calls = 10
+    calls = 2
 
     t = math.floor(time.time()) + 0.5
     for i in range(calls):

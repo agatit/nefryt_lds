@@ -31,6 +31,9 @@ class TrendBaseMeta(type):
             cls._objects[key] = obj
             return obj
 
+    def reset_cache(cls):
+        cls._objects = {}
+
 
 class TrendBase(metaclass=TrendBaseMeta):
 
@@ -42,7 +45,7 @@ class TrendBase(metaclass=TrendBaseMeta):
 
         self._read_params()
         self._read_children()
-        logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")    
+        logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")
 
 
     def update(self, data: np.ndarray, timestamp: int, parent_id: int = None):

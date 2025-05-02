@@ -14,6 +14,7 @@ class AppConfig(BaseModel):
     db_uri: str
     verbosity: str = 'INFO'
     modbus_port: int = 502
+    use_profiler: bool = False
 
 
 _config = load_yaml(path, "config.yaml")
@@ -21,6 +22,5 @@ _config = load_yaml(path, "config.yaml")
 Settings = AppConfig(**_config)
 logging.basicConfig(stream=sys.stdout, level=Settings.verbosity, force=True)
 
-def setup_engine():
-    db_url = Settings.db_uri
+def setup_engine(db_url: str = Settings.db_uri):
     set_new_engine(create_engine(url=db_url, echo=False))
