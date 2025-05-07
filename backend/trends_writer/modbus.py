@@ -12,7 +12,7 @@ class PipePlantDataBlock(ModbusSequentialDataBlock):
         self.pipe_plant = pipe_plant
 
     def setValues(self, address, values):
-        logging.info(f"setValues: address={address}, relative = {address - self.address}, values={values}")
+        # logging.info(f"setValues: address={address}, relative = {address - self.address}, values={values}")
         try:
             self.pipe_plant.update(address - self.address, values)
             super().setValues(address, values)

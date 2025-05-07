@@ -3,15 +3,13 @@ import struct
 import time
 import sys
 from typing import List
-
 import numpy as np
-from sqlalchemy import select, insert, and_, literal, literal_column, cast, String
-from sqlalchemy.orm import sessionmaker, Session
-
+from sqlalchemy import select, insert, and_, literal, cast, String, Integer
+from sqlalchemy.orm import Session
 from database import lds
 from db import get_engine
 
-# klasy zapisane stringiem, aby uniknąć cyklicznych importów 
+
 TREND_CLASSES = {
     'QUICK': 'TrendQuick',
     'MEAN': 'TrendMean',
@@ -36,9 +34,8 @@ class TrendBaseMeta(type):
 
 
 class TrendBase(metaclass=TrendBaseMeta):
-
-    def __init__(self, id: int, parent_id: int = None):
-        self.id = id
+    def __init__(self, _id: int):
+        self.id = _id
         self.children: List[TrendBase] = []
         self.params = {}
         self.block_size = 100
@@ -63,12 +60,12 @@ class TrendBase(metaclass=TrendBaseMeta):
 
 
     def _read_params(self):
-        stmt = select(lds.TrendParamDef, lds.TrendParam) \
-            .select_from(lds.Trend) \
-            .join(lds.TrendDef, lds.Trend.TrendDefID == lds.TrendDef.ID) \
-            .join(lds.TrendParamDef, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID) \
-            .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.Trend.ID == lds.TrendParam.TrendID)) \
-            .where(lds.Trend.ID == literal(self.id))
+        stmt = (select(lds.TrendParamDef, lds.TrendParam)
+                .select_from(lds.Trend)
+                .join(lds.TrendDef, lds.Trend.TrendDefID == lds.TrendDef.ID) # noqa
+                .join(lds.TrendParamDef, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID)
+                .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.Trend.ID == lds.TrendParam.TrendID))
+                .where(lds.Trend.ID == literal(self.id)))
 
         with Session(get_engine()) as session:
             read_params = session.execute(stmt).fetchall()
@@ -78,15 +75,17 @@ class TrendBase(metaclass=TrendBaseMeta):
 
 
     def _read_children(self):
-        stmt = select(lds.Trend, lds.TrendDef) \
-            .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) \
-            .join(lds.TrendParam, lds.TrendParam.TrendID == lds.Trend.ID) \
-            .join(lds.TrendParamDef, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID)) \
-            .where(and_(lds.TrendParamDef.DataType == 'TREND', cast(lds.TrendParam.Value, String) == str(self.id)))
+        stmt = (select(lds.Trend, lds.TrendDef)
+                .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) # noqa
+                .join(lds.TrendParam, lds.TrendParam.TrendID == lds.Trend.ID)
+                .join(lds.TrendParamDef,
+                      and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
+                           lds.TrendDef.ID == lds.TrendParamDef.TrendDefID))
+                .where(and_(lds.TrendParamDef.DataType == 'TREND', lds.TrendParam.Value == float(self.id))))
 
-        # from .. import trend
         with Session(get_engine()) as session:
             results = session.execute(stmt).all()
+
         for trend, trend_def in results:
             trend_class = getattr(sys.modules["trends_writer.trend"], TREND_CLASSES[trend_def.ID.strip()])
             trend = trend_class(trend.ID, self.id)
@@ -117,8 +116,4 @@ class TrendBase(metaclass=TrendBaseMeta):
         except Exception as e:
             with Session(get_engine()) as session:
                 session.rollback()
-            raise(e)
-
-
-
-
+            raise e

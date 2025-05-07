@@ -1,14 +1,10 @@
-from typing import List
-import logging
 import numpy as np
 from scipy import signal
-
 from . import TrendFilter
 
 
 class TrendMean(TrendFilter):
-
-    def calculate(self) -> np.ndarray:      
+    def calculate(self) -> np.ndarray | None:
 
         # if len(self.result) == self.output_size then
         # kernel size must be (2 * self.output_size * 100) + 1 and
@@ -26,4 +22,4 @@ class TrendMean(TrendFilter):
             result = result.astype(np.uint16)
 
             return result
-
+        return None

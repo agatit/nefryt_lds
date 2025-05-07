@@ -1,4 +1,4 @@
-db_uri: mssql+pyodbc://sa:{db_password}@localhost:7768/NefrytLDS_Zygmuntow_2025?driver=ODBC+Driver+17+for+SQL+Server
+db_uri: mssql+pyodbc://sa:Onyks$us@owl.agatit.pl:1449/NefrytLDS_Zygmuntow_2025?driver=ODBC+Driver+17+for+SQL+Server
 verbosity: INFO
 modbus_port: 502
 use_profiler: True
