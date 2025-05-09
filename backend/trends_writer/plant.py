@@ -31,12 +31,15 @@ class PipePlant:
             self.queues[new_trend_quick.register] = new_trend_quick.queue
 
     def update(self, register, data):
+        try:
             if Settings.use_profiler:
                 timestamp = round(time.time())
                 Profiler.queue.put((1, timestamp))
                 self.queues[register].put((data, timestamp))
             else:
                 self.queues[register].put((data, round(time.time())))
+        except:
+            raise ValueError(f'No quick trend is using {register} register')
 
     def shutdown_processes(self):
         for trend in self.trends:

@@ -1,0 +1,50 @@
+[project]
+name = "nefrytlds-backend"
+version = "1.0.0"
+description = "System LDS Backend"
+requires-python = ">=3.10"
+dependencies = [
+    "bcrypt==4.0.1",
+    "connexion[swagger-ui]>=2.6.0",
+    "fastapi==0.115.12",
+    "fastapi-pagination==0.12.34",
+    "flask==2.1.0",
+    "flask-cors>=3.0.10",
+    "numpy>=1.14.3",
+    "passlib==1.7.4",
+    "pyjwt>=2.4.0",
+    "pymodbus==3.9.2",
+    "pymssql==2.3.4",
+    "pyodbc>=4.0.22",
+    "python-dateutil>=2.6.0",
+    "scipy>=1.8.1",
+    "setuptools>=21.0.0",
+    "sqlalchemy==2.0.40",
+    "sqlmodel==0.0.24",
+    "swagger-ui-bundle>=0.0.2",
+    "umodbus>=1.0.4",
+    "uv==0.7.2",
+    "uvicorn==0.34.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.5",
+    "pytest-asyncio==0.26.0",
+    "testcontainers==4.9.2",
+    "pydantic-settings==2.9.1",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "api",
+    "control",
+    "database",
+    "leak_detector",
+    "trends_writer",
+    "model_data_generator"
+]
