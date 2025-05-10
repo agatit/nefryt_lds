@@ -17,7 +17,7 @@ def test_datablock_calls_pipeplant_update_method_correct_amount_of_times():
     block = PipePlantDataBlock(0, [0] * 10, pipe_plant=mock_plant2)
 
     n = 23
-    for i in range(n):
+    for _ in range(n):
         block.setValues(0, [123])
 
     assert mock_plant2.update.call_count == n

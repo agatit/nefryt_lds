@@ -1,3 +1,4 @@
+from multiprocessing.queues import Queue
 from typing import List
 import logging
 import numpy as np
@@ -5,8 +6,8 @@ from . import TrendBase
 
 
 class TrendDiff(TrendBase):
-    def __init__(self, _id: int):
-        super().__init__(_id)
+    def __init__(self, _id: int, queue: Queue, profiler_queue: Queue | None):
+        super().__init__(_id, queue, profiler_queue)
 
         self.parent_data = {
             int(self.params['TREND_A']): {
@@ -19,7 +20,9 @@ class TrendDiff(TrendBase):
             }
         }
 
-    def update(self, data: List[int], timestamp: int, parent_id: int = None):
+        self.start_process_queue()
+
+    def update(self, data: List[int], timestamp: int, parent_id: int | None = None):
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating...")
         calculated_data = self.calculate(data, timestamp, parent_id)
 
@@ -28,7 +31,7 @@ class TrendDiff(TrendBase):
         else:
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
 
-    def calculate(self, data: List[int], timestamp: int, parent_id: int = None) -> np.ndarray:
+    def calculate(self, data: List[int], timestamp: int, parent_id: int | None = None) -> np.ndarray:
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) checking pair...")
         result = None
 

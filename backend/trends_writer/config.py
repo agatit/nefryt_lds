@@ -15,6 +15,7 @@ class AppConfig(BaseModel):
     verbosity: str = 'INFO'
     modbus_port: int = 502
     use_profiler: bool = False
+    profiler_filename: str = 'profiler.log'
 
 
 _config = load_yaml(path, "config.yaml")

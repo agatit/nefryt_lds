@@ -36,7 +36,7 @@ class Profiler:
                     if count == 1:
                         time_used  = time.perf_counter() - start
                         time_used_percent = (time_used / 1.0) * 100
-                        with open("profiler_queues1.log", "a") as f:
+                        with open(Settings.profiler_filename, "a") as f:
                             f.write(f"{timestamp}: Trends writer used {time_used_percent:.2f}% of time\n")
                         Profiler.updates.pop(timestamp-1, None)
                     Profiler.updates[timestamp] = (count - 1, start)
