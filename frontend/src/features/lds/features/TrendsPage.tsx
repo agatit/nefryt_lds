@@ -207,7 +207,7 @@ export default function TrendsPage() {
   }
 
   const throttledValueAxisChange = React.useMemo(
-    () => throttle(setValueAxisState, 50),
+    () => throttle(setValueAxisState, 166),
     []
   );
 
@@ -312,24 +312,24 @@ export default function TrendsPage() {
           Math.sin((date.getTime() / Math.pow(10, 8)) * 2) +
           date.getMonth() +
           Math.sin(date.getHours() / 2) +
-          Math.random() * (2 - 1) +
-          1
+          Math.random() * (1.5 - 0.5) +
+          0.5
         );
       case 1:
         return (
           Math.cos((date.getTime() / Math.pow(10, 8)) * 2) +
           date.getDate() / 2 +
           Math.cos(date.getHours() / 2) +
-          Math.random() * (2 - 1) -
+          Math.random() * (1.5 - 0.5) -
           5
         );
       case 2:
         return (
           Math.sin(date.getTime() / Math.pow(10, 7)) +
           date.getMonth() +
-          Math.cos(date.getMinutes() / 10) +
-          Math.random() * (2 - 1) +
-          1
+          Math.cos(date.getMinutes() / 25) +
+          Math.random() * (1.5 - 0.5) +
+          0.5
         );
     }
     return (
@@ -345,14 +345,14 @@ export default function TrendsPage() {
     if (startDate == null || endDate == null) return;
 
     const timeDiff = endDate.getTime() - startDate.getTime();
-    const step = Math.floor(timeDiff / 1000);
+    const step = Math.floor(timeDiff / 500);
     const newTrendsData: ChartSeriesTrendData[] = [];
 
     const navStartDate = new Date(startDate.getTime() - timeDiff);
     const navEndDate = new Date(endDate.getTime() + timeDiff);
     const newNavData: ChartSeriesTrendData[] = [];
     const step2 = Math.floor(
-      (navEndDate.getTime() - navStartDate.getTime()) / 200
+      (navEndDate.getTime() - navStartDate.getTime()) / 150
     );
 
     let max;
@@ -362,7 +362,7 @@ export default function TrendsPage() {
       if (!trendsState!.activeTrendsIDs.includes(trend.ID!)) continue;
 
       const generatedData: ChartTrendData[] = [];
-      for (let i = 0; i < 1000; i++) {
+      for (let i = 0; i < 500; i++) {
         const timestamp = new Date(startDate.getTime() + i * step);
         const value = generateValue(timestamp, trend.ID!);
 
@@ -380,7 +380,7 @@ export default function TrendsPage() {
       }
 
       const navData: ChartTrendData[] = [];
-      for (let i = 0; i < 200; i++) {
+      for (let i = 0; i < 150; i++) {
         const timestamp = new Date(navStartDate.getTime() + i * step2);
         navData.push({
           timestamp: timestamp,

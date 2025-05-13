@@ -124,16 +124,6 @@ export default function ScaleScrollBar({
         newEndPercentage = startingStartPercentage.current;
         newEndValue = startingValue.current.end;
       }
-      console.log("###########");
-      console.log(startingValue.current.start);
-      console.log(startingValue.current.end);
-      console.log(range);
-      console.log("shift");
-      console.log(pixelShift);
-      console.log(shift);
-      console.log("result");
-      console.log(newStartPercentage);
-      console.log(newEndPercentage);
 
       switch (dragging!) {
         case Dragged.Start:
