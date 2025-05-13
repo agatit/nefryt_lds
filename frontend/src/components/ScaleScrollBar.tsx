@@ -47,6 +47,7 @@ export default function ScaleScrollBar({
   const valueRef = React.useRef<ScaleScrollBarValueType>(value);
 
   React.useEffect(() => {
+    if (dragging !== null) return;
     setStartPercentage(((value.start - min) / range) * 100);
     setEndPercentage(((value.end - min) / range) * 100);
     valueRef.current = value;
@@ -59,6 +60,8 @@ export default function ScaleScrollBar({
   const startingStartPercentage = React.useRef<number>(startPercentage);
   const startingEndPercentage = React.useRef<number>(endPercentage);
   const startingValue = React.useRef<ScaleScrollBarValueType>(value);
+  const edgeControlTop = React.useRef<number>(0);
+  const edgeControlBot = React.useRef<number>(0);
 
   React.useEffect(() => {
     if (trackRef.current)
@@ -96,62 +99,94 @@ export default function ScaleScrollBar({
         ? ((startingValue.current.start + shift - min) / range) * 100
         : startingStartPercentage.current - ((shift - min) / range) * 100;
       let newEndPercentage = vertical
-        ? startingEndPercentage.current + ((shift - min) / range) * 100
+        ? ((startingValue.current.end + shift - min) / range) * 100
         : startingEndPercentage.current - ((shift - min) / range) * 100;
 
       let newStartValue = startingValue.current.start + shift;
       let newEndValue = startingValue.current.end + shift;
 
+      if (newStartPercentage < 0) {
+        newStartPercentage = 0;
+        newStartValue = min;
+        edgeControlBot.current++;
+      } else edgeControlBot.current = 0;
       if (newStartPercentage >= startingEndPercentage.current) {
         newStartPercentage = startingEndPercentage.current;
         newStartValue = startingValue.current.start;
       }
+
+      if (newEndPercentage > 100) {
+        newEndPercentage = 100;
+        newEndValue = max;
+        edgeControlTop.current++;
+      } else edgeControlTop.current = 0;
       if (newEndPercentage <= startingStartPercentage.current) {
         newEndPercentage = startingStartPercentage.current;
         newEndValue = startingValue.current.end;
       }
+      console.log("###########");
+      console.log(startingValue.current.start);
+      console.log(startingValue.current.end);
+      console.log(range);
+      console.log("shift");
+      console.log(pixelShift);
+      console.log(shift);
+      console.log("result");
+      console.log(newStartPercentage);
+      console.log(newEndPercentage);
 
       switch (dragging!) {
         case Dragged.Start:
-          if (newStartPercentage < 0) return;
+          if (edgeControlBot.current > 1) return;
 
-          if (onChange) {
+          setStartPercentage(newStartPercentage);
+          if (onChange)
             onChange({
               value: {
                 start: newStartValue,
                 end: startingValue.current.end,
               },
             });
-          } else setStartPercentage(newStartPercentage);
+          valueRef.current = {
+            start: newStartValue,
+            end: startingValue.current.end,
+          };
 
           break;
         case Dragged.End:
-          if (newEndPercentage > 100) return;
+          if (edgeControlTop.current > 1) return;
 
-          if (onChange) {
+          setEndPercentage(newEndPercentage);
+          if (onChange)
             onChange({
               value: {
                 start: startingValue.current.start,
                 end: newEndValue,
               },
             });
-          } else setEndPercentage(newEndPercentage);
+          valueRef.current = {
+            start: startingValue.current.start,
+            end: newEndValue,
+          };
 
           break;
         case Dragged.Scroll:
-          if (newStartPercentage < 0 || newEndPercentage > 100) return;
+          if (edgeControlBot.current > 1 || edgeControlTop.current > 1) return;
 
-          if (onChange) {
+          setStartPercentage(newStartPercentage);
+          setEndPercentage(newEndPercentage);
+          if (onChange)
             onChange({
               value: {
                 start: newStartValue,
                 end: newEndValue,
               },
             });
-          } else {
-            setStartPercentage(newStartPercentage);
-            setEndPercentage(newEndPercentage);
-          }
+          valueRef.current = {
+            start: newStartValue,
+            end: newEndValue,
+          };
+
           break;
       }
     }
