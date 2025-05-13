@@ -1,0 +1,97 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+
+.scale-scroll-bar {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.scale-scroll-bar.horizontal {
+  width: 200px;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.scale-scroll-bar.vertical {
+  height: 200px;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.scale-scroll-bar > .container {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.scale-scroll-bar > .container.horizontal {
+  flex-direction: column;
+  height: 28px;
+}
+
+.scale-scroll-bar > .container.vertical {
+  width: 28px;
+  height: 100%;
+}
+
+.scale-scroll-bar > .container > .slider-track {
+  background-color: k-color(base-emphasis);
+  border-radius: k-border-radius(md);
+  position: relative;
+}
+
+.scale-scroll-bar > .container > .slider-track.horizontal {
+  width: 100%;
+  height: 16px;
+}
+
+.scale-scroll-bar > .container > .slider-track.vertical {
+  height: 100%;
+  width: 16px;
+}
+
+.scale-scroll-bar > .container > .slider-track > * {
+  position: absolute;
+  background-color: k-color(primary);
+  cursor: pointer;
+}
+
+.scale-scroll-bar > .container > .slider-track > *.horizontal {
+  height: 16px;
+}
+
+.scale-scroll-bar > .container > .slider-track > *.vertical {
+  width: 16px;
+}
+
+.scale-scroll-bar > .container > .slider-track > *:hover {
+  background-color: k-color(primary-hover);
+}
+
+.scale-scroll-bar > .container > .slider-track > .slider-selection {
+  border-radius: k-border-radius(md);
+  z-index: 1;
+}
+
+.scale-scroll-bar > .container > .slider-track > .draghandle {
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 4px solid k-color(primary-emphasis);
+  width: 16px;
+  height: 16px;
+  z-index: 2;
+}
+
+.scale-scroll-bar > .container > .slider-track > .draghandle.horizontal {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.scale-scroll-bar > .container > .slider-track > .draghandle.vertical {
+  left: 50%;
+  transform: translate(-50%, 50%);
+}
+
+.scale-scroll-bar > .container > .slider-track > .draghandle:hover {
+  border-color: k-color(primary-active);
+}
