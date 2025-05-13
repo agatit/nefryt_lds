@@ -1,6 +1,5 @@
 import logging
 import struct
-import time
 import sys
 from multiprocessing import Queue as QueueInit, Process
 from typing import List
@@ -120,9 +119,6 @@ class TrendBase(metaclass=TrendBaseMeta):
 
     def _save(self, data: np.ndarray, timestamp: int):
         try:
-            if timestamp is None:
-                timestamp = int(time.time())
-
             data = data.astype(np.uint16)
             data = np.minimum(data, [np.iinfo(np.uint16).max-1] * len(data))  # FFFF reserved for error
             packed_data = struct.pack('<100H', *data)

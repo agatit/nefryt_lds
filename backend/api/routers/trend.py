@@ -93,7 +93,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
         statement = (
             select(func.count()).
             select_from(lds.TrendData).
-            where(lds.TrendData.Time.in_(trend_timestamps)). # noqa
+            where(lds.TrendData.Time.in_(list(set(trend_timestamps)))). # noqa
             where(lds.TrendData.TrendID.in_(trend_id_list)) # noqa
         )
         with Session(engine) as session:
@@ -109,7 +109,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                                                                                 trend_timestamps_ms, params.size)
 
         statement = (select(lds.TrendData).
-                     where(lds.TrendData.Time.in_(trend_timestamps)). # noqa
+                     where(lds.TrendData.Time.in_(list(set(trend_timestamps)))). # noqa
                      where(lds.TrendData.TrendID.in_(trend_id_list)). # noqa
                      order_by(lds.TrendData.Time)) # noqa
         with Session(engine) as session:
@@ -139,8 +139,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                 for trend_id in one_second_data.keys():
                     result_lists[str(trend_id)].append((((lds_trends_scales[trend_id]["ScaledMax"]
                                                           - lds_trends_scales[trend_id]["ScaledMin"])
-                                                         * (one_second_data[trend_id][
-                                                                -time_data[1] // 10 - 1]
+                                                         * (one_second_data[trend_id][time_data[1] // 10]
                                                             - lds_trends_scales[trend_id]["RawMin"])
                                                          / (lds_trends_scales[trend_id]["RawMax"]
                                                             - lds_trends_scales[trend_id]["RawMin"])
@@ -184,7 +183,7 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
         statement = (
             select(func.count()).
             select_from(lds.TrendData).
-            where(lds.TrendData.Time.in_(trend_timestamps)). # noqa
+            where(lds.TrendData.Time.in_(list(set(trend_timestamps)))). # noqa
             where(lds.TrendData.TrendID == literal(trend_id)) # noqa
         )
         with Session(engine) as session:
@@ -199,7 +198,7 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
         trend_timestamps, trend_timestamps_ms = calculate_page_timestamps_lists(start_pos, trend_timestamps,
                                                                                 trend_timestamps_ms, params.size)
         statement = (select(lds.TrendData).
-                     where(lds.TrendData.Time.in_(trend_timestamps)). # noqa
+                     where(lds.TrendData.Time.in_(list(set(trend_timestamps)))). # noqa
                      where(lds.TrendData.TrendID == literal(trend_id)). # noqa
                      order_by(lds.TrendData.Time)) # noqa
         with Session(engine) as session:
@@ -228,7 +227,7 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
             while time_data and time_data[0] == current_second:
                 if len(one_second_data) != 0:
                     result_list.append((((lds_trend_scales["ScaledMax"] - lds_trend_scales["ScaledMin"])
-                                         * (one_second_data[-time_data[1] // 10 - 1] - lds_trend_scales["RawMin"])
+                                         * (one_second_data[time_data[1] // 10] - lds_trend_scales["RawMin"])
                                          / (lds_trend_scales["RawMax"] - lds_trend_scales["RawMin"])
                                          + lds_trend_scales["ScaledMin"]),
                                         time_data[0], time_data[1]))
