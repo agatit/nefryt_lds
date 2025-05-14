@@ -4,6 +4,7 @@ version = "1.0.0"
 description = "System LDS Backend"
 requires-python = ">=3.10"
 dependencies = [
+    "alembic==1.15.2",
     "bcrypt==4.0.1",
     "connexion[swagger-ui]>=2.6.0",
     "fastapi==0.115.12",

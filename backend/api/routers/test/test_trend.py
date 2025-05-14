@@ -801,7 +801,7 @@ def test_update_trend_param_should_return_not_found_response_code_and_error_when
 
 def calculate_expected_value(trend: lds.Trend, timestamp_ms: int) -> float:
     one_second_data = struct.unpack("H" * 100, binary_data)
-    return ((trend.ScaledMax - trend.ScaledMin) * (one_second_data[-timestamp_ms // 10 - 1] - trend.RawMin)
+    return ((trend.ScaledMax - trend.ScaledMin) * (one_second_data[timestamp_ms // 10] - trend.RawMin)
             / (trend.RawMax - trend.RawMin) + trend.ScaledMin)
 
 

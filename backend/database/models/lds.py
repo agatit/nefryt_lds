@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
-    Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey
+    Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint
 from sqlmodel import SQLModel, Field
 from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase
 
@@ -95,7 +95,7 @@ class TrendGroup(SQLModel, table=True):
 
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True, nullable=False))
     Name: str = Field(sa_column=Column(String(100, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
-    AnalisisOnly: bool = Field(default=False, nullable=False)
+    AnalisisOnly: bool = Field(False, nullable=False, sa_column_kwargs={"server_default": "0"})
 
 
 class Unit(SQLModel, table=True):
@@ -161,7 +161,7 @@ class PipelineNode(SQLModel, table=True):
             ForeignKey("lds.Node.ID", ondelete="CASCADE", onupdate="CASCADE"),
             nullable=False
         ))
-    First: bool = Field(False, nullable=False)
+    First: bool = Field(False, nullable=False, sa_column_kwargs={"server_default": "0"})
 
 
 class PipelineParam(SQLModel, table=True):
@@ -189,6 +189,11 @@ class PipelineParam(SQLModel, table=True):
 class Trend(TrendBase, table=True):
     __tablename__ = 'Trend'
     __table_args__ = (
+        ForeignKeyConstraint(
+            ['TrendDefID'], ['lds.TrendDef.ID'],
+            name='Trend_TrendDef_fk',
+            ondelete='CASCADE'
+        ),
         {'schema': 'lds'}
     )
 
@@ -206,26 +211,41 @@ class TrendParamDef(SQLModel, table=True):
         ForeignKey('lds.TrendDef.ID'),
         nullable=False, index=True))
     Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
-    DataType: str | None = Field(None, sa_column=Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    DataType: str | None = Field(None, sa_column=Column(VARCHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
 class Event(SQLModel, table=True):
     __tablename__ = 'Event'
     __table_args__ = (
+        ForeignKeyConstraint(
+            ['EventDefID'], ['lds.EventDef.ID'],
+            name='Event_EventDef_fk',
+            onupdate='CASCADE',
+            ondelete='CASCADE'
+        ),
+        ForeignKeyConstraint(
+            ['MethodID'], ['lds.Method.ID'],
+            name='Event_Method_fk',
+            onupdate='CASCADE',
+            ondelete='CASCADE'
+        ),
         {'schema': 'lds'}
     )
 
-    ID: int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
+    ID: int | None = Field(
+        default=None,
+        primary_key=True,
+        sa_column_kwargs={"autoincrement": True},
+        sa_type=BigInteger
+    )
     EventDefID: str = (
         Field(sa_column=Column(
             CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
-            ForeignKey("lds.EventDef.ID", ondelete="CASCADE", onupdate="CASCADE"),
             nullable=False)
         ))
     MethodID: int = Field(
         sa_column=Column(
             Integer,
-            ForeignKey("lds.Method.ID", ondelete="CASCADE", onupdate="CASCADE"),
             nullable=False
         ))
     BeginDate: datetime = Field(nullable=False)
@@ -238,6 +258,12 @@ class Event(SQLModel, table=True):
 class MethodParam(SQLModel, table=True):
     __tablename__ = 'MethodParam'
     __table_args__ = (
+        ForeignKeyConstraint(
+            ['MethodID'], ['lds.Method.ID'],
+            name='MethodParam_Method_fk',
+            onupdate='CASCADE',
+            ondelete='CASCADE'
+        ),
         {'schema': 'lds'}
     )
 
@@ -246,7 +272,6 @@ class MethodParam(SQLModel, table=True):
     MethodID: int = Field(
         sa_column=Column(
             Integer,
-            ForeignKey("lds.Method.ID", ondelete="CASCADE", onupdate="CASCADE"),
             nullable=False
         ))
     Value: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))

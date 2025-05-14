@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Query, Depends
+from fastapi.encoders import jsonable_encoder
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, Engine
 from sqlalchemy.exc import IntegrityError
@@ -37,7 +38,7 @@ async def create_link(link: Annotated[LinkBase, Body()], engine: Annotated[Engin
             session.commit()
             session.refresh(link)
         content = link.model_dump(by_alias=True)
-        return JSONResponse(content=content, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=jsonable_encoder(content), status_code=status.HTTP_201_CREATED)
     except IntegrityError:
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating link')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)

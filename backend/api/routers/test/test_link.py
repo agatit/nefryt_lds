@@ -145,7 +145,7 @@ def test_get_link_by_id_should_return_not_found_response_code_and_error_when_no_
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
 def test_update_link_should_return_ok_response_code_and_link_of_given_id(add_lds_objects):
-    updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 99.99}
+    updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': '99.99'}
     response = test_client.put("/link/" + str(link2.ID), json=updated_link_dict)
     assert response.status_code == status.HTTP_200_OK
     returned_link = response.json()
@@ -156,7 +156,7 @@ def test_update_link_should_return_ok_response_code_and_link_of_given_id(add_lds
 
 
 def test_update_link_should_return_not_found_response_code_and_error_when_no_link_with_given_id():
-    updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 99.99}
+    updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': '99.99'}
     response = test_client.put("/link/" + str(link2.ID), json=updated_link_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -166,7 +166,7 @@ def test_update_link_should_return_not_found_response_code_and_error_when_no_lin
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
 def test_update_link_should_return_conflict_response_code_and_error_when_no_node_with_given_id(add_lds_objects):
-    updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 5, 'Length': 99.999}
+    updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 5, 'Length': '99.99'}
     response = test_client.put("/link/" + str(link2.ID), json=updated_link_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()

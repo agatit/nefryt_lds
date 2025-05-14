@@ -7,7 +7,6 @@ class TrendBase(SQLModel):
     TrendDefID: str = Field(
         sa_column=Column(
             CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
-            ForeignKey("lds.TrendDef.ID", ondelete="CASCADE"),
             nullable=False))
     RawMin: int = Field()
     RawMax: int = Field()

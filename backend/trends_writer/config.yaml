@@ -2,4 +2,4 @@ db_uri: mssql+pyodbc://sa:Onyks$us@owl.agatit.pl:1449/NefrytLDS_Zygmuntow_2025?d
 verbosity: INFO
 modbus_port: 502
 use_profiler: True
-profiler_filename: profiler_queues2.log
+profiler_filename: profiler_queues3.log
