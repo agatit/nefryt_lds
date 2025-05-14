@@ -21,7 +21,7 @@ class TrendBase(SQLModel):
                                    CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
                                    ForeignKey('lds.Unit.ID'),
                                    nullable=True))
-    Color: int | None = Field(None, sa_column=Column(SmallInteger, nullable=True))
+    Color: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
     Symbol: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
     NodeID: int | None = Field(None,
                                sa_column=Column(
