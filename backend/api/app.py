@@ -13,14 +13,14 @@ setup_engine()
 app = FastAPI(title='Nefryt LDS API',
               dependencies=[Depends(get_engine)])
 add_pagination(app)
+app.include_router(auth_router)
+app.include_router(trend_router)
+app.include_router(template_router)
+app.include_router(trend_defs_router)
 app.include_router(events_router)
 app.include_router(event_defs_router)
-app.include_router(trend_defs_router)
-app.include_router(trend_router)
-app.include_router(auth_router)
 app.include_router(link_router)
 app.include_router(node_router)
-app.include_router(template_router)
 
 
 origins = ['http://localhost:8080',

@@ -13,3 +13,4 @@ from .login import Login
 from .node import LdsNodeBase, EditorNodeBase, UpdateNode, Node, NodeOut
 from .trend_data_single import TrendDataSingle
 from .template import TemplateBase, TemplateOut, UpdateTemplate
+from .axis import Axis
