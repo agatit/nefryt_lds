@@ -1,7 +1,2 @@
---- 
-
-db_uri: mssql+pyodbc://sa:Onyks$us@owl.agatit.pl:1449/NefrytLDS_Zygmuntow_2025?driver=ODBC+Driver+17+for+SQL+Server
-test_db_uri: mssql+pyodbc://sa:{test_db_password}@localhost:7768/NefrytLDS_Test_Database?driver=ODBC+Driver+17+for+SQL+Server
-server_url_for_tests: mssql+pyodbc://sa:{test_db_password}@localhost:7768/master?driver=ODBC+Driver+17+for+SQL+Server
-test_db_name: NefrytLDS_Test_Database
-verbosity: INFO # DEBUG, WARNING, ERROR, ...
+db_uri: mssql+pyodbc://sa:{db_password}@localhost:7768/NefrytLDS_Zygmuntow_2025?driver=ODBC+Driver+17+for+SQL+Server
+verbosity: INFO

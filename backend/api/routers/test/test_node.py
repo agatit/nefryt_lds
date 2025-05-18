@@ -6,7 +6,7 @@ from starlette import status
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
-from api.db import get_engine, get_test_engine
+from db import get_engine
 from api.routers.security import get_user_token
 from database import lds, editor
 import pytest
@@ -53,7 +53,6 @@ def reset_node_and_link_objects():
     return [lds_nodes_list, editor_nodes_list, [link]]
 
 
-app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
@@ -107,16 +106,16 @@ def test_list_nodes_should_return_ok_response_code_and_default_page_data(add_lds
 
 
 def test_create_node_should_return_created_response_code_and_created_node_data():
-    node_dict = {'ID': 1, 'Type': 'type', 'Name': 'name', 'EditorParams': {'PosX': 22, 'PosY': 122}}
+    node_dict = {'Type': 'type', 'Name': 'name', 'EditorParams': {'PosX': 22, 'PosY': 122}}
     response = test_client.post("/node", json=node_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_node = response.json()
-    assert returned_node['ID'] == node_dict['ID']
+    assert returned_node['ID'] == 1000
     assert returned_node['Type'] == node_dict['Type']
     assert returned_node['Name'] == node_dict['Name']
     assert returned_node['EditorParams']['PosX'] == node_dict['EditorParams']['PosX']
     assert returned_node['EditorParams']['PosY'] == node_dict['EditorParams']['PosY']
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         lds_nodes_count = session.execute(select(func.count()).select_from(lds.Node)).fetchall()[0][0]
         editor_nodes_count = session.execute(select(func.count()).select_from(editor.Node)).fetchall()[0][0]
     assert lds_nodes_count == 1
@@ -124,20 +123,10 @@ def test_create_node_should_return_created_response_code_and_created_node_data()
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_create_node_should_return_conflict_response_code_and_error_when_id_not_unique(add_lds_objects):
-    node_dict = {'ID': 1, 'Type': 'type', 'Name': 'name', 'PosX': 22, 'PosY': 122}
-    response = test_client.post("/node", json=node_dict)
-    assert response.status_code == status.HTTP_409_CONFLICT
-    error = response.json()
-    assert error['code'] == status.HTTP_409_CONFLICT
-    assert error['message'] == 'Integrity error when creating node'
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
 def test_delete_node_by_id_should_return_no_content_response_code_and_remove_node(add_lds_objects):
     response = test_client.delete("/node/" + str(lds_node1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         lds_nodes_count = session.execute(select(func.count()).select_from(lds.Node)).fetchall()[0][0]
         editor_nodes_count = session.execute(select(func.count()).select_from(editor.Node)).fetchall()[0][0]
     assert lds_nodes_count == 1

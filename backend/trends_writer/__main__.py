@@ -1,17 +1,13 @@
+import asyncio
 import logging
+from trends_writer.config import setup_engine
+from trends_writer.profiler import Profiler
 from . import modbus
 from . import plant
 
 
 if __name__ == '__main__':
-
-
-    app = modbus.get_server(plant.PipePlant())
-
-    logging.info('Server started\n')
-    try:
-        app.serve_forever()
-    finally:
-        app.shutdown()
-        app.server_close()
-        logging.info('Server stopped')
+    logging.info('Server started')
+    setup_engine()
+    Profiler.init()
+    asyncio.run(modbus.run_server(plant.PipePlant()))

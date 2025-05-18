@@ -1,35 +1,44 @@
+import atexit
 import time
-from sqlalchemy import select, and_
-import numpy as np
-import threading
-
+from multiprocessing import Queue
+from sqlalchemy import select, literal
+from sqlalchemy.orm import Session
 from database import lds
-from .db import global_session, Session
+from db import get_engine
+from .config import Settings
+from .profiler import Profiler
 from .trend import TrendQuick
 
-class PipePlant:
-    __list = []
 
+class PipePlant:
     def __init__(self):
         self.trends = []
+        self.queues = {}
         self.read_trends()
+        atexit.register(self.shutdown_processes)
 
     def read_trends(self):
+        stmt = (select(lds.Trend)
+                .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID)  # noqa
+                .where(lds.TrendDef.ID == literal('QUICK')))
+        with Session(get_engine()) as session:
+            result = session.execute(stmt).fetchall()
 
-        # pobranie wszystkich trendow "QUICK"
-        stmt = select([lds.Trend]) \
-            .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) \
-            .where(lds.TrendDef.ID == 'QUICK')        
-        result = global_session.execute(stmt).fetchall()
-
-        self.trends = []
         for trend in result:
-            quickTrend = TrendQuick(trend[0].ID)
-            self.trends.append(quickTrend)
+            queue = Queue()
+            new_trend_quick = TrendQuick(trend[0].ID, queue)
+            self.trends.append(new_trend_quick)
+            self.queues[new_trend_quick.register] = new_trend_quick.queue
 
     def update(self, register, data):
-        trend: TrendQuick
+            if Settings.use_profiler:
+                timestamp = round(time.time())
+                Profiler.queue.put((1, timestamp))
+                self.queues[register].put((data, timestamp))
+            else:
+                self.queues[register].put((data, round(time.time())))
+
+    def shutdown_processes(self):
         for trend in self.trends:
-            if trend.register == register:
-                # trend.update(np.array(data), round(time.time()))
-                threading.Thread(target=trend.update, args=(np.array(data), round(time.time()), Session() )).start()
+           trend.queue.put(None)
+           trend.process.join()

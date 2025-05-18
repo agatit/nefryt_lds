@@ -6,7 +6,7 @@ from starlette import status
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
-from api.db import get_engine, get_test_engine
+from db import get_engine
 from api.routers.security import get_user_token
 from database import lds
 import pytest
@@ -16,7 +16,7 @@ node2 = lds.Node(ID=2, Type='type', Name='name')
 link1 = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
 link2 = lds.Link(ID=2, BeginNodeID=2, EndNodeID=1)
 links_list = [link1, link2]
-lds_objects = [node1, node2, link1, link2]
+lds_objects = [[node1, node2], [link1, link2]]
 
 
 def reset_link_objects():
@@ -27,9 +27,9 @@ def reset_link_objects():
     link1 = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
     link2 = lds.Link(ID=2, BeginNodeID=2, EndNodeID=1)
     links_list = [link1, link2]
-    lds_objects = [node1, node2, link1, link2]
+    lds_objects = [[node1, node2], [link1, link2]]
 
-    return [lds_objects]
+    return lds_objects
 
 
 def reset_node_objects():
@@ -42,7 +42,6 @@ def reset_node_objects():
     return [lds_objects]
 
 
-app.dependency_overrides[get_engine] = get_test_engine  # type: ignore[attr-defined]
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
 
@@ -95,34 +94,24 @@ def test_list_links_should_return_ok_response_code_and_default_page_data(add_lds
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
 def test_create_link_should_return_created_response_code_and_created_link_data(add_lds_objects):
-    link_dict = {'ID': 1, 'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 100.11}
+    link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 100.11}
     response = test_client.post("/link", json=link_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_link = response.json()
-    assert returned_link['ID'] == link_dict['ID']
+    assert returned_link['ID'] == 3
     assert returned_link['BeginNodeID'] == link_dict['BeginNodeID']
     assert returned_link['EndNodeID'] == link_dict['EndNodeID']
     assert returned_link['Length'] == link_dict['Length']
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         links_count = session.execute(select(func.count()).select_from(lds.Link)).fetchall()[0][0]
     assert links_count == 1
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_create_link_should_return_conflict_response_code_and_error_when_id_not_unique(add_lds_objects):
-    link_dict = {'ID': link1.ID, 'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 100.11}
-    response = test_client.post("/link", json=link_dict)
-    assert response.status_code == status.HTTP_409_CONFLICT
-    error = response.json()
-    assert error['code'] == status.HTTP_409_CONFLICT
-    assert error['message'] == 'Integrity error when creating link'
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
 def test_delete_link_by_id_should_return_no_content_response_code_and_remove_link(add_lds_objects):
     response = test_client.delete("/link/" + str(link1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    with Session(get_test_engine()) as session:
+    with Session(get_engine()) as session:
         links_count = session.execute(select(func.count()).select_from(lds.Link)).fetchall()[0][0]
     assert links_count == 1
 

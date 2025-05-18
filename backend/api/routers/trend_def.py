@@ -7,22 +7,22 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
 from .security import get_user_token
+from .utils import strip_strings
 from ..custom_page import CustomParams, use_custom_page, CustomPage
-from ..db import get_engine
-from ..routers.mapper import map_lds_trend_def_to_trend_def
-from ..schemas import TrendDef, Error
+from db import get_engine
+from ..schemas import Error, TrendDefBase
 
 router = APIRouter(prefix="/trend_def", tags=["trend_def"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=CustomPage[TrendDef] | Error)
+@router.get('', response_model=CustomPage[TrendDefBase] | Error)
 async def list_trend_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
                           _: Annotated[None, Depends(use_custom_page)]):
     try:
-        statement = select(lds.TrendDef).order_by(lds.TrendDef.ID)
+        statement = select(lds.TrendDef).order_by(lds.TrendDef.ID) # noqa
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
-        page.items = [map_lds_trend_def_to_trend_def(lds_trend_def) for lds_trend_def in page.items]
+        page.items = [strip_strings(lds_trend_def) for lds_trend_def in page.items]
         return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_defs(): ' + str(e))

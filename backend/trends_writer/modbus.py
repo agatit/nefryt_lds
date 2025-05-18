@@ -1,45 +1,42 @@
-from socketserver import TCPServer
-
-import umodbus
-import umodbus.server.tcp
-from umodbus.functions import create_function_from_request_pdu
-
-from .config import config                        
-
-
-class ModbusRequest(umodbus.server.tcp.RequestHandler):
-    pipe_plant = None
-
-    def __init__(self, request, client_address, server):
-
-        super().__init__(request, client_address, server)
+import asyncio
+import logging
+from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
+from pymodbus.server import StartAsyncTcpServer
+from .config import Settings
+from .plant import PipePlant
 
 
-    def process(self, request_adu):
-        """ Process request ADU and return response.
+class PipePlantDataBlock(ModbusSequentialDataBlock):
+    def __init__(self, address: int, values: list, pipe_plant: PipePlant):
+        super().__init__(address, values)
+        self.pipe_plant = pipe_plant
 
-        :param request_adu: A bytearray containing the ADU request.
-        :return: A bytearray containing the response of the ADU request.
-        """
-        meta_data = self.get_meta_data(request_adu)
-        request_pdu = self.get_request_pdu(request_adu)
-        function = create_function_from_request_pdu(request_pdu)
+    def setValues(self, address, values):
+        # logging.info(f"setValues: address={address}, relative = {address - self.address}, values={values}")
+        try:
+            self.pipe_plant.update(address - self.address, values)
+            super().setValues(address, values)
+        except Exception as e:
+            logging.warning("setValues exception: " + str(e))
 
-        self.pipe_plant.update(function.starting_address, function.values)
-
-        response_pdu = function.create_response_pdu()
-        response_adu = self.create_response_adu(meta_data, response_pdu)
-
-        return response_adu
+    def getValues(self, address, count=1):
+        logging.info(f"getValues: address={address}, relative = {address - self.address}, count={count}")
+        return super().getValues(address - self.address, count)
 
 
-def get_server(pipe_plant):
-    umodbus.conf.SIGNED_VALUES = True
-    TCPServer.allow_reuse_address = True
-
-    ModbusRequest.pipe_plant = pipe_plant
-
-    app = umodbus.server.tcp.get_server(TCPServer, ('', config.get("modbus_port", 502)), ModbusRequest)
-
-    return app
-
+async def run_server(pipe_plant: PipePlant, port: int | None = None):
+    datablock = PipePlantDataBlock(1, [0] * 1000, pipe_plant)
+    slave_context = ModbusSlaveContext(
+        hr=datablock,
+        di=ModbusSequentialDataBlock.create(),
+        co=ModbusSequentialDataBlock.create(),
+        ir=ModbusSequentialDataBlock.create()
+    )
+    server_context = ModbusServerContext(slaves=slave_context, single=True)
+    try:
+        await StartAsyncTcpServer(
+            context=server_context,
+            address=('', port if port else Settings.modbus_port),
+        )
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        logging.info("Modbus server stopped")

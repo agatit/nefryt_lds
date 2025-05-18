@@ -1,34 +1,59 @@
-from pydantic import BaseModel, Field
+from sqlalchemy import Column, Integer, ForeignKey, CHAR, Float, String, SmallInteger, Identity
+from sqlmodel import SQLModel, Field
 
 
-class Trend(BaseModel):
-    id: int | None = Field(None, alias='ID')
-    trend_group_id: int | None = Field(None, alias='TrendGroupID')
-    format: str | None = Field(None, alias='Format')
-    symbol: str | None = Field(None, alias='Symbol')
-    color: int | None = Field(None, alias='Color')
-    node_id: int | None = Field(None, alias='NodeID')
-    trend_def_id: str = Field(alias='TrendDefID')
-    time_exponent: int | None = Field(None, alias='TimeExponent')
-    unit: str | None = Field(None, alias='UnitID')
-    name: str | None = Field(None, alias='Name')
-    raw_min: int = Field(alias="RawMin")
-    raw_max: int = Field(alias="RawMax")
-    scaled_min: float = Field(alias="ScaledMin")
-    scaled_max: float = Field(alias="ScaledMax")
+class TrendBase(SQLModel):
+    ID: int = Field(sa_column=Column(Integer, Identity(start=1000, increment=1), nullable=False, primary_key=True))
+    TrendDefID: str = Field(
+        sa_column=Column(
+            CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
+            ForeignKey("lds.TrendDef.ID", ondelete="CASCADE"),
+            nullable=False))
+    RawMin: int = Field()
+    RawMax: int = Field()
+    ScaledMin: float = Field(sa_column=Column(Float(53), nullable=False))
+    ScaledMax: float = Field(sa_column=Column(Float(53), nullable=False))
+    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    TrendGroupID: int | None = Field(None)
+    TimeExponent: int | None = Field(None)
+    Format: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    UnitID: str | None = Field(None,
+                               sa_column=Column(
+                                   CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
+                                   ForeignKey('lds.Unit.ID'),
+                                   nullable=True))
+    Color: int | None = Field(None, sa_column=Column(SmallInteger, nullable=True))
+    Symbol: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    NodeID: int | None = Field(None,
+                               sa_column=Column(
+                                   Integer,
+                                   ForeignKey("lds.Node.ID", ondelete='SET NULL'),
+                                   nullable=True))
 
 
-class UpdateTrend(BaseModel):
-    trend_group_id: int | None = Field(None, alias='TrendGroupID')
-    format: str | None = Field(None, alias='Format')
-    symbol: str | None = Field(None, alias='Symbol')
-    color: int | None = Field(None, alias='Color')
-    node_id: int | None = Field(None, alias='NodeID')
-    trend_def_id: str | None = Field(None, alias='TrendDefID')
-    time_exponent: int | None = Field(None, alias='TimeExponent')
-    unit: str | None = Field(None, alias='UnitID')
-    name: str | None = Field(None, alias='Name')
-    raw_min: int | None = Field(None, alias="RawMin")
-    raw_max: int | None = Field(None, alias="RawMax")
-    scaled_min: float | None = Field(None, alias="ScaledMin")
-    scaled_max: float | None = Field(None, alias="ScaledMax")
+class UpdateTrend(SQLModel):
+    TrendDefID: str | None = Field(None,
+                                   sa_column=Column(
+                                       CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
+                                       ForeignKey("lds.TrendDef.ID", ondelete="CASCADE"),
+                                       nullable=False))
+    RawMin: int | None = Field(None)
+    RawMax: int | None = Field(None)
+    ScaledMin: float | None = Field(None, sa_column=Column(Float(53), nullable=False))
+    ScaledMax: float | None = Field(None, sa_column=Column(Float(53), nullable=False))
+    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    TrendGroupID: int | None = Field(None)
+    TimeExponent: int | None = Field(None)
+    Format: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    UnitID: str | None = Field(None,
+                               sa_column=Column(
+                                   CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
+                                   ForeignKey('lds.Unit.ID'),
+                                   nullable=True))
+    Color: int | None = Field(None, sa_column=Column(SmallInteger, nullable=True))
+    Symbol: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    NodeID: int | None = Field(None,
+                               sa_column=Column(
+                                   Integer,
+                                   ForeignKey("lds.Node.ID", ondelete='SET NULL'),
+                                   nullable=True))
