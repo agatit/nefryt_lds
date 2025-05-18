@@ -30,7 +30,7 @@ export default function CursorBubble({ text, ...divProps }: CursorBubbleProps) {
         ...divProps.style,
       }}
     >
-      <Typography.p margin={0}>{text}</Typography.p>
+      <Typography.p style={{ marginBottom: 0 }}>{text}</Typography.p>
     </div>
   );
 }

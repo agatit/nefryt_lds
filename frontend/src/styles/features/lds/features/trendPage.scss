@@ -57,6 +57,49 @@ main {
   margin: 0 k-spacing(1) 0 k-spacing(1);
 }
 
+.chart-edit-container {
+  z-index: 10002;
+  width: 60vw;
+  height: 50vh;
+  display: flex;
+  flex-direction: row;
+  gap: k-spacing(10);
+}
+
+.chart-edit-container > * {
+  flex: 1 0 0%;
+  height: 100%;
+  width: 100%;
+}
+
+.chart-edit-container > .separator {
+  flex: 0 0 1px;
+  background-color: k-color(border);
+}
+
+.chart-edit-container > .selected-trends {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-edit-container > .selected-trends > .trend-panel-bar {
+  flex: 3 0 0%;
+}
+
+.chart-edit-container > .selected-trends > .create-axis-area {
+  flex: 1 0 0%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: k-border-radius(xxxl);
+  border: 1px solid k-color(border);
+  margin: k-spacing(2);
+}
+
+.item-container > .item {
+  padding: k-spacing(1) k-spacing(5) k-spacing(1) k-spacing(5);
+}
+
 // kendo customization
 .k-tabstrip-content {
   padding-block: 0;

@@ -6,6 +6,7 @@
   background-color: k-color(app-surface);
   border: 1px solid k-color(border);
   border-radius: k-border-radius(md);
+  z-index: 20000;
 }
 
 .cursor-bubble > * {

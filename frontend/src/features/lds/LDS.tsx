@@ -6,7 +6,7 @@ import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { AuthContextProvider } from "../../contexts/authContext";
 import { DrawerRouterContainer } from "onyks_shared_kendo";
 import KendoLocalizationWrapper from "../../components/KendoLocalizationWrapper";
-import TrendsPage from "./features/TrendsPage";
+import TrendsPage from "./features/trends_page/TrendsPage";
 import TrendConfigurationPage from "./features/TrendConfigurationPage";
 import LeakProbabilityPage from "./features/LeakProbabilityPage";
 import EventsPage from "./features/EventsPage";
