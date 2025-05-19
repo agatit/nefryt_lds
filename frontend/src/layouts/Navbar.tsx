@@ -8,7 +8,7 @@ import "../styles/layouts/navbar.scss";
 import { Typography } from "@progress/kendo-react-common";
 
 const companyPageLink: string = "https://www.agatit.pl";
-const logoImage: string = "/favicon.ico";
+const logoImage: string = "/img/Agat It Logo.png";
 
 export interface NavbarProps {
   title?: string;

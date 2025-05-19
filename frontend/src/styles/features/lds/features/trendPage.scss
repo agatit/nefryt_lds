@@ -1,11 +1,111 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
 main {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+}
+
+.chart-container {
+  flex: 4 0 0;
+  overflow-y: hidden;
+}
+
+.detail-panel-tabs {
+  width: 100%;
+  flex-grow: 1;
+}
+
+.detail-panel-panel-bar {
+  width: 100%;
+}
+
+.chart-config-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: k-spacing(6);
+  width: 100%;
+}
+
+.chart-config-content > .item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.chart-config-content > .item > .legend-container {
+  display: flex;
+  justify-content: center;
+  align-items: left;
+  flex-direction: column;
+  width: 100%;
+}
+
+.chart-config-content > .item > .item-row {
+  display: flex;
+  flex-direction: row;
+  gap: k-spacing(2);
+}
+
+.k-panelbar-content > .item {
+  display: flex;
+  margin: 0 k-spacing(1) 0 k-spacing(1);
+}
+
+.chart-edit-container {
+  z-index: 10002;
+  width: 60vw;
+  height: 50vh;
+  display: flex;
+  flex-direction: row;
+  gap: k-spacing(10);
+}
+
+.chart-edit-container > * {
+  flex: 1 0 0%;
+  height: 100%;
+  width: 100%;
+}
+
+.chart-edit-container > .separator {
+  flex: 0 0 1px;
+  background-color: k-color(border);
+}
+
+.chart-edit-container > .selected-trends {
   display: flex;
   flex-direction: column;
 }
 
-.trend-select-container {
+.chart-edit-container > .selected-trends > .trend-panel-bar {
+  flex: 3 0 0%;
+}
+
+.chart-edit-container > .selected-trends > .create-axis-area {
+  flex: 1 0 0%;
   display: flex;
-  flex-direction: row;
   justify-content: center;
-  gap: 20px;
+  align-items: center;
+  border-radius: k-border-radius(xxxl);
+  border: 1px solid k-color(border);
+  margin: k-spacing(2);
+}
+
+.item-container > .item {
+  padding: k-spacing(1) k-spacing(5) k-spacing(1) k-spacing(5);
+}
+
+// kendo customization
+.k-tabstrip-content {
+  padding-block: 0;
+  padding-inline: 0;
+}
+
+.k-tabstrip-content > div {
+  width: 100%;
 }

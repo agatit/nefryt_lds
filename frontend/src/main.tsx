@@ -7,11 +7,11 @@ import "./lib/i18n";
 import App from "./App.tsx";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <CookiesProvider>
-        <App />
-      </CookiesProvider>
-    </BrowserRouter>
-  </StrictMode>
+  // <StrictMode>
+  <BrowserRouter>
+    <CookiesProvider>
+      <App />
+    </CookiesProvider>
+  </BrowserRouter>
+  // </StrictMode>
 );
