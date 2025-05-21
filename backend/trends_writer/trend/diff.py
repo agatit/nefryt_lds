@@ -8,6 +8,8 @@ from . import TrendBase
 class TrendDiff(TrendBase):
     def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue | None):
         super().__init__(_id, queue, db_uri, profiler_queue)
+        if self.params['TREND_A'] == self.params['TREND_B']:
+            raise BaseException('Trend A has to be different then Trend B')
 
         self.parent_data = {
             int(self.params['TREND_A']): {

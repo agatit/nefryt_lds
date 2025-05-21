@@ -114,9 +114,13 @@ class TrendBase(metaclass=TrendBaseMeta):
             results = session.execute(stmt).all()
 
         for trend, trend_def in results:
-            trend_class = getattr(sys.modules["trends_writer.trend"], TREND_CLASSES[trend_def.ID.strip()])
-            trend = trend_class(trend.ID, QueueInit(), self.db_uri, self.profiler_queue, self.id)
-            self.children.append(trend)
+            try:
+                trend_class = getattr(sys.modules["trends_writer.trend"], TREND_CLASSES[trend_def.ID.strip()])
+                trend = trend_class(trend.ID, QueueInit(), self.db_uri, self.profiler_queue, self.id)
+                self.children.append(trend)
+            except BaseException as e:
+                logging.warning(f"{self.__class__.__name__} ({trend.id}) child init error: {e}", exc_info=True)
+
 
     def _save(self, data: np.ndarray, timestamp: int):
         try:

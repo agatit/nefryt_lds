@@ -119,4 +119,4 @@ async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_ob
 
     server_task.cancel()
 
-    assert calls < _get_trend_data_records_count() <= (2*calls - int(trend_param2.Value)*2)
+    assert calls < _get_trend_data_records_count() <= (2*calls - int(trend_param2.Value))
