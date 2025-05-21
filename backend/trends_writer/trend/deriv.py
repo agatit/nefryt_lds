@@ -8,10 +8,10 @@ class TrendDeriv(TrendFilter):
         if len(self.storage) >= (2 * self.window_size + 1) * self.block_size:
             size = int(self.window_size * self.block_size)
 
-            kernel = np.array(range(-size, size + 1))
-            norm = 1 / (self.block_size * self.window_size * (self.block_size * self.window_size + 1) / 2)
-
-            result = signal.convolve(np.flip(self.storage), kernel, mode='valid') * norm
+            kernel = np.arange(-size, size + 1)
+            dt = 1 / self.block_size
+            norm = 1 / (dt * np.sum(kernel ** 2))
+            result = signal.convolve(self.storage, kernel, mode='valid') * -norm
 
             # derivative is signed
             result = np.maximum(result, [np.iinfo(np.int16).min + 1] * len(result))  # FFFF reserved for error

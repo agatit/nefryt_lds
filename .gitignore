@@ -4,3 +4,5 @@
 electron
 packages
 backend/.env
+backend/*.lock
+.idea
