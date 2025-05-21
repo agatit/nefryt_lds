@@ -5,9 +5,6 @@ from . import TrendFilter
 
 class TrendMean(TrendFilter):
     def calculate(self) -> np.ndarray | None:
-        # if len(self.result) == self.output_size then
-        # kernel size must be (2 * self.output_size * 100) + 1 and
-        # input size must be (2 * self.window_size + 1) * self.output_size
         if len(self.storage) >= (2 * self.window_size + 1) * self.block_size:
             kernel = [1] * (2 * self.window_size * self.block_size + 1)
             norm = 1 / len(kernel)

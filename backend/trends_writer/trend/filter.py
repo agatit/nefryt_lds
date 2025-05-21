@@ -11,8 +11,8 @@ from db import get_engine
 
 
 class TrendFilter(TrendBase):
-    def __init__(self, _id: int, queue: Queue, profiler_queue: Queue | None = None, parent_id: int | None = None):
-        super().__init__(_id, queue, profiler_queue)
+    def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue | None = None, parent_id: int | None = None):
+        super().__init__(_id, queue, db_uri, profiler_queue)
         self.parent_id = parent_id
         self.window_size = int(float(self.params['FILTER_WINDOW']))
         self.storage_timestamp = 0

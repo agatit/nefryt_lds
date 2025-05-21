@@ -3,10 +3,9 @@ import struct
 from unittest.mock import Mock, patch
 import numpy as np
 import pytest
-
 from trends_writer.trend import TrendDeriv
 
-
+random.seed(42)
 saved_results = []
 timestamp_offset = 10
 
@@ -44,13 +43,13 @@ def test_trend_deriv_calculates_derivative_correctly_for_constant_increasing_tre
                     trend = TrendDeriv(1, mocked_queue, None, None)
 
                     for i in range(5):
-                        x = np.arange(i*100, (i+1)*100, a)
-                        trend.update(x, i+timestamp_offset, None)
+                        x = np.arange(i * 100, (i + 1) * 100, a)
+                        trend.update(x, i + timestamp_offset, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
         assert len(values) == 1
-        assert values[0] == a*100
+        assert values[0] == a * 100
         assert saved_timestamp == i + filter_window_value + timestamp_offset
 
 
@@ -73,7 +72,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_trend()
 
                     for i in range(7):
                         x = [500 + (-2 + random.randint(0, 5)) for _ in range(100)]
-                        trend.update(x, i+timestamp_offset, None)
+                        trend.update(x, i + timestamp_offset, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
@@ -91,7 +90,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_decreas
         self.params = {'FILTER_WINDOW': filter_window_value}
 
     def mock_initiate_buffer(self, _, __, ___):
-        storage = [start_value - ii*5 + (-5 + random.randint(0, 11)) for ii in range(100)]
+        storage = [start_value - ii * 5 + (-5 + random.randint(0, 11)) for ii in range(100)]
         self.storage = np.array(storage)
 
     with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
@@ -102,13 +101,13 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_decreas
                     trend = TrendDeriv(1, mocked_queue, None, None)
 
                     for i in range(5):
-                        x = [start_value - i*100*a - ii*5 + (-5 + random.randint(0, 11)) for ii in range(100)]
-                        trend.update(x, i+10, None)
+                        x = [start_value - i * 100 * a - ii * 5 + (-5 + random.randint(0, 11)) for ii in range(100)]
+                        trend.update(x, i + 10, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
         for value in values:
-            assert -a*100 - a <= value <= -a*100 + a
+            assert -a * 100 - a <= value <= -a * 100 + a
         assert saved_timestamp == i + filter_window_value + timestamp_offset
 
 
@@ -130,15 +129,15 @@ def test_trend_deriv_calculates_derivative_correctly_for_changing_monotonic_tren
 
                     for i in range(6):
                         if i < 3:
-                            start = i*100
-                            end = (i+1)*100
+                            start = i * 100
+                            end = (i + 1) * 100
                             step = 1
                         else:
-                            start = (6-i)*100-1
-                            end = (5-i)*100-1
+                            start = (6 - i) * 100 - 1
+                            end = (5 - i) * 100 - 1
                             step = -1
                         x = np.arange(start, end, step)
-                        trend.update(x, i+10, None)
+                        trend.update(x, i + 10, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         if i < len(saved_results) // 2:
@@ -156,7 +155,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_plateau_trend():
         self.params = {'FILTER_WINDOW': filter_window_value}
 
     def mock_initiate_buffer(self, _, __, ___):
-        self.storage = np.arange(0, 100*a, a)
+        self.storage = np.arange(0, 100 * a, a)
 
     with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
         with patch.object(TrendDeriv, 'start_process_queue', new=lambda _: None):
@@ -167,13 +166,13 @@ def test_trend_deriv_calculates_derivative_correctly_for_plateau_trend():
 
                     for i in range(16):
                         if i % 8 == 0:
-                            x = np.arange(0, 100*a, a)
+                            x = np.arange(0, 100 * a, a)
                         elif i % 8 == 4:
-                            x = np.arange(99*a, -a, -a)
+                            x = np.arange(99 * a, -a, -a)
                         else:
-                            value = 0 if i % 8 in (5, 6, 7) else 100*a
+                            value = 0 if i % 8 in (5, 6, 7) else 100 * a
                             x = np.full(100, value)
-                        trend.update(x, i+10, None)
+                        trend.update(x, i + 10, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         if i in (0, 6, 7, 8):
@@ -204,7 +203,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_step_tr
 
                     for i in range(7):
                         x = [(i + -5 + random.randint(0, 11)) for _ in range(100)]
-                        trend.update(x, i+timestamp_offset, None)
+                        trend.update(x, i + timestamp_offset, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)

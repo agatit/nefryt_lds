@@ -15,6 +15,7 @@ from trends_writer.plant import PipePlant
 from trends_writer.modbus import run_server
 
 trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
+trend_param2 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=2, Value='2')
 
 
 def add_objects():
@@ -29,7 +30,7 @@ def add_objects():
 
 
 def add_objects_with_children():
-    global trend_param1
+    global trend_param1, trend_param2
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
@@ -108,7 +109,7 @@ async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_ob
     port = 5024
     server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
-    calls = 2
+    calls = 10
 
     t = math.floor(time.time()) + 0.5
     for i in range(calls):
@@ -118,4 +119,4 @@ async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_ob
 
     server_task.cancel()
 
-    assert _get_trend_data_records_count() == calls*2
+    assert calls < _get_trend_data_records_count() <= (2*calls - int(trend_param2.Value)*2)

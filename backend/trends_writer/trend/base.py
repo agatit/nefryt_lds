@@ -8,7 +8,7 @@ from sqlalchemy import select, insert, and_, literal
 from sqlalchemy.orm import Session
 from database import lds
 from db import get_engine
-from trends_writer.config import setup_engine, Settings
+from trends_writer.config import setup_engine
 from multiprocessing.queues import Queue
 
 
@@ -36,17 +36,18 @@ class TrendBaseMeta(type):
 
 
 class TrendBase(metaclass=TrendBaseMeta):
-    def __init__(self, _id: int, queue: Queue, profiler_queue: Queue | None):
+    def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue | None):
         self.id = _id
         self.children: List[TrendBase] = []
         self.params = {}
         self.block_size = 100
         self.profiler_queue = profiler_queue
+        self.db_uri = db_uri
 
         self._read_params()
 
         self.queue = queue
-        self.process = Process(target=self.process_queue, args=(Settings.db_uri, ))
+        self.process = Process(target=self.process_queue, args=(db_uri, ))
 
         logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")
 
@@ -114,7 +115,7 @@ class TrendBase(metaclass=TrendBaseMeta):
 
         for trend, trend_def in results:
             trend_class = getattr(sys.modules["trends_writer.trend"], TREND_CLASSES[trend_def.ID.strip()])
-            trend = trend_class(trend.ID, QueueInit(), self.profiler_queue, self.id)
+            trend = trend_class(trend.ID, QueueInit(), self.db_uri, self.profiler_queue, self.id)
             self.children.append(trend)
 
     def _save(self, data: np.ndarray, timestamp: int):

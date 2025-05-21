@@ -134,6 +134,6 @@ def set_log_level(caplog):
     caplog.set_level("WARNING")
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope='function', autouse=True)
 def reset_trend_cache():
     TrendBaseMeta.reset_cache(TrendBase)

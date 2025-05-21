@@ -12,7 +12,6 @@ class PipePlantDataBlock(ModbusSequentialDataBlock):
         self.pipe_plant = pipe_plant
 
     def setValues(self, address, values):
-        # logging.info(f"setValues: address={address}, relative = {address - self.address}, values={values}")
         try:
             self.pipe_plant.update(address - self.address, values)
             super().setValues(address, values)
@@ -20,7 +19,6 @@ class PipePlantDataBlock(ModbusSequentialDataBlock):
             logging.warning("setValues exception: " + str(e))
 
     def getValues(self, address, count=1):
-        logging.info(f"getValues: address={address}, relative = {address - self.address}, count={count}")
         return super().getValues(address - self.address, count)
 
 

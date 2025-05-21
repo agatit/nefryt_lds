@@ -26,7 +26,7 @@ class PipePlant:
 
         for trend in result:
             queue = Queue()
-            new_trend_quick = TrendQuick(trend[0].ID, queue, Profiler.queue)
+            new_trend_quick = TrendQuick(trend[0].ID, queue, Settings.db_uri, Profiler.queue)
             self.trends.append(new_trend_quick)
             self.queues[new_trend_quick.register] = new_trend_quick.queue
 

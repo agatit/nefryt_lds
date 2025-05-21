@@ -6,8 +6,8 @@ from . import TrendBase
 
 
 class TrendDiff(TrendBase):
-    def __init__(self, _id: int, queue: Queue, profiler_queue: Queue | None):
-        super().__init__(_id, queue, profiler_queue)
+    def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue | None):
+        super().__init__(_id, queue, db_uri, profiler_queue)
 
         self.parent_data = {
             int(self.params['TREND_A']): {
