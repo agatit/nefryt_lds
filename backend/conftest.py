@@ -11,7 +11,6 @@ from testcontainers.mssql import SqlServerContainer
 from config_utils import load_yaml, clear_test_db
 from db import set_new_engine, get_engine
 from trends_writer.config import Settings
-from trends_writer.trend.base import TrendBaseMeta, TrendBase
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 
 
@@ -132,8 +131,3 @@ def reset_db_status():
 @pytest.fixture(autouse=True)
 def set_log_level(caplog):
     caplog.set_level("WARNING")
-
-
-@pytest.fixture(scope='function', autouse=True)
-def reset_trend_cache():
-    TrendBaseMeta.reset_cache(TrendBase)

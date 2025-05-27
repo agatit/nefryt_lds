@@ -9,6 +9,7 @@ class Profiler:
     process = None
     updates = {}
     use_profiler = False
+    buffer = 5
 
     @staticmethod
     def init():
@@ -26,20 +27,24 @@ class Profiler:
             operation, timestamp = queue.get()
             if operation == 1:
                 if timestamp not in Profiler.updates:
-                    Profiler.updates[timestamp] = (1, time.perf_counter())
+                    Profiler.updates[timestamp] = (1, time.perf_counter(), 0)
                 else:
-                    count, start = Profiler.updates[timestamp]
-                    Profiler.updates[timestamp] = (count + 1, start)
+                    count, start, time_used = Profiler.updates[timestamp]
+                    if count > 0:
+                        Profiler.updates[timestamp] = (count + 1, start, time_used)
+                    else:
+                        Profiler.updates[timestamp] = (1, time.perf_counter(), time_used)
             elif operation == 0:
                 if timestamp in Profiler.updates:
-                    count, start = Profiler.updates[timestamp]
+                    count, start, time_used = Profiler.updates[timestamp]
                     if count == 1:
-                        time_used  = time.perf_counter() - start
-                        time_used_percent = (time_used / 1.0) * 100
-                        with open(Settings.profiler_filename, "a") as f:
-                            f.write(f"{timestamp}: Trends writer used {time_used_percent:.2f}% of time\n")
-                        Profiler.updates.pop(timestamp-1, None)
-                    Profiler.updates[timestamp] = (count - 1, start)
+                        time_used  += time.perf_counter() - start
+                        profiler_data: tuple | None = Profiler.updates.pop(timestamp-Profiler.buffer, None)
+                        if profiler_data is not None:
+                            time_used_percent = (profiler_data[2] / 1.0) * 100
+                            with open(Settings.profiler_filename, "a") as f:
+                                f.write(f"{timestamp-Profiler.buffer}: Trends writer used {time_used_percent:.2f}% of time\n")
+                    Profiler.updates[timestamp] = (count - 1, start, time_used)
             else:
                 Profiler._shutdown()
                 break

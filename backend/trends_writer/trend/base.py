@@ -1,7 +1,6 @@
 import logging
 import struct
-import sys
-from multiprocessing import Queue as QueueInit, Process
+from multiprocessing import Process
 from typing import List
 import numpy as np
 from sqlalchemy import select, insert, and_, literal
@@ -10,32 +9,10 @@ from database import lds
 from db import get_engine
 from trends_writer.config import setup_engine
 from multiprocessing.queues import Queue
+from trends_writer.trend.trend_manager import TrendManager
 
 
-TREND_CLASSES = {
-    'QUICK': 'TrendQuick',
-    'MEAN': 'TrendMean',
-    'DERIV': 'TrendDeriv',
-    'DIFF': 'TrendDiff'
-}
-
-class TrendBaseMeta(type):
-    _objects = {}
-    use_cache = True
-
-    def __call__(cls, key, *args, **kwargs):
-        if key in cls._objects and getattr(cls, "use_cache", True) is True:
-            return cls._objects[key]
-        else:
-            obj = super().__call__(key, *args, **kwargs)
-            cls._objects[key] = obj
-            return obj
-
-    def reset_cache(cls):
-        cls._objects = {}
-
-
-class TrendBase(metaclass=TrendBaseMeta):
+class TrendBase:
     def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue | None):
         self.id = _id
         self.children: List[TrendBase] = []
@@ -43,20 +20,24 @@ class TrendBase(metaclass=TrendBaseMeta):
         self.block_size = 100
         self.profiler_queue = profiler_queue
         self.db_uri = db_uri
+        self.queue = queue
 
         self._read_params()
-
-        self.queue = queue
-        self.process = Process(target=self.process_queue, args=(db_uri, ))
+        self.process = None
 
         logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")
+
+    def run_trend_process(self):
+        self._read_children()
+        self.process = Process(target=self.process_queue, args=(self.db_uri, ))
+        self.start_process_queue()
+        logging.info(f"{self.__class__.__name__} ({self.id}) started")
 
     def start_process_queue(self):
         self.process.start()
 
     def process_queue(self, db_uri: str):
         setup_engine(db_uri)
-        self._read_children()
 
         while True:
             item = self.queue.get()
@@ -102,7 +83,7 @@ class TrendBase(metaclass=TrendBaseMeta):
             self.params[tpd.ID.strip()] = tp.Value
 
     def _read_children(self):
-        stmt = (select(lds.Trend, lds.TrendDef)
+        stmt = (select(lds.Trend.ID)
                 .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) # noqa
                 .join(lds.TrendParam, lds.TrendParam.TrendID == lds.Trend.ID)
                 .join(lds.TrendParamDef,
@@ -113,14 +94,14 @@ class TrendBase(metaclass=TrendBaseMeta):
         with Session(get_engine()) as session:
             results = session.execute(stmt).all()
 
-        for trend, trend_def in results:
-            try:
-                trend_class = getattr(sys.modules["trends_writer.trend"], TREND_CLASSES[trend_def.ID.strip()])
-                trend = trend_class(trend.ID, QueueInit(), self.db_uri, self.profiler_queue, self.id)
-                self.children.append(trend)
-            except BaseException as e:
-                logging.warning(f"{self.__class__.__name__} ({trend.id}) child init error: {e}", exc_info=True)
-
+        for trend_id in results:
+            trend_id = trend_id[0]
+            child_trend = TrendManager.get(trend_id)
+            if child_trend is None:
+                logging.warning(f"No registered Trend ({trend_id}) found for parent {self.__class__.__name__} ({self.id})")
+            else:
+                self.children.append(child_trend)
+                logging.info(f"Found registered {child_trend.__class__.__name__} ({trend_id}) for parent {self.__class__.__name__} ({self.id})")
 
     def _save(self, data: np.ndarray, timestamp: int):
         try:

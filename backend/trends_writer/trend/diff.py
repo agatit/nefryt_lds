@@ -22,8 +22,6 @@ class TrendDiff(TrendBase):
             }
         }
 
-        self.start_process_queue()
-
     def update(self, data: List[int], timestamp: int, parent_id: int | None = None):
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating...")
         calculated_data = self.calculate(data, timestamp, parent_id)
