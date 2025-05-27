@@ -1699,6 +1699,164 @@ paths:
       tags:
       - trends
       x-openapi-router-controller: api.controllers.trends_controller
+  /template:
+    get:
+      description: List all templates
+      operationId: list_templates
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Template'
+                type: array
+          description: An array of templates
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: List templates
+      tags:
+        - templates
+    post:
+      description: Create a template
+      operationId: create_template
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Template'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create template
+      tags:
+        - templates
+  /template/{templateId}:
+    delete:
+      description: Deletes specific template
+      operationId: delete_template_by_id
+      parameters:
+        - description: The id of the template to retrieve
+          explode: false
+          in: path
+          name: templateId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Delete template
+      tags:
+        - templates
+    get:
+      description: Info for specific template
+      operationId: get_template_by_id
+      parameters:
+        - description: The id of the template to retrieve
+          explode: false
+          in: path
+          name: templateId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Get template details
+      tags:
+        - templates
+    put:
+      description: Updates a template
+      operationId: update_template
+      parameters:
+        - description: The id of the template to retrieve
+          explode: false
+          in: path
+          name: templateId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Template'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Updates templates
+      tags:
+        - templates
   /unit:
     get:
       description: List all units
@@ -1950,6 +2108,24 @@ components:
             $ref: '#/components/schemas/Unauthorized'
       description: Unauthorized
   schemas:
+    Axis:
+      properties:
+        TrendsID:
+          items:
+            type: integer
+          type: array
+          default: [ ]
+        Unit:
+          type: string
+        ScaledMin:
+          type: number
+        ScaledMax:
+          type: number
+      type: object
+      required:
+        - Unit
+        - ScaledMin
+        - ScaledMax
     Link:
       example:
         BeginNodeID: 0
@@ -2234,6 +2410,22 @@ components:
           type: boolean
       required:
       - NodeID
+      type: object
+    Template:
+      properties:
+        ID:
+          type: integer
+          nullable: false
+        Name:
+          type: string
+        Axes:
+          items:
+            $ref: '#/components/schemas/Axis'
+          type: array
+          default: [ ]
+      required:
+        - Name
+        - ID
       type: object
     Trend:
       example:

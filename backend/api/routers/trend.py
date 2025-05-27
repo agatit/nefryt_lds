@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Query, Body, Path, Depends
 from fastapi_pagination.ext.sqlalchemy import paginate
+from odata_query.sqlalchemy import apply_odata_query
 from sqlalchemy import select, and_, Engine, literal, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -22,9 +23,12 @@ router = APIRouter(prefix="/trend", tags=['trend'], dependencies=[Depends(get_us
 
 @router.get('', response_model=CustomPage[lds.Trend] | Error)
 async def list_trends(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
-                      _: Annotated[None, Depends(use_custom_page)], filter: Annotated[str | None, Query()] = None):
+                      _: Annotated[None, Depends(use_custom_page)],
+                      odata_filter: Annotated[str | None, Query(alias='filter')] = None):
     try:
         statement = select(lds.Trend).order_by(lds.Trend.ID)
+        if odata_filter is not None:
+            statement = apply_odata_query(statement, odata_filter)
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [strip_strings(lds_trend) for lds_trend in page.items]
@@ -300,7 +304,7 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
 @router.get('/{trend_id}/param', response_model=CustomPage[TrendParamOut] | Error)
 async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
                             params: Annotated[CustomParams, Depends()], _: Annotated[None, Depends(use_custom_page)],
-                            filter: Annotated[str | None, Query()] = None):
+                            odata_filter: Annotated[str | None, Query(alias='filter')] = None):
     try:
         statement = select(1).where(lds.Trend.ID == literal(trend_id)) # noqa
         with Session(engine) as session:
@@ -315,6 +319,8 @@ async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[
                                                  lds.Trend.ID == lds.TrendParam.TrendID))) # noqa
                      .where(lds.Trend.ID == literal(trend_id)) # noqa
                      .order_by(lds.Trend.ID)) # noqa
+        if odata_filter is not None:
+            statement = apply_odata_query(statement, odata_filter)
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [

@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Query, Depends
 from fastapi_pagination.ext.sqlalchemy import paginate
+from odata_query.sqlalchemy import apply_odata_query
 from sqlalchemy import select, Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -17,9 +18,12 @@ router = APIRouter(prefix="/template", tags=["template"], dependencies=[Depends(
 
 @router.get('', response_model=CustomPage[lds.Template] | Error)
 async def list_templates(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
-                         _: Annotated[None, Depends(use_custom_page)], filter: Annotated[str | None, Query()] = None):
+                         _: Annotated[None, Depends(use_custom_page)],
+                         odata_filter: Annotated[str | None, Query(alias='filter')] = None):
     try:
         statement = select(lds.Template).order_by(lds.Template.ID)
+        if odata_filter is not None:
+            statement = apply_odata_query(statement, odata_filter)
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [lds.Template.model_validate(template) for template in page.items]

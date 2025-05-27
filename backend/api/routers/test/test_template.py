@@ -26,12 +26,14 @@ axis3 = Axis(TrendsID=[1, 2, 3], Unit='Unit3', ScaledMax=2.5, ScaledMin=3.5)
 axes_list = [axis1, axis2, axis3]
 template1 = lds.Template(ID=1, Name='Template1', Axes=[])
 template2 = lds.Template(ID=2, Name='Template2', Axes=[axis1.model_dump(), axis2.model_dump()])
-templates_list = [template1, template2]
-lds_objects = [trend_def_list, trend_list, template1]
+template3 = lds.Template(ID=3, Name='Template3', Axes=[axis3.model_dump()])
+templates_list = [template1, template2, template3]
+lds_objects = [trend_def_list, trend_list, templates_list]
 
 
 def reset_templates_objects():
-    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend_list, template1, template2, templates_list, lds_objects
+    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend_list, template1, template2, template3, \
+        templates_list, lds_objects
 
     trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
@@ -41,7 +43,8 @@ def reset_templates_objects():
     trend_list = [trend1, trend2]
     template1 = lds.Template(ID=1, Name='Template1', Axes=[])
     template2 = lds.Template(ID=2, Name='Template2', Axes=[axis1.model_dump(), axis2.model_dump()])
-    templates_list = [template1, template2]
+    template3 = lds.Template(ID=3, Name='Template3', Axes=[axis3.model_dump()])
+    templates_list = [template1, template2, template3]
     lds_objects = [trend_def_list, trend_list, templates_list]
 
     return lds_objects
@@ -64,7 +67,6 @@ def test_list_templates_should_return_ok_response_code_and_correct_templates(add
     items = response.json()['items']
     assert len(items) == len(templates_list)
     for expected_template, returned_template in zip(templates_list, items):
-        print(returned_template)
         assert returned_template['ID'] == expected_template.ID
         assert returned_template['Name'] == expected_template.Name
         assert returned_template['Axes'] == expected_template.Axes
@@ -77,7 +79,7 @@ def test_list_templates_should_return_ok_response_code_and_correct_page_data(add
     response = test_client.get(f"/template?size={size}&page={page}")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
-    assert len(response.json()['items']) == len(templates_list)
+    assert len(response.json()['items']) == size
     assert response.json()['total'] == len(templates_list)
     assert response.json()['pages'] == len(templates_list) // size if len(templates_list) % size == 0 \
         else len(templates_list) // size + 1
@@ -98,6 +100,19 @@ def test_list_templates_should_return_ok_response_code_and_default_page_data(add
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
+def test_list_templates_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'ID gt {template1.ID} and ID lt {template3.ID}'
+    response = test_client.get(f"/template?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_template = items[0]
+    assert returned_template['ID'] == template2.ID
+    assert returned_template['Name'] == template2.Name
+    assert returned_template['Axes'] == template2.Axes
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
 def test_create_template_should_return_created_response_code_and_created_template_data(add_lds_objects):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore")
@@ -109,12 +124,12 @@ def test_create_template_should_return_created_response_code_and_created_templat
         response = test_client.post("/template", json=template_dict)
         assert response.status_code == status.HTTP_201_CREATED
         returned_link = response.json()
-        assert returned_link['ID'] == 3
+        assert returned_link['ID'] == template3.ID + 1
         assert returned_link['Name'] == template_dict['Name']
         assert returned_link['Axes'] == template_dict['Axes']
         with Session(get_engine()) as session:
             templates_count = session.execute(select(func.count()).select_from(lds.Template)).fetchall()[0][0]
-        assert templates_count == 3
+        assert templates_count == len(templates_list) + 1
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
@@ -137,7 +152,7 @@ def test_delete_template_by_id_should_return_no_content_response_code_and_remove
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
         templates_count = session.execute(select(func.count()).select_from(lds.Template)).fetchall()[0][0]
-    assert templates_count == 1
+    assert templates_count == len(templates_list) - 1
 
 
 def test_delete_template_by_id_should_return_not_found_response_code_and_error_when_no_template_with_given_id():

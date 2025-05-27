@@ -15,19 +15,21 @@ node1 = lds.Node(ID=1, Type='type', Name='name')
 node2 = lds.Node(ID=2, Type='type', Name='name')
 link1 = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
 link2 = lds.Link(ID=2, BeginNodeID=2, EndNodeID=1)
-links_list = [link1, link2]
-lds_objects = [[node1, node2], [link1, link2]]
+link3 = lds.Link(ID=4, BeginNodeID=1, EndNodeID=1)
+links_list = [link1, link2, link3]
+lds_objects = [[node1, node2], [link1, link2, link3]]
 
 
 def reset_link_objects():
-    global node1, node2, link1, link2, links_list, lds_objects
+    global node1, node2, link1, link2, link3, links_list, lds_objects
 
     node1 = lds.Node(ID=1, Type='type', Name='name')
     node2 = lds.Node(ID=2, Type='type', Name='name')
     link1 = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
-    link2 = lds.Link(ID=2, BeginNodeID=2, EndNodeID=1)
-    links_list = [link1, link2]
-    lds_objects = [[node1, node2], [link1, link2]]
+    link2 = lds.Link(ID=3, BeginNodeID=2, EndNodeID=1)
+    link3 = lds.Link(ID=5, BeginNodeID=1, EndNodeID=1)
+    links_list = [link1, link2, link3]
+    lds_objects = [[node1, node2], [link1, link2, link3]]
 
     return lds_objects
 
@@ -92,13 +94,27 @@ def test_list_links_should_return_ok_response_code_and_default_page_data(add_lds
     assert response.json()['page'] == 1
 
 
+@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
+def test_list_links_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'ID gt {link1.ID} and ID lt {link3.ID}'
+    response = test_client.get(f"/link?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_link = items[0]
+    assert returned_link['ID'] == link2.ID
+    assert returned_link['BeginNodeID'] == link2.BeginNodeID
+    assert returned_link['EndNodeID'] == link2.EndNodeID
+    assert returned_link['Length'] == link2.Length
+
+
 @pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
 def test_create_link_should_return_created_response_code_and_created_link_data(add_lds_objects):
     link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 100.11}
     response = test_client.post("/link", json=link_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_link = response.json()
-    assert returned_link['ID'] == 3
+    assert returned_link['ID'] == link3.ID+1
     assert returned_link['BeginNodeID'] == link_dict['BeginNodeID']
     assert returned_link['EndNodeID'] == link_dict['EndNodeID']
     assert returned_link['Length'] == link_dict['Length']
@@ -113,7 +129,7 @@ def test_delete_link_by_id_should_return_no_content_response_code_and_remove_lin
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
         links_count = session.execute(select(func.count()).select_from(lds.Link)).fetchall()[0][0]
-    assert links_count == 1
+    assert links_count == len(links_list) - 1
 
 
 def test_delete_link_by_id_should_return_not_found_response_code_and_error_when_no_link_with_given_id():

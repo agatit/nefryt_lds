@@ -20,42 +20,48 @@ trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
 trend_def_list = [trend_def1, trend_def2]
 trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
 trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
-trend_list = [trend1, trend2]
+trend3 = lds.Trend(ID=4, TrendDefID=trend_def1.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+trend_list = [trend1, trend2, trend3]
 trend_data1 = lds.TrendData(TrendID=1, Time=1, Data=binary_data)
 trend_data2 = lds.TrendData(TrendID=1, Time=2, Data=binary_data)
 trend_data3 = lds.TrendData(TrendID=1, Time=3, Data=binary_data)
 trend_data4 = lds.TrendData(TrendID=2, Time=2, Data=binary_data)
 trend_data_list = [trend_data1, trend_data2, trend_data3, trend_data4]
-trend_param1 = lds.TrendParam(TrendParamDefID='RAW_MIN', TrendID=1, Value='1')
-trend_param2 = lds.TrendParam(TrendParamDefID='RAW_MAX', TrendID=1, Value='2')
-trend_param_list = [trend_param1, trend_param2]
-trend_param_def1 = lds.TrendParamDef(ID='RAW_MIN', TrendDefID='ID_1', Name='name', DataType='INT')
-trend_param_def2 = lds.TrendParamDef(ID='RAW_MAX', TrendDefID='ID_1', Name='name2', DataType='INT')
-trend_param_def_list = [trend_param_def1, trend_param_def2]
+trend_param1 = lds.TrendParam(TrendParamDefID='RAW_MAX', TrendID=1, Value='1')
+trend_param2 = lds.TrendParam(TrendParamDefID='RAW_MIN', TrendID=1, Value='2')
+trend_param3 = lds.TrendParam(TrendParamDefID='SCALED_MIN', TrendID=1, Value='3')
+trend_param_list = [trend_param1, trend_param2, trend_param3]
+trend_param_def1 = lds.TrendParamDef(ID='RAW_MAX', TrendDefID='ID_1', Name='name', DataType='INT')
+trend_param_def2 = lds.TrendParamDef(ID='RAW_MIN', TrendDefID='ID_1', Name='name2', DataType='INT')
+trend_param_def3 = lds.TrendParamDef(ID='SCALED_MIN', TrendDefID='ID_1', Name='name3', DataType='FLOAT')
+trend_param_def_list = [trend_param_def1, trend_param_def2, trend_param_def3]
 
 
 def reset_all_trend_objects():
-    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend_list, \
+    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend3, trend_list, \
         trend_data1, trend_data2, trend_data3, trend_data4, trend_data_list, \
-        trend_param1, trend_param2, trend_param_list, \
-        trend_param_def1, trend_param_def2, trend_param_def_list
+        trend_param1, trend_param2, trend_param3, trend_param_list, \
+        trend_param_def1, trend_param_def2, trend_param_def3, trend_param_def_list
     trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
     trend_def_list = [trend_def1, trend_def2]
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
     trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
-    trend_list = [trend1, trend2]
+    trend3 = lds.Trend(ID=4, TrendDefID=trend_def1.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_list = [trend1, trend2, trend3]
     trend_data1 = lds.TrendData(TrendID=1, Time=1, Data=binary_data)
     trend_data2 = lds.TrendData(TrendID=1, Time=2, Data=binary_data)
     trend_data3 = lds.TrendData(TrendID=1, Time=3, Data=binary_data)
     trend_data4 = lds.TrendData(TrendID=2, Time=2, Data=binary_data)
     trend_data_list = [trend_data1, trend_data2, trend_data3, trend_data4]
-    trend_param1 = lds.TrendParam(TrendParamDefID='RAW_MIN', TrendID=1, Value='1')
-    trend_param2 = lds.TrendParam(TrendParamDefID='RAW_MAX', TrendID=1, Value='2')
-    trend_param_list = [trend_param1, trend_param2]
-    trend_param_def1 = lds.TrendParamDef(ID='RAW_MIN', TrendDefID='ID_1', Name='name', DataType='INT')
-    trend_param_def2 = lds.TrendParamDef(ID='RAW_MAX', TrendDefID='ID_1', Name='name2', DataType='INT')
-    trend_param_def_list = [trend_param_def1, trend_param_def2]
+    trend_param1 = lds.TrendParam(TrendParamDefID='RAW_MAX', TrendID=1, Value='1')
+    trend_param2 = lds.TrendParam(TrendParamDefID='RAW_MIN', TrendID=1, Value='2')
+    trend_param3 = lds.TrendParam(TrendParamDefID='SCALED_MIN', TrendID=1, Value='3')
+    trend_param_list = [trend_param1, trend_param2, trend_param3]
+    trend_param_def1 = lds.TrendParamDef(ID='RAW_MAX', TrendDefID='ID_1', Name='name', DataType='INT')
+    trend_param_def2 = lds.TrendParamDef(ID='RAW_MIN', TrendDefID='ID_1', Name='name2', DataType='INT')
+    trend_param_def3 = lds.TrendParamDef(ID='SCALED_MIN', TrendDefID='ID_1', Name='name3', DataType='FLOAT')
+    trend_param_def_list = [trend_param_def1, trend_param_def2, trend_param_def3]
 
     return [trend_def_list, trend_list, trend_data_list, trend_param_list, trend_param_def_list]
 
@@ -71,13 +77,14 @@ def reset_trend_def_objects():
 
 
 def reset_trend_objects():
-    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend_list
+    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend3, trend_list
     trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
     trend_def_list = [trend_def1, trend_def2]
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
     trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
-    trend_list = [trend1, trend2]
+    trend3 = lds.Trend(ID=4, TrendDefID=trend_def1.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_list = [trend1, trend2, trend3]
 
     return [trend_def_list, trend_list]
 
@@ -132,6 +139,22 @@ def test_list_trends_should_return_ok_response_code_and_default_page_data(add_ld
     assert response.json()['pages'] == 1
     assert response.json()['size'] == 50
     assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trends_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'ID gt {trend1.ID} and ID lt {trend3.ID}'
+    response = test_client.get(f"/trend?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_trend = items[0]
+    assert returned_trend['ID'] == trend2.ID
+    assert returned_trend['TrendDefID'] == trend2.TrendDefID.strip()
+    assert returned_trend['RawMin'] == trend2.RawMin
+    assert returned_trend['RawMax'] == trend2.RawMax
+    assert returned_trend['ScaledMin'] == trend2.ScaledMin
+    assert returned_trend['ScaledMax'] == trend2.ScaledMax
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
@@ -639,7 +662,7 @@ def test_delete_trend_by_id_should_return_no_content_response_code_and_remove_tr
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
         trends_count = session.execute(select(func.count()).select_from(lds.Trend)).fetchall()[0][0]
-    assert trends_count == 1
+    assert trends_count == len(trend_list) - 1
 
 
 def test_delete_trend_by_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
@@ -716,9 +739,9 @@ def test_list_trend_params_should_return_ok_response_code_and_correct_trend_para
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
-    assert len(items) == 2
+    assert len(items) == len(trend_param_list)
     for expected_trend_param_def, expected_trend_param, returned_trend_param in (
-            zip(trend_param_def_list, trend_param_list, reversed(items))):
+            zip(trend_param_def_list, trend_param_list, items)):
         assert returned_trend_param['TrendID'] == expected_trend_param.TrendID
         assert returned_trend_param['Value'] == expected_trend_param.Value
         assert returned_trend_param['TrendParamDefID'] == expected_trend_param.TrendParamDefID.strip()
@@ -751,6 +774,21 @@ def test_list_trend_params_should_return_ok_response_code_and_default_page_data(
     assert response.json()['pages'] == 1
     assert response.json()['size'] == 50
     assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trend_params_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'Value eq {trend_param3.Value}'
+    response = test_client.get("/trend/" + str(trend1.ID) + f"/param?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_trend_param = items[0]
+    assert returned_trend_param['TrendID'] == trend_param3.TrendID
+    assert returned_trend_param['Value'] == trend_param3.Value
+    assert returned_trend_param['TrendParamDefID'] == trend_param3.TrendParamDefID.strip()
+    assert returned_trend_param['DataType'] == trend_param_def3.DataType.strip()
+    assert returned_trend_param['Name'] == trend_param_def3.Name.strip()
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)

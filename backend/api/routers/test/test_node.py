@@ -16,39 +16,47 @@ lds_node2 = lds.Node(ID=2, Type='type2', Name='name2')
 editor_node1 = editor.Node(ID=1, PosX=10, PosY=100)
 editor_node2 = editor.Node(ID=2, PosX=-10, PosY=-100)
 link = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
+lds_node3 = lds.Node(ID=3, Type='type3', Name='name3')
+editor_node3 = editor.Node(ID=3, PosX=10, PosY=-100)
 
-nodes_list = [lds_node1, lds_node2, editor_node1, editor_node2]
-lds_nodes_list = [lds_node1, lds_node2]
-editor_nodes_list = [editor_node1, editor_node2]
+nodes_list = [lds_node1, lds_node2, lds_node3, editor_node1, editor_node2, editor_node3]
+lds_nodes_list = [lds_node1, lds_node2, lds_node3]
+editor_nodes_list = [editor_node1, editor_node2, editor_node3]
 
 
 def reset_node_objects():
-    global lds_node1, lds_node2, editor_node1, editor_node2, nodes_list, lds_nodes_list, editor_nodes_list
+    global lds_node1, lds_node2, lds_node3, editor_node1, editor_node2, editor_node3, \
+        nodes_list, lds_nodes_list, editor_nodes_list
 
     lds_node1 = lds.Node(ID=1, Type='type1', Name='name1')
     lds_node2 = lds.Node(ID=2, Type='type2', Name='name2')
     editor_node1 = editor.Node(ID=1, PosX=10, PosY=100)
     editor_node2 = editor.Node(ID=2, PosX=-10, PosY=-100)
+    lds_node3 = lds.Node(ID=3, Type='type3', Name='name3')
+    editor_node3 = editor.Node(ID=3, PosX=10, PosY=-100)
 
-    nodes_list = [lds_node1, lds_node2, editor_node1, editor_node2]
-    lds_nodes_list = [lds_node1, lds_node2]
-    editor_nodes_list = [editor_node1, editor_node2]
+    nodes_list = [lds_node1, lds_node2, lds_node3, editor_node1, editor_node2, editor_node3]
+    lds_nodes_list = [lds_node1, lds_node2, lds_node3]
+    editor_nodes_list = [editor_node1, editor_node2, editor_node3]
 
     return [lds_nodes_list, editor_nodes_list]
 
 
 def reset_node_and_link_objects():
-    global lds_node1, lds_node2, editor_node1, editor_node2, link, nodes_list, lds_nodes_list, editor_nodes_list
+    global lds_node1, lds_node2, lds_node3, editor_node1, editor_node2, editor_node3, link,\
+        nodes_list, lds_nodes_list, editor_nodes_list
 
     lds_node1 = lds.Node(ID=1, Type='type1', Name='name1')
     lds_node2 = lds.Node(ID=2, Type='type2', Name='name2')
     editor_node1 = editor.Node(ID=1, PosX=10, PosY=100)
     editor_node2 = editor.Node(ID=2, PosX=-10, PosY=-100)
     link = lds.Link(ID=1, BeginNodeID=1, EndNodeID=2)
+    lds_node3 = lds.Node(ID=3, Type='type3', Name='name3')
+    editor_node3 = editor.Node(ID=3, PosX=10, PosY=-100)
 
-    nodes_list = [lds_node1, lds_node2, editor_node1, editor_node2]
-    lds_nodes_list = [lds_node1, lds_node2]
-    editor_nodes_list = [editor_node1, editor_node2]
+    nodes_list = [lds_node1, lds_node2, lds_node3, editor_node1, editor_node2, editor_node3]
+    lds_nodes_list = [lds_node1, lds_node2, lds_node3]
+    editor_nodes_list = [editor_node1, editor_node2, editor_node3]
 
     return [lds_nodes_list, editor_nodes_list, [link]]
 
@@ -105,6 +113,21 @@ def test_list_nodes_should_return_ok_response_code_and_default_page_data(add_lds
     assert response.json()['page'] == 1
 
 
+@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
+def test_list_nodes_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'ID gt {lds_node1.ID} and ID lt {lds_node3.ID}'
+    response = test_client.get(f"/node?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_node = items[0]
+    assert returned_node['ID'] == lds_node2.ID
+    assert returned_node['Type'] == lds_node2.Type.strip()
+    assert returned_node['Name'] == lds_node2.Name
+    assert returned_node['EditorParams']['PosX'] == editor_node2.PosX
+    assert returned_node['EditorParams']['PosY'] == editor_node2.PosY
+
+
 def test_create_node_should_return_created_response_code_and_created_node_data():
     node_dict = {'Type': 'type', 'Name': 'name', 'EditorParams': {'PosX': 22, 'PosY': 122}}
     response = test_client.post("/node", json=node_dict)
@@ -129,8 +152,8 @@ def test_delete_node_by_id_should_return_no_content_response_code_and_remove_nod
     with Session(get_engine()) as session:
         lds_nodes_count = session.execute(select(func.count()).select_from(lds.Node)).fetchall()[0][0]
         editor_nodes_count = session.execute(select(func.count()).select_from(editor.Node)).fetchall()[0][0]
-    assert lds_nodes_count == 1
-    assert editor_nodes_count == 1
+    assert lds_nodes_count == len(lds_nodes_list) - 1
+    assert editor_nodes_count == len(editor_nodes_list) - 1
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_node_and_link_objects], indirect=True)

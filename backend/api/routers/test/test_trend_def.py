@@ -69,3 +69,15 @@ def test_list_trend_defs_should_return_ok_response_code_and_default_page_data(ad
     assert response.json()['pages'] == 1
     assert response.json()['size'] == 50
     assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
+def test_list_trend_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'ID ne \'{trend_def2.ID}\''
+    response = test_client.get(f"/trend_def?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_trend_def = items[0]
+    assert returned_trend_def['ID'] == trend_def1.ID.strip()
+    assert returned_trend_def['Name'] == trend_def1.Name
