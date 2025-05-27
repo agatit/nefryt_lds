@@ -15,7 +15,12 @@ import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
 import { Loader } from "@progress/kendo-react-indicators";
 import "../../../../styles/features/lds/features/trendPage.scss";
-import { Checkbox, CheckboxChangeEvent } from "@progress/kendo-react-inputs";
+import {
+  Checkbox,
+  CheckboxChangeEvent,
+  TextBox,
+  TextBoxChangeEvent,
+} from "@progress/kendo-react-inputs";
 import {
   PanelBar,
   PanelBarItem,
@@ -37,15 +42,21 @@ import { pencilIcon, saveIcon } from "@progress/kendo-svg-icons";
 import { Button } from "@progress/kendo-react-buttons";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import {
+  ItemRenderProps,
   processTreeViewItems,
   TreeView,
   TreeViewDragAnalyzer,
   TreeViewDragClue,
+  TreeViewExpandChangeEvent,
   TreeViewItemDragEndEvent,
   TreeViewItemDragOverEvent,
   TreeViewItemDragStartEvent,
+  TreeViewOperationDescriptor,
 } from "@progress/kendo-react-treeview";
 import TrendChart, { ChartSeriesTrendData, ChartTrendData } from "./TrendChart";
+
+const mainChartSampleSize = 400;
+const navigationChartSampleSize = 100;
 
 type MockupTrendType = {
   ID: number;
@@ -66,7 +77,8 @@ type TrendLoadStatus = {
   trendsLoaded: boolean;
 };
 
-type AxisType = {
+export type AxisType = {
+  Name: string;
   Unit: string;
   TrendIDs: number[];
   ScaleMax: number;
@@ -178,12 +190,12 @@ const mockupTrends: MockupTrendType[] = [
 
 const mockupTrendTreeData: TreeViewDataItem[] = [
   {
+    id: 1,
     text: "Ciśnienie",
-    expanded: true,
     items: [
       {
+        id: 2,
         text: "Pomiary",
-        expanded: true,
         items: [
           { text: mockupTrends[0].Name, id: mockupTrends[0].ID },
           { text: mockupTrends[1].Name, id: mockupTrends[1].ID },
@@ -191,8 +203,8 @@ const mockupTrendTreeData: TreeViewDataItem[] = [
         ],
       },
       {
+        id: 3,
         text: "Pochodne",
-        expanded: true,
         items: [
           { text: mockupTrends[3].Name, id: mockupTrends[3].ID },
           { text: mockupTrends[4].Name, id: mockupTrends[4].ID },
@@ -201,20 +213,20 @@ const mockupTrendTreeData: TreeViewDataItem[] = [
     ],
   },
   {
+    id: 4,
     text: "Temperatura",
-    expanded: true,
     items: [
       {
+        id: 5,
         text: "Pomiary",
-        expanded: true,
         items: [
           { text: mockupTrends[5].Name, id: mockupTrends[5].ID },
           { text: mockupTrends[6].Name, id: mockupTrends[6].ID },
         ],
       },
       {
+        id: 6,
         text: "Pochodne",
-        expanded: true,
         items: [
           { text: mockupTrends[7].Name, id: mockupTrends[7].ID },
           { text: mockupTrends[8].Name, id: mockupTrends[8].ID },
@@ -359,6 +371,13 @@ export default function TrendsPage() {
       );
   }, []);
 
+  const [showCreateAxisDialog, setShowCreateAxisDialog] =
+    React.useState<boolean>(false);
+
+  const toggleAxisDialog = React.useCallback(() => {
+    setShowCreateAxisDialog(!showCreateAxisDialog);
+  }, [showCreateAxisDialog]);
+
   // DATA STUFF
 
   const trendDefApi = React.useMemo(
@@ -381,16 +400,48 @@ export default function TrendsPage() {
   //   trendsLoaded: false,
   // });
 
-  const [axisesState, setAxisesState] = React.useState<AxisType[]>([
-    { Unit: "MPa", TrendIDs: [0, 1, 2], ScaleMax: 9, ScaleMin: -1 },
+  const [axesState, setAxesState] = React.useState<AxisType[]>([
+    {
+      Name: "Ciśnienie pomiary MPa",
+      Unit: "MPa",
+      TrendIDs: [0, 1, 2],
+      ScaleMax: 9,
+      ScaleMin: -1,
+    },
   ]);
+
+  const [newAxisName, setNewAxisName] = React.useState<string>("");
+  const lastDraggedID = React.useRef(null);
+
+  const handleAxisNameChange = React.useCallback((e: TextBoxChangeEvent) => {
+    if (e.value) setNewAxisName(e.value.toString());
+  }, []);
+
+  const createNewAxis = React.useCallback(() => {
+    const unit = (
+      trendsState.find(
+        (trend) => trend.ID == lastDraggedID.current
+      ) as MockupTrendType
+    ).Unit;
+    setAxesState([
+      ...axesState,
+      {
+        Name: newAxisName,
+        Unit: unit,
+        TrendIDs: [lastDraggedID.current!],
+        ScaleMax: 0,
+        ScaleMin: 0,
+      },
+    ]);
+    setShowCreateAxisDialog(false);
+  }, [trendsState, axesState, newAxisName]);
+
   const [trendsTree, setTrendsTree] =
     React.useState<TreeViewDataItem[]>(mockupTrendTreeData);
   const axisTree: TreeViewDataItem[] = React.useMemo(() => {
-    return axisesState.map((axis) => {
+    return axesState.map((axis) => {
       return {
-        text: axis.Unit,
-        expanded: true,
+        text: axis.Name,
         items: axis.TrendIDs.map((id) => {
           const trend = trendsState.find((trend) => trend.ID == id);
           return {
@@ -400,7 +451,7 @@ export default function TrendsPage() {
         }),
       };
     });
-  }, [axisesState]);
+  }, [axesState]);
 
   const handleTreeItemDragStart = React.useCallback(
     (e: TreeViewItemDragStartEvent) => {
@@ -420,6 +471,19 @@ export default function TrendsPage() {
     (e: TreeViewItemDragEndEvent) => {
       setShowCursorBubble(false);
 
+      if (mouseOverCreateNewAxisArea.current) {
+        setShowCreateAxisDialog(true);
+        setNewAxisName(
+          (
+            trendsState.find(
+              (trend) => trend.ID == e.item.id
+            )! as MockupTrendType
+          ).Unit
+        );
+        lastDraggedID.current = e.item.id;
+        return;
+      }
+
       const eventAnalyzer = new TreeViewDragAnalyzer(e).init();
       if (
         eventAnalyzer.destinationMeta.treeViewGuid.split("-")[0] !==
@@ -427,16 +491,22 @@ export default function TrendsPage() {
       )
         return;
 
-      const axisIndex = parseInt(
-        eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_")[0]
-      );
-      const trendIndex = parseInt(
-        eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_")[1]
-      );
+      const indexArray =
+        eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_");
 
-      setAxisesState(
-        axisesState.map((axis: AxisType, i) => {
+      const axisIndex = parseInt(indexArray[0]);
+      const trendIndex = parseInt(indexArray[1]);
+
+      setAxesState(
+        axesState.map((axis: AxisType, i) => {
           if (i !== axisIndex) return axis;
+          if (axis.TrendIDs.includes(e.item.id)) return axis;
+
+          if (indexArray.length < 2)
+            return {
+              ...axis,
+              TrendIDs: [...axis.TrendIDs, e.item.id],
+            };
 
           const newArr = axis.TrendIDs;
           switch (eventAnalyzer.getDropOperation()) {
@@ -448,7 +518,7 @@ export default function TrendsPage() {
               };
               break;
             default:
-              newArr.push(e.item.id);
+              newArr.splice(trendIndex + 1, 0, e.item.id);
               return {
                 ...axis,
                 TrendIDs: newArr,
@@ -457,10 +527,81 @@ export default function TrendsPage() {
         })
       );
     },
-    [axisesState]
+    [axesState]
   );
 
-  // const onItemDragEnd = React.useCallback((e))
+  const [expandTrendsTree, setExpandTrendsTree] =
+    React.useState<TreeViewOperationDescriptor>({
+      ids: [1, 2, 3, 4, 5, 6],
+      idField: "id",
+    });
+
+  const handleExpandTrendsTreeChange = React.useCallback(
+    (event: TreeViewExpandChangeEvent) => {
+      const ids: string[] = expandTrendsTree.ids
+        ? expandTrendsTree.ids.slice()
+        : [];
+      const index: number = ids.indexOf(event.item.id);
+
+      index === -1 ? ids.push(event.item.id) : ids.splice(index, 1);
+      setExpandTrendsTree({ ids, idField: "id" });
+    },
+    [expandTrendsTree]
+  );
+
+  const [expandAxesTree, setExpandAxesTree] =
+    React.useState<TreeViewOperationDescriptor>({
+      ids: ["Ciśnienie pomiary MPa"],
+      idField: "text",
+    });
+
+  const handleExpandAxesTreeChange = React.useCallback(
+    (event: TreeViewExpandChangeEvent) => {
+      const ids: string[] = expandAxesTree.ids
+        ? expandAxesTree.ids.slice()
+        : [];
+      const index: number = ids.indexOf(event.item.text);
+
+      index === -1 ? ids.push(event.item.text) : ids.splice(index, 1);
+      setExpandAxesTree({ ids, idField: "text" });
+    },
+    [expandAxesTree]
+  );
+
+  const TreeCustomItem = React.useCallback(
+    (props: ItemRenderProps, depth: number) => {
+      const trend = trendsState.find((trend) => trend.ID == props.item.id);
+      return props.itemHierarchicalIndex.split("_").length > depth ? (
+        <React.Fragment>
+          {trend && (
+            <SvgIcon
+              icon={chartLegendIcon}
+              size="xlarge"
+              style={{ stroke: (trend as MockupTrendType).Color }}
+            />
+          )}
+          <span>{props.item.text}</span>
+        </React.Fragment>
+      ) : (
+        <span>{props.item.text}</span>
+      );
+    },
+    [trendsState]
+  );
+
+  const TrendsTreeCustomItem = React.useCallback(
+    (props: ItemRenderProps) => {
+      return TreeCustomItem(props, 2);
+    },
+    [TreeCustomItem]
+  );
+
+  const AxisTreeCustomItem = React.useCallback(
+    (props: ItemRenderProps) => {
+      return TreeCustomItem(props, 1);
+    },
+    [TreeCustomItem]
+  );
 
   // Trends Data
   const [trendsData, setTrendsData] = React.useState<ChartSeriesTrendData[]>(
@@ -509,18 +650,19 @@ export default function TrendsPage() {
     if (startDate == null || endDate == null) return;
 
     const timeDiff = endDate.getTime() - startDate.getTime();
-    const step = Math.floor(timeDiff / 500);
+    const step = Math.floor(timeDiff / mainChartSampleSize);
     const newTrendsData: ChartSeriesTrendData[] = [];
 
     const navStartDate = new Date(startDate.getTime() - timeDiff);
     const navEndDate = new Date(endDate.getTime() + timeDiff);
     const newNavData: ChartSeriesTrendData[] = [];
     const step2 = Math.floor(
-      (navEndDate.getTime() - navStartDate.getTime()) / 150
+      (navEndDate.getTime() - navStartDate.getTime()) /
+        navigationChartSampleSize
     );
 
     const activeTrendsIDs: number[] = [];
-    for (let axis of axisesState) {
+    for (let axis of axesState) {
       for (let id of axis.TrendIDs) {
         activeTrendsIDs.push(id);
       }
@@ -530,7 +672,7 @@ export default function TrendsPage() {
       if (!activeTrendsIDs!.includes(trend.ID!)) continue;
 
       const generatedData: ChartTrendData[] = [];
-      for (let i = 0; i < 500; i++) {
+      for (let i = 0; i < mainChartSampleSize; i++) {
         const timestamp = new Date(startDate.getTime() + i * step);
         const value = generateValue(timestamp, trend.ID!);
 
@@ -541,7 +683,7 @@ export default function TrendsPage() {
       }
 
       const navData: ChartTrendData[] = [];
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < navigationChartSampleSize; i++) {
         const timestamp = new Date(navStartDate.getTime() + i * step2);
         navData.push({
           timestamp: timestamp,
@@ -575,11 +717,11 @@ export default function TrendsPage() {
 
     setTrendsData(newTrendsData);
     setNavigatorData(newNavData);
-  }, [startDate, endDate]);
+  }, [startDate, endDate, trendsState, axesState]);
 
   React.useEffect(() => {
     generateTestData();
-  }, [startDate, endDate, axisesState]);
+  }, [startDate, endDate, axesState]);
 
   return (
     <React.Fragment>
@@ -591,6 +733,7 @@ export default function TrendsPage() {
           navigationEndDate={navigationEndDate}
           trendData={trendsData}
           navigatorData={navigatorData}
+          axesState={axesState}
           onSelectStart={handleSelectStart}
           onSelectEnd={handleSelectEnd}
           onPlotAreaHover={handleOnPlotHover}
@@ -610,7 +753,7 @@ export default function TrendsPage() {
                       {t("trends-page:legend")}
                     </Typography.p>
                     <div className="legend-container">
-                      {axisesState.map((axis) => {
+                      {axesState.map((axis) => {
                         return (
                           <React.Fragment>
                             {axis.TrendIDs.map((id) => {
@@ -685,11 +828,15 @@ export default function TrendsPage() {
             <div className="segregated-trends">
               <TreeView
                 draggable={true}
-                data={trendsTree}
+                data={processTreeViewItems(trendsTree, {
+                  expand: expandTrendsTree,
+                })}
                 expandIcons={true}
                 onItemDragStart={handleTreeItemDragStart}
                 onItemDragOver={handleTreeItemDragOver}
                 onItemDragEnd={handleTreeItemDragEnd}
+                onExpandChange={handleExpandTrendsTreeChange}
+                item={TrendsTreeCustomItem}
               />
             </div>
             <div className="separator" />
@@ -697,8 +844,12 @@ export default function TrendsPage() {
               <TreeView
                 ref={axisTreeRef}
                 draggable={true}
-                data={processTreeViewItems(axisTree, {})}
+                data={processTreeViewItems(axisTree, {
+                  expand: expandAxesTree,
+                })}
                 expandIcons={true}
+                onExpandChange={handleExpandAxesTreeChange}
+                item={AxisTreeCustomItem}
               />
               <div
                 className="create-axis-area"
@@ -710,8 +861,18 @@ export default function TrendsPage() {
                 </Typography.p>
               </div>
             </div>
-            {}
           </div>
+          {showCreateAxisDialog && (
+            <Dialog onClose={toggleAxisDialog}>
+              <Label>{t("trends-page:new_axis_name")}</Label>
+              <TextBox value={newAxisName} onChange={handleAxisNameChange} />
+              <DialogActionsBar>
+                <Button type="button" onClick={createNewAxis}>
+                  {t("common:confirm")}
+                </Button>
+              </DialogActionsBar>
+            </Dialog>
+          )}
           <DialogActionsBar>
             <Button type="button" onClick={endChartEdit}>
               {t("common:cancel")}

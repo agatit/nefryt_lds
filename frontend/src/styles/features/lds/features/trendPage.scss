@@ -5,6 +5,7 @@ main {
   display: flex;
   flex-direction: row;
   height: var.$underAppBarHeight;
+  gap: 20px;
 }
 
 .chart-container {
@@ -94,6 +95,13 @@ main {
   border-radius: k-border-radius(xxxl);
   border: 1px solid k-color(border);
   margin: k-spacing(2);
+  transition: 250ms;
+}
+
+.chart-edit-container > .selected-trends > .create-axis-area:hover {
+  color: k-color(on-inverse);
+  background-color: k-color(inverse-subtle);
+  scale: 1.04;
 }
 
 .item-container > .item {
