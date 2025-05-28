@@ -178,7 +178,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('ID', 'TrendDefID', name='TrendParamDef_pk'),
     schema='lds'
     )
-    op.create_index(op.f('ix_lds_TrendParamDef_TrendDefID'), 'TrendParamDef', ['TrendDefID'], unique=False, schema='lds')
     op.create_table('Event',
     sa.Column('ID', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('EventDefID', sa.CHAR(length=10, collation='SQL_Polish_CP1250_CS_AS'), nullable=False),
@@ -217,7 +216,6 @@ def downgrade() -> None:
     op.drop_table('TrendParam', schema='lds')
     op.drop_table('MethodParam', schema='lds')
     op.drop_table('Event', schema='lds')
-    op.drop_index(op.f('ix_lds_TrendParamDef_TrendDefID'), table_name='TrendParamDef', schema='lds')
     op.drop_table('TrendParamDef', schema='lds')
     op.drop_table('Trend', schema='lds')
     op.drop_table('PipelineParam', schema='lds')

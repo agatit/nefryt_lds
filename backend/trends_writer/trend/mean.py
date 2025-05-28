@@ -11,9 +11,8 @@ class TrendMean(TrendFilter):
 
             result = signal.convolve(self.storage, kernel, mode='valid') * norm
 
-            # mean is unsigned
-            result = np.maximum(result, [np.iinfo(np.uint16).min] * len(result))
-            result = np.minimum(result, [np.iinfo(np.uint16).max-1] * len(result))  # FFFF reserved for error
+            result = np.maximum(result, [np.iinfo(np.int16).min] * len(result))
+            result = np.minimum(result, [np.iinfo(np.int16).max-1] * len(result))  # FFFF reserved for error
             result = result.astype(np.uint16)
 
             return result
