@@ -411,7 +411,7 @@ export default function TrendsPage() {
   ]);
 
   const [newAxisName, setNewAxisName] = React.useState<string>("");
-  const lastDraggedID = React.useRef(null);
+  const draggedTrend = React.useRef<Trend | MockupTrendType>(null);
 
   const handleAxisNameChange = React.useCallback((e: TextBoxChangeEvent) => {
     if (e.value) setNewAxisName(e.value.toString());
@@ -420,7 +420,7 @@ export default function TrendsPage() {
   const createNewAxis = React.useCallback(() => {
     const unit = (
       trendsState.find(
-        (trend) => trend.ID == lastDraggedID.current
+        (trend) => trend.ID == draggedTrend.current?.ID
       ) as MockupTrendType
     ).Unit;
     setAxesState([
@@ -428,7 +428,7 @@ export default function TrendsPage() {
       {
         Name: newAxisName,
         Unit: unit,
-        TrendIDs: [lastDraggedID.current!],
+        TrendIDs: [draggedTrend.current?.ID!],
         ScaleMax: 0,
         ScaleMin: 0,
       },
@@ -455,6 +455,9 @@ export default function TrendsPage() {
 
   const handleTreeItemDragStart = React.useCallback(
     (e: TreeViewItemDragStartEvent) => {
+      draggedTrend.current = trendsState.find(
+        (trend) => trend.ID == e.item.id
+      )!;
       setShowCursorBubble(true);
     },
     []
@@ -462,7 +465,30 @@ export default function TrendsPage() {
 
   const handleTreeItemDragOver = React.useCallback(
     (e: TreeViewItemDragOverEvent) => {
-      setCursorBubbleText(e.item.text);
+      if (mouseOverCreateNewAxisArea.current) {
+        setCursorBubbleText(t("trends-page:add_to_new_axis"));
+        return;
+      }
+
+      const eventAnalyzer = new TreeViewDragAnalyzer(e).init();
+      if (
+        eventAnalyzer.destinationMeta.treeViewGuid.split("-")[0] !==
+        axisTreeRef.current.props.id
+      ) {
+        setCursorBubbleText(e.item.text);
+
+        return;
+      }
+
+      setCursorBubbleText(
+        t("trends-page:add_to") +
+          ": " +
+          axesState[
+            parseInt(
+              eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_")[0]
+            )
+          ].Name
+      );
     },
     []
   );
@@ -480,7 +506,7 @@ export default function TrendsPage() {
             )! as MockupTrendType
           ).Unit
         );
-        lastDraggedID.current = e.item.id;
+
         return;
       }
 
@@ -753,7 +779,17 @@ export default function TrendsPage() {
                       {t("trends-page:legend")}
                     </Typography.p>
                     <div className="legend-container">
-                      {axesState.map((axis) => {
+                      <TreeView
+                        ref={axisTreeRef}
+                        draggable={true}
+                        data={processTreeViewItems(axisTree, {
+                          expand: expandAxesTree,
+                        })}
+                        expandIcons={true}
+                        onExpandChange={handleExpandAxesTreeChange}
+                        item={AxisTreeCustomItem}
+                      />
+                      {/* {axesState.map((axis) => {
                         return (
                           <React.Fragment>
                             {axis.TrendIDs.map((id) => {
@@ -773,7 +809,7 @@ export default function TrendsPage() {
                             })}
                           </React.Fragment>
                         );
-                      })}
+                      })} */}
                     </div>
                   </div>
                   <div className="item">
