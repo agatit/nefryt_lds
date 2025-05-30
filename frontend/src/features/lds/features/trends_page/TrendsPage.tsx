@@ -317,10 +317,10 @@ export default function TrendsPage() {
   const [cursorBubbleText, setCursorBubbleText] = React.useState("");
 
   const handleShowCursorBubbleChange = React.useCallback((value: boolean) => {
-    if (value) setShowCursorBubble(value);
+    if (value !== undefined) setShowCursorBubble(value);
   }, []);
   const handleCursorBubbleTextChange = React.useCallback((value: string) => {
-    if (value) setCursorBubbleText(value);
+    if (value !== undefined) setCursorBubbleText(value);
   }, []);
 
   const [isChartInEdit, setIsChartInEdit] = React.useState<boolean>(false);
