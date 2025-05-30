@@ -54,22 +54,19 @@ import {
   TreeViewOperationDescriptor,
 } from "@progress/kendo-react-treeview";
 import TrendChart, { ChartSeriesTrendData, ChartTrendData } from "./TrendChart";
+import TrendsDetailPanel from "./TrendsDetailPanel";
+import ChartEditDialog from "./ChartEditDialog";
 
 const mainChartSampleSize = 400;
 const navigationChartSampleSize = 100;
 
-type MockupTrendType = {
+export type MockupTrendType = {
   ID: number;
   TrendGroupID: number;
   Color: string;
   TrendDefID: string;
   Name: string;
   Unit: string;
-};
-
-type TrendsState = {
-  trends: Trend[] | MockupTrendType[];
-  activeTrendsIDs: number[];
 };
 
 type TrendLoadStatus = {
@@ -85,7 +82,7 @@ export type AxisType = {
   ScaleMin: number;
 };
 
-interface TreeViewDataItem {
+export interface TreeViewDataItem {
   id?: number;
   text: string;
   expanded?: boolean;
@@ -273,27 +270,24 @@ function generateValue(date: Date, chart: number): number {
 }
 
 export default function TrendsPage() {
-  const { t } = useTranslation(["common", "trends-page"]);
-
   const auth = React.useContext(AuthContext);
   const refreshableRequest = useRefreshableRequest();
 
   // UI STUFF
-  const [tabSelected, setTabSelected] = React.useState<number>(0);
-
-  const handleTabSelect = React.useCallback(
-    (e: TabStripSelectEventArguments) => {
-      setTabSelected(e.selected);
-    },
-    []
-  );
-
   const [startDate, setStartDate] = React.useState<Date>(() => {
     var date = new Date();
     date.setDate(date.getDate() - 1);
     return date;
   });
   const [endDate, setEndDate] = React.useState<Date>(new Date());
+
+  const handleChartStartDateChange = React.useCallback((value: Date) => {
+    if (value) setStartDate(value);
+  }, []);
+  const handleChartEndDateChange = React.useCallback((value: Date) => {
+    if (value) setEndDate(value);
+  }, []);
+
   const navigationStartDate = React.useMemo(() => {
     return new Date(
       startDate.getTime() - (endDate.getTime() - startDate.getTime())
@@ -322,14 +316,11 @@ export default function TrendsPage() {
     React.useState<boolean>(false);
   const [cursorBubbleText, setCursorBubbleText] = React.useState("");
 
-  const handleSelectStart = React.useCallback((e: SelectStartEvent) => {
-    setShowCursorBubble(true);
+  const handleShowCursorBubbleChange = React.useCallback((value: boolean) => {
+    if (value) setShowCursorBubble(value);
   }, []);
-
-  const handleSelectEnd = React.useCallback((e: SelectEndEvent) => {
-    setShowCursorBubble(false);
-    setStartDate(e.from);
-    setEndDate(e.to);
+  const handleCursorBubbleTextChange = React.useCallback((value: string) => {
+    if (value) setCursorBubbleText(value);
   }, []);
 
   const [isChartInEdit, setIsChartInEdit] = React.useState<boolean>(false);
@@ -346,37 +337,6 @@ export default function TrendsPage() {
   }, []);
 
   const axisTreeRef = React.useRef<any>(null);
-  const mouseOverCreateNewAxisArea = React.useRef<boolean>(false);
-
-  const handleMouseEnterCreateNewAxisArea = React.useCallback(() => {
-    mouseOverCreateNewAxisArea.current = true;
-  }, []);
-  const handleMouseLeaveCreateNewAxisArea = React.useCallback(() => {
-    mouseOverCreateNewAxisArea.current = false;
-  }, []);
-
-  const handleOnPlotHover = React.useCallback((e: PlotAreaHoverEvent) => {
-    if (e.category)
-      setCursorBubbleText(
-        e.category.toLocaleDateString("pl-PL", {
-          hourCycle: "h24",
-          weekday: "short",
-          month: "short",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          seconds: "2-digit",
-          fractionalSecondDigits: "3",
-        })
-      );
-  }, []);
-
-  const [showCreateAxisDialog, setShowCreateAxisDialog] =
-    React.useState<boolean>(false);
-
-  const toggleAxisDialog = React.useCallback(() => {
-    setShowCreateAxisDialog(!showCreateAxisDialog);
-  }, [showCreateAxisDialog]);
 
   // DATA STUFF
 
@@ -410,31 +370,9 @@ export default function TrendsPage() {
     },
   ]);
 
-  const [newAxisName, setNewAxisName] = React.useState<string>("");
-  const draggedTrend = React.useRef<Trend | MockupTrendType>(null);
-
-  const handleAxisNameChange = React.useCallback((e: TextBoxChangeEvent) => {
-    if (e.value) setNewAxisName(e.value.toString());
+  const handleAxesStateChange = React.useCallback((value: AxisType[]) => {
+    if (value) setAxesState(value);
   }, []);
-
-  const createNewAxis = React.useCallback(() => {
-    const unit = (
-      trendsState.find(
-        (trend) => trend.ID == draggedTrend.current?.ID
-      ) as MockupTrendType
-    ).Unit;
-    setAxesState([
-      ...axesState,
-      {
-        Name: newAxisName,
-        Unit: unit,
-        TrendIDs: [draggedTrend.current?.ID!],
-        ScaleMax: 0,
-        ScaleMin: 0,
-      },
-    ]);
-    setShowCreateAxisDialog(false);
-  }, [trendsState, axesState, newAxisName]);
 
   const [trendsTree, setTrendsTree] =
     React.useState<TreeViewDataItem[]>(mockupTrendTreeData);
@@ -452,147 +390,6 @@ export default function TrendsPage() {
       };
     });
   }, [axesState]);
-
-  const handleTreeItemDragStart = React.useCallback(
-    (e: TreeViewItemDragStartEvent) => {
-      draggedTrend.current = trendsState.find(
-        (trend) => trend.ID == e.item.id
-      )!;
-      setShowCursorBubble(true);
-    },
-    []
-  );
-
-  const handleTreeItemDragOver = React.useCallback(
-    (e: TreeViewItemDragOverEvent) => {
-      if (mouseOverCreateNewAxisArea.current) {
-        setCursorBubbleText(t("trends-page:add_to_new_axis"));
-        return;
-      }
-
-      const eventAnalyzer = new TreeViewDragAnalyzer(e).init();
-      if (
-        eventAnalyzer.destinationMeta.treeViewGuid.split("-")[0] !==
-        axisTreeRef.current.props.id
-      ) {
-        setCursorBubbleText(e.item.text);
-
-        return;
-      }
-
-      setCursorBubbleText(
-        t("trends-page:add_to") +
-          ": " +
-          axesState[
-            parseInt(
-              eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_")[0]
-            )
-          ].Name
-      );
-    },
-    []
-  );
-
-  const handleTreeItemDragEnd = React.useCallback(
-    (e: TreeViewItemDragEndEvent) => {
-      setShowCursorBubble(false);
-
-      if (mouseOverCreateNewAxisArea.current) {
-        setShowCreateAxisDialog(true);
-        setNewAxisName(
-          (
-            trendsState.find(
-              (trend) => trend.ID == e.item.id
-            )! as MockupTrendType
-          ).Unit
-        );
-
-        return;
-      }
-
-      const eventAnalyzer = new TreeViewDragAnalyzer(e).init();
-      if (
-        eventAnalyzer.destinationMeta.treeViewGuid.split("-")[0] !==
-        axisTreeRef.current.props.id
-      )
-        return;
-
-      const indexArray =
-        eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_");
-
-      const axisIndex = parseInt(indexArray[0]);
-      const trendIndex = parseInt(indexArray[1]);
-
-      setAxesState(
-        axesState.map((axis: AxisType, i) => {
-          if (i !== axisIndex) return axis;
-          if (axis.TrendIDs.includes(e.item.id)) return axis;
-
-          if (indexArray.length < 2)
-            return {
-              ...axis,
-              TrendIDs: [...axis.TrendIDs, e.item.id],
-            };
-
-          const newArr = axis.TrendIDs;
-          switch (eventAnalyzer.getDropOperation()) {
-            case "before":
-              newArr.splice(trendIndex, 0, e.item.id);
-              return {
-                ...axis,
-                TrendIDs: newArr,
-              };
-              break;
-            default:
-              newArr.splice(trendIndex + 1, 0, e.item.id);
-              return {
-                ...axis,
-                TrendIDs: newArr,
-              };
-          }
-        })
-      );
-    },
-    [axesState]
-  );
-
-  const [expandTrendsTree, setExpandTrendsTree] =
-    React.useState<TreeViewOperationDescriptor>({
-      ids: [1, 2, 3, 4, 5, 6],
-      idField: "id",
-    });
-
-  const handleExpandTrendsTreeChange = React.useCallback(
-    (event: TreeViewExpandChangeEvent) => {
-      const ids: string[] = expandTrendsTree.ids
-        ? expandTrendsTree.ids.slice()
-        : [];
-      const index: number = ids.indexOf(event.item.id);
-
-      index === -1 ? ids.push(event.item.id) : ids.splice(index, 1);
-      setExpandTrendsTree({ ids, idField: "id" });
-    },
-    [expandTrendsTree]
-  );
-
-  const [expandAxesTree, setExpandAxesTree] =
-    React.useState<TreeViewOperationDescriptor>({
-      ids: ["Ciśnienie pomiary MPa"],
-      idField: "text",
-    });
-
-  const handleExpandAxesTreeChange = React.useCallback(
-    (event: TreeViewExpandChangeEvent) => {
-      const ids: string[] = expandAxesTree.ids
-        ? expandAxesTree.ids.slice()
-        : [];
-      const index: number = ids.indexOf(event.item.text);
-
-      index === -1 ? ids.push(event.item.text) : ids.splice(index, 1);
-      setExpandAxesTree({ ids, idField: "text" });
-    },
-    [expandAxesTree]
-  );
 
   const TreeCustomItem = React.useCallback(
     (props: ItemRenderProps, depth: number) => {
@@ -760,165 +557,41 @@ export default function TrendsPage() {
           trendData={trendsData}
           navigatorData={navigatorData}
           axesState={axesState}
-          onSelectStart={handleSelectStart}
-          onSelectEnd={handleSelectEnd}
-          onPlotAreaHover={handleOnPlotHover}
+          onStartDateChange={handleChartStartDateChange}
+          onEndDateChange={handleChartEndDateChange}
+          onShowCursorBubbleChange={handleShowCursorBubbleChange}
+          onCursorBubbleTextChange={handleCursorBubbleTextChange}
         />
-        <DetailPanel className="chart-detail-panel" flexGrow={1}>
-          <TabStrip
-            className="detail-panel-tabs"
-            keepTabsMounted={true}
-            selected={tabSelected}
-            onSelect={handleTabSelect}
-          >
-            <TabStripTab title={t("trends-page:chart_config")}>
-              {!isLoadingTrends ? (
-                <div className="chart-config-content">
-                  <div className="item">
-                    <Typography.p fontSize="large" margin={0}>
-                      {t("trends-page:legend")}
-                    </Typography.p>
-                    <div className="legend-container">
-                      <TreeView
-                        ref={axisTreeRef}
-                        draggable={true}
-                        data={processTreeViewItems(axisTree, {
-                          expand: expandAxesTree,
-                        })}
-                        expandIcons={true}
-                        onExpandChange={handleExpandAxesTreeChange}
-                        item={AxisTreeCustomItem}
-                      />
-                      {/* {axesState.map((axis) => {
-                        return (
-                          <React.Fragment>
-                            {axis.TrendIDs.map((id) => {
-                              const trend = trendsState.find(
-                                (trend) => trend.ID == id
-                              );
-                              return (
-                                <div>
-                                  <SvgIcon
-                                    icon={chartLegendIcon}
-                                    size="xlarge"
-                                    style={{ stroke: trend?.Color }}
-                                  />
-                                  {trend?.Name}
-                                </div>
-                              );
-                            })}
-                          </React.Fragment>
-                        );
-                      })} */}
-                    </div>
-                  </div>
-                  <div className="item">
-                    <Button
-                      svgIcon={isChartInEdit ? undefined : pencilIcon}
-                      onClick={handleChartEditButtonClick}
-                    >
-                      {isChartInEdit ? t("common:save") : t("common:edit")}
-                    </Button>
-                  </div>
-                  <div className="item">
-                    <Typography.p fontSize="large" margin={0}>
-                      {t("trends-page:time_interval")}
-                    </Typography.p>
-                    <div className="item-row">
-                      <div>
-                        <Label>{t("common:from")}</Label>
-                        <DateTimePicker
-                          format={"dd/MM/yy HH:mm:ss"}
-                          value={startDate}
-                          onChange={handleStartDateChange}
-                        />
-                      </div>
-                      <div>
-                        <Label>{t("common:to")}</Label>
-                        <DateTimePicker
-                          format={"dd/MM/yy HH:mm:ss"}
-                          value={endDate}
-                          onChange={handleEndDateChange}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="item">
-                    <Button svgIcon={saveIcon}>
-                      {t("trends-page:save_as_template")}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <Loader size="medium" type={"infinite-spinner"} />
-              )}
-            </TabStripTab>
-            <TabStripTab title={t("trends-page:templates")}></TabStripTab>
-          </TabStrip>
-        </DetailPanel>
+        <TrendsDetailPanel
+          isLoadingTrends={isLoadingTrends}
+          axisTreeRef={axisTreeRef}
+          axisTree={axisTree}
+          TreeCustomItem={AxisTreeCustomItem}
+          isChartInEdit={isChartInEdit}
+          onChartEditButtonClick={handleChartEditButtonClick}
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
+        />
       </main>
-      {showCursorBubble && <CursorBubble text={cursorBubbleText} />}
       {isChartInEdit && (
-        <Dialog onClose={endChartEdit}>
-          <div className="chart-edit-container">
-            <div className="segregated-trends">
-              <TreeView
-                draggable={true}
-                data={processTreeViewItems(trendsTree, {
-                  expand: expandTrendsTree,
-                })}
-                expandIcons={true}
-                onItemDragStart={handleTreeItemDragStart}
-                onItemDragOver={handleTreeItemDragOver}
-                onItemDragEnd={handleTreeItemDragEnd}
-                onExpandChange={handleExpandTrendsTreeChange}
-                item={TrendsTreeCustomItem}
-              />
-            </div>
-            <div className="separator" />
-            <div className="selected-trends">
-              <TreeView
-                ref={axisTreeRef}
-                draggable={true}
-                data={processTreeViewItems(axisTree, {
-                  expand: expandAxesTree,
-                })}
-                expandIcons={true}
-                onExpandChange={handleExpandAxesTreeChange}
-                item={AxisTreeCustomItem}
-              />
-              <div
-                className="create-axis-area"
-                onMouseEnter={handleMouseEnterCreateNewAxisArea}
-                onMouseLeave={handleMouseLeaveCreateNewAxisArea}
-              >
-                <Typography.p style={{ marginBottom: 0 }}>
-                  {t("trends-page:create_new_axis")}
-                </Typography.p>
-              </div>
-            </div>
-          </div>
-          {showCreateAxisDialog && (
-            <Dialog onClose={toggleAxisDialog}>
-              <Label>{t("trends-page:new_axis_name")}</Label>
-              <TextBox value={newAxisName} onChange={handleAxisNameChange} />
-              <DialogActionsBar>
-                <Button type="button" onClick={createNewAxis}>
-                  {t("common:confirm")}
-                </Button>
-              </DialogActionsBar>
-            </Dialog>
-          )}
-          <DialogActionsBar>
-            <Button type="button" onClick={endChartEdit}>
-              {t("common:cancel")}
-            </Button>
-            <Button type="button" onClick={endChartEdit}>
-              {t("common:save")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
+        <ChartEditDialog
+          trendsTree={trendsTree}
+          TrendsTreeCustomItem={TrendsTreeCustomItem}
+          AxisTreeCustomItem={AxisTreeCustomItem}
+          axisTreeRef={axisTreeRef}
+          axisTree={axisTree}
+          onCancelButtonClick={endChartEdit}
+          onSaveButtonClick={endChartEdit}
+          trendsState={trendsState}
+          axesState={axesState}
+          onAxesStateChange={handleAxesStateChange}
+          onShowCursorBubbleChange={handleShowCursorBubbleChange}
+          onCursorBubbleTextChange={handleCursorBubbleTextChange}
+        />
       )}
+      {showCursorBubble && <CursorBubble text={cursorBubbleText} />}
     </React.Fragment>
   );
 }

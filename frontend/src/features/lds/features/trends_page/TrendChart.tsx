@@ -18,6 +18,7 @@ import ScaleScrollBar, {
 } from "../../../../components/ScaleScrollBar";
 import { throttle } from "../../../../lib/utilis";
 import { AxisType } from "./TrendsPage";
+import CursorBubble from "../../../../components/CursorBubble";
 
 interface MinMaxType {
   max: number;
@@ -43,9 +44,10 @@ export interface TrendChartProps {
   trendData: ChartSeriesTrendData[];
   navigatorData: ChartSeriesTrendData[];
   axesState: AxisType[];
-  onSelectStart: (event: SelectStartEvent) => void;
-  onSelectEnd: (event: SelectEndEvent) => void;
-  onPlotAreaHover: (event: PlotAreaHoverEvent) => void;
+  onStartDateChange: (value: Date) => void;
+  onEndDateChange: (value: Date) => void;
+  onShowCursorBubbleChange: (value: boolean) => void;
+  onCursorBubbleTextChange: (value: string) => void;
 }
 
 const TrendChart = React.memo(function TrendChart({
@@ -56,9 +58,10 @@ const TrendChart = React.memo(function TrendChart({
   trendData,
   navigatorData,
   axesState,
-  onSelectStart,
-  onSelectEnd,
-  onPlotAreaHover,
+  onStartDateChange,
+  onEndDateChange,
+  onShowCursorBubbleChange,
+  onCursorBubbleTextChange,
 }: TrendChartProps) {
   // const chartRef = React.useRef<Chart>(null);
   // const chartKeyRef = React.useRef<number>(0);
@@ -254,6 +257,32 @@ const TrendChart = React.memo(function TrendChart({
     });
   }, [ssBarStyles]);
 
+  const handleSelectStart = React.useCallback((e: SelectStartEvent) => {
+    onShowCursorBubbleChange(true);
+  }, []);
+
+  const handleSelectEnd = React.useCallback((e: SelectEndEvent) => {
+    onShowCursorBubbleChange(false);
+    onStartDateChange(e.from);
+    onEndDateChange(e.to);
+  }, []);
+
+  const handleOnPlotHover = React.useCallback((e: PlotAreaHoverEvent) => {
+    if (e.category)
+      onCursorBubbleTextChange(
+        e.category.toLocaleDateString("pl-PL", {
+          hourCycle: "h24",
+          weekday: "short",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          seconds: "2-digit",
+          fractionalSecondDigits: "3",
+        })
+      );
+  }, []);
+
   return (
     <React.Fragment>
       <div className="chart-container">
@@ -262,9 +291,9 @@ const TrendChart = React.memo(function TrendChart({
           // ref={chartRef}
           className="main-chart"
           renderAs="svg"
-          onSelectStart={onSelectStart}
-          onSelectEnd={onSelectEnd}
-          onPlotAreaHover={onPlotAreaHover}
+          onSelectStart={handleSelectStart}
+          onSelectEnd={handleSelectEnd}
+          onPlotAreaHover={handleOnPlotHover}
           transitions={false}
           style={{ height: "100%" }}
         >
@@ -293,13 +322,6 @@ const TrendChart = React.memo(function TrendChart({
             <ChartPane name={"navigator"} height={200} />
           </ChartPanes>
           <ChartValueAxis>
-            {/* <ChartValueAxisItem
-              labels={{ content: (e) => e.value + " MPa" }}
-              max={valueAxisState.max}
-              min={valueAxisState.min}
-              title={{ text: "Ciśnienie MPa", margin: { left: 10, right: 10 } }}
-              axisCrossingValue={trendMinMaxValue.min}
-            /> */}
             {mainChartAxesItems}
             <ChartValueAxisItem name="valueNavigatorAxis" pane="navigator" />
           </ChartValueAxis>
@@ -310,22 +332,6 @@ const TrendChart = React.memo(function TrendChart({
         </Chart>
       </div>
       {scaleScrollBars}
-      {/* <ScaleScrollBar
-        style={{
-          position: "absolute",
-          top: ssBarStyle.top,
-          left: ssBarStyle.left,
-          height: ssBarStyle.height,
-        }}
-        max={trendMinMaxValue.max}
-        min={trendMinMaxValue.min} //
-        vertical={true}
-        value={{
-          start: valueAxisState.min,
-          end: valueAxisState.max,
-        }}
-        onChange={handleScaleScrollBarChange}
-      /> */}
     </React.Fragment>
   );
 });
