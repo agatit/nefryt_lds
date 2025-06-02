@@ -23,4 +23,3 @@ logging.basicConfig(stream=sys.stdout, level=Settings.verbosity, force=True)
 def setup_engine():
     db_url = Settings.db_uri
     set_new_engine(create_engine(url=db_url, echo=False))
-
