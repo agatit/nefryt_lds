@@ -17,16 +17,11 @@ import ScaleScrollBar, {
   ScaleScrollBarChangeEvent,
 } from "../../../../components/ScaleScrollBar";
 import { throttle } from "../../../../lib/utilis";
+import { AxisType } from "./TrendsPage";
 
 interface MinMaxType {
   max: number;
   min: number;
-}
-
-interface ScaleScrollBarStyleType {
-  top: number;
-  left: number;
-  height: number;
 }
 
 export interface ChartTrendData {
@@ -47,6 +42,7 @@ export interface TrendChartProps {
   navigationEndDate: Date;
   trendData: ChartSeriesTrendData[];
   navigatorData: ChartSeriesTrendData[];
+  axesState: AxisType[];
   onSelectStart: (event: SelectStartEvent) => void;
   onSelectEnd: (event: SelectEndEvent) => void;
   onPlotAreaHover: (event: PlotAreaHoverEvent) => void;
@@ -59,6 +55,7 @@ const TrendChart = React.memo(function TrendChart({
   navigationEndDate,
   trendData,
   navigatorData,
+  axesState,
   onSelectStart,
   onSelectEnd,
   onPlotAreaHover,
@@ -87,51 +84,75 @@ const TrendChart = React.memo(function TrendChart({
 
     return { min, max };
   }, [trendData]);
-  const [valueAxisState, setValueAxisState] =
-    React.useState<MinMaxType>(trendMinMaxValue);
-  const [ssBarStyle, setSSBarStyle] = React.useState<ScaleScrollBarStyleType>({
-    top: 0,
-    left: 0,
-    height: 0,
-  });
-
-  React.useLayoutEffect(() => {
-    setValueAxisState(trendMinMaxValue);
-  }, [trendData]);
-
-  React.useLayoutEffect(() => {
-    const axisTitleRect = document
-      .getElementsByClassName("main-chart")[0]
-      ?.getElementsByTagName("svg")[0]
-      ?.children[1]?.children[2].lastElementChild?.getBoundingClientRect();
-
-    const axisRect = document
-      .getElementsByClassName("main-chart")[0]
-      ?.getElementsByTagName("svg")[0]
-      ?.children[1]?.children[2]?.getBoundingClientRect();
-
-    if (axisTitleRect && axisRect)
-      setSSBarStyle({
-        top: axisRect.top,
-        left: axisTitleRect.left + 15,
-        height: axisRect.bottom - axisRect.top,
-      });
-  }, []);
-
-  const throttledValueAxisChange = React.useMemo(
-    () => throttle(setValueAxisState, 166),
-    []
+  const [valueAxisState, setValueAxisState] = React.useState<MinMaxType[]>(
+    new Array(axesState.length).fill(trendMinMaxValue)
   );
 
-  function handleScaleScrollBarChange(e: ScaleScrollBarChangeEvent) {
-    throttledValueAxisChange({
-      max: Math.round(e.value.end * 100) / 100,
-      min: Math.round(e.value.start * 100) / 100,
-    });
+  React.useEffect(() => {
+    setValueAxisState(new Array(axesState.length).fill(trendMinMaxValue));
+  }, [trendMinMaxValue, axesState]);
+
+  const axisCrossingValue = React.useMemo(() => {
+    const beforeStart = new Date(startDate);
+    beforeStart.setDate(beforeStart.getDate() - 1);
+    const afterEnd = new Date(endDate);
+    afterEnd.setDate(afterEnd.getDate() + 1);
+
+    const arr = [beforeStart];
+    for (let i = 1; i < axesState.length; i++) arr.push(afterEnd);
+
+    return arr;
+  }, [axesState, startDate, endDate]);
+
+  const updateValueAxisState = React.useCallback(
+    (newMinMax: MinMaxType, index: number) => {
+      const arr = [...valueAxisState];
+      arr.splice(index, 1, newMinMax);
+      setValueAxisState(arr);
+    },
+    [valueAxisState]
+  );
+
+  const throttledValueAxisChange = React.useMemo(
+    () => throttle(updateValueAxisState, 166),
+    [updateValueAxisState]
+  );
+
+  function handleScaleScrollBarChange(
+    e: ScaleScrollBarChangeEvent,
+    index: number
+  ) {
+    throttledValueAxisChange(
+      {
+        max: Math.round(e.value.end * 100) / 100,
+        min: Math.round(e.value.start * 100) / 100,
+      },
+      index
+    );
   }
+
+  const mainChartAxesItems = React.useMemo(() => {
+    return axesState.map((axis, i) => {
+      return (
+        <ChartValueAxisItem
+          labels={{ content: (e) => e.value + " " + axis.Unit }}
+          max={
+            valueAxisState[i] ? valueAxisState[i].max : trendMinMaxValue.max //react does not offer syncing state with prop change rerender
+          }
+          min={
+            valueAxisState[i] ? valueAxisState[i].min : trendMinMaxValue.min //react does not offer syncing state with prop change rerender
+          }
+          title={{ text: axis.Name, margin: { left: 10, right: 10 } }}
+          axisCrossingValue={trendMinMaxValue.min}
+          name={axis.Name}
+        />
+      );
+    });
+  }, [axesState, valueAxisState, trendMinMaxValue]);
 
   const mainChartSeriesItems = React.useMemo(() => {
     return trendData.map((trend) => {
+      const axis = axesState.find((axis) => axis.TrendIDs.includes(trend.id));
       return (
         <ChartSeriesItem
           key={trend.id}
@@ -141,6 +162,7 @@ const TrendChart = React.memo(function TrendChart({
           data={trend.data}
           markers={{ visible: false }}
           color={trend.color}
+          axis={axis?.Name}
         />
       );
     });
@@ -165,6 +187,73 @@ const TrendChart = React.memo(function TrendChart({
     });
   }, [navigatorData]);
 
+  const ssBarVerticalStyle = React.useRef({ top: 0, height: 0 });
+  React.useLayoutEffect(() => {
+    const chartRect = document
+      .getElementsByClassName("main-chart")[0]
+      ?.getElementsByTagName("svg")[0]
+      ?.children[1]?.children[2]?.getBoundingClientRect();
+
+    ssBarVerticalStyle.current = {
+      top: chartRect.top,
+      height: chartRect.height - 16,
+    };
+  }, []);
+
+  const [ssBarStyles, setSSBarStyles] = React.useState<any[]>([]);
+  React.useLayoutEffect(() => {
+    const chartRect = document
+      .getElementsByClassName("main-chart")[0]
+      ?.getElementsByTagName("svg")[0]
+      ?.children[1]?.children[2]?.getBoundingClientRect();
+
+    const axesElements = document
+      .getElementsByClassName("main-chart")[0]
+      ?.getElementsByTagName("svg")[0]?.children[1]?.children[2]?.children;
+
+    const ssBarStyles = [];
+    let counter = 0;
+    for (let i = 0; i < axesElements.length; i++) {
+      const axis = axesState.find(
+        (axis) => axis.Name == axesElements[i].lastElementChild?.innerHTML
+      );
+
+      if (axis == undefined) continue;
+
+      counter++;
+
+      const axisRect = axesElements[i].getBoundingClientRect();
+      ssBarStyles.push({
+        left: axisRect.left + (counter == 1 ? 15 : -20),
+      });
+    }
+
+    if (chartRect && ssBarStyles.length > 0) setSSBarStyles(ssBarStyles);
+  }, [mainChartAxesItems]);
+
+  const scaleScrollBars = React.useMemo(() => {
+    return ssBarStyles.map((style, i) => {
+      return (
+        <ScaleScrollBar
+          style={{
+            position: "absolute",
+            top: ssBarVerticalStyle.current.top,
+            left: style.left,
+            height: ssBarVerticalStyle.current.height,
+          }}
+          max={trendMinMaxValue.max}
+          min={trendMinMaxValue.min}
+          vertical={true}
+          value={{
+            start: valueAxisState[i].min,
+            end: valueAxisState[i].max,
+          }}
+          onChange={(e) => handleScaleScrollBarChange(e, i)}
+        />
+      );
+    });
+  }, [ssBarStyles]);
+
   return (
     <React.Fragment>
       <div className="chart-container">
@@ -186,6 +275,7 @@ const TrendChart = React.memo(function TrendChart({
               rangeLabels={{ format: "dd/MM/yy HH:mm:ss", visible: true }}
               min={startDate}
               max={endDate}
+              axisCrossingValue={axisCrossingValue}
             />
             <ChartCategoryAxisItem
               baseUnit={"auto"}
@@ -203,12 +293,14 @@ const TrendChart = React.memo(function TrendChart({
             <ChartPane name={"navigator"} height={200} />
           </ChartPanes>
           <ChartValueAxis>
-            <ChartValueAxisItem
+            {/* <ChartValueAxisItem
               labels={{ content: (e) => e.value + " MPa" }}
               max={valueAxisState.max}
               min={valueAxisState.min}
               title={{ text: "Ciśnienie MPa", margin: { left: 10, right: 10 } }}
-            />
+              axisCrossingValue={trendMinMaxValue.min}
+            /> */}
+            {mainChartAxesItems}
             <ChartValueAxisItem name="valueNavigatorAxis" pane="navigator" />
           </ChartValueAxis>
           <ChartSeries>
@@ -217,7 +309,8 @@ const TrendChart = React.memo(function TrendChart({
           </ChartSeries>
         </Chart>
       </div>
-      <ScaleScrollBar
+      {scaleScrollBars}
+      {/* <ScaleScrollBar
         style={{
           position: "absolute",
           top: ssBarStyle.top,
@@ -225,14 +318,14 @@ const TrendChart = React.memo(function TrendChart({
           height: ssBarStyle.height,
         }}
         max={trendMinMaxValue.max}
-        min={trendMinMaxValue.min}
+        min={trendMinMaxValue.min} //
         vertical={true}
         value={{
           start: valueAxisState.min,
           end: valueAxisState.max,
         }}
         onChange={handleScaleScrollBarChange}
-      />
+      /> */}
     </React.Fragment>
   );
 });
