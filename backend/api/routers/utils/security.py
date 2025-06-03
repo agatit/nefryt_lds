@@ -6,7 +6,7 @@ from jwt import InvalidTokenError, InvalidSignatureError, ExpiredSignatureError
 import jwt
 from passlib.context import CryptContext
 from starlette import status
-from ..schemas import LoginPermissions
+from api.schemas import LoginPermissions
 
 SECRET_KEY = "45bfa25ea5ae73f9f46909ac22e5ff72d51362129e210e3bc2c728957ee18230"
 ALGORITHM = "HS256"

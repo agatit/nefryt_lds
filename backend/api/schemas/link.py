@@ -1,5 +1,4 @@
 from decimal import Decimal
-
 from sqlalchemy import Numeric, Column
 from sqlmodel import SQLModel, Field
 

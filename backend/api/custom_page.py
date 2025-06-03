@@ -26,7 +26,7 @@ class CustomParams(BaseModel, AbstractParams):
 T = TypeVar("T")
 
 
-class CustomPage(AbstractPage[T], Generic[T]):
+class CustomPage(AbstractPage[T], Generic[T]): # noqa
     items: Sequence[T]
     total: Optional[GreaterEqualZero]
     page: Optional[GreaterEqualOne]

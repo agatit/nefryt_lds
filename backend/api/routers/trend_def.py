@@ -1,4 +1,3 @@
-import traceback
 from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -8,8 +7,7 @@ from database import lds
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
-from .security import get_user_token
-from .utils import strip_strings
+from api.routers.utils import strip_strings, get_user_token
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
 from ..schemas import Error, TrendDefBase

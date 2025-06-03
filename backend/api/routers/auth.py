@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Depends
-from ..routers.security import prepare_login_permissions, get_refresh_token
+from api.routers.utils import prepare_login_permissions, get_refresh_token
 from ..schemas import Login, LoginPermissions
 
 router = APIRouter(prefix="/auth", tags=["auth"])

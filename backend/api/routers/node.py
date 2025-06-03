@@ -7,8 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, aliased
 from starlette import status
 from starlette.responses import JSONResponse, Response
-from .mapper import map_lds_node_and_editor_node_to_node_out, map_node_to_lds_node, map_node_to_editor_node
-from .security import get_user_token
+from api.routers.utils import map_lds_node_and_editor_node_to_node_out, map_node_to_lds_node, map_node_to_editor_node, get_user_token
 from ..custom_page import CustomParams, CustomPage, use_custom_page
 from db import get_engine
 from ..schemas import Error, NodeOut, UpdateNode, Node
@@ -68,7 +67,7 @@ async def delete_node_by_id(node_id: Annotated[int, Path()], engine: Annotated[E
         lds_node = aliased(lds.Node)
         editor_node = aliased(editor.Node)
         statement = (select(lds_node, editor_node)
-                     .outerjoin(editor_node, lds_node.ID == editor_node.ID)
+                     .outerjoin(editor_node, lds_node.ID == editor_node.ID) # noqa
                      .where(lds_node.ID == literal(node_id)))
         with Session(engine) as session:
             node = session.execute(statement).all()

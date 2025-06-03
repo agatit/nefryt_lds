@@ -95,7 +95,7 @@ class TrendGroup(SQLModel, table=True):
 
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True, nullable=False))
     Name: str = Field(sa_column=Column(String(100, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
-    AnalisisOnly: bool = Field(False, nullable=False, sa_column_kwargs={"server_default": "0"})
+    AnalysisOnly: bool = Field(False, nullable=False, sa_column_kwargs={"server_default": "0"})
 
 
 class Unit(SQLModel, table=True):

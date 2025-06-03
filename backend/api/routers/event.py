@@ -7,11 +7,10 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
-from .mapper import map_lds_event_and_lds_event_def_to_event_out
+from api.routers.utils import map_lds_event_and_lds_event_def_to_event_out, get_user_permissions, get_user_token
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from ..schemas import Error, EventOut, Information
 from db import get_engine
-from ..routers.security import get_user_permissions, get_user_token
 from database import lds
 
 router = APIRouter(prefix="/event", tags=["event"], dependencies=[Depends(get_user_token)])

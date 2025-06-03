@@ -810,7 +810,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: List pipelnie methods
+      summary: List pipeline methods
       tags:
       - methods
       x-openapi-router-controller: api.controllers.methods_controller
@@ -997,7 +997,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: List pipelnie method params
+      summary: List pipeline method params
       tags:
       - methods
       x-openapi-router-controller: api.controllers.methods_controller
@@ -1050,7 +1050,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: Put pipelnie method params
+      summary: Put pipeline method params
       tags:
       - methods
       x-openapi-router-controller: api.controllers.methods_controller
@@ -1090,7 +1090,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: List pipelnie pipeline params
+      summary: List pipeline pipeline params
       tags:
       - pipelines
       x-openapi-router-controller: api.controllers.pipelines_controller
@@ -1135,7 +1135,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: Put pipelnie pipeline params
+      summary: Put pipeline pipeline params
       tags:
       - pipelines
       x-openapi-router-controller: api.controllers.pipelines_controller
@@ -2115,6 +2115,8 @@ components:
             type: integer
           type: array
           default: [ ]
+        Title:
+          type: string
         Unit:
           type: string
         ScaledMin:
@@ -2593,11 +2595,11 @@ components:
           description: none
           pattern: ^.{0,100}
           type: string
-        AnalisisOnly:
+        AnalysisOnly:
           description: none
           type: boolean
       required:
-      - AnalisisOnly
+      - AnalysisOnly
       - Name
       type: object
     TrendParam:

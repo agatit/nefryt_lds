@@ -6,7 +6,7 @@ from starlette import status
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
-from api.routers.security import SECRET_KEY, ALGORITHM
+from api.routers.utils.security import SECRET_KEY, ALGORITHM
 
 
 login_data1: dict = {'username': 'user1',

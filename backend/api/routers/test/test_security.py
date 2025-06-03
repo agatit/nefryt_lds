@@ -10,10 +10,10 @@ from jwt import InvalidSignatureError, InvalidTokenError
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
-from api.routers.security import (SECRET_KEY, ALGORITHM, generate_token, get_expiration_time,
-                                  get_user_permissions, get_user_token, decode_token, pwd_context,
-                                  verify_password, hash_password, is_refresh, get_refresh_token,
-                                  prepare_login_permissions)
+from api.routers.utils.security import (SECRET_KEY, ALGORITHM, generate_token, get_expiration_time,
+                                        get_user_permissions, get_user_token, decode_token, pwd_context,
+                                        verify_password, hash_password, is_refresh, get_refresh_token,
+                                        prepare_login_permissions)
 
 login_data1: dict = {'username': 'user1',
                      'password': 'abc'}

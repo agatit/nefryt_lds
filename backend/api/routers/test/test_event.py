@@ -8,10 +8,10 @@ from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from db import get_engine
-from api.routers.security import get_user_token
+from api.routers.utils.security import get_user_token
 from database import lds
 import pytest
-from api.routers.security import SECRET_KEY, ALGORITHM
+from api.routers.utils.security import SECRET_KEY, ALGORITHM
 
 event_def_visible = lds.EventDef(ID='VISIBLE', Verbosity='verbosity', Caption='caption',
                                  Silent=False, Visible=True, Enabled=True)
