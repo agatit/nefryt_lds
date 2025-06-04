@@ -12,17 +12,17 @@ if __name__ == '__main__':
         pump_time_min = 30
         pump_time_max = 31
 
-        wave_death_time_min = 30 #s
+        wave_death_time_min = 40 #s
         wave_death_time_max = 90 #s
 
         leak_time_min = 1
         leak_time_max = 5
 
-        rest_time_after_pomping_min = 30
+        rest_time_after_pomping_min = 40
         rest_time_after_pomping_max = 90
 
 
-        cycle_amount_to_generate = 30
+        cycle_amount_to_generate = 50
         leaks_amount_to_generate_on_one_cycle = 5
         time_between_cycles = 10
         pipeline_mode = ["stationary"]
