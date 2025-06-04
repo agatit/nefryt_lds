@@ -20,9 +20,9 @@ trend_def_list = [trend_def1, trend_def2]
 trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
 trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
 trend_list = [trend1, trend2]
-axis1 = Axis(TrendsID=[1], Unit='Unit1', ScaledMin=0.5, ScaledMax=1.5)
-axis2 = Axis(TrendsID=[1, 2], Unit='Unit2', ScaledMin=1.5, ScaledMax=2.5)
-axis3 = Axis(TrendsID=[1, 2, 3], Unit='Unit3', ScaledMax=2.5, ScaledMin=3.5)
+axis1 = Axis(TrendsID=[1], Title='Axis1', Unit='Unit1', ScaledMin=0.5, ScaledMax=1.5)
+axis2 = Axis(TrendsID=[1, 2], Title='Axis2', Unit='Unit2', ScaledMin=1.5, ScaledMax=2.5)
+axis3 = Axis(TrendsID=[1, 2, 3], Title='Axis3', Unit='Unit3', ScaledMax=2.5, ScaledMin=3.5)
 axes_list = [axis1, axis2, axis3]
 template1 = lds.Template(ID=1, Name='Template1', Axes=[])
 template2 = lds.Template(ID=2, Name='Template2', Axes=[axis1.model_dump(), axis2.model_dump()])
