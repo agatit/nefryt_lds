@@ -80,7 +80,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
   );
 
   return (
-    <DetailPanel className="chart-detail-panel" flexGrow={1}>
+    <DetailPanel className="chart-detail-panel" flexGrow={1} extandable={false}>
       <TabStrip
         className="detail-panel-tabs"
         keepTabsMounted={true}

@@ -11,6 +11,12 @@ main {
 .chart-container {
   flex: 4 0 0;
   overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container > .main-chart {
+  flex-grow: 1;
 }
 
 .detail-panel-tabs {
@@ -116,4 +122,8 @@ main {
 
 .k-tabstrip-content > div {
   width: 100%;
+}
+
+.k-treeview-leaf-text > button {
+  margin-left: k-spacing(2);
 }

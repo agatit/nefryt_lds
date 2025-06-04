@@ -38,7 +38,12 @@ import {
 import CursorBubble from "../../../../components/CursorBubble";
 import { DetailPanel } from "onyks_shared_kendo";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
-import { pencilIcon, saveIcon } from "@progress/kendo-svg-icons";
+import {
+  pencilIcon,
+  saveIcon,
+  SVGIcon,
+  xIcon,
+} from "@progress/kendo-svg-icons";
 import { Button } from "@progress/kendo-react-buttons";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import {
@@ -57,8 +62,8 @@ import TrendChart, { ChartSeriesTrendData, ChartTrendData } from "./TrendChart";
 import TrendsDetailPanel from "./TrendsDetailPanel";
 import ChartEditDialog from "./ChartEditDialog";
 
-const mainChartSampleSize = 400;
-const navigationChartSampleSize = 100;
+const mainChartSampleSize = 500;
+const navigationChartSampleSize = 50;
 
 export type MockupTrendType = {
   ID: number;
@@ -391,12 +396,21 @@ export default function TrendsPage() {
     });
   }, [axesState]);
 
+  // Treeview stuff
+
   const TreeCustomItem = React.useCallback(
-    (props: ItemRenderProps, depth: number) => {
+    (
+      props: ItemRenderProps,
+      depth: number,
+      buttonIcon?: SVGIcon,
+      buttonOnClick?: React.MouseEventHandler<HTMLButtonElement>
+    ) => {
       const trend = trendsState.find((trend) => trend.ID == props.item.id);
-      return props.itemHierarchicalIndex.split("_").length > depth ? (
+      const correctDepth =
+        props.itemHierarchicalIndex.split("_").length > depth;
+      return (
         <React.Fragment>
-          {trend && (
+          {trend && correctDepth && (
             <SvgIcon
               icon={chartLegendIcon}
               size="xlarge"
@@ -404,9 +418,14 @@ export default function TrendsPage() {
             />
           )}
           <span>{props.item.text}</span>
+          {buttonIcon !== undefined && (
+            <Button
+              svgIcon={buttonIcon}
+              onClick={buttonOnClick}
+              fillMode="flat"
+            />
+          )}
         </React.Fragment>
-      ) : (
-        <span>{props.item.text}</span>
       );
     },
     [trendsState]
@@ -419,11 +438,42 @@ export default function TrendsPage() {
     [TreeCustomItem]
   );
 
-  const AxisTreeCustomItem = React.useCallback(
+  const AxisEditTreeCustomItem = React.useCallback(
     (props: ItemRenderProps) => {
       return TreeCustomItem(props, 1);
     },
     [TreeCustomItem]
+  );
+
+  const removeFromAxes = React.useCallback(
+    (props: ItemRenderProps) => {
+      const indexArray = props.itemHierarchicalIndex.split("_");
+
+      if (indexArray.length == 1) {
+        setAxesState(axesState.filter((axis) => axis.Name !== props.item.text));
+        return;
+      }
+
+      setAxesState(
+        axesState.map((axis, i) => {
+          if (i !== parseInt(indexArray[0])) return axis;
+          return {
+            ...axis,
+            TrendIDs: axis.TrendIDs.filter(
+              (ids, index) => index !== parseInt(indexArray[1])
+            ),
+          };
+        })
+      );
+    },
+    [axesState]
+  );
+
+  const AxisLegendTreeCustomItem = React.useCallback(
+    (props: ItemRenderProps) => {
+      return TreeCustomItem(props, 1, xIcon, () => removeFromAxes(props));
+    },
+    [TreeCustomItem, removeFromAxes]
   );
 
   // Trends Data
@@ -566,7 +616,7 @@ export default function TrendsPage() {
           isLoadingTrends={isLoadingTrends}
           axisTreeRef={axisTreeRef}
           axisTree={axisTree}
-          TreeCustomItem={AxisTreeCustomItem}
+          TreeCustomItem={AxisLegendTreeCustomItem}
           isChartInEdit={isChartInEdit}
           onChartEditButtonClick={handleChartEditButtonClick}
           startDate={startDate}
@@ -579,7 +629,7 @@ export default function TrendsPage() {
         <ChartEditDialog
           trendsTree={trendsTree}
           TrendsTreeCustomItem={TrendsTreeCustomItem}
-          AxisTreeCustomItem={AxisTreeCustomItem}
+          AxisTreeCustomItem={AxisLegendTreeCustomItem}
           axisTreeRef={axisTreeRef}
           axisTree={axisTree}
           onCancelButtonClick={endChartEdit}
