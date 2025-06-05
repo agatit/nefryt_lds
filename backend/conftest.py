@@ -35,7 +35,7 @@ class TestConfig(BaseModel):
 
 _config_test = load_yaml(path, "config.test.yaml")
 TestSettings = TestConfig(test_model=TestModel(**_config_test), password_settings=PasswordSettings()) # type: ignore
-Settings.use_profiler = False
+Settings.log_profiler = False
 
 def pytest_addoption(parser):
     parser.addoption(

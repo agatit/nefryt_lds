@@ -1,5 +1,6 @@
 import logging
 import struct
+import time
 from multiprocessing import Process
 from typing import List
 import numpy as np
@@ -13,7 +14,7 @@ from trends_writer.trend.trend_manager import TrendManager
 
 
 class TrendBase:
-    def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue | None):
+    def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue):
         self.id = _id
         self.children: List[TrendBase] = []
         self.params = {}
@@ -28,7 +29,6 @@ class TrendBase:
         logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")
 
     def run_trend_process(self):
-        self._read_children()
         self.process = Process(target=self.process_queue, args=(self.db_uri, ))
         self.start_process_queue()
         logging.info(f"{self.__class__.__name__} ({self.id}) started")
@@ -50,9 +50,9 @@ class TrendBase:
             timestamp = item[1]
             parent_id = item[2] if len(item) > 2 else None
 
+            self.profiler_queue.put((1, self.id, timestamp, time.perf_counter()))
             self.update(data, timestamp, parent_id)
-            if self.profiler_queue:
-                self.profiler_queue.put((0, timestamp))
+            self.profiler_queue.put((0, self.id, timestamp, time.perf_counter()))
 
     def update(self, data: np.ndarray, timestamp: int, parent_id: int | None = None):
         self._save(data, timestamp)
@@ -60,8 +60,6 @@ class TrendBase:
 
         for child in self.children:
             try:
-                if self.profiler_queue:
-                    self.profiler_queue.put((1, timestamp))
                 child.queue.put((data, timestamp, self.id))
             except Exception as e:
                 logging.exception(f"{timestamp} {self.__class__.__name__} ({self.id}) child {child.__class__.__name__} ({child.id}) update error: {e}", exc_info=True)
@@ -82,7 +80,7 @@ class TrendBase:
         for tpd, tp in read_params:
             self.params[tpd.ID.strip()] = tp.Value
 
-    def _read_children(self):
+    def read_children(self):
         stmt = (select(lds.Trend.ID)
                 .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) # noqa
                 .join(lds.TrendParam, lds.TrendParam.TrendID == lds.Trend.ID)
@@ -94,8 +92,8 @@ class TrendBase:
         with Session(get_engine()) as session:
             results = session.execute(stmt).all()
 
+        results = [res[0] for res in results]
         for trend_id in results:
-            trend_id = trend_id[0]
             child_trend = TrendManager.get(trend_id)
             if child_trend is None:
                 logging.warning(f"No registered Trend ({trend_id}) found for parent {self.__class__.__name__} ({self.id})")

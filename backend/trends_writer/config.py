@@ -3,7 +3,6 @@ import pathlib
 import logging
 from pydantic import BaseModel
 from sqlalchemy import create_engine
-
 from config_utils import load_yaml
 from db import set_new_engine
 
@@ -14,7 +13,7 @@ class AppConfig(BaseModel):
     db_uri: str
     verbosity: str = 'INFO'
     modbus_port: int = 502
-    use_profiler: bool = False
+    log_profiler: bool = False
     profiler_filename: str = 'profiler.log'
 
 

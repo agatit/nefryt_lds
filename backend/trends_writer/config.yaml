@@ -1,5 +1,5 @@
 db_uri: mssql+pyodbc://sa:Onyks$us@owl.agatit.pl:1449/NefrytLDS_Zygmuntow_2025?driver=ODBC+Driver+17+for+SQL+Server
 verbosity: INFO
 modbus_port: 502
-use_profiler: True
-profiler_filename: profiler_queues3.log
+log_profiler: True
+profiler_filename: profiler.log
