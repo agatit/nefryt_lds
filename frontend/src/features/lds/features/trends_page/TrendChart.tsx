@@ -17,27 +17,20 @@ import ScaleScrollBar, {
   ScaleScrollBarChangeEvent,
 } from "../../../../components/ScaleScrollBar";
 import { throttle } from "../../../../lib/utilis";
-import { AxisType } from "./TrendsPage";
+import { AxisType, ChartSeriesTrendData } from "./TrendsPage";
 import CursorBubble from "../../../../components/CursorBubble";
 import { useResizeObserver } from "../../../../hooks/useResizeObserver";
+import { Loader } from "@progress/kendo-react-indicators";
+
+const chartScaleThrottleMs = 50;
 
 interface MinMaxType {
   max: number;
   min: number;
 }
 
-export interface ChartTrendData {
-  timestamp: Date;
-  value: number;
-}
-
-export interface ChartSeriesTrendData {
-  data: ChartTrendData[];
-  id: number;
-  color: string;
-}
-
 interface ChartComponentProps {
+  isLoadingTrendsData: boolean;
   trendData: ChartSeriesTrendData[];
   navigatorData: ChartSeriesTrendData[];
   axesState: AxisType[];
@@ -53,6 +46,7 @@ interface ChartComponentProps {
 }
 
 const ChartComponent = React.memo(function ChartComponent({
+  isLoadingTrendsData,
   trendData,
   navigatorData,
   axesState,
@@ -192,11 +186,19 @@ const ChartComponent = React.memo(function ChartComponent({
         </ChartValueAxis>
         <ChartSeries>{navigationChartSeriesItems}</ChartSeries>
       </Chart>
+      {isLoadingTrendsData && (
+        <Loader
+          className="chart-loader"
+          size="medium"
+          type={"infinite-spinner"}
+        />
+      )}
     </React.Fragment>
   );
 });
 
 export interface TrendChartProps {
+  isLoadingTrendsData: boolean;
   startDate: Date;
   endDate: Date;
   navigationStartDate: Date;
@@ -211,6 +213,7 @@ export interface TrendChartProps {
 }
 
 const TrendChart = React.memo(function TrendChart({
+  isLoadingTrendsData,
   startDate,
   endDate,
   navigationStartDate,
@@ -231,6 +234,7 @@ const TrendChart = React.memo(function TrendChart({
 
     for (let trend of trendData) {
       for (let data of trend.data) {
+        if (!data.value) continue;
         if (data.value > max!) max = data.value;
         if (data.value < min!) min = data.value;
       }
@@ -260,7 +264,7 @@ const TrendChart = React.memo(function TrendChart({
   );
 
   const throttledValueAxisChange = React.useMemo(
-    () => throttle(updateValueAxisState, 166),
+    () => throttle(updateValueAxisState, chartScaleThrottleMs),
     [updateValueAxisState]
   );
 
@@ -292,6 +296,7 @@ const TrendChart = React.memo(function TrendChart({
 
   const [ssBarStyles, setSSBarStyles] = React.useState<any[]>([]);
   const handleSSBarsLeftPositioning = React.useCallback(() => {
+    if (isLoadingTrendsData) return;
     const chartRect = document
       .getElementsByClassName("main-chart")[0]
       ?.getElementsByTagName("svg")[0]
@@ -319,7 +324,7 @@ const TrendChart = React.memo(function TrendChart({
     }
 
     if (chartRect && ssBarStylesArr.length > 0) setSSBarStyles(ssBarStylesArr);
-  }, [ssBarStyles]);
+  }, [ssBarStyles, isLoadingTrendsData]);
 
   React.useLayoutEffect(() => {
     handleSSBarsLeftPositioning();
@@ -383,6 +388,7 @@ const TrendChart = React.memo(function TrendChart({
     <React.Fragment>
       <div className="chart-container" ref={chartContainerRef}>
         <ChartComponent
+          isLoadingTrendsData={isLoadingTrendsData}
           trendData={trendData}
           navigatorData={navigatorData}
           axesState={axesState}

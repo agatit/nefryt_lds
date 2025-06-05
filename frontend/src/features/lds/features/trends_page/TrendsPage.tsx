@@ -3,62 +3,22 @@ import { AuthContext } from "../../../../contexts/authContext";
 import {
   Trend,
   TrendApi,
-  TrendDef,
+  TrendDefBase,
   TrendDefApi,
 } from "../../../../services/api";
-import {
-  PlotAreaHoverEvent,
-  SelectEndEvent,
-  SelectStartEvent,
-} from "@progress/kendo-react-charts";
+
 import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
-import { Loader } from "@progress/kendo-react-indicators";
 import "../../../../styles/features/lds/features/trendPage.scss";
-import {
-  Checkbox,
-  CheckboxChangeEvent,
-  TextBox,
-  TextBoxChangeEvent,
-} from "@progress/kendo-react-inputs";
-import {
-  PanelBar,
-  PanelBarItem,
-  TabStrip,
-  TabStripSelectEventArguments,
-  TabStripTab,
-} from "@progress/kendo-react-layout";
-import { useTranslation } from "react-i18next";
+
 import { SvgIcon, Typography } from "@progress/kendo-react-common";
-import { Label } from "@progress/kendo-react-labels";
-import {
-  DateTimePicker,
-  DateTimePickerChangeEvent,
-} from "@progress/kendo-react-dateinputs";
+import { DateTimePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import CursorBubble from "../../../../components/CursorBubble";
-import { DetailPanel } from "onyks_shared_kendo";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
-import {
-  pencilIcon,
-  saveIcon,
-  SVGIcon,
-  xIcon,
-} from "@progress/kendo-svg-icons";
+import { SVGIcon, xIcon } from "@progress/kendo-svg-icons";
 import { Button } from "@progress/kendo-react-buttons";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import {
-  ItemRenderProps,
-  processTreeViewItems,
-  TreeView,
-  TreeViewDragAnalyzer,
-  TreeViewDragClue,
-  TreeViewExpandChangeEvent,
-  TreeViewItemDragEndEvent,
-  TreeViewItemDragOverEvent,
-  TreeViewItemDragStartEvent,
-  TreeViewOperationDescriptor,
-} from "@progress/kendo-react-treeview";
-import TrendChart, { ChartSeriesTrendData, ChartTrendData } from "./TrendChart";
+import { ItemRenderProps } from "@progress/kendo-react-treeview";
+import TrendChart from "./TrendChart";
 import TrendsDetailPanel from "./TrendsDetailPanel";
 import ChartEditDialog from "./ChartEditDialog";
 
@@ -87,8 +47,19 @@ export type AxisType = {
   ScaleMin: number;
 };
 
+export interface ChartTrendData {
+  timestamp: Date;
+  value: number | null;
+}
+
+export interface ChartSeriesTrendData {
+  data: ChartTrendData[];
+  id: number;
+  color: string;
+}
+
 export interface TreeViewDataItem {
-  id?: number;
+  id?: number | string;
   text: string;
   expanded?: boolean;
   checked?: boolean;
@@ -96,7 +67,7 @@ export interface TreeViewDataItem {
   items?: TreeViewDataItem[];
 }
 
-const mockupTrendDefs: TrendDef[] = [
+const mockupTrendDefs: TrendDefBase[] = [
   {
     ID: "P01",
     Name: "Pressure",
@@ -238,6 +209,16 @@ const mockupTrendTreeData: TreeViewDataItem[] = [
   },
 ];
 
+const mockupAxes: AxisType[] = [
+  {
+    Name: "Ciśnienie pomiary MPa",
+    Unit: "MPa",
+    TrendIDs: [0, 1, 2],
+    ScaleMax: 9,
+    ScaleMin: -1,
+  },
+];
+
 function generateValue(date: Date, chart: number): number {
   switch (chart) {
     case 0:
@@ -274,17 +255,71 @@ function generateValue(date: Date, chart: number): number {
   );
 }
 
-export default function TrendsPage() {
+interface MockupTrendGroupType {
+  ID: number;
+  Name: string;
+  AnalisisOnly?: boolean;
+}
+
+const mockupTrendGroupFromDB: MockupTrendGroupType[] = [
+  {
+    ID: 1,
+    Name: "Przepływ",
+  },
+  {
+    ID: 2,
+    Name: "Temperatura",
+  },
+  {
+    ID: 3,
+    Name: "Gęstość",
+  },
+  {
+    ID: 4,
+    Name: "Ciśnienie",
+  },
+  {
+    ID: 6,
+    Name: "Przepływ",
+  },
+  {
+    ID: 7,
+    Name: "Temperatura",
+  },
+  {
+    ID: 8,
+    Name: "Gęstość",
+  },
+  {
+    ID: 9,
+    Name: "Ciśnienie",
+  },
+  {
+    ID: 10,
+    Name: "Automatyka",
+  },
+  {
+    ID: 11,
+    Name: "Automatyka",
+  },
+];
+
+export interface TrendsPageProps {
+  useMockup: boolean;
+}
+
+export default function TrendsPage({ useMockup }: TrendsPageProps) {
   const auth = React.useContext(AuthContext);
   const refreshableRequest = useRefreshableRequest();
 
   // UI STUFF
   const [startDate, setStartDate] = React.useState<Date>(() => {
-    var date = new Date();
-    date.setDate(date.getDate() - 1);
-    return date;
+    return new Date(1746608208000);
+    // var date = new Date();
+    // date.setDate(date.getDate() - 1);
+    // return date;
   });
-  const [endDate, setEndDate] = React.useState<Date>(new Date());
+  const [endDate, setEndDate] = React.useState<Date>(new Date(1746609215000));
 
   const handleChartStartDateChange = React.useCallback((value: Date) => {
     if (value) setStartDate(value);
@@ -355,32 +390,82 @@ export default function TrendsPage() {
   );
 
   // Trends and trend defs
-  const [trendDefs, setTrendDefs] = React.useState<TrendDef[]>(mockupTrendDefs);
+  const [trendDefs, setTrendDefs] =
+    React.useState<TrendDefBase[]>(mockupTrendDefs);
   const [trendsState, setTrendsState] = React.useState<
     Trend[] | MockupTrendType[]
   >(mockupTrends);
   const [isLoadingTrends, setIsLoadingTrends] = React.useState<boolean>(false);
-  // const trendLoadStatusRef = React.useRef<TrendLoadStatus>({
-  //   defsLoaded: false,
-  //   trendsLoaded: false,
-  // });
+  const trendLoadStatusRef = React.useRef<TrendLoadStatus>({
+    defsLoaded: false,
+    trendsLoaded: false,
+  });
 
-  const [axesState, setAxesState] = React.useState<AxisType[]>([
-    {
-      Name: "Ciśnienie pomiary MPa",
-      Unit: "MPa",
-      TrendIDs: [0, 1, 2],
-      ScaleMax: 9,
-      ScaleMin: -1,
-    },
-  ]);
+  const [axesState, setAxesState] = React.useState<AxisType[]>(
+    useMockup
+      ? mockupAxes
+      : [
+          {
+            Name: "Ciśnienia",
+            Unit: "MPa",
+            TrendIDs: [1, 2, 3, 4],
+            ScaleMax: 0,
+            ScaleMin: 0,
+          },
+        ]
+  );
 
   const handleAxesStateChange = React.useCallback((value: AxisType[]) => {
     if (value) setAxesState(value);
   }, []);
 
-  const [trendsTree, setTrendsTree] =
-    React.useState<TreeViewDataItem[]>(mockupTrendTreeData);
+  const trendsTree: TreeViewDataItem[] = React.useMemo(() => {
+    if (useMockup) return mockupTrendTreeData;
+
+    const trendsTree: TreeViewDataItem[] = mockupTrendGroupFromDB.map(
+      (item) => {
+        return {
+          id: item.ID,
+          text: item.Name,
+          items: [],
+        };
+      }
+    );
+
+    for (let trend of trendsState) {
+      const index = trendsTree.findIndex(
+        (item) => item.id == trend.TrendGroupID
+      );
+      const trendDef = trendDefs.find((item) => item.ID == trend.TrendDefID);
+
+      const indexTrendDef = trendsTree[index].items?.findIndex(
+        (item) => item.id == trend.TrendDefID
+      );
+
+      if (indexTrendDef == -1) {
+        trendsTree[index].items?.push({
+          id: trend.TrendDefID,
+          text: trendDef?.Name!,
+          items: [
+            {
+              id: trend.ID,
+              text: trend.Name!,
+            },
+          ],
+        });
+
+        continue;
+      }
+
+      trendsTree[index].items![indexTrendDef!].items?.push({
+        id: trend.ID,
+        text: trend.Name!,
+      });
+    }
+
+    return trendsTree;
+  }, [trendsState, mockupTrendGroupFromDB]);
+
   const axisTree: TreeViewDataItem[] = React.useMemo(() => {
     return axesState.map((axis) => {
       return {
@@ -394,7 +479,7 @@ export default function TrendsPage() {
         }),
       };
     });
-  }, [axesState]);
+  }, [axesState, trendsState]);
 
   // Treeview stuff
 
@@ -483,44 +568,101 @@ export default function TrendsPage() {
   const [navigatorData, setNavigatorData] = React.useState<
     ChartSeriesTrendData[]
   >([]);
-  // const [isLoadingTrendsData, setIsLoadingTrendsData] =
-  //   React.useState<boolean>(false);
+  const [isLoadingTrendsData, setIsLoadingTrendsData] =
+    React.useState<boolean>(true);
+  const trendsDataLoadStatusRef = React.useRef<boolean>(false);
 
   // Loading from api
 
-  // function checkIfTrendsLoaded() {
-  //   if (
-  //     trendLoadStatusRef.current.defsLoaded &&
-  //     trendLoadStatusRef.current.trendsLoaded
-  //   )
-  //     setIsLoadingTrends(false);
-  // }
+  function checkIfTrendsLoaded() {
+    if (
+      trendLoadStatusRef.current.defsLoaded &&
+      trendLoadStatusRef.current.trendsLoaded
+    )
+      setIsLoadingTrends(false);
+  }
 
-  // async function loadTrends() {
-  //   trendLoadStatusRef.current = { defsLoaded: false, trendsLoaded: false };
+  async function loadTrends() {
+    trendLoadStatusRef.current = { defsLoaded: false, trendsLoaded: false };
 
-  //   refreshableRequest(
-  //     trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi)
-  //   ).then((response) => {
-  //     trendLoadStatusRef.current.defsLoaded = true;
-  //     if (response?.data) setTrendDefs(response?.data.items);
-  //     checkIfTrendsLoaded();
-  //   });
+    refreshableRequest(
+      trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi)
+    ).then((response) => {
+      trendLoadStatusRef.current.defsLoaded = true;
+      if (response?.data) setTrendDefs(response?.data.items);
+      checkIfTrendsLoaded();
+    });
 
-  //   refreshableRequest(trendApi.listTrendsTrendGet.bind(trendApi)).then(
-  //     (response) => {
-  //       trendLoadStatusRef.current.trendsLoaded = true;
-  //       if (response?.data)
-  //         setTrendsState({ trends: response.data.items, activeTrendsIDs: [] });
-  //       checkIfTrendsLoaded();
-  //     }
-  //   );
-  // }
+    refreshableRequest(trendApi.listTrendsTrendGet.bind(trendApi)).then(
+      (response) => {
+        trendLoadStatusRef.current.trendsLoaded = true;
+        if (response?.data) setTrendsState(response.data.items);
+        checkIfTrendsLoaded();
+      }
+    );
+  }
+
+  function checkIfTrendsDataLoaded() {
+    if (trendsDataLoadStatusRef) setIsLoadingTrendsData(false);
+  }
+
+  async function loadTrendsData() {
+    trendsDataLoadStatusRef.current = false;
+
+    var trendIdList: string = "";
+    const trendIdArr: number[] = [];
+
+    axesState.forEach((axis) => {
+      trendIdArr.push(...axis.TrendIDs);
+    });
+
+    trendIdArr.forEach((id) => {
+      trendIdList += id.toString() + ",";
+    });
+
+    refreshableRequest(
+      trendApi.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
+        trendApi
+      ),
+      trendIdList,
+      startDate.getTime() / 1000,
+      endDate.getTime() / 1000,
+      mainChartSampleSize,
+      1,
+      1000
+    ).then((response) => {
+      const newTrendsData: ChartSeriesTrendData[] = trendIdArr.map((id) => {
+        return {
+          data: [],
+          id: id,
+          color: trendsState.find((trend) => trend.ID == id)?.Color!,
+        };
+      });
+      response?.data.items.forEach((item) => {
+        const timestamp = new Date(item.Timestamp * 1000);
+        item.Data?.forEach((dataitem) => {
+          const index = newTrendsData.findIndex((td) => td.id == dataitem.ID);
+          newTrendsData[index].data.push({
+            timestamp: timestamp,
+            value: dataitem.Value ? dataitem.Value : null,
+          });
+        });
+      });
+
+      trendsDataLoadStatusRef.current = true;
+      checkIfTrendsDataLoaded();
+
+      setTrendsData(newTrendsData);
+    });
+  }
 
   // mockup data testing
 
   const generateTestData = React.useCallback(async () => {
     if (startDate == null || endDate == null) return;
+
+    trendLoadStatusRef.current = { defsLoaded: false, trendsLoaded: false };
+    trendsDataLoadStatusRef.current = false;
 
     const timeDiff = endDate.getTime() - startDate.getTime();
     const step = Math.floor(timeDiff / mainChartSampleSize);
@@ -590,16 +732,26 @@ export default function TrendsPage() {
 
     setTrendsData(newTrendsData);
     setNavigatorData(newNavData);
+
+    trendLoadStatusRef.current = { defsLoaded: true, trendsLoaded: true };
+    checkIfTrendsLoaded();
+    trendsDataLoadStatusRef.current = true;
+    checkIfTrendsDataLoaded();
   }, [startDate, endDate, trendsState, axesState]);
 
   React.useEffect(() => {
-    generateTestData();
+    useMockup ? generateTestData() : loadTrends();
   }, [startDate, endDate, axesState]);
+
+  React.useEffect(() => {
+    if (!isLoadingTrends && !useMockup) loadTrendsData();
+  }, [isLoadingTrends, axesState]);
 
   return (
     <React.Fragment>
       <main>
         <TrendChart
+          isLoadingTrendsData={isLoadingTrendsData}
           startDate={startDate}
           endDate={endDate}
           navigationStartDate={navigationStartDate}

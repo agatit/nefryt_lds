@@ -36,6 +36,15 @@ export default function LDS() {
       separator: true,
     },
     {
+      text: t("nav:trends_mockup"),
+      svgIcon: kpiStatusOpenIcon,
+      selected: pathname == "/trends-mockup",
+      route: "/trends-mockup",
+    },
+    {
+      separator: true,
+    },
+    {
       text: t("nav:trends"),
       svgIcon: kpiStatusOpenIcon,
       selected: pathname == "/trends",
@@ -104,7 +113,14 @@ export default function LDS() {
         <KendoLocalizationWrapper>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/trends" element={<TrendsPage />} />
+            <Route
+              path="/trends-mockup"
+              element={<TrendsPage key={1} useMockup={true} />}
+            />
+            <Route
+              path="/trends"
+              element={<TrendsPage key={2} useMockup={false} />}
+            />
             <Route
               path="/trend-configuration"
               element={<TrendConfigurationPage />}

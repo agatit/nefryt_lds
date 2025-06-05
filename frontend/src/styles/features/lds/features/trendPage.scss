@@ -13,6 +13,7 @@ main {
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .chart-container > .main-chart {
@@ -112,6 +113,13 @@ main {
 
 .item-container > .item {
   padding: k-spacing(1) k-spacing(5) k-spacing(1) k-spacing(5);
+}
+
+.chart-loader {
+  position: absolute !important;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 // kendo customization
