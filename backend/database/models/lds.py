@@ -2,7 +2,8 @@ from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint
 from sqlmodel import SQLModel, Field
-from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase
+from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
+    UnitBase
 
 
 class EventDef(EventDefBase, table=True):
@@ -98,17 +99,11 @@ class TrendGroup(SQLModel, table=True):
     AnalysisOnly: bool = Field(False, nullable=False, sa_column_kwargs={"server_default": "0"})
 
 
-class Unit(SQLModel, table=True):
+class Unit(UnitBase, table=True):
     __tablename__ = 'Unit'
     __table_args__ = (
         {'schema': 'lds'}
     )
-
-    ID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False, primary_key=True))
-    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
-    Symbol: str | None = Field(None, sa_column=Column(String(10, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
-    BaseID: str | None = Field(None, sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
-    Multiplier: float | None = Field(None, sa_column=Column(Numeric(20, 10), nullable=True))
 
 
 class Link(LinkBase, table=True):

@@ -8,4 +8,3 @@ from api.models.method_param import MethodParam
 from api.models.pipeline import Pipeline
 from api.models.pipeline_param import PipelineParam
 from api.models.pipeline_param_def import PipelineParamDef
-from api.models.unit import Unit
