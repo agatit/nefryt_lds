@@ -314,12 +314,11 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
 
   // UI STUFF
   const [startDate, setStartDate] = React.useState<Date>(() => {
-    return new Date(1746608208000);
-    // var date = new Date();
-    // date.setDate(date.getDate() - 1);
-    // return date;
+    var date = new Date();
+    date.setDate(date.getDate() - 1);
+    return date;
   });
-  const [endDate, setEndDate] = React.useState<Date>(new Date(1746609215000));
+  const [endDate, setEndDate] = React.useState<Date>(new Date());
 
   const handleChartStartDateChange = React.useCallback((value: Date) => {
     if (value) setStartDate(value);
@@ -625,35 +624,41 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
         trendApi
       ),
       trendIdList,
-      startDate.getTime() / 1000,
-      endDate.getTime() / 1000,
+      startDate.getTime(),
+      endDate.getTime(),
       mainChartSampleSize,
       1,
       1000
-    ).then((response) => {
-      const newTrendsData: ChartSeriesTrendData[] = trendIdArr.map((id) => {
-        return {
-          data: [],
-          id: id,
-          color: trendsState.find((trend) => trend.ID == id)?.Color!,
-        };
-      });
-      response?.data.items.forEach((item) => {
-        const timestamp = new Date(item.Timestamp * 1000);
-        item.Data?.forEach((dataitem) => {
-          const index = newTrendsData.findIndex((td) => td.id == dataitem.ID);
-          newTrendsData[index].data.push({
-            timestamp: timestamp,
-            value: dataitem.Value ? dataitem.Value : null,
+    )
+      .then((response) => {
+        const newTrendsData: ChartSeriesTrendData[] = trendIdArr.map((id) => {
+          return {
+            data: [],
+            id: id,
+            color: trendsState.find((trend) => trend.ID == id)?.Color!,
+          };
+        });
+        response?.data.items.forEach((item) => {
+          const timestamp = new Date(item.Timestamp * 1000);
+          item.Data?.forEach((dataitem) => {
+            const index = newTrendsData.findIndex((td) => td.id == dataitem.ID);
+            newTrendsData[index].data.push({
+              timestamp: timestamp,
+              value: dataitem.Value ? dataitem.Value : null,
+            });
           });
         });
+
+        trendsDataLoadStatusRef.current = true;
+        checkIfTrendsDataLoaded();
+
+        setTrendsData(newTrendsData);
+      })
+      .catch((err) => {
+        if (err.status == 404) {
+          console.log("no data");
+        }
       });
-
-      trendsDataLoadStatusRef.current = true;
-      checkIfTrendsDataLoaded();
-
-      setTrendsData(newTrendsData);
-    });
   }
 
   // mockup data testing

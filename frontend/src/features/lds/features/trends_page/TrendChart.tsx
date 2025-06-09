@@ -2,6 +2,7 @@ import {
   Chart,
   ChartCategoryAxis,
   ChartCategoryAxisItem,
+  ChartNoDataOverlay,
   ChartPane,
   ChartPanes,
   ChartSeries,
@@ -21,6 +22,9 @@ import { AxisType, ChartSeriesTrendData } from "./TrendsPage";
 import CursorBubble from "../../../../components/CursorBubble";
 import { useResizeObserver } from "../../../../hooks/useResizeObserver";
 import { Loader } from "@progress/kendo-react-indicators";
+import { SvgIcon } from "@progress/kendo-react-common";
+import { xCircleIcon } from "@progress/kendo-svg-icons";
+import { useTranslation } from "react-i18next";
 
 const chartScaleThrottleMs = 50;
 
@@ -43,6 +47,7 @@ interface ChartComponentProps {
   endDate: Date;
   navigationStartDate: Date;
   navigationEndDate: Date;
+  isEmpty: boolean;
 }
 
 const ChartComponent = React.memo(function ChartComponent({
@@ -59,7 +64,10 @@ const ChartComponent = React.memo(function ChartComponent({
   endDate,
   navigationStartDate,
   navigationEndDate,
+  isEmpty,
 }: ChartComponentProps) {
+  const { t } = useTranslation(["common", "trends-page"]);
+
   const axisCrossingValue = React.useMemo(() => {
     const beforeStart = new Date(startDate);
     beforeStart.setDate(beforeStart.getDate() - 1);
@@ -157,6 +165,20 @@ const ChartComponent = React.memo(function ChartComponent({
         </ChartCategoryAxis>
         <ChartValueAxis>{mainChartAxesItems}</ChartValueAxis>
         <ChartSeries>{mainChartSeriesItems}</ChartSeries>
+        {isEmpty && (
+          <ChartNoDataOverlay>
+            <div>
+              <SvgIcon
+                icon={xCircleIcon}
+                themeColor="error"
+                size="xxlarge"
+              ></SvgIcon>
+              <p style={{ paddingTop: "8px" }}>
+                {t("trends-page:no_data_in_range")}
+              </p>
+            </div>
+          </ChartNoDataOverlay>
+        )}
       </Chart>
       <Chart
         className="navigation-chart"
@@ -226,13 +248,27 @@ const TrendChart = React.memo(function TrendChart({
   onShowCursorBubbleChange,
   onCursorBubbleTextChange,
 }: TrendChartProps) {
+  const isEmpty: boolean = React.useMemo(() => {
+    for (let trend of trendData) {
+      if (trend.data.length > 0) {
+        return false;
+      }
+    }
+    return true;
+  }, [trendData]);
+
   const trendMinMaxValue: MinMaxType = React.useMemo(() => {
     if (trendData.length == 0) return { max: 0, min: 0 };
 
-    let min = trendData[0].data[0].value;
-    let max = trendData[0].data[0].value;
+    let min;
+    let max;
 
     for (let trend of trendData) {
+      if (trend.data.length == 0) continue;
+      if (min == undefined || max == undefined) {
+        min = trend.data[0].value;
+        max = trend.data[0].value;
+      }
       for (let data of trend.data) {
         if (!data.value) continue;
         if (data.value > max!) max = data.value;
@@ -330,9 +366,24 @@ const TrendChart = React.memo(function TrendChart({
     handleSSBarsLeftPositioning();
   }, [axesState]);
 
-  const chartContainerRef = useResizeObserver<HTMLDivElement>(
-    handleSSBarsLeftPositioning
-  );
+  const chartRect = React.useRef({ width: 0, height: 0 });
+  const chartRenderCounter = React.useRef(0);
+  const chartContainerRef = useResizeObserver<HTMLDivElement>((size) => {
+    chartRenderCounter.current++;
+    if (chartRenderCounter.current < 3) {
+      // on initial load with already set data we have proper position of axis at first rerender, fix later
+      handleSSBarsLeftPositioning();
+      return;
+    }
+
+    if (
+      size.width == chartRect.current.width &&
+      size.height == chartRect.current.height
+    ) {
+      chartRect.current = size;
+      handleSSBarsLeftPositioning();
+    }
+  });
 
   const scaleScrollBars = React.useMemo(() => {
     return ssBarStyles.map((style, i) => {
@@ -344,6 +395,7 @@ const TrendChart = React.memo(function TrendChart({
             top: ssBarVerticalStyle.current.top,
             left: style.left,
             height: ssBarVerticalStyle.current.height,
+            display: isEmpty || chartRenderCounter.current < 2 ? "none" : "",
           }}
           max={trendMinMaxValue.max}
           min={trendMinMaxValue.min}
@@ -389,7 +441,7 @@ const TrendChart = React.memo(function TrendChart({
       <div className="chart-container" ref={chartContainerRef}>
         <ChartComponent
           isLoadingTrendsData={isLoadingTrendsData}
-          trendData={trendData}
+          trendData={isEmpty ? [] : trendData}
           navigatorData={navigatorData}
           axesState={axesState}
           trendMinMaxValue={trendMinMaxValue}
@@ -401,6 +453,7 @@ const TrendChart = React.memo(function TrendChart({
           endDate={endDate}
           navigationStartDate={navigationStartDate}
           navigationEndDate={navigationEndDate}
+          isEmpty={isEmpty}
         />
       </div>
       {scaleScrollBars}
