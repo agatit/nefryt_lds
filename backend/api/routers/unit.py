@@ -1,4 +1,3 @@
-import traceback
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Query, Depends
 from fastapi.encoders import jsonable_encoder
@@ -30,7 +29,6 @@ async def list_units(engine: Annotated[Engine, Depends(get_engine)], params: Ann
             page = paginate(session, statement, params=params)
         return page
     except Exception as e:
-        traceback.print_exc()
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_units(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

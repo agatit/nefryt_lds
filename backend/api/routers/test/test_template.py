@@ -20,20 +20,22 @@ trend_def_list = [trend_def1, trend_def2]
 trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
 trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
 trend_list = [trend1, trend2]
-axis1 = Axis(TrendsID=[1], Title='Axis1', Unit='Unit1', ScaledMin=0.5, ScaledMax=1.5)
-axis2 = Axis(TrendsID=[1, 2], Title='Axis2', Unit='Unit2', ScaledMin=1.5, ScaledMax=2.5)
-axis3 = Axis(TrendsID=[1, 2, 3], Title='Axis3', Unit='Unit3', ScaledMax=2.5, ScaledMin=3.5)
-axes_list = [axis1, axis2, axis3]
+unit = lds.Unit(ID='Unit1')
+axis1 = Axis(TrendsID=[1], Title='Axis1', UnitID=unit.ID, ScaledMin=0.5, ScaledMax=1.5)
+axis2 = Axis(TrendsID=[1, 2], Title='Axis2', UnitID=unit.ID, ScaledMin=1.5, ScaledMax=2.5)
+axis3 = Axis(TrendsID=[1, 2, 3], Title='Axis3', UnitID=unit.ID, ScaledMax=2.5, ScaledMin=3.5)
+axis4 = Axis(TrendsID=[2], Title='Axis4', UnitID=unit.ID+'2', ScaledMax=3.5, ScaledMin=4.5)
+axes_list = [axis1, axis2, axis3, axis4]
 template1 = lds.Template(ID=1, Name='Template1', Axes=[])
 template2 = lds.Template(ID=2, Name='Template2', Axes=[axis1.model_dump(), axis2.model_dump()])
 template3 = lds.Template(ID=3, Name='Template3', Axes=[axis3.model_dump()])
 templates_list = [template1, template2, template3]
-lds_objects = [trend_def_list, trend_list, templates_list]
+lds_objects = [trend_def_list, trend_list, [unit], templates_list]
 
 
 def reset_templates_objects():
     global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend_list, template1, template2, template3, \
-        templates_list, lds_objects
+        templates_list, lds_objects, unit
 
     trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
@@ -41,11 +43,12 @@ def reset_templates_objects():
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
     trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
     trend_list = [trend1, trend2]
+    unit = lds.Unit(ID='Unit1')
     template1 = lds.Template(ID=1, Name='Template1', Axes=[])
     template2 = lds.Template(ID=2, Name='Template2', Axes=[axis1.model_dump(), axis2.model_dump()])
     template3 = lds.Template(ID=3, Name='Template3', Axes=[axis3.model_dump()])
     templates_list = [template1, template2, template3]
-    lds_objects = [trend_def_list, trend_list, templates_list]
+    lds_objects = [trend_def_list, trend_list, [unit], templates_list]
 
     return lds_objects
 
@@ -147,6 +150,19 @@ def test_create_template_should_return_not_acceptable_response_code_and_error_wh
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
+def test_create_template_should_return_not_acceptable_response_code_and_error_when_no_units_with_given_ids(add_lds_objects):
+    template_dict = {'Name': 'Template3', 'Axes': [
+        axis1.model_dump(),
+        axis4.model_dump()
+    ]}
+    response = test_client.post("/template", json=template_dict)
+    assert response.status_code == status.HTTP_406_NOT_ACCEPTABLE
+    error = response.json()
+    assert error['code'] == status.HTTP_406_NOT_ACCEPTABLE
+    assert error['message'] == f'No units with ids = [{axis4.UnitID}]'
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
 def test_delete_template_by_id_should_return_no_content_response_code_and_remove_template(add_lds_objects):
     response = test_client.delete("/template/" + str(template1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -203,6 +219,16 @@ def test_update_template_should_return_not_acceptable_response_code_and_error_wh
     error = response.json()
     assert error['code'] == status.HTTP_406_NOT_ACCEPTABLE
     assert error['message'] == 'No trends with ids = [3]'
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
+def test_update_template_should_return_not_acceptable_response_code_and_error_when_no_unit_with_given_ids(add_lds_objects):
+    updated_template_dict = {'Axes': [axis1.model_dump(), axis2.model_dump(), axis4.model_dump()]}
+    response = test_client.put("/template/" + str(template1.ID), json=updated_template_dict)
+    assert response.status_code == status.HTTP_406_NOT_ACCEPTABLE
+    error = response.json()
+    assert error['code'] == status.HTTP_406_NOT_ACCEPTABLE
+    assert error['message'] == f'No units with ids = [{axis4.UnitID}]'
 
 
 def test_update_template_should_return_not_found_response_code_and_error_when_no_template_with_given_id():

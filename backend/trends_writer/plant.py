@@ -63,7 +63,7 @@ class PipePlant:
 
     def read_trend_children(self, register: int | None, trend: TrendBase):
         children = trend.children
-        if len(children) == 0:
+        if len(children) == 0 and register is None:
             return [trend.id]
 
         recursive_children = []
@@ -79,14 +79,18 @@ class PipePlant:
     def update(self, register, data):
         try:
             timestamp = round(time.time())
+            print(timestamp)
             if timestamp != self.last_timestamp:
                 self.last_timestamp = timestamp
                 not_updated_count = self._prepare_not_updated_trends()
                 Profiler.queue.put((2, not_updated_count, timestamp-1))
                 self.quick_trends_ids_not_updated = list(self.quick_trends_by_ids.keys())
-            self.quick_trends[register][1].put((data, timestamp))
-            self.quick_trends_ids_not_updated.remove(self.quick_trends[register][0])
-        except:
+            if self.quick_trends[register][0] in self.quick_trends_ids_not_updated:
+                self.quick_trends[register][1].put((data, timestamp))
+                self.quick_trends_ids_not_updated.remove(self.quick_trends[register][0])
+            else:
+                raise Exception(f"Quick trend with id = {self.quick_trends[register][0]} already updated in timestamp {timestamp}")
+        except KeyError:
             raise ValueError(f'No quick trend is using {register} register')
 
     def _prepare_not_updated_trends(self):

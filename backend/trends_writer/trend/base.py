@@ -4,7 +4,7 @@ import time
 from multiprocessing import Process
 from typing import List
 import numpy as np
-from sqlalchemy import select, insert, and_, literal
+from sqlalchemy import select, and_, literal, text
 from sqlalchemy.orm import Session
 from database import lds
 from db import get_engine
@@ -107,13 +107,9 @@ class TrendBase:
             data = np.minimum(data, [np.iinfo(np.uint16).max-1] * len(data))  # FFFF reserved for error
             packed_data = struct.pack('<100H', *data)
 
-            insert_stmt = insert(lds.TrendData).values(
-                TrendID=self.id,
-                Time=timestamp,
-                Data=packed_data
-            )
+            insert_stmt = text(f"EXEC Update_Insert_TrendData {self.id}, {timestamp}, :data")
             with Session(get_engine()) as session:
-                session.execute(insert_stmt)
+                session.execute(insert_stmt, {"data": packed_data})
                 session.commit()
 
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) saved") 

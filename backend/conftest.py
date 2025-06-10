@@ -4,7 +4,7 @@ import sys
 import pytest
 from pydantic import Field, BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from sqlalchemy import create_engine, text, Connection
+from sqlalchemy import create_engine, text, Connection, Engine
 from sqlalchemy.orm import Session
 from sqlmodel import SQLModel
 from testcontainers.mssql import SqlServerContainer
@@ -59,6 +59,29 @@ def drop_database(conn: Connection, test_db_name: str):
     conn.execute(text(f"DROP DATABASE {test_db_name}"))
 
 
+def create_procedure(engine: Engine):
+    with Session(engine) as session:
+        session.execute(text("""
+            CREATE PROCEDURE Update_Insert_TrendData
+                @trend_id INT,
+                @time BIGINT,
+                @value BINARY(200)
+                AS
+                    BEGIN
+                        UPDATE lds.TrendData
+                        SET Data = @value
+                        WHERE TrendID = @trend_id AND Time = @time;
+                    
+                        IF @@ROWCOUNT = 0
+                        BEGIN
+                            INSERT INTO lds.TrendData (TrendID, Time, Data)
+                            VALUES (@trend_id, @time, @value);
+                        END
+                    END
+                """))
+        session.commit()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_database(request):
     db_type = request.config.db_type
@@ -83,6 +106,7 @@ def setup_test_database(request):
 
         test_engine = create_engine(url=test_db_uri, echo=False)
         SQLModel.metadata.create_all(test_engine)
+        create_procedure(test_engine)
         set_new_engine(test_engine)
 
         yield
@@ -102,6 +126,7 @@ def setup_test_database(request):
                 conn.execute(text("CREATE SCHEMA editor"))
 
             SQLModel.metadata.create_all(test_engine)
+            create_procedure(test_engine)
             set_new_engine(test_engine)
 
             yield

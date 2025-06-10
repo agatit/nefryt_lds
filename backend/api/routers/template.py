@@ -36,10 +36,15 @@ async def list_templates(engine: Annotated[Engine, Depends(get_engine)], params:
 @router.post('', response_model=lds.Template | Error)
 async def create_template(template: Annotated[TemplateBase, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
-        incorrect_trend_ids = validate_axes(template.Axes, engine)
+        incorrect_trend_ids = validate_axes_trend_ids(template.Axes, engine)
         if len(incorrect_trend_ids) > 0:
             error = Error(code=status.HTTP_406_NOT_ACCEPTABLE,
                           message='No trends with ids = ' + str(incorrect_trend_ids))
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_406_NOT_ACCEPTABLE)
+        incorrect_unit_ids = validate_axes_unit_ids(template.Axes, engine)
+        if len(incorrect_unit_ids) > 0:
+            error = Error(code=status.HTTP_406_NOT_ACCEPTABLE,
+                          message='No units with ids = ' + str(incorrect_unit_ids).replace('\'', ''))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_406_NOT_ACCEPTABLE)
         template = lds.Template(**template.model_dump())
         with Session(engine) as session:
@@ -100,10 +105,15 @@ async def update_template(template_id: Annotated[int, Path()], updated_template:
                               message='No template with id = ' + str(template_id))
                 return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
             if updated_template.Axes is not None:
-                incorrect_trend_ids = validate_axes(updated_template.Axes, engine)
+                incorrect_trend_ids = validate_axes_trend_ids(updated_template.Axes, engine)
                 if len(incorrect_trend_ids) > 0:
                     error = Error(code=status.HTTP_406_NOT_ACCEPTABLE,
                                   message='No trends with ids = ' + str(incorrect_trend_ids))
+                    return JSONResponse(content=error.model_dump(), status_code=status.HTTP_406_NOT_ACCEPTABLE)
+                incorrect_unit_ids = validate_axes_unit_ids(updated_template.Axes, engine)
+                if len(incorrect_unit_ids) > 0:
+                    error = Error(code=status.HTTP_406_NOT_ACCEPTABLE,
+                                  message='No units with ids = ' + str(incorrect_unit_ids).replace('\'', ''))
                     return JSONResponse(content=error.model_dump(), status_code=status.HTTP_406_NOT_ACCEPTABLE)
             updated_template_dict = updated_template.model_dump(by_alias=True, exclude_unset=True)
             for k, v in updated_template_dict.items():
@@ -120,7 +130,7 @@ async def update_template(template_id: Annotated[int, Path()], updated_template:
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def validate_axes(axes: list[Axis], engine: Engine):
+def validate_axes_trend_ids(axes: list[Axis], engine: Engine):
     trend_ids = []
     for axis in axes:
         trend_ids = trend_ids + axis.TrendsID
@@ -130,3 +140,15 @@ def validate_axes(axes: list[Axis], engine: Engine):
         existing_trend_ids = session.execute(statement).all()
     existing_trend_ids = [id_[0] for id_ in existing_trend_ids]
     return list(set(trend_ids) - set(existing_trend_ids))
+
+
+def validate_axes_unit_ids(axes: list[Axis], engine: Engine):
+    unit_ids = []
+    for axis in axes:
+        unit_ids = unit_ids + [axis.UnitID]
+    unit_ids = list(set(unit_ids))
+    statement = select(lds.Unit.ID).where(lds.Unit.ID.in_(unit_ids))  # noqa
+    with Session(engine) as session:
+        existing_unit_ids = session.execute(statement).all()
+    existing_unit_ids = [id_[0].strip() for id_ in existing_unit_ids]
+    return list(set(unit_ids) - set(existing_unit_ids))

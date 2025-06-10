@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
-    Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint
+    Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
 from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
     UnitBase
@@ -73,6 +73,7 @@ class TrendData(SQLModel, table=True):
     __tablename__ = 'TrendData'
     __table_args__ = (
         PrimaryKeyConstraint('Time', 'TrendID', name='TrendData_pk'),
+        Index("idx_time_trendid", "TrendID", "Time", unique=True),
         {'schema': 'lds'}
     )
 
