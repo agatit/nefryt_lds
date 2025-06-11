@@ -22,6 +22,7 @@ class TrendBase:
         self.profiler_queue = profiler_queue
         self.db_uri = db_uri
         self.queue = queue
+        self.children_count = 0
 
         self._read_params()
         self.process = None
@@ -38,6 +39,7 @@ class TrendBase:
 
     def process_queue(self, db_uri: str):
         setup_engine(db_uri)
+        self.profiler_queue.put((3, None, int(time.time()), None))
 
         while True:
             item = self.queue.get()
@@ -48,19 +50,20 @@ class TrendBase:
                 break
             data = np.array(item[0])
             timestamp = item[1]
-            parent_id = item[2] if len(item) > 2 else None
+            profiler_timestamp_diff = item[2]
+            parent_id = item[3] if len(item) > 3 else None
 
-            self.profiler_queue.put((1, self.id, timestamp, time.perf_counter()))
-            self.update(data, timestamp, parent_id)
-            self.profiler_queue.put((0, self.id, timestamp, time.perf_counter()))
+            self.profiler_queue.put((1, self.id, timestamp + profiler_timestamp_diff, time.perf_counter()))
+            self.update(data, timestamp, profiler_timestamp_diff, parent_id)
+            self.profiler_queue.put((0, self.id, timestamp + profiler_timestamp_diff, time.perf_counter()))
 
-    def update(self, data: np.ndarray, timestamp: int, parent_id: int | None = None):
+    def update(self, data: np.ndarray, timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int | None = None):
         self._save(data, timestamp)
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating children...")
 
         for child in self.children:
             try:
-                child.queue.put((data, timestamp, self.id))
+                child.queue.put((data, timestamp, profiler_timestamp_diff, self.id))
             except Exception as e:
                 logging.exception(f"{timestamp} {self.__class__.__name__} ({self.id}) child {child.__class__.__name__} ({child.id}) update error: {e}", exc_info=True)
 
@@ -117,3 +120,6 @@ class TrendBase:
             with Session(get_engine()) as session:
                 session.rollback()
             raise e
+
+    def set_children_count(self, children_count: int):
+        self.children_count = children_count

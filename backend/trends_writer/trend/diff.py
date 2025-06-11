@@ -22,12 +22,12 @@ class TrendDiff(TrendBase):
             }
         }
 
-    def update(self, data: List[int], timestamp: int, parent_id: int | None = None):
+    def update(self, data: List[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int | None = None):
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating...")
         calculated_data = self.calculate(data, timestamp, parent_id)
 
         if calculated_data is not None:
-            super().update(calculated_data, timestamp, parent_id)
+            super().update(calculated_data, timestamp, profiler_timestamp_diff, parent_id)
         else:
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
 

@@ -209,26 +209,3 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_step_tr
         values = np.unique(saved_data)
         assert np.all(np.isin(values, (0, 1)))
         assert saved_timestamp == i + filter_window_value + timestamp_offset
-
-# def test_trend_mean_calculates_mean_correctly():
-#     def mock_read_params(self):
-#         self.params = {'FILTER_WINDOW': '1.0'}
-#
-#     def mock_initiate_buffer(self, _, __, ___):
-#         self.storage = 100 * np.ones(100)
-#
-#     with patch.object(TrendMean, '_read_params', new=mock_read_params):
-#         with patch.object(TrendMean, 'start_process_queue', new=lambda _: None):
-#             with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
-#                 mocked_queue = Mock()
-#                 trend = TrendMean(1, mocked_queue, None, None)
-#                 # a = 3
-#
-#                 for i in range(5):
-#                     # x = np.arange(i*100, (i+1)*100)
-#                     # y = a*x
-#                     y = 100 * np.ones(100)
-#                     trend.update(y, i+10, None)
-#                     # print(trend.storage)
-#
-#                 assert 1== 0

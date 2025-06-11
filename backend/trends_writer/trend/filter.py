@@ -17,7 +17,7 @@ class TrendFilter(TrendBase):
         self.storage_timestamp = 0
         self.storage = np.array([], dtype=np.uint16)
 
-    def update(self, data: List[int], timestamp: int, parent_id: int = None):
+    def update(self, data: List[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int = None):
         logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating...")
 
         if timestamp == self.storage_timestamp + 1 and len(self.storage) < self.block_size * (self.window_size * 2 + 1):
@@ -39,8 +39,10 @@ class TrendFilter(TrendBase):
 
         calculated_data = self.calculate()
         if calculated_data is not None:
-            super().update(calculated_data, timestamp - self.window_size, parent_id)
+            super().update(calculated_data, timestamp - self.window_size, profiler_timestamp_diff + self.window_size, parent_id)
         else:
+            if self.children_count > 0:
+                self.profiler_queue.put((2, self.children_count, timestamp, None))
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
 
     def calculate(self) -> np.ndarray:

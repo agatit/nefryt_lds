@@ -2,7 +2,6 @@ import atexit
 import logging
 import sys
 import time
-from collections import Counter
 from multiprocessing import Queue
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -71,22 +70,24 @@ class PipePlant:
             recursive_children += self.read_trend_children(None, child)
 
         if register is not None:
+            trend.set_children_count(len(recursive_children))
             self.quick_trends_by_ids[trend.id] = recursive_children
             return None
         else:
+            trend.set_children_count(len(recursive_children))
             return recursive_children + [trend.id]
 
     def update(self, register, data):
         try:
             timestamp = round(time.time())
-            print(timestamp)
             if timestamp != self.last_timestamp:
+                not_updated_count = len(self._prepare_not_updated_trends())
+                if not_updated_count != 0:
+                    Profiler.queue.put((2, not_updated_count, self.last_timestamp, None))
                 self.last_timestamp = timestamp
-                not_updated_count = self._prepare_not_updated_trends()
-                Profiler.queue.put((2, not_updated_count, timestamp-1))
                 self.quick_trends_ids_not_updated = list(self.quick_trends_by_ids.keys())
             if self.quick_trends[register][0] in self.quick_trends_ids_not_updated:
-                self.quick_trends[register][1].put((data, timestamp))
+                self.quick_trends[register][1].put((data, timestamp, 0))
                 self.quick_trends_ids_not_updated.remove(self.quick_trends[register][0])
             else:
                 raise Exception(f"Quick trend with id = {self.quick_trends[register][0]} already updated in timestamp {timestamp}")
@@ -99,19 +100,10 @@ class PipePlant:
             ids += self.quick_trends_by_ids[trend_id]
             ids += [trend_id]
 
-        counter = Counter(ids)
-        total = 0
-
-        for trend_id, count in counter.items():
-            if trend_id in self.double_trends_ids:
-                total += count
-            else:
-                total += 1
-
-        return total
+        return ids
 
     @staticmethod
     def shutdown_processes():
         for trend in TrendManager.get_all():
-           trend.queue.put(None)
+           trend.queue.put(None, None, None)
            trend.process.join()
