@@ -13,7 +13,11 @@ class TrendBase(SQLModel):
     ScaledMin: float = Field(sa_column=Column(Float(53), nullable=False))
     ScaledMax: float = Field(sa_column=Column(Float(53), nullable=False))
     Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
-    TrendGroupID: int | None = Field(None)
+    TrendGroupID: int | None = Field(None, sa_column=Column(
+            Integer,
+            ForeignKey("lds.TrendGroup.ID", onupdate="CASCADE"),
+            nullable=True
+        ))
     TimeExponent: int | None = Field(None)
     Format: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
     UnitID: str | None = Field(None,

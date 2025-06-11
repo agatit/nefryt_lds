@@ -15,3 +15,4 @@ from .trend_data_single import TrendDataSingle
 from .template import TemplateBase, TemplateOut, UpdateTemplate
 from .axis import Axis
 from .unit import UnitBase, UpdateUnit
+from .trend_group import TrendGroupBase, UpdateTrendGroup

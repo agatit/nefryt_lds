@@ -1987,6 +1987,147 @@ paths:
       tags:
       - units
       x-openapi-router-controller: api.controllers.units_controller
+  /trend_group:
+    get:
+      description: List all trend groups
+      operationId: list_trend_groups
+      parameters:
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TrendGroup'
+                type: array
+          description: An array of trend groups
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List trend groups
+      tags:
+        - trend
+    post:
+      description: Create a trend group
+      operationId: create_trend_group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrendGroup'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendGroup'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create trend group
+      tags:
+        - trends
+  /trend_group/{TrendGroupId}:
+    delete:
+      description: Deletes specific trend group
+      operationId: delete_trend_group_by_id
+      parameters:
+        - description: The id of the trend group to delete
+          explode: false
+          in: path
+          name: TrendGroupId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes trend group
+      tags:
+        - trends
+    get:
+      description: Info for specific trend group
+      operationId: get_trend_group_by_id
+      parameters:
+        - description: The id of the trend group to retrieve
+          explode: false
+          in: path
+          name: TrendGroupId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendGroup'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets trend group details
+      tags:
+        - trends
+    put:
+      description: Updates a trend group
+      operationId: update_trend_group
+      parameters:
+        - description: The id of the trend group to retrieve
+          explode: false
+          in: path
+          name: TrendGroupId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrendGroup'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendGroup'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Updates trend group
+      tags:
+        - trends
 components:
   parameters:
     eventId:

@@ -3,7 +3,7 @@ from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
 from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
-    UnitBase
+    UnitBase, TrendGroupBase
 
 
 class EventDef(EventDefBase, table=True):
@@ -89,15 +89,13 @@ class TrendDef(TrendDefBase, table=True):
     )
 
 
-class TrendGroup(SQLModel, table=True):
+class TrendGroup(TrendGroupBase, table=True):
     __tablename__ = 'TrendGroup'
     __table_args__ = (
         {'schema': 'lds'}
     )
 
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True, nullable=False))
-    Name: str = Field(sa_column=Column(String(100, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
-    AnalysisOnly: bool = Field(False, nullable=False, sa_column_kwargs={"server_default": "0"})
 
 
 class Unit(UnitBase, table=True):
