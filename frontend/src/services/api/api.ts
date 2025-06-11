@@ -26,94 +26,428 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 /**
  * 
  * @export
- * @interface EditorNode
+ * @interface Axis
  */
-export interface EditorNode {
+export interface Axis {
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof Axis
+     */
+    'TrendsID'?: Array<number>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Axis
+     */
+    'Title': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Axis
+     */
+    'Unit': string;
     /**
      * 
      * @type {number}
-     * @memberof EditorNode
+     * @memberof Axis
      */
-    'PosX'?: number;
+    'ScaledMin': number;
     /**
      * 
      * @type {number}
-     * @memberof EditorNode
+     * @memberof Axis
      */
-    'PosY'?: number;
+    'ScaledMax': number;
 }
 /**
  * 
  * @export
- * @interface Event
+ * @interface CustomPageEventDef
  */
-export interface Event {
+export interface CustomPageEventDef {
+    /**
+     * 
+     * @type {Array<EventDef>}
+     * @memberof CustomPageEventDef
+     */
+    'items': Array<EventDef>;
     /**
      * 
      * @type {number}
-     * @memberof Event
+     * @memberof CustomPageEventDef
      */
-    'ID'?: number | null;
+    'total': number | null;
     /**
      * 
      * @type {number}
-     * @memberof Event
+     * @memberof CustomPageEventDef
      */
-    'MethodID': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Event
-     */
-    'Details'?: string | null;
+    'page': number | null;
     /**
      * 
      * @type {number}
-     * @memberof Event
+     * @memberof CustomPageEventDef
      */
-    'Position'?: number | null;
+    'size': number | null;
     /**
      * 
-     * @type {string}
-     * @memberof Event
+     * @type {number}
+     * @memberof CustomPageEventDef
      */
-    'EventDefID': string;
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageEventOut
+ */
+export interface CustomPageEventOut {
     /**
      * 
-     * @type {string}
-     * @memberof Event
+     * @type {Array<EventOut>}
+     * @memberof CustomPageEventOut
      */
-    'Verbosity'?: string | null;
+    'items': Array<EventOut>;
     /**
      * 
-     * @type {string}
-     * @memberof Event
+     * @type {number}
+     * @memberof CustomPageEventOut
      */
-    'Caption'?: string | null;
+    'total': number | null;
     /**
      * 
-     * @type {boolean}
-     * @memberof Event
+     * @type {number}
+     * @memberof CustomPageEventOut
      */
-    'Silient'?: boolean | null;
+    'page': number | null;
     /**
      * 
-     * @type {string}
-     * @memberof Event
+     * @type {number}
+     * @memberof CustomPageEventOut
      */
-    'BeginDate': string;
+    'size': number | null;
     /**
      * 
-     * @type {string}
-     * @memberof Event
+     * @type {number}
+     * @memberof CustomPageEventOut
      */
-    'AckDate'?: string | null;
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageLink
+ */
+export interface CustomPageLink {
     /**
      * 
-     * @type {string}
-     * @memberof Event
+     * @type {Array<Link>}
+     * @memberof CustomPageLink
      */
-    'EndDate'?: string | null;
+    'items': Array<Link>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageLink
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageLink
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageLink
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageLink
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageNodeOut
+ */
+export interface CustomPageNodeOut {
+    /**
+     * 
+     * @type {Array<NodeOut>}
+     * @memberof CustomPageNodeOut
+     */
+    'items': Array<NodeOut>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageNodeOut
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageNodeOut
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageNodeOut
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageNodeOut
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageTemplate
+ */
+export interface CustomPageTemplate {
+    /**
+     * 
+     * @type {Array<Template>}
+     * @memberof CustomPageTemplate
+     */
+    'items': Array<Template>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTemplate
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTemplate
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTemplate
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTemplate
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageTrend
+ */
+export interface CustomPageTrend {
+    /**
+     * 
+     * @type {Array<Trend>}
+     * @memberof CustomPageTrend
+     */
+    'items': Array<Trend>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrend
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrend
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrend
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrend
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageTrendDataMultiple
+ */
+export interface CustomPageTrendDataMultiple {
+    /**
+     * 
+     * @type {Array<TrendDataMultiple>}
+     * @memberof CustomPageTrendDataMultiple
+     */
+    'items': Array<TrendDataMultiple>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDataMultiple
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDataMultiple
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDataMultiple
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDataMultiple
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageTrendDataSingle
+ */
+export interface CustomPageTrendDataSingle {
+    /**
+     * 
+     * @type {Array<TrendDataSingle>}
+     * @memberof CustomPageTrendDataSingle
+     */
+    'items': Array<TrendDataSingle>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDataSingle
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDataSingle
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDataSingle
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDataSingle
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageTrendDefBase
+ */
+export interface CustomPageTrendDefBase {
+    /**
+     * 
+     * @type {Array<TrendDefBase>}
+     * @memberof CustomPageTrendDefBase
+     */
+    'items': Array<TrendDefBase>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDefBase
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDefBase
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDefBase
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendDefBase
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageTrendParamOut
+ */
+export interface CustomPageTrendParamOut {
+    /**
+     * 
+     * @type {Array<TrendParamOut>}
+     * @memberof CustomPageTrendParamOut
+     */
+    'items': Array<TrendParamOut>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendParamOut
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendParamOut
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendParamOut
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendParamOut
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface EditorNodeBase
+ */
+export interface EditorNodeBase {
+    /**
+     * 
+     * @type {number}
+     * @memberof EditorNodeBase
+     */
+    'PosX'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof EditorNodeBase
+     */
+    'PosY'?: number | null;
 }
 /**
  * 
@@ -126,37 +460,110 @@ export interface EventDef {
      * @type {string}
      * @memberof EventDef
      */
-    'ID': string;
+    'Verbosity': string;
     /**
      * 
      * @type {string}
      * @memberof EventDef
+     */
+    'Caption': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof EventDef
+     */
+    'Silent'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof EventDef
+     */
+    'Visible'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof EventDef
+     */
+    'Enabled'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof EventDef
+     */
+    'ID': string;
+}
+/**
+ * 
+ * @export
+ * @interface EventOut
+ */
+export interface EventOut {
+    /**
+     * 
+     * @type {number}
+     * @memberof EventOut
+     */
+    'ID'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof EventOut
+     */
+    'MethodID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof EventOut
+     */
+    'Details'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof EventOut
+     */
+    'Position'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof EventOut
+     */
+    'EventDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EventOut
      */
     'Verbosity'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof EventDef
+     * @memberof EventOut
      */
     'Caption'?: string | null;
     /**
      * 
      * @type {boolean}
-     * @memberof EventDef
+     * @memberof EventOut
      */
-    'Silent'?: boolean | null;
+    'Silient'?: boolean | null;
     /**
      * 
-     * @type {boolean}
-     * @memberof EventDef
+     * @type {string}
+     * @memberof EventOut
      */
-    'Visible'?: boolean | null;
+    'BeginDate': string;
     /**
      * 
-     * @type {boolean}
-     * @memberof EventDef
+     * @type {string}
+     * @memberof EventOut
      */
-    'Enabled'?: boolean | null;
+    'AckDate'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof EventOut
+     */
+    'EndDate'?: string | null;
 }
 /**
  * 
@@ -199,15 +606,16 @@ export interface Information {
 /**
  * 
  * @export
+ * @interface Length
+ */
+export interface Length {
+}
+/**
+ * 
+ * @export
  * @interface Link
  */
 export interface Link {
-    /**
-     * 
-     * @type {number}
-     * @memberof Link
-     */
-    'ID'?: number | null;
     /**
      * 
      * @type {number}
@@ -222,10 +630,41 @@ export interface Link {
     'EndNodeID'?: number | null;
     /**
      * 
+     * @type {string}
+     * @memberof Link
+     */
+    'Length'?: string | null;
+    /**
+     * 
      * @type {number}
      * @memberof Link
      */
-    'Length'?: number | null;
+    'ID': number;
+}
+/**
+ * 
+ * @export
+ * @interface LinkBase
+ */
+export interface LinkBase {
+    /**
+     * 
+     * @type {number}
+     * @memberof LinkBase
+     */
+    'BeginNodeID'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof LinkBase
+     */
+    'EndNodeID'?: number | null;
+    /**
+     * 
+     * @type {Length}
+     * @memberof LinkBase
+     */
+    'Length'?: Length | null;
 }
 /**
  * 
@@ -328,22 +767,10 @@ export interface ModelError {
 export interface Node {
     /**
      * 
-     * @type {number}
-     * @memberof Node
-     */
-    'ID'?: number | null;
-    /**
-     * 
      * @type {string}
      * @memberof Node
      */
     'Type': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Node
-     */
-    'TrendID'?: number | null;
     /**
      * 
      * @type {string}
@@ -352,343 +779,53 @@ export interface Node {
     'Name'?: string | null;
     /**
      * 
-     * @type {EditorNode}
+     * @type {EditorNodeBase}
      * @memberof Node
      */
-    'EditorParams'?: EditorNode | null;
+    'EditorParams'?: EditorNodeBase | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Node
+     */
+    'TrendID'?: number | null;
 }
 /**
  * 
  * @export
- * @interface PageEvent
+ * @interface NodeOut
  */
-export interface PageEvent {
-    /**
-     * 
-     * @type {Array<Event>}
-     * @memberof PageEvent
-     */
-    'items': Array<Event>;
+export interface NodeOut {
     /**
      * 
      * @type {number}
-     * @memberof PageEvent
+     * @memberof NodeOut
      */
-    'total': number | null;
+    'ID'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof NodeOut
+     */
+    'Type': string;
     /**
      * 
      * @type {number}
-     * @memberof PageEvent
+     * @memberof NodeOut
      */
-    'page': number | null;
+    'TrendID'?: number | null;
     /**
      * 
-     * @type {number}
-     * @memberof PageEvent
+     * @type {string}
+     * @memberof NodeOut
      */
-    'size': number | null;
+    'Name'?: string | null;
     /**
      * 
-     * @type {number}
-     * @memberof PageEvent
+     * @type {EditorNodeBase}
+     * @memberof NodeOut
      */
-    'pages'?: number | null;
-}
-/**
- * 
- * @export
- * @interface PageEventDef
- */
-export interface PageEventDef {
-    /**
-     * 
-     * @type {Array<EventDef>}
-     * @memberof PageEventDef
-     */
-    'items': Array<EventDef>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageEventDef
-     */
-    'total': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageEventDef
-     */
-    'page': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageEventDef
-     */
-    'size': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageEventDef
-     */
-    'pages'?: number | null;
-}
-/**
- * 
- * @export
- * @interface PageLink
- */
-export interface PageLink {
-    /**
-     * 
-     * @type {Array<Link>}
-     * @memberof PageLink
-     */
-    'items': Array<Link>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageLink
-     */
-    'total': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageLink
-     */
-    'page': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageLink
-     */
-    'size': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageLink
-     */
-    'pages'?: number | null;
-}
-/**
- * 
- * @export
- * @interface PageNode
- */
-export interface PageNode {
-    /**
-     * 
-     * @type {Array<Node>}
-     * @memberof PageNode
-     */
-    'items': Array<Node>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageNode
-     */
-    'total': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageNode
-     */
-    'page': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageNode
-     */
-    'size': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageNode
-     */
-    'pages'?: number | null;
-}
-/**
- * 
- * @export
- * @interface PageTrend
- */
-export interface PageTrend {
-    /**
-     * 
-     * @type {Array<Trend>}
-     * @memberof PageTrend
-     */
-    'items': Array<Trend>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrend
-     */
-    'total': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrend
-     */
-    'page': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrend
-     */
-    'size': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrend
-     */
-    'pages'?: number | null;
-}
-/**
- * 
- * @export
- * @interface PageTrendDataMultiple
- */
-export interface PageTrendDataMultiple {
-    /**
-     * 
-     * @type {Array<TrendDataMultiple>}
-     * @memberof PageTrendDataMultiple
-     */
-    'items': Array<TrendDataMultiple>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDataMultiple
-     */
-    'total': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDataMultiple
-     */
-    'page': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDataMultiple
-     */
-    'size': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDataMultiple
-     */
-    'pages'?: number | null;
-}
-/**
- * 
- * @export
- * @interface PageTrendDataSingle
- */
-export interface PageTrendDataSingle {
-    /**
-     * 
-     * @type {Array<TrendDataSingle>}
-     * @memberof PageTrendDataSingle
-     */
-    'items': Array<TrendDataSingle>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDataSingle
-     */
-    'total': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDataSingle
-     */
-    'page': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDataSingle
-     */
-    'size': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDataSingle
-     */
-    'pages'?: number | null;
-}
-/**
- * 
- * @export
- * @interface PageTrendDef
- */
-export interface PageTrendDef {
-    /**
-     * 
-     * @type {Array<TrendDef>}
-     * @memberof PageTrendDef
-     */
-    'items': Array<TrendDef>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDef
-     */
-    'total': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDef
-     */
-    'page': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDef
-     */
-    'size': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendDef
-     */
-    'pages'?: number | null;
-}
-/**
- * 
- * @export
- * @interface PageTrendParam
- */
-export interface PageTrendParam {
-    /**
-     * 
-     * @type {Array<TrendParam>}
-     * @memberof PageTrendParam
-     */
-    'items': Array<TrendParam>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendParam
-     */
-    'total': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendParam
-     */
-    'page': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendParam
-     */
-    'size': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof PageTrendParam
-     */
-    'pages'?: number | null;
+    'EditorParams'?: EditorNodeBase | null;
 }
 /**
  * 
@@ -732,19 +869,13 @@ export interface ResponseCreateEventDefEventDefPost {
      * @type {string}
      * @memberof ResponseCreateEventDefEventDefPost
      */
-    'ID': string;
+    'Verbosity': string;
     /**
      * 
      * @type {string}
      * @memberof ResponseCreateEventDefEventDefPost
      */
-    'Verbosity'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseCreateEventDefEventDefPost
-     */
-    'Caption'?: string;
+    'Caption': string;
     /**
      * 
      * @type {boolean}
@@ -763,6 +894,12 @@ export interface ResponseCreateEventDefEventDefPost {
      * @memberof ResponseCreateEventDefEventDefPost
      */
     'Enabled'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateEventDefEventDefPost
+     */
+    'ID': string;
     /**
      * 
      * @type {number}
@@ -787,12 +924,6 @@ export interface ResponseCreateLinkLinkPost {
      * @type {number}
      * @memberof ResponseCreateLinkLinkPost
      */
-    'ID'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseCreateLinkLinkPost
-     */
     'BeginNodeID'?: number;
     /**
      * 
@@ -802,10 +933,16 @@ export interface ResponseCreateLinkLinkPost {
     'EndNodeID'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof ResponseCreateLinkLinkPost
+     */
+    'Length'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof ResponseCreateLinkLinkPost
      */
-    'Length'?: number;
+    'ID': number;
     /**
      * 
      * @type {number}
@@ -851,10 +988,10 @@ export interface ResponseCreateNodeNodePost {
     'Name'?: string;
     /**
      * 
-     * @type {EditorNode}
+     * @type {EditorNodeBase}
      * @memberof ResponseCreateNodeNodePost
      */
-    'EditorParams'?: EditorNode;
+    'EditorParams'?: EditorNodeBase;
     /**
      * 
      * @type {number}
@@ -871,6 +1008,43 @@ export interface ResponseCreateNodeNodePost {
 /**
  * 
  * @export
+ * @interface ResponseCreateTemplateTemplatePost
+ */
+export interface ResponseCreateTemplateTemplatePost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTemplateTemplatePost
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {Array<Axis>}
+     * @memberof ResponseCreateTemplateTemplatePost
+     */
+    'Axes'?: Array<Axis>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTemplateTemplatePost
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTemplateTemplatePost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTemplateTemplatePost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseCreateTrendTrendPost
  */
 export interface ResponseCreateTrendTrendPost {
@@ -879,61 +1053,13 @@ export interface ResponseCreateTrendTrendPost {
      * @type {number}
      * @memberof ResponseCreateTrendTrendPost
      */
-    'ID'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseCreateTrendTrendPost
-     */
-    'TrendGroupID'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseCreateTrendTrendPost
-     */
-    'Format'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseCreateTrendTrendPost
-     */
-    'Symbol'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseCreateTrendTrendPost
-     */
-    'Color'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseCreateTrendTrendPost
-     */
-    'NodeID'?: number;
+    'ID': number;
     /**
      * 
      * @type {string}
      * @memberof ResponseCreateTrendTrendPost
      */
     'TrendDefID': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseCreateTrendTrendPost
-     */
-    'TimeExponent'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseCreateTrendTrendPost
-     */
-    'UnitID'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseCreateTrendTrendPost
-     */
-    'Name'?: string;
     /**
      * 
      * @type {number}
@@ -958,6 +1084,54 @@ export interface ResponseCreateTrendTrendPost {
      * @memberof ResponseCreateTrendTrendPost
      */
     'ScaledMax': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'TrendGroupID'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'TimeExponent'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'Format'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'UnitID'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'Color'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'Symbol'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'NodeID'?: number;
     /**
      * 
      * @type {number}
@@ -1129,19 +1303,13 @@ export interface ResponseGetEventDefByIdEventDefEventDefIdGet {
      * @type {string}
      * @memberof ResponseGetEventDefByIdEventDefEventDefIdGet
      */
-    'ID': string;
+    'Verbosity': string;
     /**
      * 
      * @type {string}
      * @memberof ResponseGetEventDefByIdEventDefEventDefIdGet
      */
-    'Verbosity'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseGetEventDefByIdEventDefEventDefIdGet
-     */
-    'Caption'?: string;
+    'Caption': string;
     /**
      * 
      * @type {boolean}
@@ -1160,6 +1328,12 @@ export interface ResponseGetEventDefByIdEventDefEventDefIdGet {
      * @memberof ResponseGetEventDefByIdEventDefEventDefIdGet
      */
     'Enabled'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetEventDefByIdEventDefEventDefIdGet
+     */
+    'ID': string;
     /**
      * 
      * @type {number}
@@ -1184,12 +1358,6 @@ export interface ResponseGetLinkByIdLinkLinkIdGet {
      * @type {number}
      * @memberof ResponseGetLinkByIdLinkLinkIdGet
      */
-    'ID'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseGetLinkByIdLinkLinkIdGet
-     */
     'BeginNodeID'?: number;
     /**
      * 
@@ -1199,10 +1367,16 @@ export interface ResponseGetLinkByIdLinkLinkIdGet {
     'EndNodeID'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof ResponseGetLinkByIdLinkLinkIdGet
+     */
+    'Length'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof ResponseGetLinkByIdLinkLinkIdGet
      */
-    'Length'?: number;
+    'ID': number;
     /**
      * 
      * @type {number}
@@ -1248,10 +1422,10 @@ export interface ResponseGetNodeByIdNodeNodeIdGet {
     'Name'?: string;
     /**
      * 
-     * @type {EditorNode}
+     * @type {EditorNodeBase}
      * @memberof ResponseGetNodeByIdNodeNodeIdGet
      */
-    'EditorParams'?: EditorNode;
+    'EditorParams'?: EditorNodeBase;
     /**
      * 
      * @type {number}
@@ -1317,6 +1491,43 @@ export interface ResponseGetSingleTrendDataTrendTrendIdSingleDataBeginEndSamples
 /**
  * 
  * @export
+ * @interface ResponseGetTemplateByIdTemplateTemplateIdGet
+ */
+export interface ResponseGetTemplateByIdTemplateTemplateIdGet {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTemplateByIdTemplateTemplateIdGet
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {Array<Axis>}
+     * @memberof ResponseGetTemplateByIdTemplateTemplateIdGet
+     */
+    'Axes'?: Array<Axis>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTemplateByIdTemplateTemplateIdGet
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTemplateByIdTemplateTemplateIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTemplateByIdTemplateTemplateIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseGetTrendByIdTrendTrendIdGet
  */
 export interface ResponseGetTrendByIdTrendTrendIdGet {
@@ -1325,61 +1536,13 @@ export interface ResponseGetTrendByIdTrendTrendIdGet {
      * @type {number}
      * @memberof ResponseGetTrendByIdTrendTrendIdGet
      */
-    'ID'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseGetTrendByIdTrendTrendIdGet
-     */
-    'TrendGroupID'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseGetTrendByIdTrendTrendIdGet
-     */
-    'Format'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseGetTrendByIdTrendTrendIdGet
-     */
-    'Symbol'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseGetTrendByIdTrendTrendIdGet
-     */
-    'Color'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseGetTrendByIdTrendTrendIdGet
-     */
-    'NodeID'?: number;
+    'ID': number;
     /**
      * 
      * @type {string}
      * @memberof ResponseGetTrendByIdTrendTrendIdGet
      */
     'TrendDefID': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseGetTrendByIdTrendTrendIdGet
-     */
-    'TimeExponent'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseGetTrendByIdTrendTrendIdGet
-     */
-    'UnitID'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseGetTrendByIdTrendTrendIdGet
-     */
-    'Name'?: string;
     /**
      * 
      * @type {number}
@@ -1404,6 +1567,54 @@ export interface ResponseGetTrendByIdTrendTrendIdGet {
      * @memberof ResponseGetTrendByIdTrendTrendIdGet
      */
     'ScaledMax': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'TrendGroupID'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'TimeExponent'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'Format'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'UnitID'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'Color'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'Symbol'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'NodeID'?: number;
     /**
      * 
      * @type {number}
@@ -1532,13 +1743,13 @@ export interface ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet {
      * @type {string}
      * @memberof ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet
      */
-    'Value': string;
+    'TrendParamDefID': string;
     /**
      * 
      * @type {string}
      * @memberof ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet
      */
-    'TrendParamDefID': string;
+    'Value': string;
     /**
      * 
      * @type {string}
@@ -1621,10 +1832,10 @@ export interface ResponseListEventDefsEventDefGet {
 export interface ResponseListEventsEventGet {
     /**
      * 
-     * @type {Array<Event>}
+     * @type {Array<EventOut>}
      * @memberof ResponseListEventsEventGet
      */
-    'items': Array<Event>;
+    'items': Array<EventOut>;
     /**
      * 
      * @type {number}
@@ -1719,10 +1930,10 @@ export interface ResponseListLinksLinkGet {
 export interface ResponseListNodesNodeGet {
     /**
      * 
-     * @type {Array<Node>}
+     * @type {Array<NodeOut>}
      * @memberof ResponseListNodesNodeGet
      */
-    'items': Array<Node>;
+    'items': Array<NodeOut>;
     /**
      * 
      * @type {number}
@@ -1763,15 +1974,64 @@ export interface ResponseListNodesNodeGet {
 /**
  * 
  * @export
+ * @interface ResponseListTemplatesTemplateGet
+ */
+export interface ResponseListTemplatesTemplateGet {
+    /**
+     * 
+     * @type {Array<Template>}
+     * @memberof ResponseListTemplatesTemplateGet
+     */
+    'items': Array<Template>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTemplatesTemplateGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTemplatesTemplateGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTemplatesTemplateGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTemplatesTemplateGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTemplatesTemplateGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListTemplatesTemplateGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseListTrendDefsTrendDefGet
  */
 export interface ResponseListTrendDefsTrendDefGet {
     /**
      * 
-     * @type {Array<TrendDef>}
+     * @type {Array<TrendDefBase>}
      * @memberof ResponseListTrendDefsTrendDefGet
      */
-    'items': Array<TrendDef>;
+    'items': Array<TrendDefBase>;
     /**
      * 
      * @type {number}
@@ -1817,10 +2077,10 @@ export interface ResponseListTrendDefsTrendDefGet {
 export interface ResponseListTrendParamsTrendTrendIdParamGet {
     /**
      * 
-     * @type {Array<TrendParam>}
+     * @type {Array<TrendParamOut>}
      * @memberof ResponseListTrendParamsTrendTrendIdParamGet
      */
-    'items': Array<TrendParam>;
+    'items': Array<TrendParamOut>;
     /**
      * 
      * @type {number}
@@ -1918,19 +2178,13 @@ export interface ResponseUpdateEventDefEventDefEventDefIdPut {
      * @type {string}
      * @memberof ResponseUpdateEventDefEventDefEventDefIdPut
      */
-    'ID': string;
+    'Verbosity': string;
     /**
      * 
      * @type {string}
      * @memberof ResponseUpdateEventDefEventDefEventDefIdPut
      */
-    'Verbosity'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseUpdateEventDefEventDefEventDefIdPut
-     */
-    'Caption'?: string;
+    'Caption': string;
     /**
      * 
      * @type {boolean}
@@ -1949,6 +2203,12 @@ export interface ResponseUpdateEventDefEventDefEventDefIdPut {
      * @memberof ResponseUpdateEventDefEventDefEventDefIdPut
      */
     'Enabled'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateEventDefEventDefEventDefIdPut
+     */
+    'ID': string;
     /**
      * 
      * @type {number}
@@ -1973,12 +2233,6 @@ export interface ResponseUpdateLinkLinkLinkIdPut {
      * @type {number}
      * @memberof ResponseUpdateLinkLinkLinkIdPut
      */
-    'ID'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseUpdateLinkLinkLinkIdPut
-     */
     'BeginNodeID'?: number;
     /**
      * 
@@ -1988,10 +2242,16 @@ export interface ResponseUpdateLinkLinkLinkIdPut {
     'EndNodeID'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof ResponseUpdateLinkLinkLinkIdPut
+     */
+    'Length'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof ResponseUpdateLinkLinkLinkIdPut
      */
-    'Length'?: number;
+    'ID': number;
     /**
      * 
      * @type {number}
@@ -2037,10 +2297,10 @@ export interface ResponseUpdateNodeNodeNodeIdPut {
     'Name'?: string;
     /**
      * 
-     * @type {EditorNode}
+     * @type {EditorNodeBase}
      * @memberof ResponseUpdateNodeNodeNodeIdPut
      */
-    'EditorParams'?: EditorNode;
+    'EditorParams'?: EditorNodeBase;
     /**
      * 
      * @type {number}
@@ -2051,6 +2311,43 @@ export interface ResponseUpdateNodeNodeNodeIdPut {
      * 
      * @type {string}
      * @memberof ResponseUpdateNodeNodeNodeIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseUpdateTemplateTemplateTemplateIdPut
+ */
+export interface ResponseUpdateTemplateTemplateTemplateIdPut {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTemplateTemplateTemplateIdPut
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {Array<Axis>}
+     * @memberof ResponseUpdateTemplateTemplateTemplateIdPut
+     */
+    'Axes'?: Array<Axis>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTemplateTemplateTemplateIdPut
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTemplateTemplateTemplateIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTemplateTemplateTemplateIdPut
      */
     'message': string;
 }
@@ -2071,13 +2368,13 @@ export interface ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut {
      * @type {string}
      * @memberof ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut
      */
-    'Value': string;
+    'TrendParamDefID': string;
     /**
      * 
      * @type {string}
      * @memberof ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut
      */
-    'TrendParamDefID': string;
+    'Value': string;
     /**
      * 
      * @type {string}
@@ -2114,61 +2411,13 @@ export interface ResponseUpdateTrendTrendTrendIdPut {
      * @type {number}
      * @memberof ResponseUpdateTrendTrendTrendIdPut
      */
-    'ID'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseUpdateTrendTrendTrendIdPut
-     */
-    'TrendGroupID'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseUpdateTrendTrendTrendIdPut
-     */
-    'Format'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseUpdateTrendTrendTrendIdPut
-     */
-    'Symbol'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseUpdateTrendTrendTrendIdPut
-     */
-    'Color'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseUpdateTrendTrendTrendIdPut
-     */
-    'NodeID'?: number;
+    'ID': number;
     /**
      * 
      * @type {string}
      * @memberof ResponseUpdateTrendTrendTrendIdPut
      */
     'TrendDefID': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseUpdateTrendTrendTrendIdPut
-     */
-    'TimeExponent'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseUpdateTrendTrendTrendIdPut
-     */
-    'UnitID'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseUpdateTrendTrendTrendIdPut
-     */
-    'Name'?: string;
     /**
      * 
      * @type {number}
@@ -2193,6 +2442,54 @@ export interface ResponseUpdateTrendTrendTrendIdPut {
      * @memberof ResponseUpdateTrendTrendTrendIdPut
      */
     'ScaledMax': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'TrendGroupID'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'TimeExponent'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'Format'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'UnitID'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'Color'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'Symbol'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'NodeID'?: number;
     /**
      * 
      * @type {number}
@@ -2209,6 +2506,50 @@ export interface ResponseUpdateTrendTrendTrendIdPut {
 /**
  * 
  * @export
+ * @interface Template
+ */
+export interface Template {
+    /**
+     * 
+     * @type {string}
+     * @memberof Template
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {Array<Axis>}
+     * @memberof Template
+     */
+    'Axes'?: Array<Axis>;
+    /**
+     * 
+     * @type {number}
+     * @memberof Template
+     */
+    'ID': number;
+}
+/**
+ * 
+ * @export
+ * @interface TemplateBase
+ */
+export interface TemplateBase {
+    /**
+     * 
+     * @type {string}
+     * @memberof TemplateBase
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {Array<Axis>}
+     * @memberof TemplateBase
+     */
+    'Axes'?: Array<Axis>;
+}
+/**
+ * 
+ * @export
  * @interface Trend
  */
 export interface Trend {
@@ -2217,61 +2558,13 @@ export interface Trend {
      * @type {number}
      * @memberof Trend
      */
-    'ID'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof Trend
-     */
-    'TrendGroupID'?: number | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof Trend
-     */
-    'Format'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof Trend
-     */
-    'Symbol'?: string | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof Trend
-     */
-    'Color'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof Trend
-     */
-    'NodeID'?: number | null;
+    'ID': number;
     /**
      * 
      * @type {string}
      * @memberof Trend
      */
     'TrendDefID': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Trend
-     */
-    'TimeExponent'?: number | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof Trend
-     */
-    'UnitID'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof Trend
-     */
-    'Name'?: string | null;
     /**
      * 
      * @type {number}
@@ -2296,6 +2589,145 @@ export interface Trend {
      * @memberof Trend
      */
     'ScaledMax': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Trend
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Trend
+     */
+    'TrendGroupID'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Trend
+     */
+    'TimeExponent'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Trend
+     */
+    'Format'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Trend
+     */
+    'UnitID'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Trend
+     */
+    'Color'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Trend
+     */
+    'Symbol'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Trend
+     */
+    'NodeID'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface TrendBase
+ */
+export interface TrendBase {
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendBase
+     */
+    'TrendDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'RawMin': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'RawMax': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'ScaledMin': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'ScaledMax': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendBase
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'TrendGroupID'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'TimeExponent'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendBase
+     */
+    'Format'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendBase
+     */
+    'UnitID'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendBase
+     */
+    'Color'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendBase
+     */
+    'Symbol'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'NodeID'?: number | null;
 }
 /**
  * 
@@ -2350,56 +2782,56 @@ export interface TrendDataSingle {
 /**
  * 
  * @export
- * @interface TrendDef
+ * @interface TrendDefBase
  */
-export interface TrendDef {
+export interface TrendDefBase {
     /**
      * 
      * @type {string}
-     * @memberof TrendDef
+     * @memberof TrendDefBase
      */
     'ID': string;
     /**
      * 
      * @type {string}
-     * @memberof TrendDef
+     * @memberof TrendDefBase
      */
-    'Name': string;
+    'Name'?: string | null;
 }
 /**
  * 
  * @export
- * @interface TrendParam
+ * @interface TrendParamOut
  */
-export interface TrendParam {
+export interface TrendParamOut {
     /**
      * 
      * @type {number}
-     * @memberof TrendParam
+     * @memberof TrendParamOut
      */
     'TrendID': number;
     /**
      * 
      * @type {string}
-     * @memberof TrendParam
-     */
-    'Value': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof TrendParam
+     * @memberof TrendParamOut
      */
     'TrendParamDefID': string;
     /**
      * 
      * @type {string}
-     * @memberof TrendParam
+     * @memberof TrendParamOut
+     */
+    'Value': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendParamOut
      */
     'DataType'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof TrendParam
+     * @memberof TrendParamOut
      */
     'Name'?: string | null;
 }
@@ -2479,10 +2911,10 @@ export interface UpdateLink {
     'EndNodeID'?: number | null;
     /**
      * 
-     * @type {number}
+     * @type {Length}
      * @memberof UpdateLink
      */
-    'Length'?: number | null;
+    'Length'?: Length | null;
 }
 /**
  * 
@@ -2495,13 +2927,7 @@ export interface UpdateNode {
      * @type {string}
      * @memberof UpdateNode
      */
-    'Type': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateNode
-     */
-    'TrendID'?: number | null;
+    'Type'?: string | null;
     /**
      * 
      * @type {string}
@@ -2510,10 +2936,29 @@ export interface UpdateNode {
     'Name'?: string | null;
     /**
      * 
-     * @type {EditorNode}
+     * @type {EditorNodeBase}
      * @memberof UpdateNode
      */
-    'EditorParams'?: EditorNode | null;
+    'EditorParams'?: EditorNodeBase | null;
+}
+/**
+ * 
+ * @export
+ * @interface UpdateTemplate
+ */
+export interface UpdateTemplate {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateTemplate
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {Array<Axis>}
+     * @memberof UpdateTemplate
+     */
+    'Axes'?: Array<Axis> | null;
 }
 /**
  * 
@@ -2523,58 +2968,10 @@ export interface UpdateNode {
 export interface UpdateTrend {
     /**
      * 
-     * @type {number}
-     * @memberof UpdateTrend
-     */
-    'TrendGroupID'?: number | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateTrend
-     */
-    'Format'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateTrend
-     */
-    'Symbol'?: string | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateTrend
-     */
-    'Color'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateTrend
-     */
-    'NodeID'?: number | null;
-    /**
-     * 
      * @type {string}
      * @memberof UpdateTrend
      */
     'TrendDefID'?: string | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateTrend
-     */
-    'TimeExponent'?: number | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateTrend
-     */
-    'UnitID'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateTrend
-     */
-    'Name'?: string | null;
     /**
      * 
      * @type {number}
@@ -2599,6 +2996,54 @@ export interface UpdateTrend {
      * @memberof UpdateTrend
      */
     'ScaledMax'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateTrend
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateTrend
+     */
+    'TrendGroupID'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateTrend
+     */
+    'TimeExponent'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateTrend
+     */
+    'Format'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateTrend
+     */
+    'UnitID'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateTrend
+     */
+    'Color'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateTrend
+     */
+    'Symbol'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateTrend
+     */
+    'NodeID'?: number | null;
 }
 /**
  * 
@@ -3509,13 +3954,13 @@ export const LinkApiAxiosParamCreator = function (configuration?: Configuration)
         /**
          * 
          * @summary Create Link
-         * @param {Link} link 
+         * @param {LinkBase} linkBase 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createLinkLinkPost: async (link: Link, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'link' is not null or undefined
-            assertParamExists('createLinkLinkPost', 'link', link)
+        createLinkLinkPost: async (linkBase: LinkBase, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'linkBase' is not null or undefined
+            assertParamExists('createLinkLinkPost', 'linkBase', linkBase)
             const localVarPath = `/link`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -3539,7 +3984,7 @@ export const LinkApiAxiosParamCreator = function (configuration?: Configuration)
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(link, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(linkBase, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3728,12 +4173,12 @@ export const LinkApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Create Link
-         * @param {Link} link 
+         * @param {LinkBase} linkBase 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async createLinkLinkPost(link: Link, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateLinkLinkPost>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createLinkLinkPost(link, options);
+        async createLinkLinkPost(linkBase: LinkBase, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateLinkLinkPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createLinkLinkPost(linkBase, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['LinkApi.createLinkLinkPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -3806,12 +4251,12 @@ export const LinkApiFactory = function (configuration?: Configuration, basePath?
         /**
          * 
          * @summary Create Link
-         * @param {Link} link 
+         * @param {LinkBase} linkBase 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createLinkLinkPost(link: Link, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateLinkLinkPost> {
-            return localVarFp.createLinkLinkPost(link, options).then((request) => request(axios, basePath));
+        createLinkLinkPost(linkBase: LinkBase, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateLinkLinkPost> {
+            return localVarFp.createLinkLinkPost(linkBase, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3869,13 +4314,13 @@ export class LinkApi extends BaseAPI {
     /**
      * 
      * @summary Create Link
-     * @param {Link} link 
+     * @param {LinkBase} linkBase 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof LinkApi
      */
-    public createLinkLinkPost(link: Link, options?: RawAxiosRequestConfig) {
-        return LinkApiFp(this.configuration).createLinkLinkPost(link, options).then((request) => request(this.axios, this.basePath));
+    public createLinkLinkPost(linkBase: LinkBase, options?: RawAxiosRequestConfig) {
+        return LinkApiFp(this.configuration).createLinkLinkPost(linkBase, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -4365,6 +4810,438 @@ export class NodeApi extends BaseAPI {
 
 
 /**
+ * TemplateApi - axios parameter creator
+ * @export
+ */
+export const TemplateApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create Template
+         * @param {TemplateBase} templateBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createTemplateTemplatePost: async (templateBase: TemplateBase, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'templateBase' is not null or undefined
+            assertParamExists('createTemplateTemplatePost', 'templateBase', templateBase)
+            const localVarPath = `/template`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(templateBase, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Template By Id
+         * @param {number} templateId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTemplateByIdTemplateTemplateIdDelete: async (templateId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'templateId' is not null or undefined
+            assertParamExists('deleteTemplateByIdTemplateTemplateIdDelete', 'templateId', templateId)
+            const localVarPath = `/template/{template_id}`
+                .replace(`{${"template_id"}}`, encodeURIComponent(String(templateId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Template By Id
+         * @param {number} templateId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTemplateByIdTemplateTemplateIdGet: async (templateId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'templateId' is not null or undefined
+            assertParamExists('getTemplateByIdTemplateTemplateIdGet', 'templateId', templateId)
+            const localVarPath = `/template/{template_id}`
+                .replace(`{${"template_id"}}`, encodeURIComponent(String(templateId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Templates
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listTemplatesTemplateGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/template`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Template
+         * @param {number} templateId 
+         * @param {UpdateTemplate} updateTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateTemplateTemplateTemplateIdPut: async (templateId: number, updateTemplate: UpdateTemplate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'templateId' is not null or undefined
+            assertParamExists('updateTemplateTemplateTemplateIdPut', 'templateId', templateId)
+            // verify required parameter 'updateTemplate' is not null or undefined
+            assertParamExists('updateTemplateTemplateTemplateIdPut', 'updateTemplate', updateTemplate)
+            const localVarPath = `/template/{template_id}`
+                .replace(`{${"template_id"}}`, encodeURIComponent(String(templateId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateTemplate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * TemplateApi - functional programming interface
+ * @export
+ */
+export const TemplateApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = TemplateApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Template
+         * @param {TemplateBase} templateBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createTemplateTemplatePost(templateBase: TemplateBase, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateTemplateTemplatePost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createTemplateTemplatePost(templateBase, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TemplateApi.createTemplateTemplatePost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Template By Id
+         * @param {number} templateId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteTemplateByIdTemplateTemplateIdDelete(templateId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTemplateByIdTemplateTemplateIdDelete(templateId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TemplateApi.deleteTemplateByIdTemplateTemplateIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Template By Id
+         * @param {number} templateId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getTemplateByIdTemplateTemplateIdGet(templateId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetTemplateByIdTemplateTemplateIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getTemplateByIdTemplateTemplateIdGet(templateId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TemplateApi.getTemplateByIdTemplateTemplateIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Templates
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listTemplatesTemplateGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListTemplatesTemplateGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listTemplatesTemplateGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TemplateApi.listTemplatesTemplateGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Template
+         * @param {number} templateId 
+         * @param {UpdateTemplate} updateTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateTemplateTemplateTemplateIdPut(templateId: number, updateTemplate: UpdateTemplate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdateTemplateTemplateTemplateIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateTemplateTemplateTemplateIdPut(templateId, updateTemplate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TemplateApi.updateTemplateTemplateTemplateIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * TemplateApi - factory interface
+ * @export
+ */
+export const TemplateApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = TemplateApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Template
+         * @param {TemplateBase} templateBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createTemplateTemplatePost(templateBase: TemplateBase, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateTemplateTemplatePost> {
+            return localVarFp.createTemplateTemplatePost(templateBase, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Template By Id
+         * @param {number} templateId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTemplateByIdTemplateTemplateIdDelete(templateId: number, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.deleteTemplateByIdTemplateTemplateIdDelete(templateId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Template By Id
+         * @param {number} templateId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTemplateByIdTemplateTemplateIdGet(templateId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetTemplateByIdTemplateTemplateIdGet> {
+            return localVarFp.getTemplateByIdTemplateTemplateIdGet(templateId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Templates
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listTemplatesTemplateGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListTemplatesTemplateGet> {
+            return localVarFp.listTemplatesTemplateGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Template
+         * @param {number} templateId 
+         * @param {UpdateTemplate} updateTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateTemplateTemplateTemplateIdPut(templateId: number, updateTemplate: UpdateTemplate, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdateTemplateTemplateTemplateIdPut> {
+            return localVarFp.updateTemplateTemplateTemplateIdPut(templateId, updateTemplate, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * TemplateApi - object-oriented interface
+ * @export
+ * @class TemplateApi
+ * @extends {BaseAPI}
+ */
+export class TemplateApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Template
+     * @param {TemplateBase} templateBase 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TemplateApi
+     */
+    public createTemplateTemplatePost(templateBase: TemplateBase, options?: RawAxiosRequestConfig) {
+        return TemplateApiFp(this.configuration).createTemplateTemplatePost(templateBase, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Template By Id
+     * @param {number} templateId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TemplateApi
+     */
+    public deleteTemplateByIdTemplateTemplateIdDelete(templateId: number, options?: RawAxiosRequestConfig) {
+        return TemplateApiFp(this.configuration).deleteTemplateByIdTemplateTemplateIdDelete(templateId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Template By Id
+     * @param {number} templateId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TemplateApi
+     */
+    public getTemplateByIdTemplateTemplateIdGet(templateId: number, options?: RawAxiosRequestConfig) {
+        return TemplateApiFp(this.configuration).getTemplateByIdTemplateTemplateIdGet(templateId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Templates
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TemplateApi
+     */
+    public listTemplatesTemplateGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return TemplateApiFp(this.configuration).listTemplatesTemplateGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Template
+     * @param {number} templateId 
+     * @param {UpdateTemplate} updateTemplate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TemplateApi
+     */
+    public updateTemplateTemplateTemplateIdPut(templateId: number, updateTemplate: UpdateTemplate, options?: RawAxiosRequestConfig) {
+        return TemplateApiFp(this.configuration).updateTemplateTemplateTemplateIdPut(templateId, updateTemplate, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * TrendApi - axios parameter creator
  * @export
  */
@@ -4373,13 +5250,13 @@ export const TrendApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * 
          * @summary Create Trend
-         * @param {Trend} trend 
+         * @param {TrendBase} trendBase 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createTrendTrendPost: async (trend: Trend, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'trend' is not null or undefined
-            assertParamExists('createTrendTrendPost', 'trend', trend)
+        createTrendTrendPost: async (trendBase: TrendBase, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendBase' is not null or undefined
+            assertParamExists('createTrendTrendPost', 'trendBase', trendBase)
             const localVarPath = `/trend`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -4403,7 +5280,7 @@ export const TrendApiAxiosParamCreator = function (configuration?: Configuration
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(trend, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(trendBase, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4911,12 +5788,12 @@ export const TrendApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Create Trend
-         * @param {Trend} trend 
+         * @param {TrendBase} trendBase 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async createTrendTrendPost(trend: Trend, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateTrendTrendPost>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createTrendTrendPost(trend, options);
+        async createTrendTrendPost(trendBase: TrendBase, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateTrendTrendPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createTrendTrendPost(trendBase, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TrendApi.createTrendTrendPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5087,12 +5964,12 @@ export const TrendApiFactory = function (configuration?: Configuration, basePath
         /**
          * 
          * @summary Create Trend
-         * @param {Trend} trend 
+         * @param {TrendBase} trendBase 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createTrendTrendPost(trend: Trend, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateTrendTrendPost> {
-            return localVarFp.createTrendTrendPost(trend, options).then((request) => request(axios, basePath));
+        createTrendTrendPost(trendBase: TrendBase, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateTrendTrendPost> {
+            return localVarFp.createTrendTrendPost(trendBase, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -5230,13 +6107,13 @@ export class TrendApi extends BaseAPI {
     /**
      * 
      * @summary Create Trend
-     * @param {Trend} trend 
+     * @param {TrendBase} trendBase 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TrendApi
      */
-    public createTrendTrendPost(trend: Trend, options?: RawAxiosRequestConfig) {
-        return TrendApiFp(this.configuration).createTrendTrendPost(trend, options).then((request) => request(this.axios, this.basePath));
+    public createTrendTrendPost(trendBase: TrendBase, options?: RawAxiosRequestConfig) {
+        return TrendApiFp(this.configuration).createTrendTrendPost(trendBase, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5394,12 +6271,13 @@ export const TrendDefApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * 
          * @summary List Trend Defs
+         * @param {string | null} [filter] 
          * @param {number} [page] 
          * @param {number} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listTrendDefsTrendDefGet: async (page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listTrendDefsTrendDefGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/trend_def`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -5415,6 +6293,10 @@ export const TrendDefApiAxiosParamCreator = function (configuration?: Configurat
             // authentication HTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
 
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
@@ -5448,13 +6330,14 @@ export const TrendDefApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary List Trend Defs
+         * @param {string | null} [filter] 
          * @param {number} [page] 
          * @param {number} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listTrendDefsTrendDefGet(page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListTrendDefsTrendDefGet>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listTrendDefsTrendDefGet(page, size, options);
+        async listTrendDefsTrendDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListTrendDefsTrendDefGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listTrendDefsTrendDefGet(filter, page, size, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TrendDefApi.listTrendDefsTrendDefGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5472,13 +6355,14 @@ export const TrendDefApiFactory = function (configuration?: Configuration, baseP
         /**
          * 
          * @summary List Trend Defs
+         * @param {string | null} [filter] 
          * @param {number} [page] 
          * @param {number} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listTrendDefsTrendDefGet(page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListTrendDefsTrendDefGet> {
-            return localVarFp.listTrendDefsTrendDefGet(page, size, options).then((request) => request(axios, basePath));
+        listTrendDefsTrendDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListTrendDefsTrendDefGet> {
+            return localVarFp.listTrendDefsTrendDefGet(filter, page, size, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -5493,14 +6377,15 @@ export class TrendDefApi extends BaseAPI {
     /**
      * 
      * @summary List Trend Defs
+     * @param {string | null} [filter] 
      * @param {number} [page] 
      * @param {number} [size] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TrendDefApi
      */
-    public listTrendDefsTrendDefGet(page?: number, size?: number, options?: RawAxiosRequestConfig) {
-        return TrendDefApiFp(this.configuration).listTrendDefsTrendDefGet(page, size, options).then((request) => request(this.axios, this.basePath));
+    public listTrendDefsTrendDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return TrendDefApiFp(this.configuration).listTrendDefsTrendDefGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

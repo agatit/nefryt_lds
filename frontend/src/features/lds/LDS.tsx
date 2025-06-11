@@ -1,5 +1,10 @@
 import { DrawerItemProps } from "@progress/kendo-react-layout";
-import { homeIcon, kpiStatusOpenIcon } from "@progress/kendo-svg-icons";
+import {
+  homeIcon,
+  kpiStatusOpenIcon,
+  lockIcon,
+  unlockIcon,
+} from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
@@ -11,6 +16,8 @@ import TrendConfigurationPage from "./features/TrendConfigurationPage";
 import LeakProbabilityPage from "./features/LeakProbabilityPage";
 import EventsPage from "./features/EventsPage";
 import HomePage from "./features/HomePage";
+import { Button } from "@progress/kendo-react-buttons";
+import "../../styles/features/lds/lds.scss";
 
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav"]);
@@ -24,6 +31,15 @@ export default function LDS() {
       svgIcon: homeIcon,
       selected: pathname == "/",
       route: "/",
+    },
+    {
+      separator: true,
+    },
+    {
+      text: t("nav:trends_mockup"),
+      svgIcon: kpiStatusOpenIcon,
+      selected: pathname == "/trends-mockup",
+      route: "/trends-mockup",
     },
     {
       separator: true,
@@ -78,12 +94,17 @@ export default function LDS() {
     );
   }, [pathname]);
 
+  const [isMenuPinned, setIsMenuPinned] = React.useState<boolean>(true);
+  const toggleMenuPinned = React.useCallback(() => {
+    setIsMenuPinned(!isMenuPinned);
+  }, [isMenuPinned]);
+
   return (
     <AuthContextProvider>
       <DrawerRouterContainer
         items={routerItems}
         navigate={navigate}
-        expandOnHover={false}
+        expandOnHover={!isMenuPinned}
         expanded={true}
         position="start"
         mode="push"
@@ -92,7 +113,14 @@ export default function LDS() {
         <KendoLocalizationWrapper>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/trends" element={<TrendsPage />} />
+            <Route
+              path="/trends-mockup"
+              element={<TrendsPage key={1} useMockup={true} />}
+            />
+            <Route
+              path="/trends"
+              element={<TrendsPage key={2} useMockup={false} />}
+            />
             <Route
               path="/trend-configuration"
               element={<TrendConfigurationPage />}
@@ -105,6 +133,11 @@ export default function LDS() {
           </Routes>
         </KendoLocalizationWrapper>
       </DrawerRouterContainer>
+      <Button
+        className="router-lock-button"
+        svgIcon={isMenuPinned ? lockIcon : unlockIcon}
+        onClick={toggleMenuPinned}
+      />
     </AuthContextProvider>
   );
 }

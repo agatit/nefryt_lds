@@ -3,73 +3,35 @@ import { AuthContext } from "../../../../contexts/authContext";
 import {
   Trend,
   TrendApi,
-  TrendDef,
+  TrendDefBase,
   TrendDefApi,
 } from "../../../../services/api";
-import {
-  PlotAreaHoverEvent,
-  SelectEndEvent,
-  SelectStartEvent,
-} from "@progress/kendo-react-charts";
+
 import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
-import { Loader } from "@progress/kendo-react-indicators";
 import "../../../../styles/features/lds/features/trendPage.scss";
-import {
-  Checkbox,
-  CheckboxChangeEvent,
-  TextBox,
-  TextBoxChangeEvent,
-} from "@progress/kendo-react-inputs";
-import {
-  PanelBar,
-  PanelBarItem,
-  TabStrip,
-  TabStripSelectEventArguments,
-  TabStripTab,
-} from "@progress/kendo-react-layout";
-import { useTranslation } from "react-i18next";
+
 import { SvgIcon, Typography } from "@progress/kendo-react-common";
-import { Label } from "@progress/kendo-react-labels";
-import {
-  DateTimePicker,
-  DateTimePickerChangeEvent,
-} from "@progress/kendo-react-dateinputs";
+import { DateTimePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import CursorBubble from "../../../../components/CursorBubble";
-import { DetailPanel } from "onyks_shared_kendo";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
-import { pencilIcon, saveIcon } from "@progress/kendo-svg-icons";
+import { SVGIcon, xIcon } from "@progress/kendo-svg-icons";
 import { Button } from "@progress/kendo-react-buttons";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import {
-  ItemRenderProps,
-  processTreeViewItems,
-  TreeView,
-  TreeViewDragAnalyzer,
-  TreeViewDragClue,
-  TreeViewExpandChangeEvent,
-  TreeViewItemDragEndEvent,
-  TreeViewItemDragOverEvent,
-  TreeViewItemDragStartEvent,
-  TreeViewOperationDescriptor,
-} from "@progress/kendo-react-treeview";
-import TrendChart, { ChartSeriesTrendData, ChartTrendData } from "./TrendChart";
+import { ItemRenderProps } from "@progress/kendo-react-treeview";
+import TrendChart from "./TrendChart";
+import TrendsDetailPanel from "./TrendsDetailPanel";
+import ChartEditDialog from "./ChartEditDialog";
 
-const mainChartSampleSize = 400;
-const navigationChartSampleSize = 100;
+const mainChartSampleSize = 500;
+const navigationChartSampleSize = 50;
 
-type MockupTrendType = {
+export type MockupTrendType = {
   ID: number;
   TrendGroupID: number;
   Color: string;
   TrendDefID: string;
   Name: string;
   Unit: string;
-};
-
-type TrendsState = {
-  trends: Trend[] | MockupTrendType[];
-  activeTrendsIDs: number[];
 };
 
 type TrendLoadStatus = {
@@ -85,8 +47,19 @@ export type AxisType = {
   ScaleMin: number;
 };
 
-interface TreeViewDataItem {
-  id?: number;
+export interface ChartTrendData {
+  timestamp: Date;
+  value: number | null;
+}
+
+export interface ChartSeriesTrendData {
+  data: ChartTrendData[];
+  id: number;
+  color: string;
+}
+
+export interface TreeViewDataItem {
+  id?: number | string;
   text: string;
   expanded?: boolean;
   checked?: boolean;
@@ -94,7 +67,7 @@ interface TreeViewDataItem {
   items?: TreeViewDataItem[];
 }
 
-const mockupTrendDefs: TrendDef[] = [
+const mockupTrendDefs: TrendDefBase[] = [
   {
     ID: "P01",
     Name: "Pressure",
@@ -236,6 +209,16 @@ const mockupTrendTreeData: TreeViewDataItem[] = [
   },
 ];
 
+const mockupAxes: AxisType[] = [
+  {
+    Name: "Ciśnienie pomiary MPa",
+    Unit: "MPa",
+    TrendIDs: [0, 1, 2],
+    ScaleMax: 9,
+    ScaleMin: -1,
+  },
+];
+
 function generateValue(date: Date, chart: number): number {
   switch (chart) {
     case 0:
@@ -272,28 +255,78 @@ function generateValue(date: Date, chart: number): number {
   );
 }
 
-export default function TrendsPage() {
-  const { t } = useTranslation(["common", "trends-page"]);
+interface MockupTrendGroupType {
+  ID: number;
+  Name: string;
+  AnalisisOnly?: boolean;
+}
 
+const mockupTrendGroupFromDB: MockupTrendGroupType[] = [
+  {
+    ID: 1,
+    Name: "Przepływ",
+  },
+  {
+    ID: 2,
+    Name: "Temperatura",
+  },
+  {
+    ID: 3,
+    Name: "Gęstość",
+  },
+  {
+    ID: 4,
+    Name: "Ciśnienie",
+  },
+  {
+    ID: 6,
+    Name: "Przepływ",
+  },
+  {
+    ID: 7,
+    Name: "Temperatura",
+  },
+  {
+    ID: 8,
+    Name: "Gęstość",
+  },
+  {
+    ID: 9,
+    Name: "Ciśnienie",
+  },
+  {
+    ID: 10,
+    Name: "Automatyka",
+  },
+  {
+    ID: 11,
+    Name: "Automatyka",
+  },
+];
+
+export interface TrendsPageProps {
+  useMockup: boolean;
+}
+
+export default function TrendsPage({ useMockup }: TrendsPageProps) {
   const auth = React.useContext(AuthContext);
   const refreshableRequest = useRefreshableRequest();
 
   // UI STUFF
-  const [tabSelected, setTabSelected] = React.useState<number>(0);
-
-  const handleTabSelect = React.useCallback(
-    (e: TabStripSelectEventArguments) => {
-      setTabSelected(e.selected);
-    },
-    []
-  );
-
   const [startDate, setStartDate] = React.useState<Date>(() => {
     var date = new Date();
     date.setDate(date.getDate() - 1);
     return date;
   });
   const [endDate, setEndDate] = React.useState<Date>(new Date());
+
+  const handleChartStartDateChange = React.useCallback((value: Date) => {
+    if (value) setStartDate(value);
+  }, []);
+  const handleChartEndDateChange = React.useCallback((value: Date) => {
+    if (value) setEndDate(value);
+  }, []);
+
   const navigationStartDate = React.useMemo(() => {
     return new Date(
       startDate.getTime() - (endDate.getTime() - startDate.getTime())
@@ -322,14 +355,11 @@ export default function TrendsPage() {
     React.useState<boolean>(false);
   const [cursorBubbleText, setCursorBubbleText] = React.useState("");
 
-  const handleSelectStart = React.useCallback((e: SelectStartEvent) => {
-    setShowCursorBubble(true);
+  const handleShowCursorBubbleChange = React.useCallback((value: boolean) => {
+    if (value !== undefined) setShowCursorBubble(value);
   }, []);
-
-  const handleSelectEnd = React.useCallback((e: SelectEndEvent) => {
-    setShowCursorBubble(false);
-    setStartDate(e.from);
-    setEndDate(e.to);
+  const handleCursorBubbleTextChange = React.useCallback((value: string) => {
+    if (value !== undefined) setCursorBubbleText(value);
   }, []);
 
   const [isChartInEdit, setIsChartInEdit] = React.useState<boolean>(false);
@@ -346,37 +376,6 @@ export default function TrendsPage() {
   }, []);
 
   const axisTreeRef = React.useRef<any>(null);
-  const mouseOverCreateNewAxisArea = React.useRef<boolean>(false);
-
-  const handleMouseEnterCreateNewAxisArea = React.useCallback(() => {
-    mouseOverCreateNewAxisArea.current = true;
-  }, []);
-  const handleMouseLeaveCreateNewAxisArea = React.useCallback(() => {
-    mouseOverCreateNewAxisArea.current = false;
-  }, []);
-
-  const handleOnPlotHover = React.useCallback((e: PlotAreaHoverEvent) => {
-    if (e.category)
-      setCursorBubbleText(
-        e.category.toLocaleDateString("pl-PL", {
-          hourCycle: "h24",
-          weekday: "short",
-          month: "short",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          seconds: "2-digit",
-          fractionalSecondDigits: "3",
-        })
-      );
-  }, []);
-
-  const [showCreateAxisDialog, setShowCreateAxisDialog] =
-    React.useState<boolean>(false);
-
-  const toggleAxisDialog = React.useCallback(() => {
-    setShowCreateAxisDialog(!showCreateAxisDialog);
-  }, [showCreateAxisDialog]);
 
   // DATA STUFF
 
@@ -390,54 +389,82 @@ export default function TrendsPage() {
   );
 
   // Trends and trend defs
-  const [trendDefs, setTrendDefs] = React.useState<TrendDef[]>(mockupTrendDefs);
+  const [trendDefs, setTrendDefs] =
+    React.useState<TrendDefBase[]>(mockupTrendDefs);
   const [trendsState, setTrendsState] = React.useState<
     Trend[] | MockupTrendType[]
   >(mockupTrends);
   const [isLoadingTrends, setIsLoadingTrends] = React.useState<boolean>(false);
-  // const trendLoadStatusRef = React.useRef<TrendLoadStatus>({
-  //   defsLoaded: false,
-  //   trendsLoaded: false,
-  // });
+  const trendLoadStatusRef = React.useRef<TrendLoadStatus>({
+    defsLoaded: false,
+    trendsLoaded: false,
+  });
 
-  const [axesState, setAxesState] = React.useState<AxisType[]>([
-    {
-      Name: "Ciśnienie pomiary MPa",
-      Unit: "MPa",
-      TrendIDs: [0, 1, 2],
-      ScaleMax: 9,
-      ScaleMin: -1,
-    },
-  ]);
+  const [axesState, setAxesState] = React.useState<AxisType[]>(
+    useMockup
+      ? mockupAxes
+      : [
+          {
+            Name: "Ciśnienia",
+            Unit: "MPa",
+            TrendIDs: [1, 2, 3, 4],
+            ScaleMax: 0,
+            ScaleMin: 0,
+          },
+        ]
+  );
 
-  const [newAxisName, setNewAxisName] = React.useState<string>("");
-  const draggedTrend = React.useRef<Trend | MockupTrendType>(null);
-
-  const handleAxisNameChange = React.useCallback((e: TextBoxChangeEvent) => {
-    if (e.value) setNewAxisName(e.value.toString());
+  const handleAxesStateChange = React.useCallback((value: AxisType[]) => {
+    if (value) setAxesState(value);
   }, []);
 
-  const createNewAxis = React.useCallback(() => {
-    const unit = (
-      trendsState.find(
-        (trend) => trend.ID == draggedTrend.current?.ID
-      ) as MockupTrendType
-    ).Unit;
-    setAxesState([
-      ...axesState,
-      {
-        Name: newAxisName,
-        Unit: unit,
-        TrendIDs: [draggedTrend.current?.ID!],
-        ScaleMax: 0,
-        ScaleMin: 0,
-      },
-    ]);
-    setShowCreateAxisDialog(false);
-  }, [trendsState, axesState, newAxisName]);
+  const trendsTree: TreeViewDataItem[] = React.useMemo(() => {
+    if (useMockup) return mockupTrendTreeData;
 
-  const [trendsTree, setTrendsTree] =
-    React.useState<TreeViewDataItem[]>(mockupTrendTreeData);
+    const trendsTree: TreeViewDataItem[] = mockupTrendGroupFromDB.map(
+      (item) => {
+        return {
+          id: item.ID,
+          text: item.Name,
+          items: [],
+        };
+      }
+    );
+
+    for (let trend of trendsState) {
+      const index = trendsTree.findIndex(
+        (item) => item.id == trend.TrendGroupID
+      );
+      const trendDef = trendDefs.find((item) => item.ID == trend.TrendDefID);
+
+      const indexTrendDef = trendsTree[index].items?.findIndex(
+        (item) => item.id == trend.TrendDefID
+      );
+
+      if (indexTrendDef == -1) {
+        trendsTree[index].items?.push({
+          id: trend.TrendDefID,
+          text: trendDef?.Name!,
+          items: [
+            {
+              id: trend.ID,
+              text: trend.Name!,
+            },
+          ],
+        });
+
+        continue;
+      }
+
+      trendsTree[index].items![indexTrendDef!].items?.push({
+        id: trend.ID,
+        text: trend.Name!,
+      });
+    }
+
+    return trendsTree;
+  }, [trendsState, mockupTrendGroupFromDB]);
+
   const axisTree: TreeViewDataItem[] = React.useMemo(() => {
     return axesState.map((axis) => {
       return {
@@ -451,155 +478,23 @@ export default function TrendsPage() {
         }),
       };
     });
-  }, [axesState]);
+  }, [axesState, trendsState]);
 
-  const handleTreeItemDragStart = React.useCallback(
-    (e: TreeViewItemDragStartEvent) => {
-      draggedTrend.current = trendsState.find(
-        (trend) => trend.ID == e.item.id
-      )!;
-      setShowCursorBubble(true);
-    },
-    []
-  );
-
-  const handleTreeItemDragOver = React.useCallback(
-    (e: TreeViewItemDragOverEvent) => {
-      if (mouseOverCreateNewAxisArea.current) {
-        setCursorBubbleText(t("trends-page:add_to_new_axis"));
-        return;
-      }
-
-      const eventAnalyzer = new TreeViewDragAnalyzer(e).init();
-      if (
-        eventAnalyzer.destinationMeta.treeViewGuid.split("-")[0] !==
-        axisTreeRef.current.props.id
-      ) {
-        setCursorBubbleText(e.item.text);
-
-        return;
-      }
-
-      setCursorBubbleText(
-        t("trends-page:add_to") +
-          ": " +
-          axesState[
-            parseInt(
-              eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_")[0]
-            )
-          ].Name
-      );
-    },
-    []
-  );
-
-  const handleTreeItemDragEnd = React.useCallback(
-    (e: TreeViewItemDragEndEvent) => {
-      setShowCursorBubble(false);
-
-      if (mouseOverCreateNewAxisArea.current) {
-        setShowCreateAxisDialog(true);
-        setNewAxisName(
-          (
-            trendsState.find(
-              (trend) => trend.ID == e.item.id
-            )! as MockupTrendType
-          ).Unit
-        );
-
-        return;
-      }
-
-      const eventAnalyzer = new TreeViewDragAnalyzer(e).init();
-      if (
-        eventAnalyzer.destinationMeta.treeViewGuid.split("-")[0] !==
-        axisTreeRef.current.props.id
-      )
-        return;
-
-      const indexArray =
-        eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_");
-
-      const axisIndex = parseInt(indexArray[0]);
-      const trendIndex = parseInt(indexArray[1]);
-
-      setAxesState(
-        axesState.map((axis: AxisType, i) => {
-          if (i !== axisIndex) return axis;
-          if (axis.TrendIDs.includes(e.item.id)) return axis;
-
-          if (indexArray.length < 2)
-            return {
-              ...axis,
-              TrendIDs: [...axis.TrendIDs, e.item.id],
-            };
-
-          const newArr = axis.TrendIDs;
-          switch (eventAnalyzer.getDropOperation()) {
-            case "before":
-              newArr.splice(trendIndex, 0, e.item.id);
-              return {
-                ...axis,
-                TrendIDs: newArr,
-              };
-              break;
-            default:
-              newArr.splice(trendIndex + 1, 0, e.item.id);
-              return {
-                ...axis,
-                TrendIDs: newArr,
-              };
-          }
-        })
-      );
-    },
-    [axesState]
-  );
-
-  const [expandTrendsTree, setExpandTrendsTree] =
-    React.useState<TreeViewOperationDescriptor>({
-      ids: [1, 2, 3, 4, 5, 6],
-      idField: "id",
-    });
-
-  const handleExpandTrendsTreeChange = React.useCallback(
-    (event: TreeViewExpandChangeEvent) => {
-      const ids: string[] = expandTrendsTree.ids
-        ? expandTrendsTree.ids.slice()
-        : [];
-      const index: number = ids.indexOf(event.item.id);
-
-      index === -1 ? ids.push(event.item.id) : ids.splice(index, 1);
-      setExpandTrendsTree({ ids, idField: "id" });
-    },
-    [expandTrendsTree]
-  );
-
-  const [expandAxesTree, setExpandAxesTree] =
-    React.useState<TreeViewOperationDescriptor>({
-      ids: ["Ciśnienie pomiary MPa"],
-      idField: "text",
-    });
-
-  const handleExpandAxesTreeChange = React.useCallback(
-    (event: TreeViewExpandChangeEvent) => {
-      const ids: string[] = expandAxesTree.ids
-        ? expandAxesTree.ids.slice()
-        : [];
-      const index: number = ids.indexOf(event.item.text);
-
-      index === -1 ? ids.push(event.item.text) : ids.splice(index, 1);
-      setExpandAxesTree({ ids, idField: "text" });
-    },
-    [expandAxesTree]
-  );
+  // Treeview stuff
 
   const TreeCustomItem = React.useCallback(
-    (props: ItemRenderProps, depth: number) => {
+    (
+      props: ItemRenderProps,
+      depth: number,
+      buttonIcon?: SVGIcon,
+      buttonOnClick?: React.MouseEventHandler<HTMLButtonElement>
+    ) => {
       const trend = trendsState.find((trend) => trend.ID == props.item.id);
-      return props.itemHierarchicalIndex.split("_").length > depth ? (
+      const correctDepth =
+        props.itemHierarchicalIndex.split("_").length > depth;
+      return (
         <React.Fragment>
-          {trend && (
+          {trend && correctDepth && (
             <SvgIcon
               icon={chartLegendIcon}
               size="xlarge"
@@ -607,9 +502,14 @@ export default function TrendsPage() {
             />
           )}
           <span>{props.item.text}</span>
+          {buttonIcon !== undefined && (
+            <Button
+              svgIcon={buttonIcon}
+              onClick={buttonOnClick}
+              fillMode="flat"
+            />
+          )}
         </React.Fragment>
-      ) : (
-        <span>{props.item.text}</span>
       );
     },
     [trendsState]
@@ -622,11 +522,42 @@ export default function TrendsPage() {
     [TreeCustomItem]
   );
 
-  const AxisTreeCustomItem = React.useCallback(
+  const AxisEditTreeCustomItem = React.useCallback(
     (props: ItemRenderProps) => {
       return TreeCustomItem(props, 1);
     },
     [TreeCustomItem]
+  );
+
+  const removeFromAxes = React.useCallback(
+    (props: ItemRenderProps) => {
+      const indexArray = props.itemHierarchicalIndex.split("_");
+
+      if (indexArray.length == 1) {
+        setAxesState(axesState.filter((axis) => axis.Name !== props.item.text));
+        return;
+      }
+
+      setAxesState(
+        axesState.map((axis, i) => {
+          if (i !== parseInt(indexArray[0])) return axis;
+          return {
+            ...axis,
+            TrendIDs: axis.TrendIDs.filter(
+              (ids, index) => index !== parseInt(indexArray[1])
+            ),
+          };
+        })
+      );
+    },
+    [axesState]
+  );
+
+  const AxisLegendTreeCustomItem = React.useCallback(
+    (props: ItemRenderProps) => {
+      return TreeCustomItem(props, 1, xIcon, () => removeFromAxes(props));
+    },
+    [TreeCustomItem, removeFromAxes]
   );
 
   // Trends Data
@@ -636,44 +567,107 @@ export default function TrendsPage() {
   const [navigatorData, setNavigatorData] = React.useState<
     ChartSeriesTrendData[]
   >([]);
-  // const [isLoadingTrendsData, setIsLoadingTrendsData] =
-  //   React.useState<boolean>(false);
+  const [isLoadingTrendsData, setIsLoadingTrendsData] =
+    React.useState<boolean>(true);
+  const trendsDataLoadStatusRef = React.useRef<boolean>(false);
 
   // Loading from api
 
-  // function checkIfTrendsLoaded() {
-  //   if (
-  //     trendLoadStatusRef.current.defsLoaded &&
-  //     trendLoadStatusRef.current.trendsLoaded
-  //   )
-  //     setIsLoadingTrends(false);
-  // }
+  function checkIfTrendsLoaded() {
+    if (
+      trendLoadStatusRef.current.defsLoaded &&
+      trendLoadStatusRef.current.trendsLoaded
+    )
+      setIsLoadingTrends(false);
+  }
 
-  // async function loadTrends() {
-  //   trendLoadStatusRef.current = { defsLoaded: false, trendsLoaded: false };
+  async function loadTrends() {
+    trendLoadStatusRef.current = { defsLoaded: false, trendsLoaded: false };
 
-  //   refreshableRequest(
-  //     trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi)
-  //   ).then((response) => {
-  //     trendLoadStatusRef.current.defsLoaded = true;
-  //     if (response?.data) setTrendDefs(response?.data.items);
-  //     checkIfTrendsLoaded();
-  //   });
+    refreshableRequest(
+      trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi)
+    ).then((response) => {
+      trendLoadStatusRef.current.defsLoaded = true;
+      if (response?.data) setTrendDefs(response?.data.items);
+      checkIfTrendsLoaded();
+    });
 
-  //   refreshableRequest(trendApi.listTrendsTrendGet.bind(trendApi)).then(
-  //     (response) => {
-  //       trendLoadStatusRef.current.trendsLoaded = true;
-  //       if (response?.data)
-  //         setTrendsState({ trends: response.data.items, activeTrendsIDs: [] });
-  //       checkIfTrendsLoaded();
-  //     }
-  //   );
-  // }
+    refreshableRequest(trendApi.listTrendsTrendGet.bind(trendApi)).then(
+      (response) => {
+        trendLoadStatusRef.current.trendsLoaded = true;
+        if (response?.data) setTrendsState(response.data.items);
+        checkIfTrendsLoaded();
+      }
+    );
+  }
+
+  function checkIfTrendsDataLoaded() {
+    if (trendsDataLoadStatusRef) setIsLoadingTrendsData(false);
+  }
+
+  async function loadTrendsData() {
+    trendsDataLoadStatusRef.current = false;
+
+    var trendIdList: string = "";
+    const trendIdArr: number[] = [];
+
+    axesState.forEach((axis) => {
+      trendIdArr.push(...axis.TrendIDs);
+    });
+
+    trendIdArr.forEach((id) => {
+      trendIdList += id.toString() + ",";
+    });
+
+    refreshableRequest(
+      trendApi.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
+        trendApi
+      ),
+      trendIdList,
+      startDate.getTime(),
+      endDate.getTime(),
+      mainChartSampleSize,
+      1,
+      1000
+    )
+      .then((response) => {
+        const newTrendsData: ChartSeriesTrendData[] = trendIdArr.map((id) => {
+          return {
+            data: [],
+            id: id,
+            color: trendsState.find((trend) => trend.ID == id)?.Color!,
+          };
+        });
+        response?.data.items.forEach((item) => {
+          const timestamp = new Date(item.Timestamp * 1000);
+          item.Data?.forEach((dataitem) => {
+            const index = newTrendsData.findIndex((td) => td.id == dataitem.ID);
+            newTrendsData[index].data.push({
+              timestamp: timestamp,
+              value: dataitem.Value ? dataitem.Value : null,
+            });
+          });
+        });
+
+        trendsDataLoadStatusRef.current = true;
+        checkIfTrendsDataLoaded();
+
+        setTrendsData(newTrendsData);
+      })
+      .catch((err) => {
+        if (err.status == 404) {
+          console.log("no data");
+        }
+      });
+  }
 
   // mockup data testing
 
   const generateTestData = React.useCallback(async () => {
     if (startDate == null || endDate == null) return;
+
+    trendLoadStatusRef.current = { defsLoaded: false, trendsLoaded: false };
+    trendsDataLoadStatusRef.current = false;
 
     const timeDiff = endDate.getTime() - startDate.getTime();
     const step = Math.floor(timeDiff / mainChartSampleSize);
@@ -743,16 +737,26 @@ export default function TrendsPage() {
 
     setTrendsData(newTrendsData);
     setNavigatorData(newNavData);
+
+    trendLoadStatusRef.current = { defsLoaded: true, trendsLoaded: true };
+    checkIfTrendsLoaded();
+    trendsDataLoadStatusRef.current = true;
+    checkIfTrendsDataLoaded();
   }, [startDate, endDate, trendsState, axesState]);
 
   React.useEffect(() => {
-    generateTestData();
+    useMockup ? generateTestData() : loadTrends();
   }, [startDate, endDate, axesState]);
+
+  React.useEffect(() => {
+    if (!isLoadingTrends && !useMockup) loadTrendsData();
+  }, [isLoadingTrends, axesState]);
 
   return (
     <React.Fragment>
       <main>
         <TrendChart
+          isLoadingTrendsData={isLoadingTrendsData}
           startDate={startDate}
           endDate={endDate}
           navigationStartDate={navigationStartDate}
@@ -760,165 +764,41 @@ export default function TrendsPage() {
           trendData={trendsData}
           navigatorData={navigatorData}
           axesState={axesState}
-          onSelectStart={handleSelectStart}
-          onSelectEnd={handleSelectEnd}
-          onPlotAreaHover={handleOnPlotHover}
+          onStartDateChange={handleChartStartDateChange}
+          onEndDateChange={handleChartEndDateChange}
+          onShowCursorBubbleChange={handleShowCursorBubbleChange}
+          onCursorBubbleTextChange={handleCursorBubbleTextChange}
         />
-        <DetailPanel className="chart-detail-panel" flexGrow={1}>
-          <TabStrip
-            className="detail-panel-tabs"
-            keepTabsMounted={true}
-            selected={tabSelected}
-            onSelect={handleTabSelect}
-          >
-            <TabStripTab title={t("trends-page:chart_config")}>
-              {!isLoadingTrends ? (
-                <div className="chart-config-content">
-                  <div className="item">
-                    <Typography.p fontSize="large" margin={0}>
-                      {t("trends-page:legend")}
-                    </Typography.p>
-                    <div className="legend-container">
-                      <TreeView
-                        ref={axisTreeRef}
-                        draggable={true}
-                        data={processTreeViewItems(axisTree, {
-                          expand: expandAxesTree,
-                        })}
-                        expandIcons={true}
-                        onExpandChange={handleExpandAxesTreeChange}
-                        item={AxisTreeCustomItem}
-                      />
-                      {/* {axesState.map((axis) => {
-                        return (
-                          <React.Fragment>
-                            {axis.TrendIDs.map((id) => {
-                              const trend = trendsState.find(
-                                (trend) => trend.ID == id
-                              );
-                              return (
-                                <div>
-                                  <SvgIcon
-                                    icon={chartLegendIcon}
-                                    size="xlarge"
-                                    style={{ stroke: trend?.Color }}
-                                  />
-                                  {trend?.Name}
-                                </div>
-                              );
-                            })}
-                          </React.Fragment>
-                        );
-                      })} */}
-                    </div>
-                  </div>
-                  <div className="item">
-                    <Button
-                      svgIcon={isChartInEdit ? undefined : pencilIcon}
-                      onClick={handleChartEditButtonClick}
-                    >
-                      {isChartInEdit ? t("common:save") : t("common:edit")}
-                    </Button>
-                  </div>
-                  <div className="item">
-                    <Typography.p fontSize="large" margin={0}>
-                      {t("trends-page:time_interval")}
-                    </Typography.p>
-                    <div className="item-row">
-                      <div>
-                        <Label>{t("common:from")}</Label>
-                        <DateTimePicker
-                          format={"dd/MM/yy HH:mm:ss"}
-                          value={startDate}
-                          onChange={handleStartDateChange}
-                        />
-                      </div>
-                      <div>
-                        <Label>{t("common:to")}</Label>
-                        <DateTimePicker
-                          format={"dd/MM/yy HH:mm:ss"}
-                          value={endDate}
-                          onChange={handleEndDateChange}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="item">
-                    <Button svgIcon={saveIcon}>
-                      {t("trends-page:save_as_template")}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <Loader size="medium" type={"infinite-spinner"} />
-              )}
-            </TabStripTab>
-            <TabStripTab title={t("trends-page:templates")}></TabStripTab>
-          </TabStrip>
-        </DetailPanel>
+        <TrendsDetailPanel
+          isLoadingTrends={isLoadingTrends}
+          axisTreeRef={axisTreeRef}
+          axisTree={axisTree}
+          TreeCustomItem={AxisLegendTreeCustomItem}
+          isChartInEdit={isChartInEdit}
+          onChartEditButtonClick={handleChartEditButtonClick}
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
+        />
       </main>
-      {showCursorBubble && <CursorBubble text={cursorBubbleText} />}
       {isChartInEdit && (
-        <Dialog onClose={endChartEdit}>
-          <div className="chart-edit-container">
-            <div className="segregated-trends">
-              <TreeView
-                draggable={true}
-                data={processTreeViewItems(trendsTree, {
-                  expand: expandTrendsTree,
-                })}
-                expandIcons={true}
-                onItemDragStart={handleTreeItemDragStart}
-                onItemDragOver={handleTreeItemDragOver}
-                onItemDragEnd={handleTreeItemDragEnd}
-                onExpandChange={handleExpandTrendsTreeChange}
-                item={TrendsTreeCustomItem}
-              />
-            </div>
-            <div className="separator" />
-            <div className="selected-trends">
-              <TreeView
-                ref={axisTreeRef}
-                draggable={true}
-                data={processTreeViewItems(axisTree, {
-                  expand: expandAxesTree,
-                })}
-                expandIcons={true}
-                onExpandChange={handleExpandAxesTreeChange}
-                item={AxisTreeCustomItem}
-              />
-              <div
-                className="create-axis-area"
-                onMouseEnter={handleMouseEnterCreateNewAxisArea}
-                onMouseLeave={handleMouseLeaveCreateNewAxisArea}
-              >
-                <Typography.p style={{ marginBottom: 0 }}>
-                  {t("trends-page:create_new_axis")}
-                </Typography.p>
-              </div>
-            </div>
-          </div>
-          {showCreateAxisDialog && (
-            <Dialog onClose={toggleAxisDialog}>
-              <Label>{t("trends-page:new_axis_name")}</Label>
-              <TextBox value={newAxisName} onChange={handleAxisNameChange} />
-              <DialogActionsBar>
-                <Button type="button" onClick={createNewAxis}>
-                  {t("common:confirm")}
-                </Button>
-              </DialogActionsBar>
-            </Dialog>
-          )}
-          <DialogActionsBar>
-            <Button type="button" onClick={endChartEdit}>
-              {t("common:cancel")}
-            </Button>
-            <Button type="button" onClick={endChartEdit}>
-              {t("common:save")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
+        <ChartEditDialog
+          trendsTree={trendsTree}
+          TrendsTreeCustomItem={TrendsTreeCustomItem}
+          AxisTreeCustomItem={AxisLegendTreeCustomItem}
+          axisTreeRef={axisTreeRef}
+          axisTree={axisTree}
+          onCancelButtonClick={endChartEdit}
+          onSaveButtonClick={endChartEdit}
+          trendsState={trendsState}
+          axesState={axesState}
+          onAxesStateChange={handleAxesStateChange}
+          onShowCursorBubbleChange={handleShowCursorBubbleChange}
+          onCursorBubbleTextChange={handleCursorBubbleTextChange}
+        />
       )}
+      {showCursorBubble && <CursorBubble text={cursorBubbleText} />}
     </React.Fragment>
   );
 }

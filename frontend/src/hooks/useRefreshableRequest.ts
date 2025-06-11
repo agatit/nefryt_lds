@@ -15,6 +15,8 @@ export function useRefreshableRequest() {
     } catch (err: any) {
       if (err.status == 401) {
         await auth?.refreshAccess();
+      } else {
+        throw err;
       }
     }
   }
