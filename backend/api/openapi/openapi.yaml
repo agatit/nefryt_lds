@@ -1698,7 +1698,6 @@ paths:
       summary: List trend defs
       tags:
       - trends
-      x-openapi-router-controller: api.controllers.trends_controller
   /template:
     get:
       description: List all templates
@@ -2017,7 +2016,7 @@ paths:
           description: unexpected error
       summary: List trend groups
       tags:
-        - trend
+        - trends
     post:
       description: Create a trend group
       operationId: create_trend_group
@@ -2128,6 +2127,95 @@ paths:
       summary: Updates trend group
       tags:
         - trends
+  /trend_writer:
+    get:
+      description: List all profiler datas
+      operationId: list_profiler_data
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProfilerData'
+                type: array
+          description: A array of profiler datas
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List trend writer profiler datas
+      tags:
+        - trend_writer
+  /trend_writer/{TrendId}:
+    get:
+      description: Info for specific profiler data
+      operationId: get_profiler_data_by_id
+      parameters:
+        - description: The id of the trend to retrieve profiler data
+          explode: false
+          in: path
+          name: TrendId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilerData'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets profiler data details
+      tags:
+        - trend_writer
+  /trend_writer/general:
+    get:
+      description: Info for profiler data in general
+      operationId: get_general_profiler_data
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilerGeneralData'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets profiler data in general details
+      tags:
+        - trend_writer
 components:
   parameters:
     eventId:
@@ -2936,6 +3024,60 @@ components:
           title: Multiplier
           type: number
       title: Unit
+      type: object
+    ProfilerData:
+      example:
+        ID: 10
+        Time10: 0.165767
+        Time100: 0.212234
+        Time1000: 0.245436576
+        QueueSize: 0
+      properties:
+        ID:
+          title: ID
+          type: integer
+        Time10:
+          title: Time10
+          type: number
+          nullable: true
+        Time100:
+          title: Time100
+          type: number
+          nullable: true
+        Time1000:
+          title: Time1000
+          type: number
+          nullable: true
+        QueueSize:
+          title: QueueSize
+          type: integer
+          nullable: true
+      title: ProfilerData
+      type: object
+    ProfilerGeneralData:
+      example:
+        ActiveTrends: 5
+        Time10: 0.165767
+        Time100: 0.212234
+        Time1000: 0.245436576
+        QueueSize: 1.4
+      properties:
+        ActiveTrends:
+          title: ActiveTrends
+          type: integer
+        Time10:
+          title: Time10
+          type: number
+        Time100:
+          title: Time100
+          type: number
+        Time1000:
+          title: Time1000
+          type: number
+        QueueSize:
+          title: QueueSize
+          type: number
+      title: ProfilerGeneralData
       type: object
     EditorPipeline:
       example:

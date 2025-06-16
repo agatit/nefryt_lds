@@ -32,6 +32,8 @@ class Profiler:
         Profiler.process.daemon = True
         Profiler.process.start()
 
+    # TODO: on start => create new OR reset values, then write to db logic, on close => remove
+    # TODO: profiler writer tests
     @staticmethod
     def _process_queue(queue: multiprocessing.Queue, trends_dict: dict, expected_trends_count: int):
         initialized_processes_count = 0
