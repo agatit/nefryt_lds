@@ -57,6 +57,7 @@ class PipePlant:
         for register, quick_trend in self.quick_trends.items():
             self.read_trend_children(register, TrendManager.get(quick_trend[0]))
         self.quick_trends_ids_not_updated = list(self.quick_trends_by_ids.keys())
+        Profiler.add_profiler_data_to_db(trend_ids)
         for trend in TrendManager.get_all():
             trend.run_trend_process()
 
@@ -83,7 +84,7 @@ class PipePlant:
             if timestamp != self.last_timestamp:
                 not_updated_count = len(self._prepare_not_updated_trends())
                 if not_updated_count != 0:
-                    Profiler.queue.put((2, not_updated_count, self.last_timestamp, None))
+                    Profiler.queue.put((2, not_updated_count, self.last_timestamp, None, None))
                 self.last_timestamp = timestamp
                 self.quick_trends_ids_not_updated = list(self.quick_trends_by_ids.keys())
             if self.quick_trends[register][0] in self.quick_trends_ids_not_updated:
@@ -105,5 +106,5 @@ class PipePlant:
     @staticmethod
     def shutdown_processes():
         for trend in TrendManager.get_all():
-           trend.queue.put(None, None, None)
+           trend.queue.put(None)
            trend.process.join()

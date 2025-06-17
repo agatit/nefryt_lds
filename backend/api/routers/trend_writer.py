@@ -9,12 +9,12 @@ from starlette.responses import JSONResponse
 from api.routers.utils import get_user_token
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
-from ..schemas import Error, ProfilerGeneralData
+from ..schemas import Error, ProfilerGeneralData, ProfilerDataOut
 
 router = APIRouter(prefix="/trend_writer", tags=["trend_writer"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=CustomPage[lds.ProfilerData] | Error)
+@router.get('', response_model=CustomPage[ProfilerDataOut] | Error)
 async def list_profiler_data(engine: Annotated[Engine, Depends(get_engine)],
                                           params: Annotated[CustomParams, Depends()],
                                           _: Annotated[None, Depends(use_custom_page)]):
@@ -42,9 +42,9 @@ async def get_general_profiler_data(engine: Annotated[Engine, Depends(get_engine
             profiler_data = profiler_data[0]
             if (profiler_data.Time10 is not None and profiler_data.Time100 is not None
                     and profiler_data.Time1000 is not None):
-                general_data.Time10 += profiler_data.Time10
-                general_data.Time100 += profiler_data.Time100
-                general_data.Time1000 += profiler_data.Time1000
+                general_data.Time10 += float(profiler_data.Time10)
+                general_data.Time100 += float(profiler_data.Time100)
+                general_data.Time1000 += float(profiler_data.Time1000)
                 general_data.ActiveTrends += 1
                 general_data.QueueSize += profiler_data.QueueSize if profiler_data.QueueSize else 0
 
@@ -59,7 +59,7 @@ async def get_general_profiler_data(engine: Annotated[Engine, Depends(get_engine
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id}', response_model=lds.ProfilerData | Error)
+@router.get('/{trend_id}', response_model=ProfilerDataOut | Error)
 async def get_profiler_data_by_id(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:

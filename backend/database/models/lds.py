@@ -289,7 +289,7 @@ class Template(TemplateBase, table=True):
 
 
 class ProfilerData(ProfilerDataBase, table=True):
-    __tablename__ = 'TProfilerData'
+    __tablename__ = 'ProfilerData'
     __table_args__ = (
         {'schema': 'lds'}
     )

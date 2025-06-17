@@ -13,7 +13,7 @@ trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin
 trend2 = lds.Trend(ID=3, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
 trend3 = lds.Trend(ID=5, TrendDefID=trend_def.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
 trend_list = [trend1, trend2, trend3]
-profiler_data1 = lds.ProfilerData(ID=1, Time10=0.1, Time100=0.2, Time1000=0.25, QueueSize=5)
+profiler_data1 = lds.ProfilerData(ID=1, Time10=0.1, Time100=0.2245, Time1000=0.25, QueueSize=5)
 profiler_data2 = lds.ProfilerData(ID=3, Time10=0.2, Time100=0.3, Time1000=0.5, QueueSize=1)
 profiler_data3 = lds.ProfilerData(ID=5)
 profiler_data_list = [profiler_data1, profiler_data2, profiler_data3]
@@ -28,7 +28,7 @@ def reset_profiler_data_objects():
     trend2 = lds.Trend(ID=3, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
     trend3 = lds.Trend(ID=5, TrendDefID=trend_def.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
     trend_list = [trend1, trend2, trend3]
-    profiler_data1 = lds.ProfilerData(ID=1, Time10=0.1, Time100=0.2, Time1000=0.25, QueueSize=5)
+    profiler_data1 = lds.ProfilerData(ID=1, Time10=0.123456, Time100=0.2, Time1000=0.25, QueueSize=5)
     profiler_data2 = lds.ProfilerData(ID=3, Time10=0.2, Time100=0.3, Time1000=0.5, QueueSize=1)
     profiler_data3 = lds.ProfilerData(ID=5)
     profiler_data_list = [profiler_data1, profiler_data2, profiler_data3]
@@ -54,9 +54,18 @@ def test_list_profiler_data_should_return_ok_response_code_and_correct_profiler_
     assert len(items) == len(profiler_data_list)
     for expected_profiler_data, returned_profiler_data in zip(profiler_data_list, items):
         assert returned_profiler_data['ID'] == expected_profiler_data.ID
-        assert returned_profiler_data['Time10'] == expected_profiler_data.Time10
-        assert returned_profiler_data['Time100'] == expected_profiler_data.Time100
-        assert returned_profiler_data['Time1000'] == expected_profiler_data.Time1000
+        if expected_profiler_data.Time10 is None:
+            assert returned_profiler_data['Time10'] is None
+        else:
+            assert returned_profiler_data['Time10'] == float(expected_profiler_data.Time10)
+        if expected_profiler_data.Time100 is None:
+            assert returned_profiler_data['Time100'] is None
+        else:
+            assert returned_profiler_data['Time100'] == float(expected_profiler_data.Time100)
+        if expected_profiler_data.Time1000 is None:
+            assert returned_profiler_data['Time1000'] is None
+        else:
+            assert returned_profiler_data['Time1000'] == float(expected_profiler_data.Time1000)
         assert returned_profiler_data['QueueSize'] == expected_profiler_data.QueueSize
 
 
@@ -93,9 +102,9 @@ def test_get_general_profiler_data_should_return_ok_response_code_and_correct_ge
     assert response.status_code == status.HTTP_200_OK
     returned_general_data = response.json()
     assert returned_general_data['ActiveTrends'] == 2
-    assert returned_general_data['Time10'] == (profiler_data2.Time10 + profiler_data1.Time10)/2
-    assert returned_general_data['Time100'] == (profiler_data2.Time100 + profiler_data1.Time100)/2
-    assert returned_general_data['Time1000'] == (profiler_data2.Time1000 + profiler_data1.Time1000)/2
+    assert returned_general_data['Time10'] == (float(profiler_data2.Time10) + float(profiler_data1.Time10))/2
+    assert returned_general_data['Time100'] == (float(profiler_data2.Time100) + round(float(profiler_data1.Time100), 5))/2
+    assert returned_general_data['Time1000'] == (float(profiler_data2.Time1000) + float(profiler_data1.Time1000))/2
     assert returned_general_data['QueueSize'] == (profiler_data2.QueueSize + profiler_data1.QueueSize)/2
 
 
@@ -113,9 +122,9 @@ def test_get_profiler_data_by_id_should_return_ok_response_code_and_profiler_dat
     assert response.status_code == status.HTTP_200_OK
     returned_profiler_data = response.json()
     assert returned_profiler_data['ID'] == profiler_data2.ID
-    assert returned_profiler_data['Time10'] == profiler_data2.Time10
-    assert returned_profiler_data['Time100'] == profiler_data2.Time100
-    assert returned_profiler_data['Time1000'] == profiler_data2.Time1000
+    assert returned_profiler_data['Time10'] == float(profiler_data2.Time10)
+    assert returned_profiler_data['Time100'] == float(profiler_data2.Time100)
+    assert returned_profiler_data['Time1000'] == float(profiler_data2.Time1000)
     assert returned_profiler_data['QueueSize'] == profiler_data2.QueueSize
 
 

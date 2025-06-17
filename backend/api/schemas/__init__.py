@@ -16,4 +16,4 @@ from .template import TemplateBase, TemplateOut, UpdateTemplate
 from .axis import Axis
 from .unit import UnitBase, UpdateUnit
 from .trend_group import TrendGroupBase, UpdateTrendGroup
-from .trend_writer import ProfilerDataBase, ProfilerGeneralData
+from .trend_writer import ProfilerDataBase, ProfilerGeneralData, ProfilerDataOut

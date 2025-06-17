@@ -39,7 +39,7 @@ class TrendBase:
 
     def process_queue(self, db_uri: str):
         setup_engine(db_uri)
-        self.profiler_queue.put((3, None, int(time.time()), None))
+        self.profiler_queue.put((3, None, int(time.time()), None, None))
 
         while True:
             item = self.queue.get()
@@ -53,9 +53,13 @@ class TrendBase:
             profiler_timestamp_diff = item[2]
             parent_id = item[3] if len(item) > 3 else None
 
-            self.profiler_queue.put((1, self.id, timestamp + profiler_timestamp_diff, time.perf_counter()))
+            self.profiler_queue.put((1, self.id, timestamp + profiler_timestamp_diff, time.perf_counter(), None))
             self.update(data, timestamp, profiler_timestamp_diff, parent_id)
-            self.profiler_queue.put((0, self.id, timestamp + profiler_timestamp_diff, time.perf_counter()))
+            try:
+                qsize = self.queue.qsize()
+            except NotImplementedError:
+                qsize = None
+            self.profiler_queue.put((0, self.id, timestamp + profiler_timestamp_diff, time.perf_counter(), qsize))
 
     def update(self, data: np.ndarray, timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int | None = None):
         self._save(data, timestamp)

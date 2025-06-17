@@ -42,7 +42,7 @@ class TrendFilter(TrendBase):
             super().update(calculated_data, timestamp - self.window_size, profiler_timestamp_diff + self.window_size, parent_id)
         else:
             if self.children_count > 0:
-                self.profiler_queue.put((2, self.children_count, timestamp, None))
+                self.profiler_queue.put((2, self.children_count, timestamp, None, None))
             logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
 
     def calculate(self) -> np.ndarray:

@@ -23,6 +23,19 @@ trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
 trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
 trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
 trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+
+def add_two_objects():
+    global trend_param1, trend1, trend_def1, trend3
+    trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
+    trend_param3 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=3, Value='2000')
+    trend_param_def = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
+    objs = [[trend_def1], [trend1, trend3], [trend_param1, trend_param3], [trend_param_def]]
+
+    return objs
 
 
 def add_objects():
@@ -61,6 +74,12 @@ def init_profiler(trend_ids: list):
 def _get_trend_data_records_count():
     with Session(get_engine()) as session:
         return session.execute(select(func.count()).select_from(lds.TrendData)).fetchall()[0][0]
+
+
+def _get_profiler_data_active_trends_count():
+    with Session(get_engine()) as session:
+        return session.execute(select(func.count()).select_from(lds.ProfilerData)
+                               .where(lds.ProfilerData.Time10 != None)).fetchall()[0][0] # noqa
 
 
 def _get_trend_data_records():
@@ -198,8 +217,23 @@ async def test_trend_data_should_update_data_when_the_same_primary_key_in_repeat
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+@pytest.mark.parametrize('reset_lds_objects', [add_two_objects], indirect=True)
 async def test_profiler_should_write_data_to_database(add_lds_objects):
     port = 5027
-    server_task = asyncio.create_task(run_server(PipePlant(), port))
-    pass
+    Profiler.init()
+    plant = PipePlant()
+    plant.last_timestamp = 0
+    server_task = asyncio.create_task(run_server(plant, port))
+    await asyncio.sleep(0.5)
+    calls = 5
+
+    t = math.floor(time.time()) + 0.5
+
+    for i in range(calls):
+        await _send_data(port, int(trend_param1.Value), [randint(0, 255) for _ in range(100)])
+        await asyncio.sleep(t - time.time() + 1)
+        t += 1
+
+    server_task.cancel()
+
+    assert _get_profiler_data_active_trends_count() == 1

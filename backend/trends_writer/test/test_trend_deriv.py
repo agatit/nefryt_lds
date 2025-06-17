@@ -40,11 +40,12 @@ def test_trend_deriv_calculates_derivative_correctly_for_constant_increasing_tre
             with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
                 with patch.object(TrendDeriv, '_save', new=mock_save):
                     mocked_queue = Mock()
-                    trend = TrendDeriv(1, mocked_queue, None, None)
+                    mocked_queue2 = Mock()
+                    trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                     for i in range(5):
-                        x = np.arange(i * 100, (i + 1) * 100, a)
-                        trend.update(x, i + timestamp_offset, None)
+                        x = list(np.arange(i * 100, (i + 1) * 100, a))
+                        trend.update(x, i + timestamp_offset, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
@@ -68,11 +69,12 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_trend()
             with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
                 with patch.object(TrendDeriv, '_save', new=mock_save):
                     mocked_queue = Mock()
-                    trend = TrendDeriv(1, mocked_queue, None, None)
+                    mocked_queue2 = Mock()
+                    trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                     for i in range(7):
                         x = [500 + (-2 + random.randint(0, 5)) for _ in range(100)]
-                        trend.update(x, i + timestamp_offset, None)
+                        trend.update(x, i + timestamp_offset, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
@@ -98,11 +100,12 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_decreas
             with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
                 with patch.object(TrendDeriv, '_save', new=mock_save):
                     mocked_queue = Mock()
-                    trend = TrendDeriv(1, mocked_queue, None, None)
+                    mocked_queue2 = Mock()
+                    trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                     for i in range(5):
                         x = [start_value - i * 100 * a - ii * 5 + (-5 + random.randint(0, 11)) for ii in range(100)]
-                        trend.update(x, i + 10, None)
+                        trend.update(x, i + 10, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
@@ -125,7 +128,8 @@ def test_trend_deriv_calculates_derivative_correctly_for_changing_monotonic_tren
             with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
                 with patch.object(TrendDeriv, '_save', new=mock_save):
                     mocked_queue = Mock()
-                    trend = TrendDeriv(1, mocked_queue, None, None)
+                    mocked_queue2 = Mock()
+                    trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                     for i in range(6):
                         if i < 3:
@@ -136,8 +140,8 @@ def test_trend_deriv_calculates_derivative_correctly_for_changing_monotonic_tren
                             start = (6 - i) * 100 - 1
                             end = (5 - i) * 100 - 1
                             step = -1
-                        x = np.arange(start, end, step)
-                        trend.update(x, i + 10, None)
+                        x = list(np.arange(start, end, step))
+                        trend.update(x, i + 10, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         if i < len(saved_results) // 2:
@@ -162,7 +166,8 @@ def test_trend_deriv_calculates_derivative_correctly_for_plateau_trend():
             with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
                 with patch.object(TrendDeriv, '_save', new=mock_save):
                     mocked_queue = Mock()
-                    trend = TrendDeriv(1, mocked_queue, None, None)
+                    mocked_queue2 = Mock()
+                    trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                     for i in range(16):
                         if i % 8 == 0:
@@ -171,8 +176,8 @@ def test_trend_deriv_calculates_derivative_correctly_for_plateau_trend():
                             x = np.arange(99 * a, -a, -a)
                         else:
                             value = 0 if i % 8 in (5, 6, 7) else 100 * a
-                            x = np.full(100, value)
-                        trend.update(x, i + 10, None)
+                            x = list(np.full(100, value))
+                        trend.update(x, i + 10, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         if i in (0, 6, 7, 8):
@@ -199,11 +204,12 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_step_tr
             with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
                 with patch.object(TrendDeriv, '_save', new=mock_save):
                     mocked_queue = Mock()
-                    trend = TrendDeriv(1, mocked_queue, None, None)
+                    mocked_queue2 = Mock()
+                    trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                     for i in range(7):
                         x = [(i + -5 + random.randint(0, 11)) for _ in range(100)]
-                        trend.update(x, i + timestamp_offset, None)
+                        trend.update(x, i + timestamp_offset, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, DECIMAL
 from sqlmodel import SQLModel, Field
 
 
@@ -10,15 +10,31 @@ class ProfilerDataBase(SQLModel):
         primary_key=True,
         nullable=True
     ))
-    Time10: float | None = Field(None, nullable=True)
-    Time100: float | None = Field(None, nullable=True)
-    Time1000: float | None = Field(None, nullable=True)
+    Time10: float | None = Field(
+        default=None,
+        sa_column=Column(DECIMAL(10, 5), nullable=True)
+    )
+    Time100: float | None = Field(
+        default=None,
+        sa_column=Column(DECIMAL(10, 5), nullable=True)
+    )
+    Time1000: float | None = Field(
+        default=None,
+        sa_column=Column(DECIMAL(10, 5), nullable=True)
+    )
     QueueSize: int | None = Field(None, nullable=True)
 
 
 class ProfilerGeneralData(BaseModel):
-    ActiveTrends: int = Field(0)
-    Time10: float = Field(0)
-    Time100: float = Field(0)
-    Time1000: float = Field(0)
-    QueueSize: float = Field(0)
+    ActiveTrends: int = 0
+    Time10: float = 0
+    Time100: float = 0
+    Time1000: float = 0
+    QueueSize: float = 0
+
+class ProfilerDataOut(BaseModel):
+    ID: int
+    Time10: float | None
+    Time100: float | None
+    Time1000: float | None
+    QueueSize: int | None
