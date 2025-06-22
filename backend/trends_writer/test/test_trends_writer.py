@@ -66,10 +66,6 @@ def add_objects_with_children():
 
     return objs
 
-def init_profiler(trend_ids: list):
-    Profiler.init()
-    Profiler.set_trends(trend_ids, [])
-
 
 def _get_trend_data_records_count():
     with Session(get_engine()) as session:
@@ -99,7 +95,7 @@ async def _send_data(port: int, addr: int, data: list[int]):
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
 async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_objects):
     port = 5022
-    init_profiler([trend1.ID])
+    Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
     calls = 2
@@ -119,7 +115,7 @@ async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_o
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
 async def test_trend_data_should_write_only_when_correct_address(add_lds_objects):
     port = 5023
-    init_profiler([trend1.ID])
+    Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
     calls = 2
@@ -144,7 +140,7 @@ async def test_trend_data_should_write_only_when_correct_address(add_lds_objects
 @pytest.mark.parametrize('reset_lds_objects', [add_objects_with_children], indirect=True)
 async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_objects):
     port = 5024
-    init_profiler([trend1.ID, trend2.ID])
+    Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
     calls = 10
@@ -164,7 +160,7 @@ async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_ob
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
 async def test_trend_data_should_not_update_data_when_the_same_primary_key_in_one_timestamp(add_lds_objects):
     port = 5025
-    init_profiler([trend1.ID])
+    Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
     calls = 2
@@ -190,7 +186,7 @@ async def test_trend_data_should_not_update_data_when_the_same_primary_key_in_on
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
 async def test_trend_data_should_update_data_when_the_same_primary_key_in_repeated_timestamp(add_lds_objects):
     port = 5026
-    init_profiler([trend1.ID])
+    Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
     await asyncio.sleep(0.5)
     calls = 3
@@ -225,7 +221,7 @@ async def test_profiler_should_write_data_to_database(add_lds_objects):
     plant.last_timestamp = 0
     server_task = asyncio.create_task(run_server(plant, port))
     await asyncio.sleep(0.5)
-    calls = 5
+    calls = 10
 
     t = math.floor(time.time()) + 0.5
 

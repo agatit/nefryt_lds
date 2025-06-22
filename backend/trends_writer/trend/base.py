@@ -46,7 +46,6 @@ class TrendBase:
             if item is None:
                 for child in self.children:
                     child.queue.put(None)
-                    child.process.join()
                 break
             data = np.array(item[0])
             timestamp = item[1]

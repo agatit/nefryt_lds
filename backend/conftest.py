@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import pathlib
 import sys
@@ -82,6 +83,12 @@ def create_procedure(engine: Engine):
         session.commit()
 
 
+def cleanup_processes_after_tests():
+    for p in multiprocessing.active_children():
+        p.terminate()
+        p.join(timeout=5)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_database(request):
     db_type = request.config.db_type
@@ -131,6 +138,7 @@ def setup_test_database(request):
 
             yield
 
+    cleanup_processes_after_tests()
 
 @pytest.fixture(scope="function")
 def reset_lds_objects(request):

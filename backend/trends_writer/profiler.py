@@ -3,8 +3,10 @@ import copy
 import logging
 import math
 import multiprocessing
+import sys
+
 from sqlalchemy import delete
-from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 from database.models import lds
 from db import get_engine
@@ -15,6 +17,12 @@ class Profiler:
     queue = None
     process = None
     updates = {}
+    stdout_handler = logging.StreamHandler(sys.__stdout__)
+    stdout_handler.setLevel(logging.INFO)
+
+    logger = logging.getLogger("atexit")
+    logger.setLevel(logging.INFO)
+    logger.addHandler(stdout_handler)
 
     @staticmethod
     def init():
@@ -52,18 +60,18 @@ class Profiler:
             with Session(get_engine()) as session:
                 session.execute(delete(lds.ProfilerData))
                 session.commit()
-        except OperationalError:
+        except SQLAlchemyError:
             pass
 
     @staticmethod
     def _start_process(trends_dict: dict, trends_count: int):
         Profiler.process = multiprocessing.Process(target=Profiler._process_queue,
-                                                   args=(Profiler.queue, trends_dict, trends_count, Settings.db_uri))
+                                                   args=(Profiler.queue, trends_dict, trends_count, Settings.db_uri, Settings.log_profiler))
         Profiler.process.daemon = True
         Profiler.process.start()
 
     @staticmethod
-    def _process_queue(queue: multiprocessing.Queue, trends_dict: dict, expected_trends_count: int, db_uri: str):
+    def _process_queue(queue: multiprocessing.Queue, trends_dict: dict, expected_trends_count: int, db_uri: str, log_profiler: bool):
         setup_engine(db_uri)
         initialized_processes_count = 0
         first_timestamp = math.inf
@@ -114,7 +122,7 @@ class Profiler:
                         Profiler.updates[timestamp][trend_id][1][0] = None
                         Profiler.updates[timestamp][trend_id][0][1] = 0
                         if finished_count >= trends_count and current_count == 0:
-                            Profiler.write_profiler_data(time_used, timestamp)
+                            Profiler.write_profiler_data(log_profiler, time_used, timestamp)
                         else:
                             Profiler.updates[timestamp][trend_id][0][1] -= 0
             elif operation == 2 and timestamp >= first_timestamp:
@@ -123,7 +131,7 @@ class Profiler:
                     finished_count += trend_id
                     Profiler.updates[timestamp]['total'][1] = (current_count, finished_count, start, time_used)
                     if finished_count >= trends_count and current_count == 0:
-                        Profiler.write_profiler_data(time_used, timestamp)
+                        Profiler.write_profiler_data(log_profiler, time_used, timestamp)
                 elif len(trend_id) < trends_dict['total'][0]:
                     Profiler.updates[timestamp] = copy.deepcopy(trends_dict)
                     Profiler.updates[timestamp]['total'][1] = (0, trend_id, None, 0)
@@ -136,9 +144,9 @@ class Profiler:
                 break
 
     @staticmethod
-    def write_profiler_data(time_used: float, timestamp: int):
+    def write_profiler_data(log_profiler: bool, time_used: float, timestamp: int):
         time_used_percent = (time_used / 1.0) * 100
-        if Settings.log_profiler:
+        if log_profiler:
             with (open(Settings.profiler_filename, "a") as f):
                 for k, v in Profiler.updates[timestamp].items():
                     if k == 'total' or v[1][1] is None or v[0][0] != 0:
