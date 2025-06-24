@@ -3,7 +3,7 @@ from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
 from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
-    UnitBase, TrendGroupBase, ProfilerDataBase
+    UnitBase, TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase
 
 
 class EventDef(EventDefBase, table=True):
@@ -293,3 +293,19 @@ class ProfilerData(ProfilerDataBase, table=True):
     __table_args__ = (
         {'schema': 'lds'}
     )
+
+
+class SimulationDef(SimulationDefBase, table=True):
+    __tablename__ = 'SimulationDef'
+    __table_args__ = (
+        {'schema': 'lds'}
+    )
+
+
+class Simulation(SimulationBase, table=True):
+    __tablename__ = 'Simulation'
+    __table_args__ = (
+        {'schema': 'lds'}
+    )
+
+    ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))

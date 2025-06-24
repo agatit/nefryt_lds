@@ -6,7 +6,7 @@ from starlette.responses import JSONResponse
 from db import get_engine
 from .config import setup_engine
 from .routers import (events_router, event_defs_router, trend_defs_router, trend_router, auth_router, link_router,
-                      node_router, template_router, unit_router, trend_groups_router, trend_writer_router)
+                      node_router, template_router, unit_router, trend_groups_router, trend_writer_router, simulation_router)
 from .schemas import Error
 
 setup_engine()
@@ -24,6 +24,7 @@ app.include_router(node_router)
 app.include_router(unit_router)
 app.include_router(trend_groups_router)
 app.include_router(trend_writer_router)
+app.include_router(simulation_router)
 
 
 origins = ['http://localhost:8080',

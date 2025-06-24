@@ -176,7 +176,7 @@ def test_create_trend_should_return_created_response_code_and_created_trend_data
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_create_tren_should_return_conflict_response_code_and_error_when_id_not_unique(add_lds_objects):
+def test_create_trend_should_return_conflict_response_code_and_error_when_id_not_unique(add_lds_objects):
     trend_dict = {'ID': trend1.ID, 'TrendDefID': 'ID_1', 'RawMin': 100,
                   'RawMax': 1000, 'ScaledMin': -1.5, 'ScaledMax': 2.25}
     response = test_client.post("/trend", json=trend_dict)

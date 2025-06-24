@@ -17,3 +17,5 @@ from .axis import Axis
 from .unit import UnitBase, UpdateUnit
 from .trend_group import TrendGroupBase, UpdateTrendGroup
 from .trend_writer import ProfilerDataBase, ProfilerGeneralData, ProfilerDataOut
+from .simulation_def import SimulationDefBase
+from .simulation import SimulationBase, UpdateSimulation

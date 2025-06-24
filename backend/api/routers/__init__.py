@@ -9,3 +9,4 @@ from .template import router as template_router
 from .unit import router as unit_router
 from .trend_group import router as trend_groups_router
 from .trend_writer import router as trend_writer_router
+from .simulation import router as simulation_router
