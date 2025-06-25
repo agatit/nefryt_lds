@@ -3,7 +3,7 @@ from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
 from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
-    UnitBase, TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase
+    UnitBase, TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase, SimulationParamBase
 
 
 class EventDef(EventDefBase, table=True):
@@ -309,3 +309,36 @@ class Simulation(SimulationBase, table=True):
     )
 
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))
+
+
+class SimulationParamDef(SQLModel, table=True):
+    __tablename__ = 'SimulationParamDef'
+    __table_args__ = (
+        PrimaryKeyConstraint('ID', 'SimulationDefID', name='SimulationParamDef_pk'),
+        {'schema': 'lds'}
+    )
+
+    ID: str = Field(sa_column=Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
+    SimulationDefID: str = Field(sa_column=Column(
+        CHAR(20, 'SQL_Polish_CP1250_CS_AS'),
+        ForeignKey("lds.SimulationDef.ID", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False, index=True))
+    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    DataType: str | None = Field(None, sa_column=Column(VARCHAR(20, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+
+
+class SimulationParam(SimulationParamBase, table=True):
+    __tablename__ = 'SimulationParam'
+    __table_args__ = (
+        PrimaryKeyConstraint('SimulationID', 'SimulationParamDefID', name='SimulationParam_pk'),
+        ForeignKeyConstraint(
+            ["SimulationParamDefID", "SimulationDefID"],
+            ["lds.SimulationParamDef.ID", "lds.SimulationParamDef.SimulationDefID"],
+            ondelete="NO ACTION", onupdate="NO ACTION"
+        ),
+        {'schema': 'lds'}
+    )
+
+    SimulationDefID: str = Field(sa_column=Column(
+        CHAR(20, 'SQL_Polish_CP1250_CS_AS'),
+        nullable=False))
