@@ -97,7 +97,7 @@ async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_o
     port = 5022
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(5)
     calls = 2
 
     t = math.floor(time.time()) + 0.5
@@ -117,7 +117,7 @@ async def test_trend_data_should_write_only_when_correct_address(add_lds_objects
     port = 5023
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(5)
     calls = 2
     tasks = 3
 
@@ -162,7 +162,7 @@ async def test_trend_data_should_not_update_data_when_the_same_primary_key_in_on
     port = 5025
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(5)
     calls = 2
 
     t_start = 100

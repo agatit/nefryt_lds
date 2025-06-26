@@ -3,7 +3,8 @@ from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
 from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
-    UnitBase, TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase, SimulationParamBase
+    UnitBase, TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase, SimulationParamBase, \
+    SimulationDataBase
 
 
 class EventDef(EventDefBase, table=True):
@@ -322,7 +323,7 @@ class SimulationParamDef(SQLModel, table=True):
     SimulationDefID: str = Field(sa_column=Column(
         CHAR(20, 'SQL_Polish_CP1250_CS_AS'),
         ForeignKey("lds.SimulationDef.ID", ondelete="CASCADE", onupdate="CASCADE"),
-        nullable=False, index=True))
+        nullable=False))
     Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
     DataType: str | None = Field(None, sa_column=Column(VARCHAR(20, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
@@ -342,3 +343,18 @@ class SimulationParam(SimulationParamBase, table=True):
     SimulationDefID: str = Field(sa_column=Column(
         CHAR(20, 'SQL_Polish_CP1250_CS_AS'),
         nullable=False))
+
+
+class SimulationData(SimulationDataBase, table=True):
+    __tablename__ = 'SimulationData'
+    __table_args__ = (
+        PrimaryKeyConstraint('SimulationID', 'Distance', name='SimulationData_pk'),
+        {'schema': 'lds'}
+    )
+
+    SimulationID: int = Field(sa_column=Column(
+        Integer,
+        ForeignKey("lds.Simulation.ID", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False
+    ))
+    Time: int = Field(sa_column=Column(BigInteger, nullable=False))

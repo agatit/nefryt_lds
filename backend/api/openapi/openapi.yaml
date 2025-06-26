@@ -2216,6 +2216,389 @@ paths:
       summary: Gets profiler data in general details
       tags:
         - trend_writer
+  /simulation:
+    get:
+      description: List all simulations
+      operationId: list_simulations
+      parameters:
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Simulation'
+                type: array
+          description: An array of simulations
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List simulations
+      tags:
+        - simulations
+    post:
+      description: Create a simulation
+      operationId: create_simulation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Simulation'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Simulation'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create simulation
+      tags:
+        - simulations
+  /simulation/{simulationId}:
+    delete:
+      description: Deletes specific simulation
+      operationId: delete_simulation_by_id
+      parameters:
+        - description: The id of the simulation to delete
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes simulation
+      tags:
+        - simulations
+    get:
+      description: Info for specific simulation
+      operationId: get_simulation_by_id
+      parameters:
+        - description: The id of the simulation to retrieve
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Simulation'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets simulation details
+      tags:
+        - simulations
+    put:
+      description: Updates a simulation
+      operationId: update_simulation
+      parameters:
+        - description: The id of the simulation to update
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Simulation'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Simulation'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Updates simulation
+      tags:
+        - simulations
+  /simulation/defs:
+    get:
+      description: List all simulation defs
+      operationId: list_simulation_defs
+      parameters:
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SimulationDef'
+                type: array
+          description: An array of simulation defs
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List simulation defs
+      tags:
+        - simulations
+  /simulation/{simulationId}/param:
+    get:
+      description: List all simulation params
+      operationId: list_simulation_params_by_simulation_id
+      parameters:
+        - description: The id of the simulation to retrieve
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SimulationParam'
+                type: array
+          description: An array of simulation params
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List simulation params
+      tags:
+        - simulations
+    post:
+      description: Create new simulation params
+      operationId: create_simulation_param
+      parameters:
+        - description: The id of the simulation to which create simulation param
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSimulationParam'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create new simulation param
+      tags:
+        - simulations
+  /simulation/{simulationId}/param/{simulationParamDefId}:
+    get:
+      description: Get simulation param
+      operationId: get_simulation_param_by_simulation_param_def_id
+      parameters:
+        - description: The id of the simulation to retrieve
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: The id of the simulation param to retrieve
+          explode: false
+          in: path
+          name: simulationParamDefId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get simulation param
+      tags:
+        - simulations
+    put:
+      description: Update simulation param
+      operationId: update_simulation_param
+      parameters:
+        - description: The id of the simulation to update
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: The id of the simulation param to update
+          explode: false
+          in: path
+          name: simulationParamDefId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSimulationParam'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update simulation param
+      tags:
+        - simulations
+    delete:
+      description: Deletes specific simulation param
+      operationId: delete_simulation_param_by_id
+      parameters:
+        - description: The id of the simulation to delete
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: The id of the simulation param to delete
+          explode: false
+          in: path
+          name: simulationParamDefId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes simulation param
+      tags:
+        - simulations
+  /simulation/{simulationId}/data:
+    get:
+      description: Simulation data for specific simulation
+      operationId: get_simulation_data
+      parameters:
+        - description: The id of the simulation to retrieve
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationDataOut'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets simulation data
+      tags:
+        - simulations
 components:
   parameters:
     eventId:
@@ -3078,6 +3461,159 @@ components:
           title: QueueSize
           type: number
       title: ProfilerGeneralData
+      type: object
+    SimulationDef:
+      example:
+        ID: DENSITY
+        Name: Density
+      properties:
+        ID:
+          title: ID
+          type: string
+        Name:
+          title: Name
+          type: string
+      required:
+        - ID
+        - Name
+      title: SimulationDef
+      type: object
+    Simulation:
+      example:
+        ID: 1
+        SimulationDefID: DENSITY
+        TrendID: 10
+        Name: Simulation1
+        RefreshTimeSeconds: 10
+        DistanceMeters: 1000
+      properties:
+        ID:
+          readOnly: true
+          title: ID
+          type: integer
+        Name:
+          title: Name
+          type: string
+          nullable: True
+        SimulationDefID:
+          title: SimulationDefID
+          type: string
+        TrendID:
+          title: TrendID
+          type: integer
+        RefreshTimeSeconds:
+          title: RefreshTimeSeconds
+          type: integer
+        DistanceMeters:
+          title: DistanceMeters
+          type: integer
+      required:
+        - ID
+        - SimulationDefID
+        - TrendID
+        - RefreshTimeSeconds
+        - DistanceMeters
+      title: Simulation
+      type: object
+    SimulationParam:
+      example:
+        SimulationID: 1
+        SimulationParamDefID: WIDTH
+        Value: 100
+        DataType: FLOAT
+        Name: Width
+      properties:
+        Name:
+          title: Name
+          type: string
+        SimulationParamDefID:
+          title: SimulationParamDefID
+          type: string
+        SimulationID:
+          title: SimulationID
+          type: integer
+        DataType:
+          title: DataType
+          type: string
+        Value:
+          title: Value
+          type: string
+      required:
+        - SimulationID
+        - SimulationParamDefID
+        - Value
+        - DataType
+        - Name
+      title: SimulationParam
+      type: object
+    UpdateSimulationParam:
+      example:
+        SimulationID: 1
+        SimulationParamDefID: WIDTH
+        Value: 100
+      properties:
+        SimulationParamDefID:
+          title: SimulationParamDefID
+          type: string
+        SimulationID:
+          title: SimulationID
+          type: integer
+        Value:
+          title: Value
+          type: string
+      title: UpdateSimulationParam
+      type: object
+    CreateSimulationParam:
+      example:
+        SimulationParamDefID: WIDTH
+        Value: 100
+      properties:
+        SimulationParamDefID:
+          title: SimulationParamDefID
+          type: string
+        Value:
+          title: Value
+          type: string
+      title: CreateSimulationParam
+      type: object
+    SimulationData:
+      example:
+        Distance: 100
+        Data: 80.5
+      properties:
+        Distance:
+          title: Distance
+          type: integer
+        Data:
+          title: Data
+          type: number
+          nullable: True
+      required:
+        - Distance
+      title: SimulationData
+      type: object
+    SimulationDataOut:
+      example:
+        SimulationID: 1
+        Time: 123456789
+        Data: []
+      properties:
+        SimulationID:
+          title: SimulationID
+          type: integer
+        Time:
+          title: Time
+          type: integer
+        Data:
+          items:
+            $ref: '#/components/schemas/SimulationData'
+          type: array
+          default: []
+      required:
+        - Time
+        - SimulationID
+        - Data
+      title: SimulationDataOut
       type: object
     EditorPipeline:
       example:

@@ -1,4 +1,3 @@
-import traceback
 from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Body, Path
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -11,15 +10,13 @@ from starlette import status
 from starlette.responses import JSONResponse, Response
 from api.routers.utils import strip_strings, get_user_token, \
     map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out, \
-    map_simulation_param_base_to_lds_simulation_param
+    map_simulation_param_base_to_lds_simulation_param, map_lds_simulation_data_to_simulation_data_out
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
 from ..schemas import Error, SimulationDefBase, SimulationBase, Information, UpdateSimulation, SimulationParamOut, \
-    UpdateSimulationParam, SimulationParamIn
+    UpdateSimulationParam, SimulationParamIn, SimulationDataOut
 
 # TODO: uzupełnić openapi
-# TODO: alembic
-# TODO: getter simulation data
 router = APIRouter(prefix="/simulation", tags=["simulation"], dependencies=[Depends(get_user_token)])
 
 
@@ -166,8 +163,7 @@ async def list_simulation_params_by_simulation_id(simulation_id: Annotated[int, 
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [
-            map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param,
-                                                                                          lds_simulation_param_def)
+            map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param, lds_simulation_param_def)
             for lds_simulation_param, lds_simulation_param_def in page.items
         ]
         return page
@@ -253,7 +249,6 @@ async def update_simulation_param(simulation_id: Annotated[int, Path()],
         return await get_simulation_param_by_simulation_param_def_id(lds_simulation_param.SimulationID,
                                                                      lds_simulation_param.SimulationParamDefID.strip(), engine)
     except IntegrityError:
-        traceback.print_exc()
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when updating simulation')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
@@ -319,4 +314,48 @@ async def delete_simulation_param_by_id(simulation_id: Annotated[int, Path()],
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                       message='Exception in delete_simulation_param_by_id(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get('/{simulation_id}/data', response_model=CustomPage[SimulationDataOut] | Error)
+async def get_simulation_data(simulation_id: Annotated[int, Path()],
+                              engine: Annotated[Engine, Depends(get_engine)],
+                              params: Annotated[CustomParams, Depends()],
+                              _: Annotated[None, Depends(use_custom_page)]):
+    try:
+        with Session(engine) as session:
+            lds_simulation = session.get(lds.Simulation, simulation_id)
+        if not lds_simulation:
+            error = Error(code=status.HTTP_404_NOT_FOUND, message='No simulation with id = ' + str(simulation_id))
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+
+        with Session(engine) as session:
+            lds_simulation_param = session.get(lds.SimulationParam, (simulation_id, 'LENGTH'))
+        if not lds_simulation_param:
+            error = Error(code=status.HTTP_404_NOT_FOUND,
+                          message='No simulation param with id = \'LENGTH\' for simulation with id = ' + str(simulation_id))
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+
+        distances = [distance for distance in range(0, int(lds_simulation_param.Value), lds_simulation.DistanceMeters)]
+        statement = (select(lds.SimulationData)
+                     .where(lds.SimulationData.SimulationID == literal(simulation_id)) # noqa
+                     .order_by(lds.SimulationData.Distance))
+
+        with Session(engine) as session:
+            lds_simulation_data_rows = session.execute(statement).all()
+        lds_simulation_data: list[lds.SimulationData] = [data[0] for data in lds_simulation_data_rows]
+
+        if len(lds_simulation_data) == 0:
+            error = Error(code=status.HTTP_404_NOT_FOUND,
+                          message='No simulation data for simulation with id = ' + str(simulation_id))
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+
+        simulation_data_out = map_lds_simulation_data_to_simulation_data_out(lds_simulation_data, distances)
+        simulation_data_out.Data = simulation_data_out.Data[(params.page-1)*params.size: params.page*params.size]
+        return CustomPage(items=[simulation_data_out], total=len(distances),
+                          pages=len(distances)//params.size if len(distances)//params.size > 0 else 1,
+                          page=params.page, size=params.size)
+    except Exception as e:
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                      message='Exception in list_simulation_params_by_simulation_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

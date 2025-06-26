@@ -1,6 +1,6 @@
 from api.routers.utils import to_dict, strip_strings_in_dict
 from api.schemas import EventOut, TrendDataMultiple, TrendValue, TrendDataSingle, Node, \
-    NodeOut, EditorNodeBase, TrendParamOut, SimulationParamOut, SimulationParamIn
+    NodeOut, EditorNodeBase, TrendParamOut, SimulationParamOut, SimulationParamIn, SimulationDataOut, SimulationDataBase
 from database import lds, editor
 
 
@@ -85,3 +85,29 @@ def map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_ou
 def map_simulation_param_base_to_lds_simulation_param(simulation_param: SimulationParamIn, lds_simulation: lds.Simulation) -> lds.SimulationParam:
     return lds.SimulationParam(**simulation_param.model_dump()
                                      | {'SimulationDefID': lds_simulation.SimulationDefID, 'SimulationID': lds_simulation.ID})
+
+
+def map_lds_simulation_data_to_simulation_data_out(simulation_data_list: list[lds.SimulationData], distances: list[int]) -> SimulationDataOut:
+    iter_lds_simulation_data = iter(simulation_data_list)
+    lds_simulation_data = next(iter_lds_simulation_data, None)
+    simulation_data_out_dict = {
+        'SimulationID': lds_simulation_data.SimulationID,
+        'Time': lds_simulation_data.Time,
+        'Data': []
+    }
+    for distance in distances:
+        if not lds_simulation_data:
+            simulation_data_out_dict['Data'].append(
+                SimulationDataBase(Distance=distance, Data=None)
+            )
+        elif lds_simulation_data.Distance == distance:
+            simulation_data_out_dict['Data'].append(
+                SimulationDataBase(Distance=distance, Data=lds_simulation_data.Data)
+            )
+            lds_simulation_data = next(iter_lds_simulation_data, None)
+        else:
+            simulation_data_out_dict['Data'].append(
+                SimulationDataBase(Distance=distance, Data=None)
+            )
+
+    return SimulationDataOut(**simulation_data_out_dict)

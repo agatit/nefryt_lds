@@ -8,7 +8,7 @@ class ProfilerDataBase(SQLModel):
         Integer,
         ForeignKey("lds.Trend.ID", onupdate="CASCADE", ondelete="CASCADE"),
         primary_key=True,
-        nullable=True
+        nullable=False
     ))
     Time10: float | None = Field(
         default=None,
