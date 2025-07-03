@@ -3485,7 +3485,7 @@ components:
         TrendID: 10
         Name: Simulation1
         RefreshTimeSeconds: 10
-        DistanceMeters: 1000
+        ResolutionMeters: 1000
       properties:
         ID:
           readOnly: true
@@ -3504,15 +3504,15 @@ components:
         RefreshTimeSeconds:
           title: RefreshTimeSeconds
           type: integer
-        DistanceMeters:
-          title: DistanceMeters
+        ResolutionMeters:
+          title: ResolutionMeters
           type: integer
       required:
         - ID
         - SimulationDefID
         - TrendID
         - RefreshTimeSeconds
-        - DistanceMeters
+        - ResolutionMeters
       title: Simulation
       type: object
     SimulationParam:

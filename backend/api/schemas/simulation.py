@@ -17,7 +17,7 @@ class SimulationBase(SQLModel):
         ))
     Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
     RefreshTimeSeconds: int = Field()
-    DistanceMeters: int = Field()
+    ResolutionMeters: int = Field()
 
 
 
@@ -36,5 +36,4 @@ class UpdateSimulation(SQLModel):
         ))
     Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
     RefreshTimeSeconds: int | None = Field(None)
-    DistanceMeters: int | None = Field(None)
-
+    ResolutionMeters: int | None = Field(None)

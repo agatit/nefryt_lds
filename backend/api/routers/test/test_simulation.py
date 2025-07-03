@@ -20,13 +20,13 @@ trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
 trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
 trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
 simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
-                             DistanceMeters=500)
+                             ResolutionMeters=500)
 simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
-                             DistanceMeters=500)
+                             ResolutionMeters=500)
 simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
-                             DistanceMeters=10)
+                             ResolutionMeters=10)
 simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
-                             DistanceMeters=100)
+                             ResolutionMeters=100)
 simulation_list = [simulation1, simulation2, simulation3, simulation4]
 simulation_param_def1 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='DENSITY', Name='Pipeline length', DataType='INT')
 simulation_param_def2 = lds.SimulationParamDef(ID='WIDTH', SimulationDefID='DENSITY', Name='Pipeline width', DataType='FLOAT')
@@ -70,13 +70,13 @@ def reset_simulation_objects():
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
     trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
     simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
-                                 DistanceMeters=500)
+                                 ResolutionMeters=500)
     simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
-                                 DistanceMeters=500)
+                                 ResolutionMeters=500)
     simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
-                                 DistanceMeters=10)
+                                 ResolutionMeters=10)
     simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
-                                 DistanceMeters=100)
+                                 ResolutionMeters=100)
     simulation_list = [simulation1, simulation2, simulation3, simulation4]
 
     return [simulation_def_list, [trend_def], [trend1, trend2], simulation_list]
@@ -95,13 +95,13 @@ def reset_simulation_param_objects():
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
     trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
     simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
-                                 DistanceMeters=500)
+                                 ResolutionMeters=500)
     simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
-                                 DistanceMeters=500)
+                                 ResolutionMeters=500)
     simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
-                                 DistanceMeters=10)
+                                 ResolutionMeters=10)
     simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
-                                 DistanceMeters=100)
+                                 ResolutionMeters=100)
     simulation_list = [simulation1, simulation2, simulation3, simulation4]
     simulation_param_def1 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='DENSITY', Name='Pipeline length',
                                                    DataType='INT')
@@ -142,13 +142,13 @@ def reset_simulation_data_objects():
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
     trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
     simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
-                                 DistanceMeters=500)
+                                 ResolutionMeters=500)
     simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
-                                 DistanceMeters=500)
+                                 ResolutionMeters=500)
     simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
-                                 DistanceMeters=10)
+                                 ResolutionMeters=10)
     simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
-                                 DistanceMeters=100)
+                                 ResolutionMeters=100)
     simulation_list = [simulation1, simulation2, simulation3, simulation4]
     simulation_param_def1 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='DENSITY', Name='Pipeline length',
                                                    DataType='INT')
@@ -259,7 +259,7 @@ def test_list_simulations_should_return_ok_response_code_and_correct_simulations
         assert returned_simulation['TrendID'] == expected_simulation.TrendID
         assert returned_simulation['Name'] == expected_simulation.Name
         assert returned_simulation['RefreshTimeSeconds'] == expected_simulation.RefreshTimeSeconds
-        assert returned_simulation['DistanceMeters'] == expected_simulation.DistanceMeters
+        assert returned_simulation['ResolutionMeters'] == expected_simulation.ResolutionMeters
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
@@ -303,12 +303,12 @@ def test_list_simulations_should_return_ok_response_code_and_data_filtered_by_od
         assert returned_simulation['TrendID'] == expected_simulation.TrendID
         assert returned_simulation['Name'] == expected_simulation.Name
         assert returned_simulation['RefreshTimeSeconds'] == expected_simulation.RefreshTimeSeconds
-        assert returned_simulation['DistanceMeters'] == expected_simulation.DistanceMeters
+        assert returned_simulation['ResolutionMeters'] == expected_simulation.ResolutionMeters
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
 def test_create_simulation_should_return_created_response_code_and_created_simulation_data(add_lds_objects):
-    simulation_dict = {'SimulationDefID': simulation_def1.ID, 'TrendID': trend2.ID, 'RefreshTimeSeconds': 5, 'DistanceMeters': 100}
+    simulation_dict = {'SimulationDefID': simulation_def1.ID, 'TrendID': trend2.ID, 'RefreshTimeSeconds': 5, 'ResolutionMeters': 100}
     response = test_client.post("/simulation", json=simulation_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_simulation = response.json()
@@ -317,7 +317,7 @@ def test_create_simulation_should_return_created_response_code_and_created_simul
     assert returned_simulation['TrendID'] == simulation_dict['TrendID']
     assert returned_simulation['Name'] is None
     assert returned_simulation['RefreshTimeSeconds'] == simulation_dict['RefreshTimeSeconds']
-    assert returned_simulation['DistanceMeters'] == simulation_dict['DistanceMeters']
+    assert returned_simulation['ResolutionMeters'] == simulation_dict['ResolutionMeters']
     with Session(get_engine()) as session:
         simulations_count = session.execute(select(func.count()).select_from(lds.Simulation)).fetchall()[0][0]
     assert simulations_count == len(simulation_list)+1
@@ -325,7 +325,7 @@ def test_create_simulation_should_return_created_response_code_and_created_simul
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
 def test_create_simulation_should_return_conflict_response_code_and_error_when_no_simulation_def_with_given_id(add_lds_objects):
-    simulation_dict = {'SimulationDefID': 'ABC', 'TrendID': trend2.ID, 'RefreshTimeSeconds': 5, 'DistanceMeters': 100}
+    simulation_dict = {'SimulationDefID': 'ABC', 'TrendID': trend2.ID, 'RefreshTimeSeconds': 5, 'ResolutionMeters': 100}
     response = test_client.post("/simulation", json=simulation_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()
@@ -335,7 +335,7 @@ def test_create_simulation_should_return_conflict_response_code_and_error_when_n
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
 def test_create_simulation_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(add_lds_objects):
-    simulation_dict = {'SimulationDefID': simulation_def1.ID, 'TrendID': trend2.ID+1, 'RefreshTimeSeconds': 5, 'DistanceMeters': 100}
+    simulation_dict = {'SimulationDefID': simulation_def1.ID, 'TrendID': trend2.ID+1, 'RefreshTimeSeconds': 5, 'ResolutionMeters': 100}
     response = test_client.post("/simulation", json=simulation_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()
@@ -370,7 +370,7 @@ def test_get_simulation_by_id_should_return_ok_response_code_and_simulation_of_g
     assert returned_simulation['TrendID'] == simulation3.TrendID
     assert returned_simulation['Name'] == simulation3.Name
     assert returned_simulation['RefreshTimeSeconds'] == simulation3.RefreshTimeSeconds
-    assert returned_simulation['DistanceMeters'] == simulation3.DistanceMeters
+    assert returned_simulation['ResolutionMeters'] == simulation3.ResolutionMeters
 
 
 def test_get_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
@@ -383,7 +383,7 @@ def test_get_simulation_by_id_should_return_not_found_response_code_and_error_wh
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
 def test_update_simulation_by_id_should_return_ok_response_code_and_simulation_of_given_id(add_lds_objects):
-    update_simulation_dict = {'SimulationDefID': 'WAVE', 'RefreshTimeSeconds': 45, 'DistanceMeters': 111}
+    update_simulation_dict = {'SimulationDefID': 'WAVE', 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation2.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_200_OK
     returned_simulation = response.json()
@@ -392,12 +392,12 @@ def test_update_simulation_by_id_should_return_ok_response_code_and_simulation_o
     assert returned_simulation['TrendID'] == simulation2.TrendID
     assert returned_simulation['Name'] == simulation2.Name
     assert returned_simulation['RefreshTimeSeconds'] == update_simulation_dict['RefreshTimeSeconds']
-    assert returned_simulation['DistanceMeters'] == update_simulation_dict['DistanceMeters']
+    assert returned_simulation['ResolutionMeters'] == update_simulation_dict['ResolutionMeters']
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
 def test_update_simulation_by_id_should_return_conflict_response_code_and_error_when_no_simulation_def_with_given_id(add_lds_objects):
-    update_simulation_dict = {'SimulationDefID': 'ABC', 'RefreshTimeSeconds': 45, 'DistanceMeters': 111}
+    update_simulation_dict = {'SimulationDefID': 'ABC', 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation3.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()
@@ -407,7 +407,7 @@ def test_update_simulation_by_id_should_return_conflict_response_code_and_error_
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
 def test_update_simulation_by_id_should_return_conflict_response_code_and_error_when_no_simulation_def_with_given_id(add_lds_objects):
-    update_simulation_dict = {'TrendID': trend2.ID+10, 'RefreshTimeSeconds': 45, 'DistanceMeters': 111}
+    update_simulation_dict = {'TrendID': trend2.ID+10, 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation3.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()
@@ -416,7 +416,7 @@ def test_update_simulation_by_id_should_return_conflict_response_code_and_error_
 
 
 def test_update_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
-    update_simulation_dict = {'SimulationDefID': 'WAVE', 'RefreshTimeSeconds': 45, 'DistanceMeters': 111}
+    update_simulation_dict = {'SimulationDefID': 'WAVE', 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation3.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
