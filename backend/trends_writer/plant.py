@@ -20,6 +20,9 @@ TREND_CLASSES = {
 }
 
 
+logger = logging.getLogger(__name__)
+
+
 class PipePlant:
     def __init__(self):
         self.quick_trends = {}
@@ -36,6 +39,7 @@ class PipePlant:
         with Session(get_engine()) as session:
             result = session.execute(stmt).all()
 
+        logger.info("PipePlant: Started reading trends")
         trend_ids = []
         for trend, trend_def in result:
             try:
@@ -48,8 +52,9 @@ class PipePlant:
                 elif trend_def.ID.strip() == 'DIFF':
                     self.double_trends_ids.append(trend.ID)
             except Exception as e:
-                logging.warning(f"Trend with id = ({trend.ID}) init error: {e}", exc_info=True)
+                logger.warning(f"PipePlant: Trend with id = ({trend.ID}) init error: {e}", exc_info=True)
 
+        logger.info(f"PipePlant: Initialized trends (count={len(trend_ids)})")
         Profiler.set_trends(trend_ids, self.double_trends_ids)
 
         for trend in TrendManager.get_all():
@@ -60,6 +65,7 @@ class PipePlant:
         Profiler.add_profiler_data_to_db(trend_ids)
         for trend in TrendManager.get_all():
             trend.run_trend_process()
+        logger.info("PipePlant: Finished reading trends")
 
     def read_trend_children(self, register: int | None, trend: TrendBase):
         children = trend.children
@@ -90,9 +96,12 @@ class PipePlant:
             if self.quick_trends[register][0] in self.quick_trends_ids_not_updated:
                 self.quick_trends[register][1].put((data, timestamp, 0))
                 self.quick_trends_ids_not_updated.remove(self.quick_trends[register][0])
+                logger.debug(f"PipePlant: Trend with id={self.quick_trends[register][0]} data sent (timestamp={timestamp})")
             else:
+                logger.exception(f"PipePlant: Quick trend with id = {self.quick_trends[register][0]} already updated (timestamp={timestamp})")
                 raise Exception(f"Quick trend with id = {self.quick_trends[register][0]} already updated in timestamp {timestamp}")
         except KeyError:
+            logger.exception(f"PipePlant: No quick trend using register={register}")
             raise ValueError(f'No quick trend is using {register} register')
 
     def _prepare_not_updated_trends(self):

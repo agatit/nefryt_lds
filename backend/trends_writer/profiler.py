@@ -3,8 +3,6 @@ import copy
 import logging
 import math
 import multiprocessing
-import sys
-
 from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -13,21 +11,19 @@ from db import get_engine
 from trends_writer.config import Settings, setup_engine
 
 
+logger = logging.getLogger(__name__)
+
+
 class Profiler:
     queue = None
     process = None
     updates = {}
-    stdout_handler = logging.StreamHandler(sys.__stdout__)
-    stdout_handler.setLevel(logging.INFO)
-
-    logger = logging.getLogger("atexit")
-    logger.setLevel(logging.INFO)
-    logger.addHandler(stdout_handler)
 
     @staticmethod
     def init():
         Profiler.queue = multiprocessing.Queue()
         atexit.register(Profiler._shutdown)
+        logger.info(f"Profiler: Initialized")
 
     @staticmethod
     def set_trends(trend_ids: list[str], double_trends_ids: list[str]):
@@ -37,9 +33,11 @@ class Profiler:
             if trend_id in double_trends_ids:
                 profiler_dict[trend_id] = [[2, 0], [None, None, None]]
         Profiler._start_process(profiler_dict, len(trend_ids))
+        logger.info(f"Profiler: Set trends")
 
     @staticmethod
     def add_profiler_data_to_db(trend_ids: list[str]):
+        logger.info(f"Profiler: Started creating profiler data in database")
         for trend_id in trend_ids:
             trend_id = int(trend_id)
             profiler_data = lds.ProfilerData(ID=trend_id)
@@ -53,6 +51,7 @@ class Profiler:
                     session.delete(old_profiler_data)
                     session.add(profiler_data)
                     session.commit()
+        logger.info(f"Profiler: Finished creating profiler data in database")
 
     @staticmethod
     def delete_profiler_data_from_db():
@@ -69,6 +68,7 @@ class Profiler:
                                                    args=(Profiler.queue, trends_dict, trends_count, Settings.db_uri, Settings.log_profiler))
         Profiler.process.daemon = True
         Profiler.process.start()
+        logger.info("Profiler: Process started")
 
     @staticmethod
     def _process_queue(queue: multiprocessing.Queue, trends_dict: dict, expected_trends_count: int, db_uri: str, log_profiler: bool):
@@ -93,7 +93,7 @@ class Profiler:
                     else:
                         Profiler.updates[timestamp]['total'][1] = (1, finished_count, perf_counter, time_used)
                 if Profiler.updates[timestamp][trend_id][0][0] == 0:
-                    logging.warning(f'Profiler already got start time for {trend_id} in timestamp {timestamp}')
+                    logger.warning(f'Profiler: Already got start time for trend with id={trend_id} (timestamp={timestamp})')
                 else:
                     Profiler.updates[timestamp][trend_id][0][0] -= 1
                     Profiler.updates[timestamp][trend_id][0][1] += 1
@@ -108,9 +108,9 @@ class Profiler:
                     current_count -= 1
                     Profiler.updates[timestamp]['total'][1] = (current_count, finished_count, start, time_used)
                     if Profiler.updates[timestamp][trend_id][1][0] is None and Profiler.updates[timestamp][trend_id][1][1] is None:
-                        logging.warning(f'Profiler did not get start time for {trend_id} in timestamp {timestamp}')
+                        logger.warning(f'Profiler: No start time for trend with id={trend_id} (timestamp={timestamp})')
                     elif Profiler.updates[timestamp][trend_id][1][0] is None and Profiler.updates[timestamp][trend_id][1][1] is not None:
-                        logging.warning(f'Profiler already got stop time for {trend_id} in timestamp {timestamp}')
+                        logger.warning(f'Profiler: Already got stop time for trend with id={trend_id} (timestamp={timestamp})')
                     elif Profiler.updates[timestamp][trend_id][0][1] == 1:
                         start_time = Profiler.updates[timestamp][trend_id][1][0]
                         trend_time_used = perf_counter - start_time
@@ -140,6 +140,7 @@ class Profiler:
                 if initialized_processes_count == expected_trends_count:
                     first_timestamp = timestamp + 1
             elif operation is None:
+                logger.info(f'Profiler: Started shutdown')
                 Profiler._shutdown()
                 break
 

@@ -35,16 +35,16 @@ def test_trend_diff_calculates_difference_correctly_for_different_trends():
         self.params = {'TREND_A': trend_id1, 'TREND_B': trend_id2}
 
     with patch.object(TrendDiff, '_read_params', new=mock_read_params):
-        with patch.object(TrendDiff, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendDiff, '_save', new=mock_save):
-                mocked_queue = Mock()
-                trend = TrendDiff(0, mocked_queue, None, None)
+        with patch.object(TrendDiff, '_save', new=mock_save):
+            mocked_queue = Mock()
+            mocked_queue2 = Mock()
+            trend = TrendDiff(0, mocked_queue, '', mocked_queue2)
 
-                for i in range(5):
-                    x1 = np.arange(a1*i*100, a1*(i+1)*100, a1)
-                    x2 = np.arange(a2*i*100, a2*(i+1)*100, a2)
-                    trend.update(x1, i + timestamp_offset, trend_id1)
-                    trend.update(x2, i + timestamp_offset, trend_id2)
+            for i in range(5):
+                x1 = np.arange(a1*i*100, a1*(i+1)*100, a1).tolist()
+                x2 = np.arange(a2*i*100, a2*(i+1)*100, a2).tolist()
+                trend.update(x1, i + timestamp_offset, trend_id1)
+                trend.update(x2, i + timestamp_offset, trend_id2)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         expected_data = np.arange(a1*i*100, a1*(i+1)*100, a1) - np.arange(a2*i*100, a2*(i+1)*100, a2)
@@ -60,15 +60,15 @@ def test_trend_diff_calculates_difference_correctly_for_the_same_data():
         self.params = {'TREND_A': trend_id1, 'TREND_B': trend_id2}
 
     with patch.object(TrendDiff, '_read_params', new=mock_read_params):
-        with patch.object(TrendDiff, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendDiff, '_save', new=mock_save):
-                mocked_queue = Mock()
-                trend = TrendDiff(0, mocked_queue, None, None)
+        with patch.object(TrendDiff, '_save', new=mock_save):
+            mocked_queue = Mock()
+            mocked_queue2 = Mock()
+            trend = TrendDiff(0, mocked_queue, '', mocked_queue2)
 
-                for i in range(5):
-                    x = np.full(100, 5)
-                    trend.update(x, i + timestamp_offset, trend_id1)
-                    trend.update(x, i + timestamp_offset, trend_id2)
+            for i in range(5):
+                x = np.full(100, 5).tolist()
+                trend.update(x, i + timestamp_offset, trend_id1)
+                trend.update(x, i + timestamp_offset, trend_id2)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         expected_data = np.full(100, 0)
@@ -83,11 +83,11 @@ def test_trend_diff_raise_exception_when_the_same_trend():
         self.params = {'TREND_A': trend_id, 'TREND_B': trend_id}
 
     with patch.object(TrendDiff, '_read_params', new=mock_read_params):
-        with patch.object(TrendDiff, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendDiff, '_save', new=mock_save):
-                mocked_queue = Mock()
-                with pytest.raises(BaseException):
-                    TrendDiff(0, mocked_queue, None, None)
+        with patch.object(TrendDiff, '_save', new=mock_save):
+            mocked_queue = Mock()
+            mocked_queue2 = Mock()
+            with pytest.raises(BaseException):
+                TrendDiff(0, mocked_queue, '', mocked_queue2)
 
 
 def test_trend_diff_calculates_difference_when_only_one_trend_sends_data():
@@ -98,17 +98,17 @@ def test_trend_diff_calculates_difference_when_only_one_trend_sends_data():
         self.params = {'TREND_A': trend_id1, 'TREND_B': trend_id2}
 
     with patch.object(TrendDiff, '_read_params', new=mock_read_params):
-        with patch.object(TrendDiff, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendDiff, '_save', new=mock_save):
-                mocked_queue = Mock()
-                trend = TrendDiff(0, mocked_queue, None, None)
+        with patch.object(TrendDiff, '_save', new=mock_save):
+            mocked_queue = Mock()
+            mocked_queue2 = Mock()
+            trend = TrendDiff(0, mocked_queue, '', mocked_queue2)
 
-                for i in range(5):
-                    x1 = np.full(100, 50)
-                    x2 = np.full(100, 5)
-                    trend.update(x1, i + timestamp_offset, trend_id1)
-                    if i >= 2:
-                        trend.update(x2, i + timestamp_offset, trend_id2)
+            for i in range(5):
+                x1 = np.full(100, 50).tolist()
+                x2 = np.full(100, 5).tolist()
+                trend.update(x1, i + timestamp_offset, trend_id1)
+                if i >= 2:
+                    trend.update(x2, i + timestamp_offset, trend_id2)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         expected_data = np.full(100, 45)

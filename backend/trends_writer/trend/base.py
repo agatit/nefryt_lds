@@ -13,6 +13,9 @@ from multiprocessing.queues import Queue
 from trends_writer.trend.trend_manager import TrendManager
 
 
+logger = logging.getLogger(__name__)
+
+
 class TrendBase:
     def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue):
         self.id = _id
@@ -23,19 +26,16 @@ class TrendBase:
         self.db_uri = db_uri
         self.queue = queue
         self.children_count = 0
-
         self._read_params()
         self.process = None
+        self.last_update = None
 
-        logging.info(f"{self.__class__.__name__} ({self.id}) initialized: params={self.params}")
+        logger.info(f"{self.__class__.__name__} ({self.id}): Trend initialized (params={self.params})")
 
     def run_trend_process(self):
         self.process = Process(target=self.process_queue, args=(self.db_uri, ))
-        self.start_process_queue()
-        logging.info(f"{self.__class__.__name__} ({self.id}) started")
-
-    def start_process_queue(self):
         self.process.start()
+        logger.info(f"{self.__class__.__name__} ({self.id}): Process started")
 
     def process_queue(self, db_uri: str):
         setup_engine(db_uri)
@@ -48,10 +48,21 @@ class TrendBase:
                     child.queue.put(None)
                 break
             data = np.array(item[0])
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Got data: {data}")
             timestamp = item[1]
             profiler_timestamp_diff = item[2]
             parent_id = item[3] if len(item) > 3 else None
 
+            if self.last_update is not None and self.last_update < timestamp-1:
+                try:
+                    qsize = self.queue.qsize()
+                    logger.warning(f"{self.__class__.__name__} ({self.id}): Data not continuously updated "
+                                    f"(updated={timestamp - self.last_update} seconds ago, queue size={qsize})")
+                except NotImplementedError:
+                    logger.warning(f"{self.__class__.__name__} ({self.id}): Data not continuously updated "
+                                    f"(updated={timestamp - self.last_update} seconds ago)")
+
+            self.last_update = timestamp
             self.profiler_queue.put((1, self.id, timestamp + profiler_timestamp_diff, time.perf_counter(), None))
             self.update(data, timestamp, profiler_timestamp_diff, parent_id)
             try:
@@ -62,14 +73,16 @@ class TrendBase:
 
     def update(self, data: np.ndarray, timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int | None = None):
         self._save(data, timestamp)
-        logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating children...")
+        logger.debug(f"{self.__class__.__name__} ({self.id}): Started updating children (timestamp={timestamp})")
 
         for child in self.children:
             try:
                 child.queue.put((data, timestamp, profiler_timestamp_diff, self.id))
             except Exception as e:
-                logging.exception(f"{timestamp} {self.__class__.__name__} ({self.id}) child {child.__class__.__name__} ({child.id}) update error: {e}", exc_info=True)
+                logger.exception(f"{self.__class__.__name__} ({self.id}): "
+                                 f"Child {child.__class__.__name__} ({child.id}) update error (timestamp={timestamp}): {e}", exc_info=True)
 
+        logger.debug(f"{self.__class__.__name__} ({self.id}): Finished updating children (timestamp={timestamp})")
         return timestamp
 
     def _read_params(self):
@@ -102,10 +115,10 @@ class TrendBase:
         for trend_id in results:
             child_trend = TrendManager.get(trend_id)
             if child_trend is None:
-                logging.warning(f"No registered Trend ({trend_id}) found for parent {self.__class__.__name__} ({self.id})")
+                logger.warning(f"{self.__class__.__name__} ({self.id}): No registered trend with id={trend_id} found for parent")
             else:
                 self.children.append(child_trend)
-                logging.info(f"Found registered {child_trend.__class__.__name__} ({trend_id}) for parent {self.__class__.__name__} ({self.id})")
+                logger.info(f"{self.__class__.__name__} ({self.id}): Found registered {child_trend.__class__.__name__} ({trend_id})")
 
     def _save(self, data: np.ndarray, timestamp: int):
         try:
@@ -118,11 +131,11 @@ class TrendBase:
                 session.execute(insert_stmt, {"data": packed_data})
                 session.commit()
 
-            logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) saved") 
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Saved data (timestamp={timestamp})")
         except Exception as e:
             with Session(get_engine()) as session:
                 session.rollback()
-            raise e
+            logger.exception(f"{self.__class__.__name__} ({self.id}): Update error (timestamp={timestamp}): {e}", exc_info=True)
 
     def set_children_count(self, children_count: int):
         self.children_count = children_count

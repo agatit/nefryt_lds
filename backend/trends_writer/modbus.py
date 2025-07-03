@@ -6,6 +6,9 @@ from .config import Settings
 from .plant import PipePlant
 
 
+logger = logging.getLogger(__name__)
+
+
 class PipePlantDataBlock(ModbusSequentialDataBlock):
     def __init__(self, address: int, values: list, pipe_plant: PipePlant):
         super().__init__(address, values)
@@ -15,10 +18,12 @@ class PipePlantDataBlock(ModbusSequentialDataBlock):
         try:
             self.pipe_plant.update(address - self.address, values)
             super().setValues(address, values)
+            logger.debug(f"Modbus: setValues (address={address}, values={values})")
         except Exception as e:
-            logging.warning("setValues exception: " + str(e))
+            logger.warning(f"Modbus: Exception in setValues: {e}", exc_info=True)
 
     def getValues(self, address, count=1):
+        logger.debug(f"Modbus: getValues (address={address}, count={count})")
         return super().getValues(address - self.address, count)
 
 
@@ -32,9 +37,10 @@ async def run_server(pipe_plant: PipePlant, port: int | None = None):
     )
     server_context = ModbusServerContext(slaves=slave_context, single=True)
     try:
+        logger.info(f"Modbus: Server started")
         await StartAsyncTcpServer(
             context=server_context,
             address=('', port if port else Settings.modbus_port),
         )
     except (KeyboardInterrupt, asyncio.CancelledError):
-        logging.info("Modbus server stopped")
+        logger.info("Modbus: Server stopped")

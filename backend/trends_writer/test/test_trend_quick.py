@@ -30,14 +30,14 @@ def test_trend_quick_saves_correct_data():
         self.params = {'MODBUS_REGISTER': 1000}
 
     with patch.object(TrendQuick, '_read_params', new=mock_read_params):
-        with patch.object(TrendQuick, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendQuick, '_save', new=mock_save):
-                mocked_queue = Mock()
-                trend = TrendQuick(0, mocked_queue, None, None)
+        with patch.object(TrendQuick, '_save', new=mock_save):
+            mocked_queue = Mock()
+            mocked_queue2 = Mock()
+            trend = TrendQuick(0, mocked_queue, '', mocked_queue2)
 
-                for i in range(5):
-                    x = np.full(100, i*100)
-                    trend.update(x, i + timestamp_offset, None)
+            for i in range(5):
+                x = np.full(100, i*100)
+                trend.update(x, i + timestamp_offset, 0)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         expected_data = np.full(100, i*100)

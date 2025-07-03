@@ -37,16 +37,15 @@ def test_trend_deriv_calculates_mean_correctly_for_constant_trend():
         self.storage = np.array(storage)
 
     with patch.object(TrendMean, '_read_params', new=mock_read_params):
-        with patch.object(TrendMean, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
-                with patch.object(TrendMean, '_save', new=mock_save):
-                    mocked_queue = Mock()
-                    mocked_queue2 = Mock()
-                    trend = TrendMean(1, mocked_queue, '', mocked_queue2)
+        with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
+            with patch.object(TrendMean, '_save', new=mock_save):
+                mocked_queue = Mock()
+                mocked_queue2 = Mock()
+                trend = TrendMean(1, mocked_queue, '', mocked_queue2)
 
-                    for i in range(5):
-                        x = list(np.full(100, value))
-                        trend.update(x, i + timestamp_offset, 0, None)
+                for i in range(5):
+                    x = list(np.full(100, value))
+                    trend.update(x, i + timestamp_offset, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
@@ -67,16 +66,15 @@ def test_trend_deriv_calculates_mean_correctly_for_almost_constant_trend():
         self.storage = np.array(storage)
 
     with patch.object(TrendMean, '_read_params', new=mock_read_params):
-        with patch.object(TrendMean, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
-                with patch.object(TrendMean, '_save', new=mock_save):
-                    mocked_queue = Mock()
-                    mocked_queue2 = Mock()
-                    trend = TrendMean(1, mocked_queue, '', mocked_queue2)
+        with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
+            with patch.object(TrendMean, '_save', new=mock_save):
+                mocked_queue = Mock()
+                mocked_queue2 = Mock()
+                trend = TrendMean(1, mocked_queue, '', mocked_queue2)
 
-                    for i in range(5):
-                        x = [value + (-10 + random.randint(0, 21)) for _ in range(100)]
-                        trend.update(x, i + timestamp_offset, 0, None)
+                for i in range(5):
+                    x = [value + (-10 + random.randint(0, 21)) for _ in range(100)]
+                    trend.update(x, i + timestamp_offset, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
@@ -94,24 +92,23 @@ def test_trend_mean_calculates_mean_correctly_for_changing_monotonic_trend():
         self.storage = np.arange(0, 100, 1)
 
     with patch.object(TrendMean, '_read_params', new=mock_read_params):
-        with patch.object(TrendMean, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
-                with patch.object(TrendMean, '_save', new=mock_save):
-                    mocked_queue = Mock()
-                    mocked_queue2 = Mock()
-                    trend = TrendMean(1, mocked_queue, '', mocked_queue2)
+        with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
+            with patch.object(TrendMean, '_save', new=mock_save):
+                mocked_queue = Mock()
+                mocked_queue2 = Mock()
+                trend = TrendMean(1, mocked_queue, '', mocked_queue2)
 
-                    for i in range(6):
-                        if i < 3:
-                            start = i * 100
-                            end = (i + 1) * 100
-                            step = 1
-                        else:
-                            start = (6 - i) * 100 - 1
-                            end = (5 - i) * 100 - 1
-                            step = -1
-                        x = list(np.arange(start, end, step))
-                        trend.update(x, i + 10, 0, None)
+                for i in range(6):
+                    if i < 3:
+                        start = i * 100
+                        end = (i + 1) * 100
+                        step = 1
+                    else:
+                        start = (6 - i) * 100 - 1
+                        end = (5 - i) * 100 - 1
+                        step = -1
+                    x = list(np.arange(start, end, step))
+                    trend.update(x, i + 10, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         if i < len(saved_results) // 2:
@@ -149,20 +146,19 @@ def test_trend_mean_calculates_mean_correctly_with_different_filter_window_value
         self.storage = np.array(storage)
 
     with patch.object(TrendMean, '_read_params', new=mock_read_params):
-        with patch.object(TrendMean, 'start_process_queue', new=lambda _: None):
-            with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
-                with patch.object(TrendMean, '_save', new=mock_save2):
-                    mocked_queue = Mock()
-                    mocked_queue2 = Mock()
-                    trend1 = TrendMean(0, mocked_queue, '', mocked_queue2)
-                    trend2 = TrendMean(1, mocked_queue, '', mocked_queue2)
-                    trend3 = TrendMean(2, mocked_queue, '', mocked_queue2)
+        with patch.object(TrendMean, 'initiate_buffer', new=mock_initiate_buffer):
+            with patch.object(TrendMean, '_save', new=mock_save2):
+                mocked_queue = Mock()
+                mocked_queue2 = Mock()
+                trend1 = TrendMean(0, mocked_queue, '', mocked_queue2)
+                trend2 = TrendMean(1, mocked_queue, '', mocked_queue2)
+                trend3 = TrendMean(2, mocked_queue, '', mocked_queue2)
 
-                    for i in range(9):
-                        x = list(np.full(100, 200 * i))
-                        trend1.update(x, i + timestamp_offset, 0, None)
-                        trend2.update(x, i + timestamp_offset, 0, None)
-                        trend3.update(x, i + timestamp_offset, 0, None)
+                for i in range(9):
+                    x = list(np.full(100, 200 * i))
+                    trend1.update(x, i + timestamp_offset, 0, None)
+                    trend2.update(x, i + timestamp_offset, 0, None)
+                    trend3.update(x, i + timestamp_offset, 0, None)
 
     for i, ((saved_data1, saved_timestamp1), (saved_data2, saved_timestamp2), (saved_data3, saved_timestamp3)) \
             in enumerate(zip(saved_results[0][2:], saved_results[1][1:], saved_results[2])):
