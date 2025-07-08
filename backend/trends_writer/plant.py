@@ -98,11 +98,9 @@ class PipePlant:
                 self.quick_trends_ids_not_updated.remove(self.quick_trends[register][0])
                 logger.debug(f"PipePlant: Trend with id={self.quick_trends[register][0]} data sent (timestamp={timestamp})")
             else:
-                logger.exception(f"PipePlant: Quick trend with id = {self.quick_trends[register][0]} already updated (timestamp={timestamp})")
-                raise Exception(f"Quick trend with id = {self.quick_trends[register][0]} already updated in timestamp {timestamp}")
+                logger.warning(f"PipePlant: Quick trend with id = {self.quick_trends[register][0]} already updated (timestamp={timestamp})")
         except KeyError:
             logger.exception(f"PipePlant: No quick trend using register={register}")
-            raise ValueError(f'No quick trend is using {register} register')
 
     def _prepare_not_updated_trends(self):
         ids = []

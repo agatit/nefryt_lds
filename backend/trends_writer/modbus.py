@@ -20,7 +20,7 @@ class PipePlantDataBlock(ModbusSequentialDataBlock):
             super().setValues(address, values)
             logger.debug(f"Modbus: setValues (address={address}, values={values})")
         except Exception as e:
-            logger.warning(f"Modbus: Exception in setValues: {e}", exc_info=True)
+            logger.exception(f"Modbus: Exception in setValues: {e}", exc_info=True)
 
     def getValues(self, address, count=1):
         logger.debug(f"Modbus: getValues (address={address}, count={count})")
