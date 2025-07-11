@@ -187,10 +187,10 @@
     "applyBtn": "Apply"
   },
   "timepicker": {
-    "now": "NOW",
-    "selectNow": "Select Now",
-    "cancel": "Cancel",
-    "set": "Set",
+    "now": "TERAZ",
+    "selectNow": "Wybierz teraz",
+    "cancel": "Anuluj",
+    "set": "Ustaw",
     "toggleTimeSelector": "Toggle TimeSelector",
     "toggleClock": "Toggle Clock"
   },
@@ -338,8 +338,8 @@
     "deleteSeries": "Delete the series",
     "deleteDialogTitle": "Delete Event",
     "deleteRecurringDialogTitle": "Delete Recurring Item",
-    "dateTitle": "Date",
-    "timeTitle": "Time",
+    "dateTitle": "Data",
+    "timeTitle": "Czas",
     "eventTitle": "Event",
     "noEvents": "no events"
   },

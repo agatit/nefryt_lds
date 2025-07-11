@@ -1,4 +1,9 @@
 {
   "/": "Nefryt LDS",
-  "/login": "Logowanie do systemu"
+  "/login": "Logowanie do systemu",
+  "/trends-mockup": "Wykresy trendów MOCKUP",
+  "/trends": "Wykresy trendów",
+  "/trend-configuration": "Konfiguracja trendów",
+  "/leak-probability-map": "Mapa prawdopodobieństwa wycieków",
+  "/events": "Wydarzenia"
 }

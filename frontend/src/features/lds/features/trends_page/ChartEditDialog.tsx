@@ -1,5 +1,5 @@
 import { Button } from "@progress/kendo-react-buttons";
-import { Typography } from "@progress/kendo-react-common";
+import { SvgIcon, Typography } from "@progress/kendo-react-common";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { AxisType, MockupTrendType, TreeViewDataItem } from "./TrendsPage";
 import { Trend } from "../../../../services/api";
 import CursorBubble from "../../../../components/CursorBubble";
+import { plusIcon } from "@progress/kendo-svg-icons";
 
 export interface ChartEditDialogProps {
   trendsTree: TreeViewDataItem[];
@@ -271,7 +272,12 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
               onMouseEnter={handleMouseEnterCreateNewAxisArea}
               onMouseLeave={handleMouseLeaveCreateNewAxisArea}
             >
-              <Typography.p style={{ marginBottom: 0 }}>
+              <SvgIcon icon={plusIcon} size="large" />
+              <Typography.p
+                style={{ marginBottom: 0 }}
+                fontWeight="bold"
+                fontSize="large"
+              >
                 {t("trends-page:create_new_axis")}
               </Typography.p>
             </div>

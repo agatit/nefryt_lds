@@ -87,12 +87,12 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
         selected={tabSelected}
         onSelect={handleTabSelect}
       >
-        <TabStripTab title={t("trends-page:chart_config")}>
+        <TabStripTab title={t("trends-page:chart_management")}>
           {!isLoadingTrends ? (
             <div className="chart-config-content">
               <div className="item">
                 <Typography.p fontSize="large" margin={0}>
-                  {t("trends-page:legend")}
+                  {t("trends-page:chart_legend")}
                 </Typography.p>
                 <div className="legend-container">
                   <TreeView
@@ -108,18 +108,10 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
                 </div>
               </div>
               <div className="item">
-                <Button
-                  svgIcon={isChartInEdit ? undefined : pencilIcon}
-                  onClick={onChartEditButtonClick}
-                >
-                  {isChartInEdit ? t("common:save") : t("common:edit")}
-                </Button>
-              </div>
-              <div className="item">
                 <Typography.p fontSize="large" margin={0}>
                   {t("trends-page:time_interval")}
                 </Typography.p>
-                <div className="item-row">
+                <div className="item-column">
                   <div>
                     <Label>{t("common:from")}</Label>
                     <DateTimePicker
@@ -139,9 +131,14 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
                 </div>
               </div>
               <div className="item">
-                <Button svgIcon={saveIcon}>
-                  {t("trends-page:save_as_template")}
-                </Button>
+                <div className="item-row">
+                  <Button svgIcon={pencilIcon} onClick={onChartEditButtonClick}>
+                    {t("common:edit")}
+                  </Button>
+                  <Button svgIcon={saveIcon}>
+                    {t("trends-page:save_as_template")}
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (

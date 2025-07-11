@@ -147,6 +147,7 @@ const ChartComponent = React.memo(function ChartComponent({
   return (
     <React.Fragment>
       <Chart
+        key={"main-chart"}
         //   key={chartKeyRef.current}
         // ref={chartRef}
         className="main-chart"
@@ -181,8 +182,9 @@ const ChartComponent = React.memo(function ChartComponent({
         )}
       </Chart>
       <Chart
+        key={"navigation-chart"}
         className="navigation-chart"
-        renderAs="canvas"
+        renderAs="svg"
         onSelectStart={handleSelectStart}
         onSelectEnd={handleSelectEnd}
         onPlotAreaHover={handleOnPlotHover}
@@ -195,7 +197,7 @@ const ChartComponent = React.memo(function ChartComponent({
             maxDivisions={20}
             labels={{ visible: false }}
             name="navigatorAxis"
-            select={select}
+            // select={select}
             min={navigationStartDate}
             max={navigationEndDate}
           />
@@ -350,7 +352,6 @@ const TrendChart = React.memo(function TrendChart({
       );
 
       if (axis == undefined) continue;
-
       counter++;
 
       const axisRect = axesElements[i].getBoundingClientRect();
@@ -358,11 +359,10 @@ const TrendChart = React.memo(function TrendChart({
         left: axisRect.left + (counter == 1 ? 15 : -20),
       });
     }
-
     if (chartRect && ssBarStylesArr.length > 0) setSSBarStyles(ssBarStylesArr);
   }, [ssBarStyles, isLoadingTrendsData]);
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     handleSSBarsLeftPositioning();
   }, [axesState]);
 

@@ -309,6 +309,12 @@ export interface TrendsPageProps {
 }
 
 export default function TrendsPage({ useMockup }: TrendsPageProps) {
+  React.useLayoutEffect(() => {
+    const axesElements = document
+      .getElementsByClassName("main-chart")[0]
+      ?.getElementsByTagName("svg")[0]?.children[1]?.children[2]?.children;
+  });
+
   const auth = React.useContext(AuthContext);
   const refreshableRequest = useRefreshableRequest();
 
@@ -415,6 +421,7 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
   );
 
   const handleAxesStateChange = React.useCallback((value: AxisType[]) => {
+    console.log("BAJO");
     if (value) setAxesState(value);
   }, []);
 
@@ -501,7 +508,11 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
               style={{ stroke: (trend as MockupTrendType).Color }}
             />
           )}
-          <span>{props.item.text}</span>
+          {correctDepth ? (
+            <span>{props.item.text}</span>
+          ) : (
+            <span style={{ fontWeight: "bold" }}>{props.item.text}</span>
+          )}
           {buttonIcon !== undefined && (
             <Button
               svgIcon={buttonIcon}

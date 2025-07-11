@@ -20,7 +20,7 @@ import { Button } from "@progress/kendo-react-buttons";
 import "../../styles/features/lds/lds.scss";
 
 export default function LDS() {
-  const { t } = useTranslation(["common", "titles", "nav"]);
+  const { t } = useTranslation(["common", "titles", "nav", "kendo"]);
   const { pathname } = useLocation();
   const navigate = useNavigate();
 

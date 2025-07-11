@@ -60,6 +60,12 @@ main {
   gap: k-spacing(2);
 }
 
+.chart-config-content > .item > .item-column {
+  display: flex;
+  flex-direction: column;
+  gap: k-spacing(2);
+}
+
 .k-panelbar-content > .item {
   display: flex;
   margin: 0 k-spacing(1) 0 k-spacing(1);
