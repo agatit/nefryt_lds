@@ -29,7 +29,7 @@ main {
   width: 100%;
 }
 
-.chart-config-content {
+.detail-panel-content {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -38,7 +38,7 @@ main {
   width: 100%;
 }
 
-.chart-config-content > .item {
+.detail-panel-content > .item {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -46,7 +46,7 @@ main {
   width: 100%;
 }
 
-.chart-config-content > .item > .legend-container {
+.detail-panel-content > .item > .legend-container {
   display: flex;
   justify-content: center;
   align-items: left;
@@ -54,13 +54,13 @@ main {
   width: 100%;
 }
 
-.chart-config-content > .item > .item-row {
+.detail-panel-content > .item > .item-row {
   display: flex;
   flex-direction: row;
   gap: k-spacing(2);
 }
 
-.chart-config-content > .item > .item-column {
+.detail-panel-content > .item > .item-column {
   display: flex;
   flex-direction: column;
   gap: k-spacing(2);

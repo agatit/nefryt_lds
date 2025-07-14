@@ -11,5 +11,6 @@
   "date": "Data",
   "time": "Czas",
   "from": "Od",
-  "To": "Do"
+  "to": "Do",
+  "confirm": "Zatwierdź"
 }

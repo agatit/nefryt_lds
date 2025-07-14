@@ -16,13 +16,22 @@ import {
   processTreeViewItems,
   TreeView,
   TreeViewExpandChangeEvent,
+  TreeViewItemClickEvent,
   TreeViewOperationDescriptor,
 } from "@progress/kendo-react-treeview";
 import { DetailPanel } from "onyks_shared_kendo";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { TreeViewDataItem } from "./TrendsPage";
-import { pencilIcon, saveIcon } from "@progress/kendo-svg-icons";
+import {
+  cancelIcon,
+  checkIcon,
+  pencilIcon,
+  saveIcon,
+} from "@progress/kendo-svg-icons";
+import { Template } from "../../../../services/api";
+import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 export interface TrendDetailPanelProps {
   isLoadingTrends: boolean;
@@ -35,6 +44,9 @@ export interface TrendDetailPanelProps {
   endDate: Date;
   onStartDateChange: (event: DateTimePickerChangeEvent) => void;
   onEndDateChange: (event: DateTimePickerChangeEvent) => void;
+  templates: Template[];
+  onSelectedTemplateChange: (value: Template) => void;
+  handleCreateNewTemplate: (name: string) => void;
 }
 
 const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
@@ -48,6 +60,9 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
   endDate,
   onStartDateChange,
   onEndDateChange,
+  templates,
+  onSelectedTemplateChange,
+  handleCreateNewTemplate,
 }: TrendDetailPanelProps) {
   const { t } = useTranslation(["common", "trends-page"]);
 
@@ -60,6 +75,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
     []
   );
 
+  // chart
   const [expandAxesTree, setExpandAxesTree] =
     React.useState<TreeViewOperationDescriptor>({
       ids: ["Ciśnienie pomiary MPa"],
@@ -79,6 +95,53 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
     [expandAxesTree]
   );
 
+  // templates
+  const templateTree: TreeViewDataItem[] = React.useMemo(() => {
+    return templates.map((template) => {
+      return {
+        text: template.Name,
+        id: template.ID,
+      };
+    });
+  }, [templates]);
+
+  const [templateSelect, setTemplateSelect] = React.useState<string[]>([""]);
+  const handleTemplateClick = React.useCallback(
+    (event: TreeViewItemClickEvent) => {
+      setTemplateSelect([event.itemHierarchicalIndex]);
+      onSelectedTemplateChange(
+        templates.find((template) => template.ID == event.item.id)!
+      );
+    },
+    [templates]
+  );
+
+  const [showDialog, setShowDialog] = React.useState<boolean>(false);
+  const [newTemplateName, setNewTemplateName] = React.useState<string>("");
+
+  const handleNewTemplateNameChange = React.useCallback(
+    (event: TextBoxChangeEvent) => {
+      setNewTemplateName(event.value ? event.value.toString() : "");
+    },
+    []
+  );
+
+  const handleSaveTemplateButtonClick = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      setShowDialog(true);
+    },
+    []
+  );
+
+  const handleCreateTemplateConfirm = React.useCallback(() => {
+    setShowDialog(false);
+    handleCreateNewTemplate(newTemplateName);
+  }, [newTemplateName]);
+
+  const closeDialog = React.useCallback(() => {
+    setShowDialog(false);
+  }, []);
+
   return (
     <DetailPanel className="chart-detail-panel" flexGrow={1} extandable={false}>
       <TabStrip
@@ -89,7 +152,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
       >
         <TabStripTab title={t("trends-page:chart_management")}>
           {!isLoadingTrends ? (
-            <div className="chart-config-content">
+            <div className="detail-panel-content">
               <div className="item">
                 <Typography.p fontSize="large" margin={0}>
                   {t("trends-page:chart_legend")}
@@ -135,7 +198,10 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
                   <Button svgIcon={pencilIcon} onClick={onChartEditButtonClick}>
                     {t("common:edit")}
                   </Button>
-                  <Button svgIcon={saveIcon}>
+                  <Button
+                    svgIcon={saveIcon}
+                    onClick={handleSaveTemplateButtonClick}
+                  >
                     {t("trends-page:save_as_template")}
                   </Button>
                 </div>
@@ -145,8 +211,39 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
             <Loader size="medium" type={"infinite-spinner"} />
           )}
         </TabStripTab>
-        <TabStripTab title={t("trends-page:templates")}></TabStripTab>
+        <TabStripTab title={t("trends-page:templates")}>
+          <div className="detail-panel-content"></div>
+          <TreeView
+            data={processTreeViewItems(templateTree, {
+              select: templateSelect,
+            })}
+            onItemClick={handleTemplateClick}
+          />
+        </TabStripTab>
       </TabStrip>
+      {showDialog && (
+        <Dialog
+          title={t("trends-page:enter_template_name")}
+          onClose={closeDialog}
+        >
+          <TextBox
+            value={newTemplateName}
+            onChange={handleNewTemplateNameChange}
+          />
+          <DialogActionsBar>
+            <Button svgIcon={cancelIcon} onClick={closeDialog}>
+              {t("common:cancel")}
+            </Button>
+            <Button
+              svgIcon={checkIcon}
+              onClick={handleCreateTemplateConfirm}
+              themeColor={"primary"}
+            >
+              {t("common:confirm")}
+            </Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
     </DetailPanel>
   );
 });

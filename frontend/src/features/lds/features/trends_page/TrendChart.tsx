@@ -362,9 +362,10 @@ const TrendChart = React.memo(function TrendChart({
     if (chartRect && ssBarStylesArr.length > 0) setSSBarStyles(ssBarStylesArr);
   }, [ssBarStyles, isLoadingTrendsData]);
 
+  const [triggerRerender, setTriggerRerender] = React.useState<boolean>(false);
   React.useEffect(() => {
     handleSSBarsLeftPositioning();
-  }, [axesState]);
+  }, [axesState, triggerRerender]);
 
   const chartRect = React.useRef({ width: 0, height: 0 });
   const chartRenderCounter = React.useRef(0);
@@ -386,6 +387,11 @@ const TrendChart = React.memo(function TrendChart({
   });
 
   const scaleScrollBars = React.useMemo(() => {
+    if (ssBarStyles.length !== valueAxisState.length) {
+      setTriggerRerender(!triggerRerender);
+      return;
+    }
+
     return ssBarStyles.map((style, i) => {
       return (
         <ScaleScrollBar

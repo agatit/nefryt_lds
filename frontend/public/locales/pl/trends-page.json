@@ -7,5 +7,6 @@
   "create_new_axis": "Stwórz nową oś",
   "add_to": "Dodaj do",
   "add_to_new_axis": "Dodaj do nowej osi",
-  "no_data_in_range": "Brak danych w podanym przedziale czasu"
+  "no_data_in_range": "Brak danych w podanym przedziale czasu",
+  "enter_template_name": "Podaj nazwę nowego szablonu"
 }

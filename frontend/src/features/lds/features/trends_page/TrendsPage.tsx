@@ -5,6 +5,9 @@ import {
   TrendApi,
   TrendDefBase,
   TrendDefApi,
+  Template,
+  Axis,
+  Unit,
 } from "../../../../services/api";
 
 import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
@@ -117,7 +120,7 @@ const mockupTrends: MockupTrendType[] = [
     Color: "#4b5ffa",
     TrendDefID: "DP01",
     Name: "Pochodna Ciśnienia 1",
-    Unit: "",
+    Unit: "MPa/s",
   },
   {
     ID: 4,
@@ -125,7 +128,7 @@ const mockupTrends: MockupTrendType[] = [
     Color: "#ac58ff",
     TrendDefID: "DP01",
     Name: "Pochodna Ciśnienia 2",
-    Unit: "",
+    Unit: "MPa/s",
   },
   {
     ID: 5,
@@ -149,7 +152,7 @@ const mockupTrends: MockupTrendType[] = [
     Color: "#ffc459",
     TrendDefID: "P01",
     Name: "Pochodna Temperatury 1",
-    Unit: "",
+    Unit: "°C/s",
   },
   {
     ID: 8,
@@ -157,7 +160,7 @@ const mockupTrends: MockupTrendType[] = [
     Color: "#4b9dd1",
     TrendDefID: "P01",
     Name: "Pochodna Temperatury 2",
-    Unit: "",
+    Unit: "°C/s",
   },
 ];
 
@@ -216,6 +219,73 @@ const mockupAxes: AxisType[] = [
     TrendIDs: [0, 1, 2],
     ScaleMax: 9,
     ScaleMin: -1,
+  },
+];
+
+const mockupUnits: Unit[] = [
+  {
+    ID: "C",
+    Name: "Temperatura",
+    Symbol: "°C",
+    BaseID: "C",
+    Multiplier: "1.0",
+  },
+  {
+    ID: "MPa",
+    Name: "Ciśnienie",
+    Symbol: "MPa",
+    BaseID: "MPa",
+    Multiplier: "1.0",
+  },
+  {
+    ID: "C_s",
+    Name: "Pochodna temperatury",
+    Symbol: "°C/s",
+    BaseID: "C_s",
+    Multiplier: "1.0",
+  },
+  {
+    ID: "MPa_s",
+    Name: "Pochodna ciśnienia",
+    Symbol: "MPa/s",
+    BaseID: "MPa_s",
+    Multiplier: "1.0",
+  },
+];
+
+const mockupTemplates: Template[] = [
+  {
+    Name: "Pomiary ciśnień",
+    Axes: [
+      {
+        TrendsID: [0, 1, 2],
+        Title: "Ciśnienie",
+        UnitID: "MPa",
+        ScaledMin: -4,
+        ScaledMax: 12,
+      },
+    ],
+    ID: 0,
+  },
+  {
+    Name: "Ciśnienia wszystko",
+    Axes: [
+      {
+        TrendsID: [0, 1, 2],
+        Title: "Ciśnienie",
+        UnitID: "MPa",
+        ScaledMin: -4,
+        ScaledMax: 12,
+      },
+      {
+        TrendsID: [3, 4],
+        Title: "Pochodna",
+        UnitID: "MPa_s",
+        ScaledMin: -4,
+        ScaledMax: 12,
+      },
+    ],
+    ID: 1,
   },
 ];
 
@@ -421,7 +491,6 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
   );
 
   const handleAxesStateChange = React.useCallback((value: AxisType[]) => {
-    console.log("BAJO");
     if (value) setAxesState(value);
   }, []);
 
@@ -486,6 +555,61 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
       };
     });
   }, [axesState, trendsState]);
+
+  const [unitsState, setUnitsState] = React.useState<Unit[]>(
+    useMockup ? mockupUnits : []
+  );
+
+  const [templatesState, setTemplatesState] = React.useState<Template[]>(
+    useMockup ? mockupTemplates : []
+  );
+  const handleTemplateStateChange = React.useCallback((value: Template[]) => {
+    if (value) setTemplatesState(value);
+  }, []);
+
+  const handleSelectedTemplateChange = React.useCallback(
+    (template: Template) => {
+      if (template.Axes == null || template.Axes.length == 0) return;
+
+      const newAxesState: AxisType[] = [];
+      for (let axis of template.Axes) {
+        const unit = unitsState.find((u) => u.ID == axis.UnitID);
+        newAxesState.push({
+          Name: axis.Title,
+          Unit: unit ? unit.Symbol! : "",
+          TrendIDs: axis.TrendsID ? axis.TrendsID : [],
+          ScaleMin: axis.ScaledMin,
+          ScaleMax: axis.ScaledMax,
+        });
+      }
+
+      setAxesState(newAxesState);
+    },
+    []
+  );
+
+  const handleCreateNewTemplate = React.useCallback(
+    (name: string) => {
+      // TODO: connect to api
+      let newTemplate: Template = {
+        Name: name,
+        Axes: axesState.map((axis) => {
+          const unit = unitsState.find((u) => u.Symbol == axis.Unit);
+          return {
+            TrendsID: axis.TrendIDs,
+            Title: axis.Name,
+            UnitID: unit!.ID,
+            ScaledMin: axis.ScaleMin,
+            ScaledMax: axis.ScaleMax,
+          };
+        }),
+        ID: templatesState.length, //tmp set id
+      };
+
+      setTemplatesState([...templatesState, newTemplate]);
+    },
+    [templatesState, axesState]
+  );
 
   // Treeview stuff
 
@@ -791,6 +915,9 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
           endDate={endDate}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
+          templates={templatesState}
+          onSelectedTemplateChange={handleSelectedTemplateChange}
+          handleCreateNewTemplate={handleCreateNewTemplate}
         />
       </main>
       {isChartInEdit && (
