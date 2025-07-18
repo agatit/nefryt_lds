@@ -6,7 +6,6 @@ import {
   TrendDefBase,
   TrendDefApi,
   Template,
-  Axis,
   Unit,
 } from "../../../../services/api";
 
@@ -14,13 +13,8 @@ import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
 import "../../../../styles/features/lds/features/trendPage.scss";
 
-import { SvgIcon, Typography } from "@progress/kendo-react-common";
 import { DateTimePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import CursorBubble from "../../../../components/CursorBubble";
-import { chartLegendIcon } from "../../components/chartLegendIcon";
-import { SVGIcon, xIcon } from "@progress/kendo-svg-icons";
-import { Button } from "@progress/kendo-react-buttons";
-import { ItemRenderProps } from "@progress/kendo-react-treeview";
 import TrendChart from "./TrendChart";
 import TrendsDetailPanel from "./TrendsDetailPanel";
 import ChartEditDialog from "./ChartEditDialog";
@@ -325,7 +319,7 @@ function generateValue(date: Date, chart: number): number {
   );
 }
 
-interface MockupTrendGroupType {
+export interface MockupTrendGroupType {
   ID: number;
   Name: string;
   AnalisisOnly?: boolean;
@@ -379,12 +373,6 @@ export interface TrendsPageProps {
 }
 
 export default function TrendsPage({ useMockup }: TrendsPageProps) {
-  React.useLayoutEffect(() => {
-    const axesElements = document
-      .getElementsByClassName("main-chart")[0]
-      ?.getElementsByTagName("svg")[0]?.children[1]?.children[2]?.children;
-  });
-
   const auth = React.useContext(AuthContext);
   const refreshableRequest = useRefreshableRequest();
 
@@ -438,20 +426,13 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
     if (value !== undefined) setCursorBubbleText(value);
   }, []);
 
-  const [isChartInEdit, setIsChartInEdit] = React.useState<boolean>(false);
-
-  const handleChartEditButtonClick = React.useCallback(
-    (e: React.MouseEvent) => {
-      setIsChartInEdit(!isChartInEdit);
-    },
-    [isChartInEdit]
-  );
-
-  const endChartEdit = React.useCallback(() => {
-    setIsChartInEdit(false);
+  const [showChartEdit, setShowChartEdit] = React.useState<boolean>(false);
+  const openChartEdit = React.useCallback(() => {
+    setShowChartEdit(true);
   }, []);
-
-  const axisTreeRef = React.useRef<any>(null);
+  const closeChartEdit = React.useCallback(() => {
+    setShowChartEdit(false);
+  }, []);
 
   // DATA STUFF
 
@@ -494,68 +475,6 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
     if (value) setAxesState(value);
   }, []);
 
-  const trendsTree: TreeViewDataItem[] = React.useMemo(() => {
-    if (useMockup) return mockupTrendTreeData;
-
-    const trendsTree: TreeViewDataItem[] = mockupTrendGroupFromDB.map(
-      (item) => {
-        return {
-          id: item.ID,
-          text: item.Name,
-          items: [],
-        };
-      }
-    );
-
-    for (let trend of trendsState) {
-      const index = trendsTree.findIndex(
-        (item) => item.id == trend.TrendGroupID
-      );
-      const trendDef = trendDefs.find((item) => item.ID == trend.TrendDefID);
-
-      const indexTrendDef = trendsTree[index].items?.findIndex(
-        (item) => item.id == trend.TrendDefID
-      );
-
-      if (indexTrendDef == -1) {
-        trendsTree[index].items?.push({
-          id: trend.TrendDefID,
-          text: trendDef?.Name!,
-          items: [
-            {
-              id: trend.ID,
-              text: trend.Name!,
-            },
-          ],
-        });
-
-        continue;
-      }
-
-      trendsTree[index].items![indexTrendDef!].items?.push({
-        id: trend.ID,
-        text: trend.Name!,
-      });
-    }
-
-    return trendsTree;
-  }, [trendsState, mockupTrendGroupFromDB]);
-
-  const axisTree: TreeViewDataItem[] = React.useMemo(() => {
-    return axesState.map((axis) => {
-      return {
-        text: axis.Name,
-        items: axis.TrendIDs.map((id) => {
-          const trend = trendsState.find((trend) => trend.ID == id);
-          return {
-            id: id,
-            text: trend!.Name!,
-          };
-        }),
-      };
-    });
-  }, [axesState, trendsState]);
-
   const [unitsState, setUnitsState] = React.useState<Unit[]>(
     useMockup ? mockupUnits : []
   );
@@ -582,10 +501,9 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
           ScaleMax: axis.ScaledMax,
         });
       }
-
       setAxesState(newAxesState);
     },
-    []
+    [unitsState]
   );
 
   const handleCreateNewTemplate = React.useCallback(
@@ -609,90 +527,6 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
       setTemplatesState([...templatesState, newTemplate]);
     },
     [templatesState, axesState]
-  );
-
-  // Treeview stuff
-
-  const TreeCustomItem = React.useCallback(
-    (
-      props: ItemRenderProps,
-      depth: number,
-      buttonIcon?: SVGIcon,
-      buttonOnClick?: React.MouseEventHandler<HTMLButtonElement>
-    ) => {
-      const trend = trendsState.find((trend) => trend.ID == props.item.id);
-      const correctDepth =
-        props.itemHierarchicalIndex.split("_").length > depth;
-      return (
-        <React.Fragment>
-          {trend && correctDepth && (
-            <SvgIcon
-              icon={chartLegendIcon}
-              size="xlarge"
-              style={{ stroke: (trend as MockupTrendType).Color }}
-            />
-          )}
-          {correctDepth ? (
-            <span>{props.item.text}</span>
-          ) : (
-            <span style={{ fontWeight: "bold" }}>{props.item.text}</span>
-          )}
-          {buttonIcon !== undefined && (
-            <Button
-              svgIcon={buttonIcon}
-              onClick={buttonOnClick}
-              fillMode="flat"
-            />
-          )}
-        </React.Fragment>
-      );
-    },
-    [trendsState]
-  );
-
-  const TrendsTreeCustomItem = React.useCallback(
-    (props: ItemRenderProps) => {
-      return TreeCustomItem(props, 2);
-    },
-    [TreeCustomItem]
-  );
-
-  const AxisEditTreeCustomItem = React.useCallback(
-    (props: ItemRenderProps) => {
-      return TreeCustomItem(props, 1);
-    },
-    [TreeCustomItem]
-  );
-
-  const removeFromAxes = React.useCallback(
-    (props: ItemRenderProps) => {
-      const indexArray = props.itemHierarchicalIndex.split("_");
-
-      if (indexArray.length == 1) {
-        setAxesState(axesState.filter((axis) => axis.Name !== props.item.text));
-        return;
-      }
-
-      setAxesState(
-        axesState.map((axis, i) => {
-          if (i !== parseInt(indexArray[0])) return axis;
-          return {
-            ...axis,
-            TrendIDs: axis.TrendIDs.filter(
-              (ids, index) => index !== parseInt(indexArray[1])
-            ),
-          };
-        })
-      );
-    },
-    [axesState]
-  );
-
-  const AxisLegendTreeCustomItem = React.useCallback(
-    (props: ItemRenderProps) => {
-      return TreeCustomItem(props, 1, xIcon, () => removeFromAxes(props));
-    },
-    [TreeCustomItem, removeFromAxes]
   );
 
   // Trends Data
@@ -906,11 +740,10 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
         />
         <TrendsDetailPanel
           isLoadingTrends={isLoadingTrends}
-          axisTreeRef={axisTreeRef}
-          axisTree={axisTree}
-          TreeCustomItem={AxisLegendTreeCustomItem}
-          isChartInEdit={isChartInEdit}
-          onChartEditButtonClick={handleChartEditButtonClick}
+          trends={trendsState}
+          axesState={axesState}
+          onAxesStateChange={handleAxesStateChange}
+          onChartEditButtonClick={openChartEdit}
           startDate={startDate}
           endDate={endDate}
           onStartDateChange={handleStartDateChange}
@@ -920,15 +753,13 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
           handleCreateNewTemplate={handleCreateNewTemplate}
         />
       </main>
-      {isChartInEdit && (
+      {showChartEdit && (
         <ChartEditDialog
-          trendsTree={trendsTree}
-          TrendsTreeCustomItem={TrendsTreeCustomItem}
-          AxisTreeCustomItem={AxisLegendTreeCustomItem}
-          axisTreeRef={axisTreeRef}
-          axisTree={axisTree}
-          onCancelButtonClick={endChartEdit}
-          onSaveButtonClick={endChartEdit}
+          useMockup={useMockup}
+          closeDialog={closeChartEdit}
+          trendDefs={trendDefs}
+          trendGroups={mockupTrendGroupFromDB}
+          mockupTrendTreeData={mockupTrendTreeData}
           trendsState={trendsState}
           axesState={axesState}
           onAxesStateChange={handleAxesStateChange}

@@ -1,5 +1,5 @@
 import { Button } from "@progress/kendo-react-buttons";
-import { Typography } from "@progress/kendo-react-common";
+import { SvgIcon, Typography } from "@progress/kendo-react-common";
 import {
   DateTimePicker,
   DateTimePickerChangeEvent,
@@ -22,23 +22,24 @@ import {
 import { DetailPanel } from "onyks_shared_kendo";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TreeViewDataItem } from "./TrendsPage";
+import { AxisType, MockupTrendType, TreeViewDataItem } from "./TrendsPage";
 import {
   cancelIcon,
   checkIcon,
   pencilIcon,
   saveIcon,
+  xIcon,
 } from "@progress/kendo-svg-icons";
-import { Template } from "../../../../services/api";
+import { Template, Trend } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import { chartLegendIcon } from "../../components/chartLegendIcon";
 
 export interface TrendDetailPanelProps {
   isLoadingTrends: boolean;
-  axisTreeRef: React.RefObject<any>;
-  axisTree: TreeViewDataItem[];
-  TreeCustomItem: React.ComponentType<ItemRenderProps>;
-  isChartInEdit: boolean;
+  trends: Trend[] | MockupTrendType[];
+  axesState: AxisType[];
+  onAxesStateChange: (value: AxisType[]) => void;
   onChartEditButtonClick: React.MouseEventHandler<HTMLButtonElement>;
   startDate: Date;
   endDate: Date;
@@ -51,10 +52,9 @@ export interface TrendDetailPanelProps {
 
 const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
   isLoadingTrends,
-  axisTreeRef,
-  axisTree,
-  TreeCustomItem,
-  isChartInEdit,
+  trends,
+  axesState,
+  onAxesStateChange,
   onChartEditButtonClick,
   startDate,
   endDate,
@@ -76,6 +76,22 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
   );
 
   // chart
+  const axisTreeRef = React.useRef<any>(null);
+
+  const axisTree: TreeViewDataItem[] = React.useMemo(() => {
+    return axesState.map((axis) => {
+      return {
+        text: axis.Name,
+        items: axis.TrendIDs.map((id) => {
+          const trend = trends.find((trend) => trend.ID == id);
+          return {
+            id: id,
+            text: trend!.Name!,
+          };
+        }),
+      };
+    });
+  }, [axesState, trends]);
   const [expandAxesTree, setExpandAxesTree] =
     React.useState<TreeViewOperationDescriptor>({
       ids: ["Ciśnienie pomiary MPa"],
@@ -93,6 +109,62 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
       setExpandAxesTree({ ids, idField: "text" });
     },
     [expandAxesTree]
+  );
+
+  const removeFromAxes = React.useCallback(
+    (props: ItemRenderProps) => {
+      const indexArray = props.itemHierarchicalIndex.split("_");
+
+      if (indexArray.length == 1) {
+        onAxesStateChange(
+          axesState.filter((axis) => axis.Name !== props.item.text)
+        );
+        return;
+      }
+
+      onAxesStateChange(
+        axesState.map((axis, i) => {
+          if (i !== parseInt(indexArray[0])) return axis;
+          return {
+            ...axis,
+            TrendIDs: axis.TrendIDs.filter(
+              (ids, index) => index !== parseInt(indexArray[1])
+            ),
+          };
+        })
+      );
+    },
+    [axesState]
+  );
+
+  const TreeCustomItem = React.useCallback(
+    (props: ItemRenderProps) => {
+      const trend = trends.find((trend) => trend.ID == props.item.id);
+      const correctDepth = props.itemHierarchicalIndex.split("_").length > 1;
+
+      return (
+        <div className={correctDepth ? "change-cursor" : ""}>
+          {trend && correctDepth && (
+            <SvgIcon
+              icon={chartLegendIcon}
+              size="xlarge"
+              style={{ stroke: (trend as any).Color }}
+            />
+          )}
+          {correctDepth ? (
+            <span>{props.item.text}</span>
+          ) : (
+            <span style={{ fontWeight: "bold" }}>{props.item.text}</span>
+          )}
+          <Button
+            svgIcon={xIcon}
+            onClick={() => removeFromAxes(props)}
+            fillMode="flat"
+          />
+        </div>
+      );
+    },
+    [trends, removeFromAxes]
   );
 
   // templates
