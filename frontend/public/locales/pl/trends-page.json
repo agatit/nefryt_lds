@@ -5,6 +5,7 @@
   "time_interval": "Przedział czasu",
   "save_as_template": "Zapisz jako szablon",
   "create_new_axis": "Stwórz nową oś",
+  "enter_new_axis_name": "Podaj nazwę nowej osi",
   "add_to": "Dodaj do",
   "add_to_new_axis": "Dodaj do nowej osi",
   "no_data_in_range": "Brak danych w podanym przedziale czasu",

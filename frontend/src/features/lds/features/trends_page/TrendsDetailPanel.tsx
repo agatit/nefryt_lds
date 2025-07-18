@@ -284,12 +284,12 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
           )}
         </TabStripTab>
         <TabStripTab title={t("trends-page:templates")}>
-          <div className="detail-panel-content"></div>
           <TreeView
             data={processTreeViewItems(templateTree, {
               select: templateSelect,
             })}
             onItemClick={handleTemplateClick}
+            className="detail-panel-content"
           />
         </TabStripTab>
       </TabStrip>

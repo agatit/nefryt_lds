@@ -162,6 +162,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
 
   // DRAG STUFF
 
+  const [dragging, setDragging] = React.useState<boolean>(false);
   const mouseOverCreateNewAxisArea = React.useRef<boolean>(false);
 
   const handleMouseEnterCreateNewAxisArea = React.useCallback(() => {
@@ -178,23 +179,38 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
     if (e.value) setNewAxisName(e.value.toString());
   }, []);
 
+  const fromDrag = React.useRef<boolean>(false);
   const createNewAxis = React.useCallback(() => {
-    const unit = (
-      trendsState.find(
-        (trend) => trend.ID == draggedTrend.current?.ID
-      ) as MockupTrendType
-    ).Unit;
-    setNewAxesState([
-      ...newAxesState,
-      {
-        Name: newAxisName,
-        Unit: unit,
-        TrendIDs: [draggedTrend.current?.ID!],
-        ScaleMax: 0,
-        ScaleMin: 0,
-      },
-    ]);
-    setShowCreateAxisDialog(false);
+    if (fromDrag.current) {
+      const unit = (
+        trendsState.find(
+          (trend) => trend.ID == draggedTrend.current?.ID
+        ) as MockupTrendType
+      ).Unit;
+      setNewAxesState([
+        ...newAxesState,
+        {
+          Name: newAxisName,
+          Unit: unit,
+          TrendIDs: [draggedTrend.current?.ID!],
+          ScaleMax: 0,
+          ScaleMin: 0,
+        },
+      ]);
+    } else {
+      setNewAxesState([
+        ...newAxesState,
+        {
+          Name: newAxisName,
+          Unit: "",
+          TrendIDs: [],
+          ScaleMax: 0,
+          ScaleMin: 0,
+        },
+      ]);
+    }
+
+    closeCreateAxisDialog();
   }, [trendsState, newAxesState, newAxisName]);
 
   const handleTreeItemDragStart = React.useCallback(
@@ -203,6 +219,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
         (trend) => trend.ID == e.item.id
       )!;
       onShowCursorBubbleChange(true);
+      setDragging(true);
     },
     []
   );
@@ -240,16 +257,15 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   const handleTreeItemDragEnd = React.useCallback(
     (e: TreeViewItemDragEndEvent) => {
       onShowCursorBubbleChange(false);
+      setDragging(false);
+      const trend = trendsState.find(
+        (trend) => trend.ID == e.item.id
+      )! as MockupTrendType;
 
       if (mouseOverCreateNewAxisArea.current) {
-        setShowCreateAxisDialog(true);
-        setNewAxisName(
-          (
-            trendsState.find(
-              (trend) => trend.ID == e.item.id
-            )! as MockupTrendType
-          ).Unit
-        );
+        openCreateAxisDialog();
+        setNewAxisName(trend.Unit);
+        fromDrag.current = true;
 
         return;
       }
@@ -269,28 +285,36 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
 
       setNewAxesState(
         newAxesState.map((axis: AxisType, i) => {
+          //a little bit of mess maybe clean up later
           if (i !== axisIndex) return axis;
           if (axis.TrendIDs.includes(e.item.id)) return axis;
 
+          let unit;
+          if (axis.TrendIDs.length == 0) unit = trend.Unit;
+
           if (indexArray.length < 2)
+            // add at the end if dragged to axis name
             return {
               ...axis,
+              Unit: unit ? unit : axis.Unit,
               TrendIDs: [...axis.TrendIDs, e.item.id],
             };
 
           const newArr = axis.TrendIDs;
           switch (eventAnalyzer.getDropOperation()) {
-            case "before":
+            case "before": // add before trend if dragged on top of trend
               newArr.splice(trendIndex, 0, e.item.id);
               return {
                 ...axis,
+                Unit: unit ? unit : axis.Unit,
                 TrendIDs: newArr,
               };
               break;
-            default:
+            default: // add after trend if dragged anywhere else on trend
               newArr.splice(trendIndex + 1, 0, e.item.id);
               return {
                 ...axis,
+                Unit: unit ? unit : axis.Unit,
                 TrendIDs: newArr,
               };
           }
@@ -384,19 +408,29 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   const [showCreateAxisDialog, setShowCreateAxisDialog] =
     React.useState<boolean>(false);
 
-  const toggleAxisDialog = React.useCallback(() => {
-    setShowCreateAxisDialog(!showCreateAxisDialog);
-  }, [showCreateAxisDialog]);
+  const openCreateAxisDialog = React.useCallback(() => {
+    setShowCreateAxisDialog(true);
+  }, []);
+
+  const closeCreateAxisDialog = React.useCallback(() => {
+    setShowCreateAxisDialog(false);
+    fromDrag.current = false;
+    setNewAxisName("");
+  }, []);
 
   const handleConfirmButtonClick = React.useCallback(() => {
     onAxesStateChange(newAxesState);
     closeDialog();
   }, [newAxesState]);
 
+  const mainClass = React.useMemo(() => {
+    return "chart-edit-container" + (dragging ? " grabbing" : "");
+  }, [dragging]);
+
   return (
     <React.Fragment>
       <Dialog>
-        <div className="chart-edit-container">
+        <div className={mainClass}>
           <div className="segregated-trends">
             <TreeView
               draggable={true}
@@ -428,6 +462,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
               className="create-axis-area"
               onMouseEnter={handleMouseEnterCreateNewAxisArea}
               onMouseLeave={handleMouseLeaveCreateNewAxisArea}
+              onClick={openCreateAxisDialog}
             >
               <SvgIcon icon={plusIcon} size="large" />
               <Typography.p
@@ -441,11 +476,25 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
           </div>
         </div>
         {showCreateAxisDialog && (
-          <Dialog onClose={toggleAxisDialog}>
-            <Label>{t("trends-page:new_axis_name")}</Label>
+          <Dialog
+            title={t("trends-page:enter_new_axis_name")}
+            onClose={closeCreateAxisDialog}
+          >
             <TextBox value={newAxisName} onChange={handleAxisNameChange} />
             <DialogActionsBar>
-              <Button type="button" onClick={createNewAxis}>
+              <Button
+                type="button"
+                svgIcon={cancelIcon}
+                onClick={closeCreateAxisDialog}
+              >
+                {t("common:cancel")}
+              </Button>
+              <Button
+                type="button"
+                svgIcon={checkIcon}
+                onClick={createNewAxis}
+                themeColor={"primary"}
+              >
                 {t("common:confirm")}
               </Button>
             </DialogActionsBar>
