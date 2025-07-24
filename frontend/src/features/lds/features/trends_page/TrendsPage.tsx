@@ -434,6 +434,10 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
     setShowChartEdit(false);
   }, []);
 
+  const [highlightedTrendID, setHighlightedTrendID] = React.useState<
+    number | null
+  >(null);
+
   // DATA STUFF
 
   const trendDefApi = React.useMemo(
@@ -737,6 +741,7 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
           onEndDateChange={handleChartEndDateChange}
           onShowCursorBubbleChange={handleShowCursorBubbleChange}
           onCursorBubbleTextChange={handleCursorBubbleTextChange}
+          highlightedTrendID={highlightedTrendID}
         />
         <TrendsDetailPanel
           isLoadingTrends={isLoadingTrends}
@@ -751,6 +756,7 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
           templates={templatesState}
           onSelectedTemplateChange={handleSelectedTemplateChange}
           handleCreateNewTemplate={handleCreateNewTemplate}
+          onHighlightedTrendIDChange={setHighlightedTrendID}
         />
       </main>
       {showChartEdit && (

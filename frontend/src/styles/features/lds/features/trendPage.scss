@@ -108,7 +108,7 @@ main {
   border-radius: k-border-radius(xxxl);
   border: 1px solid k-color(border);
   margin: k-spacing(2);
-  transition: 250ms;
+  transition: 200ms;
   cursor: pointer;
 }
 
@@ -132,6 +132,47 @@ main {
 .grabbing,
 .grabbing * {
   cursor: grabbing !important;
+}
+
+.navigation-selection-container {
+  position: absolute;
+  display: flex;
+  pointer-events: none;
+}
+
+.navigation-selection-container > .mask {
+  background-color: k-color(surface-alt);
+  opacity: 0.8;
+}
+
+.navigation-selection-container > .selection {
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: 1px;
+  border-color: color-mix(in srgb, k-color(on-app-surface) 8%, transparent);
+  box-shadow: inset 0 1px 7px
+    color-mix(in srgb, k-color(on-app-surface) 15%, transparent);
+  position: relative;
+}
+
+.navigation-selection-container > .selection > * {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  background-color: k-color(base);
+  border-radius: 50%;
+  border-style: solid;
+  border-width: 1px;
+  border-color: k-color(border);
+  top: 50%;
+  translate: -50% -50%;
+  z-index: 2;
+  cursor: ew-resize;
+  pointer-events: all;
+}
+
+.navigation-selection-container > .selection > .right-handle {
+  left: 100%;
 }
 
 // kendo customization

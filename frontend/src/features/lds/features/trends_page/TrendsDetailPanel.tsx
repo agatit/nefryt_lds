@@ -48,6 +48,7 @@ export interface TrendDetailPanelProps {
   templates: Template[];
   onSelectedTemplateChange: (value: Template) => void;
   handleCreateNewTemplate: (name: string) => void;
+  onHighlightedTrendIDChange: (value: number | null) => void;
 }
 
 const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
@@ -63,6 +64,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
   templates,
   onSelectedTemplateChange,
   handleCreateNewTemplate,
+  onHighlightedTrendIDChange,
 }: TrendDetailPanelProps) {
   const { t } = useTranslation(["common", "trends-page"]);
 
@@ -137,13 +139,29 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
     [axesState]
   );
 
+  const handleTreeItemMouseEnter = React.useCallback((id: number) => {
+    onHighlightedTrendIDChange(id);
+  }, []);
+
+  const handleTreeItemMouseLeave = React.useCallback(() => {
+    onHighlightedTrendIDChange(null);
+  }, []);
+
   const TreeCustomItem = React.useCallback(
     (props: ItemRenderProps) => {
       const trend = trends.find((trend) => trend.ID == props.item.id);
       const correctDepth = props.itemHierarchicalIndex.split("_").length > 1;
 
       return (
-        <div className={correctDepth ? "change-cursor" : ""}>
+        <div
+          className={correctDepth ? "change-cursor" : ""}
+          onMouseEnter={
+            correctDepth
+              ? () => handleTreeItemMouseEnter(props.item.id)
+              : () => {}
+          }
+          onMouseLeave={correctDepth ? handleTreeItemMouseLeave : () => {}}
+        >
           {trend && correctDepth && (
             <SvgIcon
               icon={chartLegendIcon}
