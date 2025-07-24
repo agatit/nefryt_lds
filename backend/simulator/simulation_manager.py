@@ -1,0 +1,47 @@
+import atexit
+import logging
+import time
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from database import lds
+from db import get_engine
+from .config import Settings
+from .simulations.density import factory_simulation_density_object
+
+SIMULATION_CLASSES = {
+    'DENSITY': factory_simulation_density_object,
+}
+
+
+class SimulationManager:
+    def __init__(self):
+        self.simulations = []
+        self.start_simulations()
+        atexit.register(self.shutdown_processes)
+
+    def start_simulations(self):
+        statement = select(lds.Simulation)
+        with Session(get_engine()) as session:
+            simulations = session.execute(statement).all()[:][0]
+
+        for simulation in simulations:
+            try:
+                simulation_class = SIMULATION_CLASSES[simulation.SimulationDefID.strip()]
+                new_simulation = simulation_class(simulation, Settings.db_uri)
+                self.simulations.append(new_simulation)
+            except Exception as e:
+                logging.warning(f"Simulation with id = ({simulation.ID}) init error: {e}", exc_info=True)
+
+        for simulation in self.simulations:
+            simulation.run_process()
+
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logging.info("Simulator module shutdown")
+
+    def shutdown_processes(self):
+        for simulation in self.simulations:
+            simulation.process.terminate()
+            simulation.process.join(1)

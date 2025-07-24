@@ -1,11 +1,10 @@
 from pydantic import BaseModel
-from sqlalchemy import Integer
 from sqlmodel import SQLModel, Field
 
 
 class SimulationDataBase(SQLModel):
-    Distance: int = Field(Integer)
-    Data: int | None = Field(Integer)
+    Distance: float = Field()
+    Data: int | None = Field(None)
 
 
 class SimulationDataOut(BaseModel):

@@ -10,6 +10,9 @@ from . import TrendBase
 from db import get_engine
 
 
+logger = logging.getLogger(__name__)
+
+
 class TrendFilter(TrendBase):
     def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue):
         super().__init__(_id, queue, db_uri, profiler_queue)
@@ -18,44 +21,41 @@ class TrendFilter(TrendBase):
         self.storage = np.array([], dtype=np.uint16)
 
     def update(self, data: List[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int = None):
-        logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating...")
-
         if timestamp == self.storage_timestamp + 1 and len(self.storage) < self.block_size * (self.window_size * 2 + 1):
             self.storage = np.append(self.storage[:], data)
         elif timestamp == self.storage_timestamp + 1:
             self.storage = np.append(self.storage[100:], data)
         elif timestamp > self.storage_timestamp + 1:
-            logging.warning(
-                f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage not valid {self.storage_timestamp}")
+            logger.warning(f"{self.__class__.__name__} ({self.id}): "
+                            f"Data in storage not valid (timestamp={timestamp}, storage timestamp={self.storage_timestamp})")
             self.initiate_buffer(self.window_size, timestamp, parent_id)
         else:
-            logging.warning(
-                f"{timestamp} {self.__class__.__name__} ({self.id}) data in storage already exists {self.storage_timestamp}")
+            logger.warning(f"{self.__class__.__name__} ({self.id}): "
+                            f"Data in storage already exists (timestamp={timestamp}, storage timestamp={self.storage_timestamp})")
             self.storage = np.append(self.storage[100:], data)
 
         self.storage_timestamp = timestamp
 
-        logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) calculating...")
-
         calculated_data = self.calculate()
         if calculated_data is not None:
             super().update(calculated_data, timestamp - self.window_size, profiler_timestamp_diff + self.window_size, parent_id)
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Calculated results (timestamp={timestamp})")
         else:
             if self.children_count > 0:
                 self.profiler_queue.put((2, self.children_count, timestamp, None, None))
-            logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Empty calculation results (timestamp={timestamp})")
 
     def calculate(self) -> np.ndarray:
         raise NotImplementedError
 
     def initiate_buffer(self, window_size: int, timestamp: int, parent_id: int = None):
+        logger.debug(f"{self.__class__.__name__} ({self.id}): Started buffer init")
         self.storage = np.array([], dtype=np.uint16)
 
         stmt = select(lds.TrendData) \
-            .where(and_(
-            lds.TrendData.TrendID == parent_id
-            , lds.TrendData.Time > timestamp - window_size * 2 - 1
-            , lds.TrendData.Time <= timestamp)
+            .where(and_(lds.TrendData.TrendID == parent_id,
+            lds.TrendData.Time > timestamp - window_size * 2 - 1,
+            lds.TrendData.Time <= timestamp)
         ).order_by(lds.TrendData.Time.desc())  # noqa
 
         with Session(get_engine()) as session:
@@ -73,12 +73,14 @@ class TrendFilter(TrendBase):
                             last_valid = curr_data[i]
                         else:
                             curr_data[i] = last_valid
+                    logger.debug(f"{self.__class__.__name__} ({self.id}): Buffer init read data (timestamp={curr_data})")
                 elif len(self.storage) > 0:
                     curr_data = np.full(100, fill_value=last_valid, dtype=np.uint16)
                     trend_data = next(trend_data_iter, None)
-                    logging.debug(f"{self.__class__.__name__} ({self.id}) empty trend data")
+                    logger.debug(f"{self.__class__.__name__} ({self.id}): Buffer init filled data (timestamp={curr_data})")
                 else:
                     curr_data = np.array([])
+                    logger.debug(f"{self.__class__.__name__} ({self.id}): Buffer init no data (timestamp={curr_data})")
                 self.storage = np.append(curr_data, self.storage)
 
-        logging.info(f"{self.__class__.__name__} ({self.id}) buffer reads {len(self.storage)} values from {parent_id}")
+        logger.info(f"{self.__class__.__name__} ({self.id}): Buffer init read {len(self.storage)} values from parent trend")

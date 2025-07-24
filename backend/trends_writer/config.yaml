@@ -1,5 +1,43 @@
 db_uri: mssql+pyodbc://sa:Onyks$us@owl.agatit.pl:1449/NefrytLDS_Zygmuntow_2025?driver=ODBC+Driver+17+for+SQL+Server
 verbosity: INFO
 modbus_port: 502
-log_profiler: True
+log_profiler: False
 profiler_filename: profiler.log
+logging:
+  version: 1
+
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: DEBUG
+      stream: ext://sys.stdout
+
+    manager:
+      class: logging.FileHandler
+      filename: default_log.log
+      level: INFO
+
+  loggers:
+    trends_writer:
+      level: INFO
+      handlers: [console]
+
+    trends_writer.trend:
+      level: INFO
+      handlers: [console]
+      propagate: False
+
+    trends_writer.modbus:
+      level: INFO
+      handlers: [console]
+      propagate: False
+
+    trends_writer.plant:
+      level: INFO
+      handlers: [console]
+      propagate: False
+
+    trends_writer.profiler:
+      level: WARNING
+      handlers: [console]
+      propagate: False

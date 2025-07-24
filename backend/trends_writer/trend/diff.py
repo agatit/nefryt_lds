@@ -5,6 +5,9 @@ import numpy as np
 from . import TrendBase
 
 
+logger = logging.getLogger(__name__)
+
+
 class TrendDiff(TrendBase):
     def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue | None):
         super().__init__(_id, queue, db_uri, profiler_queue)
@@ -23,16 +26,15 @@ class TrendDiff(TrendBase):
         }
 
     def update(self, data: List[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int | None = None):
-        logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) updating...")
         calculated_data = self.calculate(data, timestamp, parent_id)
 
         if calculated_data is not None:
             super().update(calculated_data, timestamp, profiler_timestamp_diff, parent_id)
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Calculated results (timestamp={timestamp})")
         else:
-            logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) empty calculate result")
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Empty calculation results (timestamp={timestamp})")
 
     def calculate(self, data: List[int], timestamp: int, parent_id: int | None = None) -> np.ndarray:
-        logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) checking pair...")
         result = None
 
         if parent_id in self.parent_data.keys():
@@ -40,7 +42,6 @@ class TrendDiff(TrendBase):
             self.parent_data[parent_id]["timestamp"] = timestamp
 
             if list(self.parent_data.values())[0]["timestamp"] == list(self.parent_data.values())[1]["timestamp"]:
-                logging.debug(f"{timestamp} {self.__class__.__name__} ({self.id}) calculating...")
                 result = list(self.parent_data.values())[0]["data"] - list(self.parent_data.values())[1]["data"]
 
                 result = np.maximum(result, [np.iinfo(np.int16).min + 1] * len(result))  # FFFF reserved for error
