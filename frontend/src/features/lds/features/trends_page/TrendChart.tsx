@@ -296,12 +296,13 @@ const NavigationSelectComponent = React.memo(
       (event: MouseEvent) => {
         if (!isDragging) return;
 
+        const pixelShift = event.clientX - startingX.current;
         switch (grabbedHandle.current) {
           case HandleType.LEFT:
-            const pixelShift = event.clientX - startingX.current;
             setSelectStart(startingSelect.current + perPixelStep * pixelShift);
             break;
           case HandleType.RIGHT:
+            setSelectEnd(startingSelect.current + perPixelStep * pixelShift);
             break;
         }
       },
@@ -330,7 +331,7 @@ const NavigationSelectComponent = React.memo(
     if (navigationChartRect == undefined) return <></>;
     return (
       <div
-        className="navigation-selection-container"
+        className={"navigation-selection-container"}
         style={{
           top: navigationChartRect.top,
           left: navigationChartRect.left,
@@ -342,12 +343,12 @@ const NavigationSelectComponent = React.memo(
         <div className="selection" style={{ width: selectWidth }}>
           <div
             ref={rightHandleRef}
-            className="right-handle"
+            className={"right-handle" + (isDragging ? " pass-events" : "")}
             onMouseDown={(event) => handleMouseDown(event, HandleType.RIGHT)}
           />
           <div
             ref={leftHandleRef}
-            className="left-handle"
+            className={"left-handle" + (isDragging ? " pass-events" : "")}
             onMouseDown={(event) => handleMouseDown(event, HandleType.LEFT)}
           />
         </div>
@@ -558,10 +559,15 @@ const TrendChart = React.memo(function TrendChart({
   const selectStartDate = React.useRef<Date>(startDate);
   const selectEndDate = React.useRef<Date>(endDate);
 
-  const handleSelectStart = React.useCallback((handle: HandleType) => {
-    onShowCursorBubbleChange(true);
-    grabbedHandle.current = handle;
-  }, []);
+  const handleSelectStart = React.useCallback(
+    (handle: HandleType) => {
+      onShowCursorBubbleChange(true);
+      grabbedHandle.current = handle;
+      selectStartDate.current = startDate;
+      selectEndDate.current = endDate;
+    },
+    [startDate, endDate]
+  );
 
   const handleSelectEnd = React.useCallback(() => {
     onShowCursorBubbleChange(false);

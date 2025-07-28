@@ -66,6 +66,12 @@ main {
   gap: k-spacing(2);
 }
 
+.detail-panel-content > .separator {
+  background-color: k-color(border);
+  width: 100%;
+  height: 1px;
+}
+
 .k-panelbar-content > .item {
   display: flex;
   margin: 0 k-spacing(1) 0 k-spacing(1);
@@ -169,6 +175,10 @@ main {
   z-index: 2;
   cursor: ew-resize;
   pointer-events: all;
+}
+
+.navigation-selection-container > .selection > *.pass-events {
+  pointer-events: none;
 }
 
 .navigation-selection-container > .selection > .right-handle {

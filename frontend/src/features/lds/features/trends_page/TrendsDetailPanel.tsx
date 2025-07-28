@@ -244,9 +244,9 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
           {!isLoadingTrends ? (
             <div className="detail-panel-content">
               <div className="item">
-                <Typography.p fontSize="large" margin={0}>
+                {/* <Typography.p fontSize="large" margin={0}>
                   {t("trends-page:chart_legend")}
-                </Typography.p>
+                </Typography.p> */}
                 <div className="legend-container">
                   <TreeView
                     ref={axisTreeRef}
@@ -260,10 +260,11 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
                   />
                 </div>
               </div>
+              <div className="separator" />
               <div className="item">
-                <Typography.p fontSize="large" margin={0}>
+                {/* <Typography.p fontSize="large" margin={0}>
                   {t("trends-page:time_interval")}
-                </Typography.p>
+                </Typography.p> */}
                 <div className="item-column">
                   <div>
                     <Label>{t("common:from")}</Label>
@@ -283,6 +284,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
                   </div>
                 </div>
               </div>
+              <div className="separator" />
               <div className="item">
                 <div className="item-row">
                   <Button svgIcon={pencilIcon} onClick={onChartEditButtonClick}>
