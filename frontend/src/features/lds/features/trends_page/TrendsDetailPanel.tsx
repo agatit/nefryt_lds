@@ -22,7 +22,7 @@ import {
 import { DetailPanel } from "onyks_shared_kendo";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { AxisType, MockupTrendType, TreeViewDataItem } from "./TrendsPage";
+import { AxisType, TreeViewDataItem } from "./TrendsPage";
 import {
   cancelIcon,
   checkIcon,
@@ -34,6 +34,7 @@ import { Template, Trend } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
+import { MockupTrendType } from "../../../../data/mockup-data";
 
 export interface TrendDetailPanelProps {
   isLoadingTrends: boolean;

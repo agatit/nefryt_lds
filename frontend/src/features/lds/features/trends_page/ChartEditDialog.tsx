@@ -16,12 +16,7 @@ import {
 } from "@progress/kendo-react-treeview";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  AxisType,
-  MockupTrendGroupType,
-  MockupTrendType,
-  TreeViewDataItem,
-} from "./TrendsPage";
+import { AxisType, TreeViewDataItem } from "./TrendsPage";
 import { Trend, TrendDefBase } from "../../../../services/api";
 import {
   cancelIcon,
@@ -30,6 +25,10 @@ import {
   xIcon,
 } from "@progress/kendo-svg-icons";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
+import {
+  MockupTrendGroupType,
+  MockupTrendType,
+} from "../../../../data/mockup-data";
 
 export interface ChartEditDialogProps {
   useMockup: boolean;

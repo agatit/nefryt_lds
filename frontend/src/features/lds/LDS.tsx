@@ -1,5 +1,7 @@
-import { DrawerItemProps } from "@progress/kendo-react-layout";
+import { DrawerItem, DrawerItemProps } from "@progress/kendo-react-layout";
 import {
+  chevronDownIcon,
+  chevronRightIcon,
   homeIcon,
   kpiStatusOpenIcon,
   lockIcon,
@@ -9,7 +11,10 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { AuthContextProvider } from "../../contexts/authContext";
-import { DrawerRouterContainer } from "onyks_shared_kendo";
+import {
+  DrawerRouterContainer,
+  DrawerRouterItemProps,
+} from "onyks_shared_kendo";
 import KendoLocalizationWrapper from "../../components/KendoLocalizationWrapper";
 import TrendsPage from "./features/trends_page/TrendsPage";
 import TrendConfigurationPage from "./features/TrendConfigurationPage";
@@ -18,6 +23,7 @@ import EventsPage from "./features/EventsPage";
 import HomePage from "./features/HomePage";
 import { Button } from "@progress/kendo-react-buttons";
 import "../../styles/features/lds/lds.scss";
+import { SvgIcon } from "@progress/kendo-react-common";
 
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav", "kendo"]);
@@ -25,62 +31,87 @@ export default function LDS() {
   const navigate = useNavigate();
 
   // Build drawer router components
-  const [routerItems, setRouterItems] = React.useState<DrawerItemProps[]>([
-    {
-      text: t("nav:home"),
-      svgIcon: homeIcon,
-      selected: pathname == "/",
-      route: "/",
-    },
-    {
-      separator: true,
-    },
-    {
-      text: t("nav:trends_mockup"),
-      svgIcon: kpiStatusOpenIcon,
-      selected: pathname == "/trends-mockup",
-      route: "/trends-mockup",
-    },
-    {
-      separator: true,
-    },
-    {
-      text: t("nav:trends"),
-      svgIcon: kpiStatusOpenIcon,
-      selected: pathname == "/trends",
-      route: "/trends",
-    },
-    {
-      separator: true,
-    },
-    {
-      text: t("nav:trend_configuration"),
-      svgIcon: kpiStatusOpenIcon,
-      selected: pathname == "/trend-configuration",
-      route: "/trend-configuration",
-    },
-    {
-      separator: true,
-    },
-    {
-      text: t("nav:leak_probability_map"),
-      svgIcon: kpiStatusOpenIcon,
-      selected: pathname == "/leak-probability-map",
-      route: "/leak-probability-map",
-    },
-    {
-      separator: true,
-    },
-    {
-      text: t("nav:events"),
-      svgIcon: kpiStatusOpenIcon,
-      selected: pathname == "/events",
-      route: "/events",
-    },
-    {
-      separator: true,
-    },
-  ]);
+  const [routerItems, setRouterItems] = React.useState<DrawerRouterItemProps[]>(
+    [
+      {
+        id: 1,
+        text: t("nav:home"),
+        svgIcon: homeIcon,
+        selected: pathname == "/",
+        route: "/",
+      },
+      {
+        separator: true,
+      },
+      {
+        id: 2,
+        text: t("nav:trends_mockup"),
+        svgIcon: kpiStatusOpenIcon,
+        selected: pathname == "/trends-mockup",
+        route: "/trends-mockup",
+      },
+      {
+        separator: true,
+      },
+      {
+        id: 3,
+        text: t("nav:trends"),
+        svgIcon: kpiStatusOpenIcon,
+        selected: pathname == "/trends",
+        route: "/trends",
+      },
+      {
+        separator: true,
+      },
+      {
+        id: 4,
+        text: t("nav:trend_configuration"),
+        svgIcon: kpiStatusOpenIcon,
+        selected: pathname == "/trend-configuration",
+        route: "/trend-configuration",
+        expanded: false,
+      },
+      {
+        id: 41,
+        text: t("nav:trend_types_configuration"),
+        svgIcon: kpiStatusOpenIcon,
+        selected: pathname == "/trend-defs-configuration",
+        route: "/trend-defs-configuration",
+        parentId: 4,
+        level: 1,
+      },
+      {
+        id: 42,
+        text: t("nav:trend_groups_configuration"),
+        svgIcon: kpiStatusOpenIcon,
+        selected: pathname == "/trend-groups-configuration",
+        route: "/trend-groups-configuration",
+        parentId: 4,
+        level: 1,
+      },
+      {
+        separator: true,
+      },
+      {
+        text: t("nav:leak_probability_map"),
+        svgIcon: kpiStatusOpenIcon,
+        selected: pathname == "/leak-probability-map",
+        route: "/leak-probability-map",
+      },
+      {
+        separator: true,
+      },
+      {
+        text: t("nav:events"),
+        svgIcon: kpiStatusOpenIcon,
+        selected: pathname == "/events",
+        route: "/events",
+      },
+      {
+        separator: true,
+      },
+    ]
+  );
 
   React.useEffect(() => {
     setRouterItems(
