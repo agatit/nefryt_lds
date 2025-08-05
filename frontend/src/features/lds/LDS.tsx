@@ -1,11 +1,15 @@
 import { DrawerItem, DrawerItemProps } from "@progress/kendo-react-layout";
 import {
+  chartLineIcon,
   chevronDownIcon,
   chevronRightIcon,
+  dropletIcon,
   homeIcon,
   kpiStatusOpenIcon,
   lockIcon,
+  planIcon,
   unlockIcon,
+  wrenchIcon,
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -17,20 +21,19 @@ import {
 } from "onyks_shared_kendo";
 import KendoLocalizationWrapper from "../../components/KendoLocalizationWrapper";
 import TrendsPage from "./features/trends_page/TrendsPage";
-import TrendConfigurationPage from "./features/TrendConfigurationPage";
+import TrendConfigurationPage from "./features/trends_configuration/TrendConfigurationPage";
 import LeakProbabilityPage from "./features/LeakProbabilityPage";
 import EventsPage from "./features/EventsPage";
 import HomePage from "./features/HomePage";
 import { Button } from "@progress/kendo-react-buttons";
 import "../../styles/features/lds/lds.scss";
-import { SvgIcon } from "@progress/kendo-react-common";
 
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav", "kendo"]);
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  // Build drawer router components
+  // Building drawer router components (that why inside component)
   const [routerItems, setRouterItems] = React.useState<DrawerRouterItemProps[]>(
     [
       {
@@ -46,7 +49,7 @@ export default function LDS() {
       {
         id: 2,
         text: t("nav:trends_mockup"),
-        svgIcon: kpiStatusOpenIcon,
+        svgIcon: chartLineIcon,
         selected: pathname == "/trends-mockup",
         route: "/trends-mockup",
       },
@@ -56,7 +59,7 @@ export default function LDS() {
       {
         id: 3,
         text: t("nav:trends"),
-        svgIcon: kpiStatusOpenIcon,
+        svgIcon: chartLineIcon,
         selected: pathname == "/trends",
         route: "/trends",
       },
@@ -66,35 +69,16 @@ export default function LDS() {
       {
         id: 4,
         text: t("nav:trend_configuration"),
-        svgIcon: kpiStatusOpenIcon,
+        svgIcon: wrenchIcon,
         selected: pathname == "/trend-configuration",
         route: "/trend-configuration",
-        expanded: false,
-      },
-      {
-        id: 41,
-        text: t("nav:trend_types_configuration"),
-        svgIcon: kpiStatusOpenIcon,
-        selected: pathname == "/trend-defs-configuration",
-        route: "/trend-defs-configuration",
-        parentId: 4,
-        level: 1,
-      },
-      {
-        id: 42,
-        text: t("nav:trend_groups_configuration"),
-        svgIcon: kpiStatusOpenIcon,
-        selected: pathname == "/trend-groups-configuration",
-        route: "/trend-groups-configuration",
-        parentId: 4,
-        level: 1,
       },
       {
         separator: true,
       },
       {
         text: t("nav:leak_probability_map"),
-        svgIcon: kpiStatusOpenIcon,
+        svgIcon: dropletIcon,
         selected: pathname == "/leak-probability-map",
         route: "/leak-probability-map",
       },
@@ -102,8 +86,9 @@ export default function LDS() {
         separator: true,
       },
       {
+        id: 5,
         text: t("nav:events"),
-        svgIcon: kpiStatusOpenIcon,
+        svgIcon: planIcon,
         selected: pathname == "/events",
         route: "/events",
       },
@@ -140,6 +125,7 @@ export default function LDS() {
         position="start"
         mode="push"
         mini
+        width={260}
       >
         <KendoLocalizationWrapper>
           <Routes>

@@ -11,6 +11,7 @@ import {
 
 import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
+import "../../../../styles/layouts/detail-panel.scss";
 import "../../../../styles/features/lds/features/trendPage.scss";
 
 import { DateTimePickerChangeEvent } from "@progress/kendo-react-dateinputs";
@@ -460,7 +461,7 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
 
   return (
     <React.Fragment>
-      <main>
+      <main className="trends-page">
         <TrendChart
           isLoadingTrendsData={isLoadingTrendsData}
           startDate={startDate}

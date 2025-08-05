@@ -32,6 +32,22 @@ export const mockupTrendDefs: TrendDefBase[] = [
   },
 ];
 
+export interface MockupGroupType {
+  ID: number;
+  Name: string;
+}
+
+export const mockupTrendGroups: MockupGroupType[] = [
+  {
+    ID: 1,
+    Name: "Ciśnienie",
+  },
+  {
+    ID: 2,
+    Name: "Temperatura",
+  },
+]
+
 export const mockupTrends: MockupTrendType[] = [
   {
     ID: 0,

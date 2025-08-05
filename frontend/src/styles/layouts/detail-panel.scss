@@ -1,0 +1,46 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../themes/variables.scss" as var;
+
+.detail-panel-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: k-spacing(6);
+  width: 100%;
+}
+
+.detail-panel-content > .item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.detail-panel-content > .item > .legend-container {
+  display: flex;
+  justify-content: center;
+  align-items: left;
+  flex-direction: column;
+  width: 100%;
+}
+
+.detail-panel-content > .item > .item-row {
+  display: flex;
+  flex-direction: row;
+  gap: k-spacing(2);
+}
+
+.detail-panel-content > .item > .item-column {
+  display: flex;
+  flex-direction: column;
+  gap: k-spacing(2);
+  width: 100%;
+}
+
+.detail-panel-content > .separator {
+  background-color: k-color(border);
+  width: 100%;
+  height: 1px;
+}

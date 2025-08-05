@@ -1,6 +1,6 @@
 {
   "grid": {
-    "groupPanelEmpty": "Drag a column header and drop it here to group by that column",
+    "groupPanelEmpty": "Przeciągnij nagłówek kolumny i upuść tutaj aby pogrupować po tej kolumnie",
     "pagerItemsPerPage": "elementów na stronę",
     "pagerInfo": "{0} - {1} z {2} elementów",
     "pagerFirstPage": "Przejdź do pierwszej strony",
@@ -183,8 +183,8 @@
     "viewHtml-update": "Update"
   },
   "flatColorPicker": {
-    "cancelBtn": "Cancel",
-    "applyBtn": "Apply"
+    "cancelBtn": "Anuluj",
+    "applyBtn": "Zastosuj"
   },
   "timepicker": {
     "now": "TERAZ",
@@ -384,7 +384,7 @@
     "previewPaneEditButton": "Edit",
     "previewPanePriorityLabel": "Priority:",
     "toolbarAddColumnButton": "Add column",
-    "toolbarSearchField": "Search"
+    "toolbarSearchField": "Szukaj"
   },
   "labels": {
     "labelsOptional": "(Optional)"
@@ -501,7 +501,7 @@
     "configuratorApply": "Apply",
     "configuratorTitle": "Settings",
     "configuratorEditorSearchTitle": "Fields",
-    "configuratorEditorSearchPlaceholder": "Search...",
+    "configuratorEditorSearchPlaceholder": "Szukaj...",
     "configuratorColumnsTitle": "Columns",
     "configuratorRowsTitle": "Rows",
     "configuratorMeasuresTitle": "Values",

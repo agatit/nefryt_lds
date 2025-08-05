@@ -1,0 +1,42 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
+main.config-page {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+}
+
+.config-grid-container {
+  flex: 4 0 0;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: k-spacing(1);
+}
+
+.config-grid-container > * {
+  flex: 1 0 0;
+  width: 100%;
+}
+
+.config-grid-container > .defs-and-groups {
+  display: flex;
+  flex-direction: row;
+
+  gap: k-spacing(2);
+}
+
+.config-grid-container > .defs-and-groups > * {
+  flex: 1 1 0;
+}
+
+.config-detail-panel.no-selected > div {
+  justify-content: center;
+  height: 100%;
+  cursor: not-allowed;
+}
+
+.config-detail-panel .k-alpha-slider {
+  display: none;
+}

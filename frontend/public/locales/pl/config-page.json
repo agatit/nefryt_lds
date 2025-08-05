@@ -1,0 +1,21 @@
+{
+  "name": "Nazwa",
+  "trend_type": "Typ trendu",
+  "trend_group": "Grupa trendu",
+  "unit": "Jednostka",
+  "color": "Kolor",
+  "add_new_trend": "Dodaj nowy trend",
+  "create_new_trend": "Utwórz nowy trend",
+  "id": "Identyfikator",
+  "symbol": "Symbol",
+  "multiplier": "Mnożnik",
+  "trends_types": "Typy trendów",
+  "trends_groups": "Grupy trendów",
+  "trends_units": "Jednostki trendów",
+  "add_new_trend_type": "Dodaj nowy typ trendów",
+  "add_new_trend_group": "Dodaj nową grupę trendów",
+  "add_new_unit": "Dodaj nową jednostkę",
+  "create_new_trend_type": "Utwórz nowy typ trendów",
+  "create_new_trend_group": "Utwórz nową grupę trendów",
+  "create_new_unit": "Utwórz nową jednostkę"
+}
