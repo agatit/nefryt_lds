@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from config import setup_engine
 from database.models import lds
 from db import get_engine
-from trends_writer.config import Settings
+from trends_writer.config import TrendsWriterSettings
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +65,8 @@ class Profiler:
     @staticmethod
     def _start_process(trends_dict: dict, trends_count: int):
         Profiler.process = multiprocessing.Process(target=Profiler._process_queue,
-                                                   args=(Profiler.queue, trends_dict, trends_count, Settings.db_uri,
-                                                         Settings.log_profiler))
+                                                   args=(Profiler.queue, trends_dict, trends_count, TrendsWriterSettings.db_uri,
+                                                         TrendsWriterSettings.log_profiler))
         Profiler.process.daemon = True
         Profiler.process.start()
         logger.info("Profiler: Process started")
@@ -138,7 +138,7 @@ class Profiler:
                     Profiler.updates[timestamp]['total'][1] = (current_count, finished_count, start, time_used)
                     if finished_count >= trends_count and current_count == 0:
                         Profiler.write_profiler_data(log_profiler, time_used, timestamp)
-                elif len(trend_id) < trends_dict['total'][0]:
+                elif trend_id < trends_dict['total'][0]:
                     Profiler.updates[timestamp] = copy.deepcopy(trends_dict)
                     Profiler.updates[timestamp]['total'][1] = (0, trend_id, None, 0)
             elif operation == 3:
@@ -154,7 +154,7 @@ class Profiler:
     def write_profiler_data(log_profiler: bool, time_used: float, timestamp: int):
         time_used_percent = (time_used / 1.0) * 100
         if log_profiler:
-            with (open(Settings.profiler_filename, "a") as f):
+            with (open(TrendsWriterSettings.profiler_filename, "a") as f):
                 for k, v in Profiler.updates[timestamp].items():
                     if k == 'total' or v[1][1] is None or v[0][0] != 0:
                         continue

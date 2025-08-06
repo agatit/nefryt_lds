@@ -5,9 +5,9 @@ import time
 from multiprocessing import Queue
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from config import Settings
 from database import lds
 from db import get_engine
-from .config import Settings
 from .profiler import Profiler
 import trends_writer.trend # noqa
 from .trend import TrendManager, TrendBase

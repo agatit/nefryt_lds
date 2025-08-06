@@ -9,12 +9,12 @@ from sqlalchemy import create_engine, text, Connection, Engine
 from sqlalchemy.orm import Session
 from sqlmodel import SQLModel
 from testcontainers.mssql import SqlServerContainer
+from config import Settings
 from config_utils import load_yaml, clear_test_db
 from db import set_new_engine, get_engine
-from trends_writer.config import Settings
+from trends_writer.config import TrendsWriterSettings
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-
-
 path = pathlib.Path(__file__).parent.resolve()
 
 
@@ -36,7 +36,7 @@ class TestConfig(BaseModel):
 
 _config_test = load_yaml(path, "config.test.yaml")
 TestSettings = TestConfig(test_model=TestModel(**_config_test), password_settings=PasswordSettings()) # type: ignore
-Settings.log_profiler = False
+TrendsWriterSettings.log_profiler = False
 
 def pytest_addoption(parser):
     parser.addoption(
