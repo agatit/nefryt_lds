@@ -9,7 +9,7 @@ import platform
 
 path = pathlib.Path(__file__).parent.resolve()
 default_manager_handler_filename = 'default_log.log'
-
+# TODO: remove log file creation when testing
 
 def set_manager_handler(default_manager_handler: dict) -> dict:
     global default_manager_handler_filename

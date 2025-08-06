@@ -6,20 +6,21 @@ from sqlalchemy.orm import Session
 from database import lds
 from db import get_engine
 from .config import Settings
-from .simulations.density import factory_simulation_density_object
+from .simulations.density_mass import SimulationDensityMass
+from .simulations.density_volume import SimulationDensityVolume
 
 SIMULATION_CLASSES = {
-    'DENSITY': factory_simulation_density_object,
+    'DENSITY_VOLUME': SimulationDensityVolume,
+    'DENSITY_MASS': SimulationDensityMass,
 }
 
 
 class SimulationManager:
     def __init__(self):
         self.simulations = []
-        self.start_simulations()
         atexit.register(self.shutdown_processes)
 
-    def start_simulations(self):
+    async def start_simulations(self):
         statement = select(lds.Simulation)
         with Session(get_engine()) as session:
             simulations = session.execute(statement).all()[:][0]
@@ -30,7 +31,7 @@ class SimulationManager:
                 new_simulation = simulation_class(simulation, Settings.db_uri)
                 self.simulations.append(new_simulation)
             except Exception as e:
-                logging.warning(f"Simulation with id = ({simulation.ID}) init error: {e}", exc_info=True)
+                logging.warning(f"Simulation with id = {simulation.ID} init error: {e}", exc_info=True)
 
         for simulation in self.simulations:
             simulation.run_process()
