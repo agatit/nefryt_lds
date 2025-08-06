@@ -40,14 +40,13 @@ interface ChartComponentProps {
   axesState: AxisType[];
   trendMinMaxValue: MinMaxType;
   valueAxisState: MinMaxType[];
-  handleSelectStart: (event: SelectStartEvent) => void;
-  handleSelectEnd: (event: SelectEndEvent) => void;
   handleOnPlotHover: (event: PlotAreaHoverEvent) => void;
   startDate: Date;
   endDate: Date;
   navigationStartDate: Date;
   navigationEndDate: Date;
   isEmpty: boolean;
+  highlightedTrendID: number | null;
 }
 
 const ChartComponent = React.memo(function ChartComponent({
@@ -57,14 +56,13 @@ const ChartComponent = React.memo(function ChartComponent({
   axesState,
   trendMinMaxValue,
   valueAxisState,
-  handleSelectStart,
-  handleSelectEnd,
   handleOnPlotHover,
   startDate,
   endDate,
   navigationStartDate,
   navigationEndDate,
   isEmpty,
+  highlightedTrendID,
 }: ChartComponentProps) {
   const { t } = useTranslation(["common", "trends-page"]);
 
@@ -101,6 +99,7 @@ const ChartComponent = React.memo(function ChartComponent({
   }, [axesState, valueAxisState, trendMinMaxValue]);
 
   const mainChartSeriesItems = React.useMemo(() => {
+    const opacity = highlightedTrendID !== null ? 0.25 : null;
     return trendData.map((trend) => {
       const axis = axesState.find((axis) => axis.TrendIDs.includes(trend.id));
       return (
@@ -113,10 +112,11 @@ const ChartComponent = React.memo(function ChartComponent({
           markers={{ visible: false }}
           color={trend.color}
           axis={axis?.Name}
+          opacity={opacity ? (trend.id == highlightedTrendID ? 1 : opacity) : 1}
         />
       );
     });
-  }, [trendData, axesState]);
+  }, [trendData, axesState, highlightedTrendID]);
 
   const navigationChartSeriesItems = React.useMemo(() => {
     return navigatorData.map((trend) => {
@@ -132,6 +132,9 @@ const ChartComponent = React.memo(function ChartComponent({
           axis="valueNavigatorAxis"
           categoryAxis="navigatorAxis"
           color={trend.color}
+          highlight={{
+            visible: false,
+          }}
         />
       );
     });
@@ -147,6 +150,7 @@ const ChartComponent = React.memo(function ChartComponent({
   return (
     <React.Fragment>
       <Chart
+        key={"main-chart"}
         //   key={chartKeyRef.current}
         // ref={chartRef}
         className="main-chart"
@@ -181,10 +185,9 @@ const ChartComponent = React.memo(function ChartComponent({
         )}
       </Chart>
       <Chart
+        key={"navigation-chart"}
         className="navigation-chart"
-        renderAs="canvas"
-        onSelectStart={handleSelectStart}
-        onSelectEnd={handleSelectEnd}
+        renderAs="svg"
         onPlotAreaHover={handleOnPlotHover}
         transitions={false}
         style={{ height: "15vh" }}
@@ -195,7 +198,6 @@ const ChartComponent = React.memo(function ChartComponent({
             maxDivisions={20}
             labels={{ visible: false }}
             name="navigatorAxis"
-            select={select}
             min={navigationStartDate}
             max={navigationEndDate}
           />
@@ -219,6 +221,143 @@ const ChartComponent = React.memo(function ChartComponent({
   );
 });
 
+enum HandleType {
+  LEFT,
+  RIGHT,
+}
+
+interface NavigationSelectComponentProps {
+  onSelectStart: (handle: HandleType) => void;
+  onSelectEnd: () => void;
+}
+
+const NavigationSelectComponent = React.memo(
+  function NavigationSelectComponent({
+    onSelectStart,
+    onSelectEnd,
+  }: NavigationSelectComponentProps) {
+    const leftHandleRef = React.useRef<HTMLDivElement>(null);
+    const rightHandleRef = React.useRef<HTMLDivElement>(null);
+    const [navigationChartRect, setNavigationChartRect] =
+      React.useState<DOMRect>();
+    const [selectStart, setSelectStart] = React.useState<number>(33.3);
+    const [selectEnd, setSelectEnd] = React.useState<number>(66.6);
+    const [isDragging, setIsDragging] = React.useState<boolean>(false);
+    const grabbedHandle = React.useRef<HandleType>(HandleType.LEFT);
+    const startingX = React.useRef<number>(0);
+    const startingSelect = React.useRef<number>(0);
+
+    React.useLayoutEffect(() => {
+      // todo add some windows resizing observers
+      setNavigationChartRect(
+        document
+          .getElementsByClassName("navigation-chart")[0]
+          ?.getElementsByTagName("svg")[0]
+          ?.children[1]?.children[2]?.getBoundingClientRect()
+      );
+    }, []);
+
+    const selectWidth = React.useMemo(() => {
+      if (navigationChartRect == undefined) return 0;
+
+      return ((selectEnd - selectStart) * navigationChartRect.width) / 100;
+    }, [navigationChartRect, selectStart, selectEnd]);
+
+    const leftMaskWidth = React.useMemo(() => {
+      if (navigationChartRect == undefined) return 0;
+
+      return ((selectStart - 0) * navigationChartRect.width) / 100;
+    }, [selectStart, navigationChartRect]);
+    const rightMaskWidth = React.useMemo(() => {
+      if (navigationChartRect == undefined) return 0;
+
+      return ((100 - selectEnd) * navigationChartRect.width) / 100;
+    }, [selectEnd, navigationChartRect]);
+
+    const perPixelStep = React.useMemo(() => {
+      if (navigationChartRect == undefined) return 0;
+
+      return 100 / navigationChartRect.width;
+    }, [navigationChartRect]);
+
+    const handleMouseDown = React.useCallback(
+      (event: React.MouseEvent, handle: HandleType) => {
+        onSelectStart(handle);
+        setIsDragging(true);
+        grabbedHandle.current = handle;
+        startingX.current = event.clientX;
+        startingSelect.current =
+          handle == HandleType.LEFT ? selectStart : selectEnd;
+      },
+      [onSelectStart]
+    );
+
+    const handleMouseMove = React.useCallback(
+      (event: MouseEvent) => {
+        if (!isDragging) return;
+
+        const pixelShift = event.clientX - startingX.current;
+        switch (grabbedHandle.current) {
+          case HandleType.LEFT:
+            setSelectStart(startingSelect.current + perPixelStep * pixelShift);
+            break;
+          case HandleType.RIGHT:
+            setSelectEnd(startingSelect.current + perPixelStep * pixelShift);
+            break;
+        }
+      },
+      [selectStart, isDragging]
+    );
+
+    const handleMouseUp = React.useCallback(() => {
+      if (!isDragging) return;
+
+      onSelectEnd();
+      setIsDragging(false);
+      setSelectStart(33.3);
+      setSelectEnd(66.6);
+    }, [onSelectEnd, isDragging]);
+
+    React.useEffect(() => {
+      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
+
+      return () => {
+        document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove);
+      };
+    }, [handleMouseUp, handleMouseMove]);
+
+    if (navigationChartRect == undefined) return <></>;
+    return (
+      <div
+        className={"navigation-selection-container"}
+        style={{
+          top: navigationChartRect.top,
+          left: navigationChartRect.left,
+          width: navigationChartRect.width,
+          height: navigationChartRect.height,
+        }}
+      >
+        <div className="mask" style={{ width: leftMaskWidth }} />
+        <div className="selection" style={{ width: selectWidth }}>
+          <div
+            ref={rightHandleRef}
+            className={"right-handle" + (isDragging ? " pass-events" : "")}
+            onMouseDown={(event) => handleMouseDown(event, HandleType.RIGHT)}
+          />
+          <div
+            ref={leftHandleRef}
+            className={"left-handle" + (isDragging ? " pass-events" : "")}
+            onMouseDown={(event) => handleMouseDown(event, HandleType.LEFT)}
+          />
+        </div>
+        <div className="mask" style={{ width: rightMaskWidth }} />
+      </div>
+    );
+  }
+);
+
 export interface TrendChartProps {
   isLoadingTrendsData: boolean;
   startDate: Date;
@@ -232,6 +371,7 @@ export interface TrendChartProps {
   onEndDateChange: (value: Date) => void;
   onShowCursorBubbleChange: (value: boolean) => void;
   onCursorBubbleTextChange: (value: string) => void;
+  highlightedTrendID: number | null;
 }
 
 const TrendChart = React.memo(function TrendChart({
@@ -247,6 +387,7 @@ const TrendChart = React.memo(function TrendChart({
   onEndDateChange,
   onShowCursorBubbleChange,
   onCursorBubbleTextChange,
+  highlightedTrendID,
 }: TrendChartProps) {
   const isEmpty: boolean = React.useMemo(() => {
     for (let trend of trendData) {
@@ -350,7 +491,6 @@ const TrendChart = React.memo(function TrendChart({
       );
 
       if (axis == undefined) continue;
-
       counter++;
 
       const axisRect = axesElements[i].getBoundingClientRect();
@@ -358,13 +498,13 @@ const TrendChart = React.memo(function TrendChart({
         left: axisRect.left + (counter == 1 ? 15 : -20),
       });
     }
-
     if (chartRect && ssBarStylesArr.length > 0) setSSBarStyles(ssBarStylesArr);
   }, [ssBarStyles, isLoadingTrendsData]);
 
-  React.useLayoutEffect(() => {
+  const [triggerRerender, setTriggerRerender] = React.useState<boolean>(false);
+  React.useEffect(() => {
     handleSSBarsLeftPositioning();
-  }, [axesState]);
+  }, [axesState, triggerRerender]);
 
   const chartRect = React.useRef({ width: 0, height: 0 });
   const chartRenderCounter = React.useRef(0);
@@ -386,6 +526,11 @@ const TrendChart = React.memo(function TrendChart({
   });
 
   const scaleScrollBars = React.useMemo(() => {
+    if (ssBarStyles.length !== valueAxisState.length) {
+      setTriggerRerender(!triggerRerender);
+      return;
+    }
+
     return ssBarStyles.map((style, i) => {
       return (
         <ScaleScrollBar
@@ -410,18 +555,33 @@ const TrendChart = React.memo(function TrendChart({
     });
   }, [ssBarStyles]);
 
-  const handleSelectStart = React.useCallback((e: SelectStartEvent) => {
-    onShowCursorBubbleChange(true);
-  }, []);
+  const grabbedHandle = React.useRef<HandleType>(HandleType.LEFT);
+  const selectStartDate = React.useRef<Date>(startDate);
+  const selectEndDate = React.useRef<Date>(endDate);
 
-  const handleSelectEnd = React.useCallback((e: SelectEndEvent) => {
+  const handleSelectStart = React.useCallback(
+    (handle: HandleType) => {
+      onShowCursorBubbleChange(true);
+      grabbedHandle.current = handle;
+      selectStartDate.current = startDate;
+      selectEndDate.current = endDate;
+    },
+    [startDate, endDate]
+  );
+
+  const handleSelectEnd = React.useCallback(() => {
     onShowCursorBubbleChange(false);
-    onStartDateChange(e.from);
-    onEndDateChange(e.to);
+    onStartDateChange(selectStartDate.current);
+    onEndDateChange(selectEndDate.current);
   }, []);
 
   const handleOnPlotHover = React.useCallback((e: PlotAreaHoverEvent) => {
-    if (e.category)
+    if (e.category) {
+      if (grabbedHandle.current == HandleType.LEFT) {
+        selectStartDate.current = e.category;
+      } else {
+        selectEndDate.current = e.category;
+      }
       onCursorBubbleTextChange(
         e.category.toLocaleDateString("pl-PL", {
           hourCycle: "h24",
@@ -434,6 +594,7 @@ const TrendChart = React.memo(function TrendChart({
           fractionalSecondDigits: "3",
         })
       );
+    }
   }, []);
 
   return (
@@ -446,17 +607,20 @@ const TrendChart = React.memo(function TrendChart({
           axesState={axesState}
           trendMinMaxValue={trendMinMaxValue}
           valueAxisState={valueAxisState}
-          handleSelectStart={handleSelectStart}
-          handleSelectEnd={handleSelectEnd}
           handleOnPlotHover={handleOnPlotHover}
           startDate={startDate}
           endDate={endDate}
           navigationStartDate={navigationStartDate}
           navigationEndDate={navigationEndDate}
           isEmpty={isEmpty}
+          highlightedTrendID={highlightedTrendID}
         />
       </div>
       {scaleScrollBars}
+      <NavigationSelectComponent
+        onSelectStart={handleSelectStart}
+        onSelectEnd={handleSelectEnd}
+      />
     </React.Fragment>
   );
 });

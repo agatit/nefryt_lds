@@ -46,7 +46,7 @@ export interface Axis {
      * @type {string}
      * @memberof Axis
      */
-    'Unit': string;
+    'UnitID': string;
     /**
      * 
      * @type {number}
@@ -205,6 +205,191 @@ export interface CustomPageNodeOut {
      * 
      * @type {number}
      * @memberof CustomPageNodeOut
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageProfilerDataOut
+ */
+export interface CustomPageProfilerDataOut {
+    /**
+     * 
+     * @type {Array<ProfilerDataOut>}
+     * @memberof CustomPageProfilerDataOut
+     */
+    'items': Array<ProfilerDataOut>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageProfilerDataOut
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageProfilerDataOut
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageProfilerDataOut
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageProfilerDataOut
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageSimulation
+ */
+export interface CustomPageSimulation {
+    /**
+     * 
+     * @type {Array<Simulation>}
+     * @memberof CustomPageSimulation
+     */
+    'items': Array<Simulation>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulation
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulation
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulation
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulation
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageSimulationDataOut
+ */
+export interface CustomPageSimulationDataOut {
+    /**
+     * 
+     * @type {Array<SimulationDataOut>}
+     * @memberof CustomPageSimulationDataOut
+     */
+    'items': Array<SimulationDataOut>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationDataOut
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationDataOut
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationDataOut
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationDataOut
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageSimulationDefBase
+ */
+export interface CustomPageSimulationDefBase {
+    /**
+     * 
+     * @type {Array<SimulationDefBase>}
+     * @memberof CustomPageSimulationDefBase
+     */
+    'items': Array<SimulationDefBase>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationDefBase
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationDefBase
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationDefBase
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationDefBase
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageSimulationParamOut
+ */
+export interface CustomPageSimulationParamOut {
+    /**
+     * 
+     * @type {Array<SimulationParamOut>}
+     * @memberof CustomPageSimulationParamOut
+     */
+    'items': Array<SimulationParamOut>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationParamOut
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationParamOut
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationParamOut
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageSimulationParamOut
      */
     'pages'?: number | null;
 }
@@ -396,6 +581,43 @@ export interface CustomPageTrendDefBase {
 /**
  * 
  * @export
+ * @interface CustomPageTrendGroup
+ */
+export interface CustomPageTrendGroup {
+    /**
+     * 
+     * @type {Array<TrendGroup>}
+     * @memberof CustomPageTrendGroup
+     */
+    'items': Array<TrendGroup>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendGroup
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendGroup
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendGroup
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageTrendGroup
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
  * @interface CustomPageTrendParamOut
  */
 export interface CustomPageTrendParamOut {
@@ -427,6 +649,43 @@ export interface CustomPageTrendParamOut {
      * 
      * @type {number}
      * @memberof CustomPageTrendParamOut
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageUnit
+ */
+export interface CustomPageUnit {
+    /**
+     * 
+     * @type {Array<Unit>}
+     * @memberof CustomPageUnit
+     */
+    'items': Array<Unit>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageUnit
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageUnit
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageUnit
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageUnit
      */
     'pages'?: number | null;
 }
@@ -762,6 +1021,13 @@ export interface ModelError {
 /**
  * 
  * @export
+ * @interface Multiplier
+ */
+export interface Multiplier {
+}
+/**
+ * 
+ * @export
  * @interface Node
  */
 export interface Node {
@@ -826,6 +1092,80 @@ export interface NodeOut {
      * @memberof NodeOut
      */
     'EditorParams'?: EditorNodeBase | null;
+}
+/**
+ * 
+ * @export
+ * @interface ProfilerDataOut
+ */
+export interface ProfilerDataOut {
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerDataOut
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerDataOut
+     */
+    'Time10': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerDataOut
+     */
+    'Time100': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerDataOut
+     */
+    'Time1000': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerDataOut
+     */
+    'QueueSize': number | null;
+}
+/**
+ * 
+ * @export
+ * @interface ProfilerGeneralData
+ */
+export interface ProfilerGeneralData {
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerGeneralData
+     */
+    'ActiveTrends'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerGeneralData
+     */
+    'Time10'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerGeneralData
+     */
+    'Time100'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerGeneralData
+     */
+    'Time1000'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilerGeneralData
+     */
+    'QueueSize'?: number;
 }
 /**
  * 
@@ -1008,6 +1348,110 @@ export interface ResponseCreateNodeNodePost {
 /**
  * 
  * @export
+ * @interface ResponseCreateSimulationParamSimulationSimulationIdParamPost
+ */
+export interface ResponseCreateSimulationParamSimulationSimulationIdParamPost {
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateSimulationParamSimulationSimulationIdParamPost
+     */
+    'SimulationID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateSimulationParamSimulationSimulationIdParamPost
+     */
+    'SimulationParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateSimulationParamSimulationSimulationIdParamPost
+     */
+    'Value': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateSimulationParamSimulationSimulationIdParamPost
+     */
+    'DataType': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateSimulationParamSimulationSimulationIdParamPost
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateSimulationParamSimulationSimulationIdParamPost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateSimulationParamSimulationSimulationIdParamPost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseCreateSimulationSimulationPost
+ */
+export interface ResponseCreateSimulationSimulationPost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'SimulationDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'TrendID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'RefreshTimeSeconds': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'DistanceMeters': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseCreateTemplateTemplatePost
  */
 export interface ResponseCreateTemplateTemplatePost {
@@ -1039,6 +1483,43 @@ export interface ResponseCreateTemplateTemplatePost {
      * 
      * @type {string}
      * @memberof ResponseCreateTemplateTemplatePost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseCreateTrendGroupTrendGroupPost
+ */
+export interface ResponseCreateTrendGroupTrendGroupPost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendGroupTrendGroupPost
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseCreateTrendGroupTrendGroupPost
+     */
+    'AnalysisOnly'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTrendGroupTrendGroupPost
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTrendGroupTrendGroupPost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendGroupTrendGroupPost
      */
     'message': string;
 }
@@ -1148,6 +1629,55 @@ export interface ResponseCreateTrendTrendPost {
 /**
  * 
  * @export
+ * @interface ResponseCreateUnitUnitPost
+ */
+export interface ResponseCreateUnitUnitPost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateUnitUnitPost
+     */
+    'ID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateUnitUnitPost
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateUnitUnitPost
+     */
+    'Symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateUnitUnitPost
+     */
+    'BaseID'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateUnitUnitPost
+     */
+    'Multiplier'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateUnitUnitPost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateUnitUnitPost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseDeleteEventDefByIdEventDefEventDefIdDelete
  */
 export interface ResponseDeleteEventDefByIdEventDefEventDefIdDelete {
@@ -1173,6 +1703,68 @@ export interface ResponseDeleteEventDefByIdEventDefEventDefIdDelete {
      * 
      * @type {number}
      * @memberof ResponseDeleteEventDefByIdEventDefEventDefIdDelete
+     */
+    'code': number;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseDeleteSimulationByIdSimulationSimulationIdDelete
+ */
+export interface ResponseDeleteSimulationByIdSimulationSimulationIdDelete {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseDeleteSimulationByIdSimulationSimulationIdDelete
+     */
+    'message': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteSimulationByIdSimulationSimulationIdDelete
+     */
+    'affected': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteSimulationByIdSimulationSimulationIdDelete
+     */
+    'status': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteSimulationByIdSimulationSimulationIdDelete
+     */
+    'code': number;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
+ */
+export interface ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
+     */
+    'message': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
+     */
+    'affected': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
+     */
+    'status': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
      */
     'code': number;
 }
@@ -1350,6 +1942,55 @@ export interface ResponseGetEventDefByIdEventDefEventDefIdGet {
 /**
  * 
  * @export
+ * @interface ResponseGetGeneralProfilerDataTrendWriterGeneralGet
+ */
+export interface ResponseGetGeneralProfilerDataTrendWriterGeneralGet {
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetGeneralProfilerDataTrendWriterGeneralGet
+     */
+    'ActiveTrends'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetGeneralProfilerDataTrendWriterGeneralGet
+     */
+    'Time10'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetGeneralProfilerDataTrendWriterGeneralGet
+     */
+    'Time100'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetGeneralProfilerDataTrendWriterGeneralGet
+     */
+    'Time1000'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetGeneralProfilerDataTrendWriterGeneralGet
+     */
+    'QueueSize'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetGeneralProfilerDataTrendWriterGeneralGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetGeneralProfilerDataTrendWriterGeneralGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseGetLinkByIdLinkLinkIdGet
  */
 export interface ResponseGetLinkByIdLinkLinkIdGet {
@@ -1436,6 +2077,208 @@ export interface ResponseGetNodeByIdNodeNodeIdGet {
      * 
      * @type {string}
      * @memberof ResponseGetNodeByIdNodeNodeIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetProfilerDataByIdTrendWriterTrendIdGet
+ */
+export interface ResponseGetProfilerDataByIdTrendWriterTrendIdGet {
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetProfilerDataByIdTrendWriterTrendIdGet
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetProfilerDataByIdTrendWriterTrendIdGet
+     */
+    'Time10': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetProfilerDataByIdTrendWriterTrendIdGet
+     */
+    'Time100': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetProfilerDataByIdTrendWriterTrendIdGet
+     */
+    'Time1000': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetProfilerDataByIdTrendWriterTrendIdGet
+     */
+    'QueueSize': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetProfilerDataByIdTrendWriterTrendIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetProfilerDataByIdTrendWriterTrendIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetSimulationByIdSimulationSimulationIdGet
+ */
+export interface ResponseGetSimulationByIdSimulationSimulationIdGet {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'SimulationDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'TrendID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'RefreshTimeSeconds': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'DistanceMeters': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetSimulationDataSimulationSimulationIdDataGet
+ */
+export interface ResponseGetSimulationDataSimulationSimulationIdDataGet {
+    /**
+     * 
+     * @type {Array<SimulationDataOut>}
+     * @memberof ResponseGetSimulationDataSimulationSimulationIdDataGet
+     */
+    'items': Array<SimulationDataOut>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationDataSimulationSimulationIdDataGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationDataSimulationSimulationIdDataGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationDataSimulationSimulationIdDataGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationDataSimulationSimulationIdDataGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationDataSimulationSimulationIdDataGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationDataSimulationSimulationIdDataGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet
+ */
+export interface ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet {
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet
+     */
+    'SimulationID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet
+     */
+    'SimulationParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet
+     */
+    'Value': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet
+     */
+    'DataType': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet
      */
     'message': string;
 }
@@ -1729,6 +2572,43 @@ export interface ResponseGetTrendDataTrendTrendIdListDataBeginEndSamplesGet {
 /**
  * 
  * @export
+ * @interface ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet
+ */
+export interface ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet
+     */
+    'AnalysisOnly'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet
  */
 export interface ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet {
@@ -1772,6 +2652,55 @@ export interface ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet {
      * 
      * @type {string}
      * @memberof ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetUnitByIdUnitUnitIdGet
+ */
+export interface ResponseGetUnitByIdUnitUnitIdGet {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetUnitByIdUnitUnitIdGet
+     */
+    'ID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetUnitByIdUnitUnitIdGet
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetUnitByIdUnitUnitIdGet
+     */
+    'Symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetUnitByIdUnitUnitIdGet
+     */
+    'BaseID'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetUnitByIdUnitUnitIdGet
+     */
+    'Multiplier'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetUnitByIdUnitUnitIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetUnitByIdUnitUnitIdGet
      */
     'message': string;
 }
@@ -1974,6 +2903,202 @@ export interface ResponseListNodesNodeGet {
 /**
  * 
  * @export
+ * @interface ResponseListProfilerDataTrendWriterGet
+ */
+export interface ResponseListProfilerDataTrendWriterGet {
+    /**
+     * 
+     * @type {Array<ProfilerDataOut>}
+     * @memberof ResponseListProfilerDataTrendWriterGet
+     */
+    'items': Array<ProfilerDataOut>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListProfilerDataTrendWriterGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListProfilerDataTrendWriterGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListProfilerDataTrendWriterGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListProfilerDataTrendWriterGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListProfilerDataTrendWriterGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListProfilerDataTrendWriterGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListSimulationDefsSimulationDefsGet
+ */
+export interface ResponseListSimulationDefsSimulationDefsGet {
+    /**
+     * 
+     * @type {Array<SimulationDefBase>}
+     * @memberof ResponseListSimulationDefsSimulationDefsGet
+     */
+    'items': Array<SimulationDefBase>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationDefsSimulationDefsGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationDefsSimulationDefsGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationDefsSimulationDefsGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationDefsSimulationDefsGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationDefsSimulationDefsGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListSimulationDefsSimulationDefsGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet
+ */
+export interface ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet {
+    /**
+     * 
+     * @type {Array<SimulationParamOut>}
+     * @memberof ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet
+     */
+    'items': Array<SimulationParamOut>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListSimulationsSimulationGet
+ */
+export interface ResponseListSimulationsSimulationGet {
+    /**
+     * 
+     * @type {Array<Simulation>}
+     * @memberof ResponseListSimulationsSimulationGet
+     */
+    'items': Array<Simulation>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationsSimulationGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationsSimulationGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationsSimulationGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationsSimulationGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListSimulationsSimulationGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListSimulationsSimulationGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseListTemplatesTemplateGet
  */
 export interface ResponseListTemplatesTemplateGet {
@@ -2072,6 +3197,55 @@ export interface ResponseListTrendDefsTrendDefGet {
 /**
  * 
  * @export
+ * @interface ResponseListTrendGroupsTrendGroupGet
+ */
+export interface ResponseListTrendGroupsTrendGroupGet {
+    /**
+     * 
+     * @type {Array<TrendGroup>}
+     * @memberof ResponseListTrendGroupsTrendGroupGet
+     */
+    'items': Array<TrendGroup>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTrendGroupsTrendGroupGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTrendGroupsTrendGroupGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTrendGroupsTrendGroupGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTrendGroupsTrendGroupGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListTrendGroupsTrendGroupGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListTrendGroupsTrendGroupGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseListTrendParamsTrendTrendIdParamGet
  */
 export interface ResponseListTrendParamsTrendTrendIdParamGet {
@@ -2164,6 +3338,55 @@ export interface ResponseListTrendsTrendGet {
      * 
      * @type {string}
      * @memberof ResponseListTrendsTrendGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListUnitsUnitGet
+ */
+export interface ResponseListUnitsUnitGet {
+    /**
+     * 
+     * @type {Array<Unit>}
+     * @memberof ResponseListUnitsUnitGet
+     */
+    'items': Array<Unit>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListUnitsUnitGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListUnitsUnitGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListUnitsUnitGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListUnitsUnitGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListUnitsUnitGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListUnitsUnitGet
      */
     'message': string;
 }
@@ -2317,6 +3540,110 @@ export interface ResponseUpdateNodeNodeNodeIdPut {
 /**
  * 
  * @export
+ * @interface ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut
+ */
+export interface ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut {
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut
+     */
+    'SimulationID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut
+     */
+    'SimulationParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut
+     */
+    'Value': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut
+     */
+    'DataType': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseUpdateSimulationSimulationSimulationIdPut
+ */
+export interface ResponseUpdateSimulationSimulationSimulationIdPut {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'SimulationDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'TrendID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'RefreshTimeSeconds': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'DistanceMeters': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseUpdateTemplateTemplateTemplateIdPut
  */
 export interface ResponseUpdateTemplateTemplateTemplateIdPut {
@@ -2348,6 +3675,43 @@ export interface ResponseUpdateTemplateTemplateTemplateIdPut {
      * 
      * @type {string}
      * @memberof ResponseUpdateTemplateTemplateTemplateIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut
+ */
+export interface ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut
+     */
+    'AnalysisOnly'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut
      */
     'message': string;
 }
@@ -2502,6 +3866,254 @@ export interface ResponseUpdateTrendTrendTrendIdPut {
      * @memberof ResponseUpdateTrendTrendTrendIdPut
      */
     'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseUpdateUnitUnitUnitIdPut
+ */
+export interface ResponseUpdateUnitUnitUnitIdPut {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateUnitUnitUnitIdPut
+     */
+    'ID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateUnitUnitUnitIdPut
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateUnitUnitUnitIdPut
+     */
+    'Symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateUnitUnitUnitIdPut
+     */
+    'BaseID'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateUnitUnitUnitIdPut
+     */
+    'Multiplier'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateUnitUnitUnitIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateUnitUnitUnitIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface Simulation
+ */
+export interface Simulation {
+    /**
+     * 
+     * @type {string}
+     * @memberof Simulation
+     */
+    'SimulationDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Simulation
+     */
+    'TrendID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Simulation
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Simulation
+     */
+    'RefreshTimeSeconds': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Simulation
+     */
+    'DistanceMeters': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Simulation
+     */
+    'ID': number;
+}
+/**
+ * 
+ * @export
+ * @interface SimulationBase
+ */
+export interface SimulationBase {
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationBase
+     */
+    'SimulationDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SimulationBase
+     */
+    'TrendID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationBase
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof SimulationBase
+     */
+    'RefreshTimeSeconds': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SimulationBase
+     */
+    'DistanceMeters': number;
+}
+/**
+ * 
+ * @export
+ * @interface SimulationDataBase
+ */
+export interface SimulationDataBase {
+    /**
+     * 
+     * @type {number}
+     * @memberof SimulationDataBase
+     */
+    'Distance'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SimulationDataBase
+     */
+    'Data'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface SimulationDataOut
+ */
+export interface SimulationDataOut {
+    /**
+     * 
+     * @type {number}
+     * @memberof SimulationDataOut
+     */
+    'SimulationID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SimulationDataOut
+     */
+    'Time': number;
+    /**
+     * 
+     * @type {Array<SimulationDataBase>}
+     * @memberof SimulationDataOut
+     */
+    'Data'?: Array<SimulationDataBase>;
+}
+/**
+ * 
+ * @export
+ * @interface SimulationDefBase
+ */
+export interface SimulationDefBase {
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationDefBase
+     */
+    'ID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationDefBase
+     */
+    'Name': string;
+}
+/**
+ * 
+ * @export
+ * @interface SimulationParamIn
+ */
+export interface SimulationParamIn {
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationParamIn
+     */
+    'SimulationParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationParamIn
+     */
+    'Value': string;
+}
+/**
+ * 
+ * @export
+ * @interface SimulationParamOut
+ */
+export interface SimulationParamOut {
+    /**
+     * 
+     * @type {number}
+     * @memberof SimulationParamOut
+     */
+    'SimulationID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationParamOut
+     */
+    'SimulationParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationParamOut
+     */
+    'Value': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationParamOut
+     */
+    'DataType': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SimulationParamOut
+     */
+    'Name': string;
 }
 /**
  * 
@@ -2801,6 +4413,50 @@ export interface TrendDefBase {
 /**
  * 
  * @export
+ * @interface TrendGroup
+ */
+export interface TrendGroup {
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendGroup
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TrendGroup
+     */
+    'AnalysisOnly'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendGroup
+     */
+    'ID': number;
+}
+/**
+ * 
+ * @export
+ * @interface TrendGroupBase
+ */
+export interface TrendGroupBase {
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendGroupBase
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TrendGroupBase
+     */
+    'AnalysisOnly'?: boolean;
+}
+/**
+ * 
+ * @export
  * @interface TrendParamOut
  */
 export interface TrendParamOut {
@@ -2853,6 +4509,80 @@ export interface TrendValue {
      * @memberof TrendValue
      */
     'Value'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface Unit
+ */
+export interface Unit {
+    /**
+     * 
+     * @type {string}
+     * @memberof Unit
+     */
+    'ID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Unit
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Unit
+     */
+    'Symbol'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Unit
+     */
+    'BaseID'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Unit
+     */
+    'Multiplier'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface UnitBase
+ */
+export interface UnitBase {
+    /**
+     * 
+     * @type {string}
+     * @memberof UnitBase
+     */
+    'ID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UnitBase
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UnitBase
+     */
+    'Symbol'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UnitBase
+     */
+    'BaseID'?: string | null;
+    /**
+     * 
+     * @type {Multiplier}
+     * @memberof UnitBase
+     */
+    'Multiplier'?: Multiplier | null;
 }
 /**
  * 
@@ -2940,6 +4670,68 @@ export interface UpdateNode {
      * @memberof UpdateNode
      */
     'EditorParams'?: EditorNodeBase | null;
+}
+/**
+ * 
+ * @export
+ * @interface UpdateSimulation
+ */
+export interface UpdateSimulation {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateSimulation
+     */
+    'SimulationDefID'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateSimulation
+     */
+    'TrendID'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateSimulation
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateSimulation
+     */
+    'RefreshTimeSeconds'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateSimulation
+     */
+    'DistanceMeters'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface UpdateSimulationParam
+ */
+export interface UpdateSimulationParam {
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateSimulationParam
+     */
+    'SimulationID'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateSimulationParam
+     */
+    'SimulationParamDefID'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateSimulationParam
+     */
+    'Value'?: string | null;
 }
 /**
  * 
@@ -3044,6 +4836,56 @@ export interface UpdateTrend {
      * @memberof UpdateTrend
      */
     'NodeID'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface UpdateTrendGroup
+ */
+export interface UpdateTrendGroup {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateTrendGroup
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateTrendGroup
+     */
+    'AnalysisOnly'?: boolean | null;
+}
+/**
+ * 
+ * @export
+ * @interface UpdateUnit
+ */
+export interface UpdateUnit {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUnit
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUnit
+     */
+    'Symbol'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUnit
+     */
+    'BaseID'?: string | null;
+    /**
+     * 
+     * @type {Multiplier}
+     * @memberof UpdateUnit
+     */
+    'Multiplier'?: Multiplier | null;
 }
 /**
  * 
@@ -4810,6 +6652,1045 @@ export class NodeApi extends BaseAPI {
 
 
 /**
+ * SimulationApi - axios parameter creator
+ * @export
+ */
+export const SimulationApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create Simulation Param
+         * @param {number} simulationId 
+         * @param {SimulationParamIn} simulationParamIn 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSimulationParamSimulationSimulationIdParamPost: async (simulationId: number, simulationParamIn: SimulationParamIn, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('createSimulationParamSimulationSimulationIdParamPost', 'simulationId', simulationId)
+            // verify required parameter 'simulationParamIn' is not null or undefined
+            assertParamExists('createSimulationParamSimulationSimulationIdParamPost', 'simulationParamIn', simulationParamIn)
+            const localVarPath = `/simulation/{simulation_id}/param`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(simulationParamIn, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Create Simulation
+         * @param {SimulationBase} simulationBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSimulationSimulationPost: async (simulationBase: SimulationBase, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationBase' is not null or undefined
+            assertParamExists('createSimulationSimulationPost', 'simulationBase', simulationBase)
+            const localVarPath = `/simulation`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(simulationBase, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Simulation By Id
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteSimulationByIdSimulationSimulationIdDelete: async (simulationId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('deleteSimulationByIdSimulationSimulationIdDelete', 'simulationId', simulationId)
+            const localVarPath = `/simulation/{simulation_id}`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Simulation Param By Id
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete: async (simulationId: number, simulationParamDefId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete', 'simulationId', simulationId)
+            // verify required parameter 'simulationParamDefId' is not null or undefined
+            assertParamExists('deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete', 'simulationParamDefId', simulationParamDefId)
+            const localVarPath = `/simulation/{simulation_id}/param/{simulation_param_def_id}`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)))
+                .replace(`{${"simulation_param_def_id"}}`, encodeURIComponent(String(simulationParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Simulation By Id
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSimulationByIdSimulationSimulationIdGet: async (simulationId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('getSimulationByIdSimulationSimulationIdGet', 'simulationId', simulationId)
+            const localVarPath = `/simulation/{simulation_id}`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Simulation Data
+         * @param {number} simulationId 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSimulationDataSimulationSimulationIdDataGet: async (simulationId: number, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('getSimulationDataSimulationSimulationIdDataGet', 'simulationId', simulationId)
+            const localVarPath = `/simulation/{simulation_id}/data`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Simulation Param By Simulation Param Def Id
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet: async (simulationId: number, simulationParamDefId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet', 'simulationId', simulationId)
+            // verify required parameter 'simulationParamDefId' is not null or undefined
+            assertParamExists('getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet', 'simulationParamDefId', simulationParamDefId)
+            const localVarPath = `/simulation/{simulation_id}/param/{simulation_param_def_id}`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)))
+                .replace(`{${"simulation_param_def_id"}}`, encodeURIComponent(String(simulationParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Simulation Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSimulationDefsSimulationDefsGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/simulation/defs`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Simulation Params By Simulation Id
+         * @param {number} simulationId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSimulationParamsBySimulationIdSimulationSimulationIdParamGet: async (simulationId: number, filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('listSimulationParamsBySimulationIdSimulationSimulationIdParamGet', 'simulationId', simulationId)
+            const localVarPath = `/simulation/{simulation_id}/param`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Simulations
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSimulationsSimulationGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/simulation`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Simulation Param
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {UpdateSimulationParam} updateSimulationParam 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut: async (simulationId: number, simulationParamDefId: string, updateSimulationParam: UpdateSimulationParam, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut', 'simulationId', simulationId)
+            // verify required parameter 'simulationParamDefId' is not null or undefined
+            assertParamExists('updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut', 'simulationParamDefId', simulationParamDefId)
+            // verify required parameter 'updateSimulationParam' is not null or undefined
+            assertParamExists('updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut', 'updateSimulationParam', updateSimulationParam)
+            const localVarPath = `/simulation/{simulation_id}/param/{simulation_param_def_id}`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)))
+                .replace(`{${"simulation_param_def_id"}}`, encodeURIComponent(String(simulationParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateSimulationParam, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Simulation
+         * @param {number} simulationId 
+         * @param {UpdateSimulation} updateSimulation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateSimulationSimulationSimulationIdPut: async (simulationId: number, updateSimulation: UpdateSimulation, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('updateSimulationSimulationSimulationIdPut', 'simulationId', simulationId)
+            // verify required parameter 'updateSimulation' is not null or undefined
+            assertParamExists('updateSimulationSimulationSimulationIdPut', 'updateSimulation', updateSimulation)
+            const localVarPath = `/simulation/{simulation_id}`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateSimulation, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SimulationApi - functional programming interface
+ * @export
+ */
+export const SimulationApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SimulationApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Simulation Param
+         * @param {number} simulationId 
+         * @param {SimulationParamIn} simulationParamIn 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createSimulationParamSimulationSimulationIdParamPost(simulationId: number, simulationParamIn: SimulationParamIn, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateSimulationParamSimulationSimulationIdParamPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createSimulationParamSimulationSimulationIdParamPost(simulationId, simulationParamIn, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.createSimulationParamSimulationSimulationIdParamPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Create Simulation
+         * @param {SimulationBase} simulationBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createSimulationSimulationPost(simulationBase: SimulationBase, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateSimulationSimulationPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createSimulationSimulationPost(simulationBase, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.createSimulationSimulationPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Simulation By Id
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteSimulationByIdSimulationSimulationIdDelete(simulationId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseDeleteSimulationByIdSimulationSimulationIdDelete>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSimulationByIdSimulationSimulationIdDelete(simulationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.deleteSimulationByIdSimulationSimulationIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Simulation Param By Id
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId, simulationParamDefId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Simulation By Id
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSimulationByIdSimulationSimulationIdGet(simulationId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetSimulationByIdSimulationSimulationIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSimulationByIdSimulationSimulationIdGet(simulationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.getSimulationByIdSimulationSimulationIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Simulation Data
+         * @param {number} simulationId 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSimulationDataSimulationSimulationIdDataGet(simulationId: number, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetSimulationDataSimulationSimulationIdDataGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSimulationDataSimulationSimulationIdDataGet(simulationId, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.getSimulationDataSimulationSimulationIdDataGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Simulation Param By Simulation Param Def Id
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet(simulationId, simulationParamDefId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Simulation Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listSimulationDefsSimulationDefsGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListSimulationDefsSimulationDefsGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSimulationDefsSimulationDefsGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.listSimulationDefsSimulationDefsGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Simulation Params By Simulation Id
+         * @param {number} simulationId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listSimulationParamsBySimulationIdSimulationSimulationIdParamGet(simulationId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSimulationParamsBySimulationIdSimulationSimulationIdParamGet(simulationId, filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.listSimulationParamsBySimulationIdSimulationSimulationIdParamGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Simulations
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listSimulationsSimulationGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListSimulationsSimulationGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSimulationsSimulationGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.listSimulationsSimulationGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Simulation Param
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {UpdateSimulationParam} updateSimulationParam 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut(simulationId: number, simulationParamDefId: string, updateSimulationParam: UpdateSimulationParam, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut(simulationId, simulationParamDefId, updateSimulationParam, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Simulation
+         * @param {number} simulationId 
+         * @param {UpdateSimulation} updateSimulation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateSimulationSimulationSimulationIdPut(simulationId: number, updateSimulation: UpdateSimulation, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdateSimulationSimulationSimulationIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateSimulationSimulationSimulationIdPut(simulationId, updateSimulation, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.updateSimulationSimulationSimulationIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * SimulationApi - factory interface
+ * @export
+ */
+export const SimulationApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SimulationApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Simulation Param
+         * @param {number} simulationId 
+         * @param {SimulationParamIn} simulationParamIn 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSimulationParamSimulationSimulationIdParamPost(simulationId: number, simulationParamIn: SimulationParamIn, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateSimulationParamSimulationSimulationIdParamPost> {
+            return localVarFp.createSimulationParamSimulationSimulationIdParamPost(simulationId, simulationParamIn, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Create Simulation
+         * @param {SimulationBase} simulationBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSimulationSimulationPost(simulationBase: SimulationBase, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateSimulationSimulationPost> {
+            return localVarFp.createSimulationSimulationPost(simulationBase, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Simulation By Id
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteSimulationByIdSimulationSimulationIdDelete(simulationId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteSimulationByIdSimulationSimulationIdDelete> {
+            return localVarFp.deleteSimulationByIdSimulationSimulationIdDelete(simulationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Simulation Param By Id
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete> {
+            return localVarFp.deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId, simulationParamDefId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Simulation By Id
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSimulationByIdSimulationSimulationIdGet(simulationId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetSimulationByIdSimulationSimulationIdGet> {
+            return localVarFp.getSimulationByIdSimulationSimulationIdGet(simulationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Simulation Data
+         * @param {number} simulationId 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSimulationDataSimulationSimulationIdDataGet(simulationId: number, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetSimulationDataSimulationSimulationIdDataGet> {
+            return localVarFp.getSimulationDataSimulationSimulationIdDataGet(simulationId, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Simulation Param By Simulation Param Def Id
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet> {
+            return localVarFp.getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet(simulationId, simulationParamDefId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Simulation Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSimulationDefsSimulationDefsGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListSimulationDefsSimulationDefsGet> {
+            return localVarFp.listSimulationDefsSimulationDefsGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Simulation Params By Simulation Id
+         * @param {number} simulationId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSimulationParamsBySimulationIdSimulationSimulationIdParamGet(simulationId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListSimulationParamsBySimulationIdSimulationSimulationIdParamGet> {
+            return localVarFp.listSimulationParamsBySimulationIdSimulationSimulationIdParamGet(simulationId, filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Simulations
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSimulationsSimulationGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListSimulationsSimulationGet> {
+            return localVarFp.listSimulationsSimulationGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Simulation Param
+         * @param {number} simulationId 
+         * @param {string} simulationParamDefId 
+         * @param {UpdateSimulationParam} updateSimulationParam 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut(simulationId: number, simulationParamDefId: string, updateSimulationParam: UpdateSimulationParam, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut> {
+            return localVarFp.updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut(simulationId, simulationParamDefId, updateSimulationParam, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Simulation
+         * @param {number} simulationId 
+         * @param {UpdateSimulation} updateSimulation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateSimulationSimulationSimulationIdPut(simulationId: number, updateSimulation: UpdateSimulation, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdateSimulationSimulationSimulationIdPut> {
+            return localVarFp.updateSimulationSimulationSimulationIdPut(simulationId, updateSimulation, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SimulationApi - object-oriented interface
+ * @export
+ * @class SimulationApi
+ * @extends {BaseAPI}
+ */
+export class SimulationApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Simulation Param
+     * @param {number} simulationId 
+     * @param {SimulationParamIn} simulationParamIn 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public createSimulationParamSimulationSimulationIdParamPost(simulationId: number, simulationParamIn: SimulationParamIn, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).createSimulationParamSimulationSimulationIdParamPost(simulationId, simulationParamIn, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Create Simulation
+     * @param {SimulationBase} simulationBase 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public createSimulationSimulationPost(simulationBase: SimulationBase, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).createSimulationSimulationPost(simulationBase, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Simulation By Id
+     * @param {number} simulationId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public deleteSimulationByIdSimulationSimulationIdDelete(simulationId: number, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).deleteSimulationByIdSimulationSimulationIdDelete(simulationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Simulation Param By Id
+     * @param {number} simulationId 
+     * @param {string} simulationParamDefId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId, simulationParamDefId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Simulation By Id
+     * @param {number} simulationId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public getSimulationByIdSimulationSimulationIdGet(simulationId: number, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).getSimulationByIdSimulationSimulationIdGet(simulationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Simulation Data
+     * @param {number} simulationId 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public getSimulationDataSimulationSimulationIdDataGet(simulationId: number, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).getSimulationDataSimulationSimulationIdDataGet(simulationId, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Simulation Param By Simulation Param Def Id
+     * @param {number} simulationId 
+     * @param {string} simulationParamDefId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).getSimulationParamBySimulationParamDefIdSimulationSimulationIdParamSimulationParamDefIdGet(simulationId, simulationParamDefId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Simulation Defs
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public listSimulationDefsSimulationDefsGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).listSimulationDefsSimulationDefsGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Simulation Params By Simulation Id
+     * @param {number} simulationId 
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public listSimulationParamsBySimulationIdSimulationSimulationIdParamGet(simulationId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).listSimulationParamsBySimulationIdSimulationSimulationIdParamGet(simulationId, filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Simulations
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public listSimulationsSimulationGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).listSimulationsSimulationGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Simulation Param
+     * @param {number} simulationId 
+     * @param {string} simulationParamDefId 
+     * @param {UpdateSimulationParam} updateSimulationParam 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut(simulationId: number, simulationParamDefId: string, updateSimulationParam: UpdateSimulationParam, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).updateSimulationParamSimulationSimulationIdParamSimulationParamDefIdPut(simulationId, simulationParamDefId, updateSimulationParam, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Simulation
+     * @param {number} simulationId 
+     * @param {UpdateSimulation} updateSimulation 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public updateSimulationSimulationSimulationIdPut(simulationId: number, updateSimulation: UpdateSimulation, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).updateSimulationSimulationSimulationIdPut(simulationId, updateSimulation, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * TemplateApi - axios parameter creator
  * @export
  */
@@ -6386,6 +9267,1130 @@ export class TrendDefApi extends BaseAPI {
      */
     public listTrendDefsTrendDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
         return TrendDefApiFp(this.configuration).listTrendDefsTrendDefGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * TrendGroupApi - axios parameter creator
+ * @export
+ */
+export const TrendGroupApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create Trend Group
+         * @param {TrendGroupBase} trendGroupBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createTrendGroupTrendGroupPost: async (trendGroupBase: TrendGroupBase, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendGroupBase' is not null or undefined
+            assertParamExists('createTrendGroupTrendGroupPost', 'trendGroupBase', trendGroupBase)
+            const localVarPath = `/trend_group`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(trendGroupBase, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Trend Group By Id
+         * @param {number} trendGroupId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTrendGroupByIdTrendGroupTrendGroupIdDelete: async (trendGroupId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendGroupId' is not null or undefined
+            assertParamExists('deleteTrendGroupByIdTrendGroupTrendGroupIdDelete', 'trendGroupId', trendGroupId)
+            const localVarPath = `/trend_group/{trend_group_id}`
+                .replace(`{${"trend_group_id"}}`, encodeURIComponent(String(trendGroupId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Trend Group By Id
+         * @param {number} trendGroupId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTrendGroupByIdTrendGroupTrendGroupIdGet: async (trendGroupId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendGroupId' is not null or undefined
+            assertParamExists('getTrendGroupByIdTrendGroupTrendGroupIdGet', 'trendGroupId', trendGroupId)
+            const localVarPath = `/trend_group/{trend_group_id}`
+                .replace(`{${"trend_group_id"}}`, encodeURIComponent(String(trendGroupId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Trend Groups
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listTrendGroupsTrendGroupGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/trend_group`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Trend Group
+         * @param {number} trendGroupId 
+         * @param {UpdateTrendGroup} updateTrendGroup 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateTrendGroupTrendGroupTrendGroupIdPut: async (trendGroupId: number, updateTrendGroup: UpdateTrendGroup, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendGroupId' is not null or undefined
+            assertParamExists('updateTrendGroupTrendGroupTrendGroupIdPut', 'trendGroupId', trendGroupId)
+            // verify required parameter 'updateTrendGroup' is not null or undefined
+            assertParamExists('updateTrendGroupTrendGroupTrendGroupIdPut', 'updateTrendGroup', updateTrendGroup)
+            const localVarPath = `/trend_group/{trend_group_id}`
+                .replace(`{${"trend_group_id"}}`, encodeURIComponent(String(trendGroupId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateTrendGroup, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * TrendGroupApi - functional programming interface
+ * @export
+ */
+export const TrendGroupApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = TrendGroupApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Trend Group
+         * @param {TrendGroupBase} trendGroupBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createTrendGroupTrendGroupPost(trendGroupBase: TrendGroupBase, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateTrendGroupTrendGroupPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createTrendGroupTrendGroupPost(trendGroupBase, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendGroupApi.createTrendGroupTrendGroupPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Trend Group By Id
+         * @param {number} trendGroupId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteTrendGroupByIdTrendGroupTrendGroupIdDelete(trendGroupId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTrendGroupByIdTrendGroupTrendGroupIdDelete(trendGroupId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendGroupApi.deleteTrendGroupByIdTrendGroupTrendGroupIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Trend Group By Id
+         * @param {number} trendGroupId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getTrendGroupByIdTrendGroupTrendGroupIdGet(trendGroupId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getTrendGroupByIdTrendGroupTrendGroupIdGet(trendGroupId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendGroupApi.getTrendGroupByIdTrendGroupTrendGroupIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Trend Groups
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listTrendGroupsTrendGroupGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListTrendGroupsTrendGroupGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listTrendGroupsTrendGroupGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendGroupApi.listTrendGroupsTrendGroupGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Trend Group
+         * @param {number} trendGroupId 
+         * @param {UpdateTrendGroup} updateTrendGroup 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateTrendGroupTrendGroupTrendGroupIdPut(trendGroupId: number, updateTrendGroup: UpdateTrendGroup, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateTrendGroupTrendGroupTrendGroupIdPut(trendGroupId, updateTrendGroup, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendGroupApi.updateTrendGroupTrendGroupTrendGroupIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * TrendGroupApi - factory interface
+ * @export
+ */
+export const TrendGroupApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = TrendGroupApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Trend Group
+         * @param {TrendGroupBase} trendGroupBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createTrendGroupTrendGroupPost(trendGroupBase: TrendGroupBase, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateTrendGroupTrendGroupPost> {
+            return localVarFp.createTrendGroupTrendGroupPost(trendGroupBase, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Trend Group By Id
+         * @param {number} trendGroupId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTrendGroupByIdTrendGroupTrendGroupIdDelete(trendGroupId: number, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.deleteTrendGroupByIdTrendGroupTrendGroupIdDelete(trendGroupId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Trend Group By Id
+         * @param {number} trendGroupId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTrendGroupByIdTrendGroupTrendGroupIdGet(trendGroupId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet> {
+            return localVarFp.getTrendGroupByIdTrendGroupTrendGroupIdGet(trendGroupId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Trend Groups
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listTrendGroupsTrendGroupGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListTrendGroupsTrendGroupGet> {
+            return localVarFp.listTrendGroupsTrendGroupGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Trend Group
+         * @param {number} trendGroupId 
+         * @param {UpdateTrendGroup} updateTrendGroup 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateTrendGroupTrendGroupTrendGroupIdPut(trendGroupId: number, updateTrendGroup: UpdateTrendGroup, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut> {
+            return localVarFp.updateTrendGroupTrendGroupTrendGroupIdPut(trendGroupId, updateTrendGroup, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * TrendGroupApi - object-oriented interface
+ * @export
+ * @class TrendGroupApi
+ * @extends {BaseAPI}
+ */
+export class TrendGroupApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Trend Group
+     * @param {TrendGroupBase} trendGroupBase 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendGroupApi
+     */
+    public createTrendGroupTrendGroupPost(trendGroupBase: TrendGroupBase, options?: RawAxiosRequestConfig) {
+        return TrendGroupApiFp(this.configuration).createTrendGroupTrendGroupPost(trendGroupBase, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Trend Group By Id
+     * @param {number} trendGroupId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendGroupApi
+     */
+    public deleteTrendGroupByIdTrendGroupTrendGroupIdDelete(trendGroupId: number, options?: RawAxiosRequestConfig) {
+        return TrendGroupApiFp(this.configuration).deleteTrendGroupByIdTrendGroupTrendGroupIdDelete(trendGroupId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Trend Group By Id
+     * @param {number} trendGroupId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendGroupApi
+     */
+    public getTrendGroupByIdTrendGroupTrendGroupIdGet(trendGroupId: number, options?: RawAxiosRequestConfig) {
+        return TrendGroupApiFp(this.configuration).getTrendGroupByIdTrendGroupTrendGroupIdGet(trendGroupId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Trend Groups
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendGroupApi
+     */
+    public listTrendGroupsTrendGroupGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return TrendGroupApiFp(this.configuration).listTrendGroupsTrendGroupGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Trend Group
+     * @param {number} trendGroupId 
+     * @param {UpdateTrendGroup} updateTrendGroup 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendGroupApi
+     */
+    public updateTrendGroupTrendGroupTrendGroupIdPut(trendGroupId: number, updateTrendGroup: UpdateTrendGroup, options?: RawAxiosRequestConfig) {
+        return TrendGroupApiFp(this.configuration).updateTrendGroupTrendGroupTrendGroupIdPut(trendGroupId, updateTrendGroup, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * TrendWriterApi - axios parameter creator
+ * @export
+ */
+export const TrendWriterApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Get General Profiler Data
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGeneralProfilerDataTrendWriterGeneralGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/trend_writer/general`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Profiler Data By Id
+         * @param {number} trendId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getProfilerDataByIdTrendWriterTrendIdGet: async (trendId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendId' is not null or undefined
+            assertParamExists('getProfilerDataByIdTrendWriterTrendIdGet', 'trendId', trendId)
+            const localVarPath = `/trend_writer/{trend_id}`
+                .replace(`{${"trend_id"}}`, encodeURIComponent(String(trendId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Profiler Data
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listProfilerDataTrendWriterGet: async (page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/trend_writer`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * TrendWriterApi - functional programming interface
+ * @export
+ */
+export const TrendWriterApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = TrendWriterApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Get General Profiler Data
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGeneralProfilerDataTrendWriterGeneralGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetGeneralProfilerDataTrendWriterGeneralGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGeneralProfilerDataTrendWriterGeneralGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendWriterApi.getGeneralProfilerDataTrendWriterGeneralGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Profiler Data By Id
+         * @param {number} trendId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getProfilerDataByIdTrendWriterTrendIdGet(trendId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetProfilerDataByIdTrendWriterTrendIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getProfilerDataByIdTrendWriterTrendIdGet(trendId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendWriterApi.getProfilerDataByIdTrendWriterTrendIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Profiler Data
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listProfilerDataTrendWriterGet(page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListProfilerDataTrendWriterGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listProfilerDataTrendWriterGet(page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendWriterApi.listProfilerDataTrendWriterGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * TrendWriterApi - factory interface
+ * @export
+ */
+export const TrendWriterApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = TrendWriterApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Get General Profiler Data
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGeneralProfilerDataTrendWriterGeneralGet(options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetGeneralProfilerDataTrendWriterGeneralGet> {
+            return localVarFp.getGeneralProfilerDataTrendWriterGeneralGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Profiler Data By Id
+         * @param {number} trendId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getProfilerDataByIdTrendWriterTrendIdGet(trendId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetProfilerDataByIdTrendWriterTrendIdGet> {
+            return localVarFp.getProfilerDataByIdTrendWriterTrendIdGet(trendId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Profiler Data
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listProfilerDataTrendWriterGet(page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListProfilerDataTrendWriterGet> {
+            return localVarFp.listProfilerDataTrendWriterGet(page, size, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * TrendWriterApi - object-oriented interface
+ * @export
+ * @class TrendWriterApi
+ * @extends {BaseAPI}
+ */
+export class TrendWriterApi extends BaseAPI {
+    /**
+     * 
+     * @summary Get General Profiler Data
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendWriterApi
+     */
+    public getGeneralProfilerDataTrendWriterGeneralGet(options?: RawAxiosRequestConfig) {
+        return TrendWriterApiFp(this.configuration).getGeneralProfilerDataTrendWriterGeneralGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Profiler Data By Id
+     * @param {number} trendId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendWriterApi
+     */
+    public getProfilerDataByIdTrendWriterTrendIdGet(trendId: number, options?: RawAxiosRequestConfig) {
+        return TrendWriterApiFp(this.configuration).getProfilerDataByIdTrendWriterTrendIdGet(trendId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Profiler Data
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendWriterApi
+     */
+    public listProfilerDataTrendWriterGet(page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return TrendWriterApiFp(this.configuration).listProfilerDataTrendWriterGet(page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * UnitApi - axios parameter creator
+ * @export
+ */
+export const UnitApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create Unit
+         * @param {UnitBase} unitBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createUnitUnitPost: async (unitBase: UnitBase, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'unitBase' is not null or undefined
+            assertParamExists('createUnitUnitPost', 'unitBase', unitBase)
+            const localVarPath = `/unit`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(unitBase, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Unit By Id
+         * @param {string} unitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteUnitByIdUnitUnitIdDelete: async (unitId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'unitId' is not null or undefined
+            assertParamExists('deleteUnitByIdUnitUnitIdDelete', 'unitId', unitId)
+            const localVarPath = `/unit/{unit_id}`
+                .replace(`{${"unit_id"}}`, encodeURIComponent(String(unitId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Unit By Id
+         * @param {string} unitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUnitByIdUnitUnitIdGet: async (unitId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'unitId' is not null or undefined
+            assertParamExists('getUnitByIdUnitUnitIdGet', 'unitId', unitId)
+            const localVarPath = `/unit/{unit_id}`
+                .replace(`{${"unit_id"}}`, encodeURIComponent(String(unitId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Units
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listUnitsUnitGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/unit`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Unit
+         * @param {string} unitId 
+         * @param {UpdateUnit} updateUnit 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateUnitUnitUnitIdPut: async (unitId: string, updateUnit: UpdateUnit, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'unitId' is not null or undefined
+            assertParamExists('updateUnitUnitUnitIdPut', 'unitId', unitId)
+            // verify required parameter 'updateUnit' is not null or undefined
+            assertParamExists('updateUnitUnitUnitIdPut', 'updateUnit', updateUnit)
+            const localVarPath = `/unit/{unit_id}`
+                .replace(`{${"unit_id"}}`, encodeURIComponent(String(unitId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateUnit, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * UnitApi - functional programming interface
+ * @export
+ */
+export const UnitApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UnitApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Unit
+         * @param {UnitBase} unitBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createUnitUnitPost(unitBase: UnitBase, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateUnitUnitPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createUnitUnitPost(unitBase, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UnitApi.createUnitUnitPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Unit By Id
+         * @param {string} unitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteUnitByIdUnitUnitIdDelete(unitId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteUnitByIdUnitUnitIdDelete(unitId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UnitApi.deleteUnitByIdUnitUnitIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Unit By Id
+         * @param {string} unitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUnitByIdUnitUnitIdGet(unitId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetUnitByIdUnitUnitIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUnitByIdUnitUnitIdGet(unitId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UnitApi.getUnitByIdUnitUnitIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Units
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listUnitsUnitGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListUnitsUnitGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listUnitsUnitGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UnitApi.listUnitsUnitGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Unit
+         * @param {string} unitId 
+         * @param {UpdateUnit} updateUnit 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateUnitUnitUnitIdPut(unitId: string, updateUnit: UpdateUnit, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdateUnitUnitUnitIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateUnitUnitUnitIdPut(unitId, updateUnit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UnitApi.updateUnitUnitUnitIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * UnitApi - factory interface
+ * @export
+ */
+export const UnitApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UnitApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Unit
+         * @param {UnitBase} unitBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createUnitUnitPost(unitBase: UnitBase, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateUnitUnitPost> {
+            return localVarFp.createUnitUnitPost(unitBase, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Unit By Id
+         * @param {string} unitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteUnitByIdUnitUnitIdDelete(unitId: string, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.deleteUnitByIdUnitUnitIdDelete(unitId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Unit By Id
+         * @param {string} unitId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUnitByIdUnitUnitIdGet(unitId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetUnitByIdUnitUnitIdGet> {
+            return localVarFp.getUnitByIdUnitUnitIdGet(unitId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Units
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listUnitsUnitGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListUnitsUnitGet> {
+            return localVarFp.listUnitsUnitGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Unit
+         * @param {string} unitId 
+         * @param {UpdateUnit} updateUnit 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateUnitUnitUnitIdPut(unitId: string, updateUnit: UpdateUnit, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdateUnitUnitUnitIdPut> {
+            return localVarFp.updateUnitUnitUnitIdPut(unitId, updateUnit, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * UnitApi - object-oriented interface
+ * @export
+ * @class UnitApi
+ * @extends {BaseAPI}
+ */
+export class UnitApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Unit
+     * @param {UnitBase} unitBase 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UnitApi
+     */
+    public createUnitUnitPost(unitBase: UnitBase, options?: RawAxiosRequestConfig) {
+        return UnitApiFp(this.configuration).createUnitUnitPost(unitBase, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Unit By Id
+     * @param {string} unitId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UnitApi
+     */
+    public deleteUnitByIdUnitUnitIdDelete(unitId: string, options?: RawAxiosRequestConfig) {
+        return UnitApiFp(this.configuration).deleteUnitByIdUnitUnitIdDelete(unitId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Unit By Id
+     * @param {string} unitId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UnitApi
+     */
+    public getUnitByIdUnitUnitIdGet(unitId: string, options?: RawAxiosRequestConfig) {
+        return UnitApiFp(this.configuration).getUnitByIdUnitUnitIdGet(unitId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Units
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UnitApi
+     */
+    public listUnitsUnitGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return UnitApiFp(this.configuration).listUnitsUnitGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Unit
+     * @param {string} unitId 
+     * @param {UpdateUnit} updateUnit 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UnitApi
+     */
+    public updateUnitUnitUnitIdPut(unitId: string, updateUnit: UpdateUnit, options?: RawAxiosRequestConfig) {
+        return UnitApiFp(this.configuration).updateUnitUnitUnitIdPut(unitId, updateUnit, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

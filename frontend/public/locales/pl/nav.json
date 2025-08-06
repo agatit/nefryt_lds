@@ -1,3 +1,10 @@
 {
-  "home": "Główna"
+  "home": "Główna",
+  "trends_mockup": "Trendy MOCKUP",
+  "trends": "Trendy",
+  "trend_configuration": "Konfiguracja trendów",
+  "leak_probability_map": "Mapa wycieków",
+  "events": "Wydarzenia",
+  "trend_types_configuration": "Konfiguracja typów",
+  "trend_groups_configuration": "Konfiguracja grup"
 }

@@ -9,5 +9,8 @@
   "contrast": "KONTRAST",
   "none": "Brak",
   "date": "Data",
-  "time": "Czas"
+  "time": "Czas",
+  "from": "Od",
+  "to": "Do",
+  "confirm": "Zatwierdź"
 }

@@ -1,5 +1,5 @@
 import { Button } from "@progress/kendo-react-buttons";
-import { Typography } from "@progress/kendo-react-common";
+import { SvgIcon, Typography } from "@progress/kendo-react-common";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
@@ -16,18 +16,26 @@ import {
 } from "@progress/kendo-react-treeview";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { AxisType, MockupTrendType, TreeViewDataItem } from "./TrendsPage";
-import { Trend } from "../../../../services/api";
-import CursorBubble from "../../../../components/CursorBubble";
+import { AxisType, TreeViewDataItem } from "./TrendsPage";
+import { Trend, TrendDefBase } from "../../../../services/api";
+import {
+  cancelIcon,
+  checkIcon,
+  plusIcon,
+  xIcon,
+} from "@progress/kendo-svg-icons";
+import { chartLegendIcon } from "../../components/chartLegendIcon";
+import {
+  MockupTrendGroupType,
+  MockupTrendType,
+} from "../../../../data/mockup-data";
 
 export interface ChartEditDialogProps {
-  trendsTree: TreeViewDataItem[];
-  TrendsTreeCustomItem: React.ComponentType<ItemRenderProps>;
-  AxisTreeCustomItem: React.ComponentType<ItemRenderProps>;
-  axisTreeRef: React.RefObject<any>;
-  axisTree: TreeViewDataItem[];
-  onCancelButtonClick: React.MouseEventHandler<HTMLButtonElement>;
-  onSaveButtonClick: React.MouseEventHandler<HTMLButtonElement>;
+  useMockup: boolean;
+  closeDialog: () => void;
+  trendDefs: TrendDefBase[];
+  trendGroups: MockupTrendGroupType[];
+  mockupTrendTreeData: TreeViewDataItem[];
   trendsState: Trend[] | MockupTrendType[];
   axesState: AxisType[];
   onAxesStateChange: (value: AxisType[]) => void;
@@ -36,13 +44,11 @@ export interface ChartEditDialogProps {
 }
 
 const ChartEditDialog = React.memo(function ChartEditDialog({
-  trendsTree,
-  TrendsTreeCustomItem,
-  AxisTreeCustomItem,
-  axisTreeRef,
-  axisTree,
-  onCancelButtonClick,
-  onSaveButtonClick,
+  useMockup,
+  closeDialog,
+  trendDefs,
+  trendGroups,
+  mockupTrendTreeData,
   trendsState,
   axesState,
   onAxesStateChange,
@@ -50,6 +56,70 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   onCursorBubbleTextChange,
 }: ChartEditDialogProps) {
   const { t } = useTranslation(["common", "trends-page"]);
+
+  const [newAxesState, setNewAxesState] = React.useState(axesState);
+
+  const trendsTree: TreeViewDataItem[] = React.useMemo(() => {
+    if (useMockup) return mockupTrendTreeData;
+
+    const trendsTree: TreeViewDataItem[] = trendGroups.map((item) => {
+      return {
+        id: item.ID,
+        text: item.Name,
+        items: [],
+      };
+    });
+
+    for (let trend of trendsState) {
+      const index = trendsTree.findIndex(
+        (item) => item.id == trend.TrendGroupID
+      );
+      const trendDef = trendDefs.find((item) => item.ID == trend.TrendDefID);
+
+      const indexTrendDef = trendsTree[index].items?.findIndex(
+        (item) => item.id == trend.TrendDefID
+      );
+
+      if (indexTrendDef == -1) {
+        trendsTree[index].items?.push({
+          id: trend.TrendDefID,
+          text: trendDef?.Name!,
+          items: [
+            {
+              id: trend.ID,
+              text: trend.Name!,
+            },
+          ],
+        });
+
+        continue;
+      }
+
+      trendsTree[index].items![indexTrendDef!].items?.push({
+        id: trend.ID,
+        text: trend.Name!,
+      });
+    }
+
+    return trendsTree;
+  }, [trendsState, trendDefs, trendGroups]);
+
+  const axisTreeRef = React.useRef<any>(null);
+
+  const axisTree: TreeViewDataItem[] = React.useMemo(() => {
+    return newAxesState.map((axis) => {
+      return {
+        text: axis.Name,
+        items: axis.TrendIDs.map((id) => {
+          const trend = trendsState.find((trend) => trend.ID == id);
+          return {
+            id: id,
+            text: trend!.Name!,
+          };
+        }),
+      };
+    });
+  }, [newAxesState, trendsState]);
 
   const [expandTrendsTree, setExpandTrendsTree] =
     React.useState<TreeViewOperationDescriptor>({
@@ -91,6 +161,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
 
   // DRAG STUFF
 
+  const [dragging, setDragging] = React.useState<boolean>(false);
   const mouseOverCreateNewAxisArea = React.useRef<boolean>(false);
 
   const handleMouseEnterCreateNewAxisArea = React.useCallback(() => {
@@ -107,24 +178,39 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
     if (e.value) setNewAxisName(e.value.toString());
   }, []);
 
+  const fromDrag = React.useRef<boolean>(false);
   const createNewAxis = React.useCallback(() => {
-    const unit = (
-      trendsState.find(
-        (trend) => trend.ID == draggedTrend.current?.ID
-      ) as MockupTrendType
-    ).Unit;
-    onAxesStateChange([
-      ...axesState,
-      {
-        Name: newAxisName,
-        Unit: unit,
-        TrendIDs: [draggedTrend.current?.ID!],
-        ScaleMax: 0,
-        ScaleMin: 0,
-      },
-    ]);
-    setShowCreateAxisDialog(false);
-  }, [trendsState, axesState, newAxisName]);
+    if (fromDrag.current) {
+      const unit = (
+        trendsState.find(
+          (trend) => trend.ID == draggedTrend.current?.ID
+        ) as MockupTrendType
+      ).Unit;
+      setNewAxesState([
+        ...newAxesState,
+        {
+          Name: newAxisName,
+          Unit: unit,
+          TrendIDs: [draggedTrend.current?.ID!],
+          ScaleMax: 0,
+          ScaleMin: 0,
+        },
+      ]);
+    } else {
+      setNewAxesState([
+        ...newAxesState,
+        {
+          Name: newAxisName,
+          Unit: "",
+          TrendIDs: [],
+          ScaleMax: 0,
+          ScaleMin: 0,
+        },
+      ]);
+    }
+
+    closeCreateAxisDialog();
+  }, [trendsState, newAxesState, newAxisName]);
 
   const handleTreeItemDragStart = React.useCallback(
     (e: TreeViewItemDragStartEvent) => {
@@ -132,6 +218,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
         (trend) => trend.ID == e.item.id
       )!;
       onShowCursorBubbleChange(true);
+      setDragging(true);
     },
     []
   );
@@ -156,29 +243,28 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
       onCursorBubbleTextChange(
         t("trends-page:add_to") +
           ": " +
-          axesState[
+          newAxesState[
             parseInt(
               eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_")[0]
             )
           ].Name
       );
     },
-    []
+    [newAxesState]
   );
 
   const handleTreeItemDragEnd = React.useCallback(
     (e: TreeViewItemDragEndEvent) => {
       onShowCursorBubbleChange(false);
+      setDragging(false);
+      const trend = trendsState.find(
+        (trend) => trend.ID == e.item.id
+      )! as MockupTrendType;
 
       if (mouseOverCreateNewAxisArea.current) {
-        setShowCreateAxisDialog(true);
-        setNewAxisName(
-          (
-            trendsState.find(
-              (trend) => trend.ID == e.item.id
-            )! as MockupTrendType
-          ).Unit
-        );
+        openCreateAxisDialog();
+        setNewAxisName(trend.Unit);
+        fromDrag.current = true;
 
         return;
       }
@@ -196,50 +282,154 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
       const axisIndex = parseInt(indexArray[0]);
       const trendIndex = parseInt(indexArray[1]);
 
-      onAxesStateChange(
-        axesState.map((axis: AxisType, i) => {
+      setNewAxesState(
+        newAxesState.map((axis: AxisType, i) => {
+          //a little bit of mess maybe clean up later
           if (i !== axisIndex) return axis;
           if (axis.TrendIDs.includes(e.item.id)) return axis;
 
+          let unit;
+          if (axis.TrendIDs.length == 0) unit = trend.Unit;
+
           if (indexArray.length < 2)
+            // add at the end if dragged to axis name
             return {
               ...axis,
+              Unit: unit ? unit : axis.Unit,
               TrendIDs: [...axis.TrendIDs, e.item.id],
             };
 
           const newArr = axis.TrendIDs;
           switch (eventAnalyzer.getDropOperation()) {
-            case "before":
+            case "before": // add before trend if dragged on top of trend
               newArr.splice(trendIndex, 0, e.item.id);
               return {
                 ...axis,
+                Unit: unit ? unit : axis.Unit,
                 TrendIDs: newArr,
               };
               break;
-            default:
+            default: // add after trend if dragged anywhere else on trend
               newArr.splice(trendIndex + 1, 0, e.item.id);
               return {
                 ...axis,
+                Unit: unit ? unit : axis.Unit,
                 TrendIDs: newArr,
               };
           }
         })
       );
     },
-    [axesState]
+    [newAxesState]
+  );
+
+  const removeFromAxes = React.useCallback(
+    (props: ItemRenderProps) => {
+      const indexArray = props.itemHierarchicalIndex.split("_");
+
+      if (indexArray.length == 1) {
+        setNewAxesState(
+          newAxesState.filter((axis) => axis.Name !== props.item.text)
+        );
+        return;
+      }
+
+      setNewAxesState(
+        newAxesState.map((axis, i) => {
+          if (i !== parseInt(indexArray[0])) return axis;
+          return {
+            ...axis,
+            TrendIDs: axis.TrendIDs.filter(
+              (ids, index) => index !== parseInt(indexArray[1])
+            ),
+          };
+        })
+      );
+    },
+    [newAxesState]
+  );
+
+  const TrendsTreeCustomItem = React.useCallback(
+    (props: ItemRenderProps) => {
+      const trend = trendsState.find((trend) => trend.ID == props.item.id);
+      const correctDepth = props.itemHierarchicalIndex.split("_").length > 2;
+
+      return (
+        <div className={correctDepth ? "change-cursor grabable" : ""}>
+          {trend && correctDepth && (
+            <SvgIcon
+              icon={chartLegendIcon}
+              size="xlarge"
+              style={{ stroke: (trend as any).Color }}
+            />
+          )}
+          {correctDepth ? (
+            <span>{props.item.text}</span>
+          ) : (
+            <span style={{ fontWeight: "bold" }}>{props.item.text}</span>
+          )}
+        </div>
+      );
+    },
+    [trendsState]
+  );
+
+  const AxisTreeCustomItem = React.useCallback(
+    (props: ItemRenderProps) => {
+      const trend = trendsState.find((trend) => trend.ID == props.item.id);
+      const correctDepth = props.itemHierarchicalIndex.split("_").length > 1;
+
+      return (
+        <div>
+          {trend && correctDepth && (
+            <SvgIcon
+              icon={chartLegendIcon}
+              size="xlarge"
+              style={{ stroke: (trend as any).Color }}
+            />
+          )}
+          {correctDepth ? (
+            <span>{props.item.text}</span>
+          ) : (
+            <span style={{ fontWeight: "bold" }}>{props.item.text}</span>
+          )}
+          <Button
+            svgIcon={xIcon}
+            onClick={() => removeFromAxes(props)}
+            fillMode="flat"
+          />
+        </div>
+      );
+    },
+    [trendsState]
   );
 
   const [showCreateAxisDialog, setShowCreateAxisDialog] =
     React.useState<boolean>(false);
 
-  const toggleAxisDialog = React.useCallback(() => {
-    setShowCreateAxisDialog(!showCreateAxisDialog);
-  }, [showCreateAxisDialog]);
+  const openCreateAxisDialog = React.useCallback(() => {
+    setShowCreateAxisDialog(true);
+  }, []);
+
+  const closeCreateAxisDialog = React.useCallback(() => {
+    setShowCreateAxisDialog(false);
+    fromDrag.current = false;
+    setNewAxisName("");
+  }, []);
+
+  const handleConfirmButtonClick = React.useCallback(() => {
+    onAxesStateChange(newAxesState);
+    closeDialog();
+  }, [newAxesState]);
+
+  const mainClass = React.useMemo(() => {
+    return "chart-edit-container" + (dragging ? " grabbing" : "");
+  }, [dragging]);
 
   return (
     <React.Fragment>
       <Dialog>
-        <div className="chart-edit-container">
+        <div className={mainClass}>
           <div className="segregated-trends">
             <TreeView
               draggable={true}
@@ -258,6 +448,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
           <div className="selected-trends">
             <TreeView
               ref={axisTreeRef}
+              className="axis-treeview"
               draggable={true}
               data={processTreeViewItems(axisTree, {
                 expand: expandAxesTree,
@@ -270,29 +461,54 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
               className="create-axis-area"
               onMouseEnter={handleMouseEnterCreateNewAxisArea}
               onMouseLeave={handleMouseLeaveCreateNewAxisArea}
+              onClick={openCreateAxisDialog}
             >
-              <Typography.p style={{ marginBottom: 0 }}>
+              <SvgIcon icon={plusIcon} size="large" />
+              <Typography.p
+                style={{ marginBottom: 0 }}
+                fontWeight="bold"
+                fontSize="large"
+              >
                 {t("trends-page:create_new_axis")}
               </Typography.p>
             </div>
           </div>
         </div>
         {showCreateAxisDialog && (
-          <Dialog onClose={toggleAxisDialog}>
-            <Label>{t("trends-page:new_axis_name")}</Label>
+          <Dialog
+            title={t("trends-page:enter_new_axis_name")}
+            onClose={closeCreateAxisDialog}
+          >
             <TextBox value={newAxisName} onChange={handleAxisNameChange} />
             <DialogActionsBar>
-              <Button type="button" onClick={createNewAxis}>
+              <Button
+                type="button"
+                svgIcon={cancelIcon}
+                onClick={closeCreateAxisDialog}
+              >
+                {t("common:cancel")}
+              </Button>
+              <Button
+                type="button"
+                svgIcon={checkIcon}
+                onClick={createNewAxis}
+                themeColor={"primary"}
+              >
                 {t("common:confirm")}
               </Button>
             </DialogActionsBar>
           </Dialog>
         )}
         <DialogActionsBar>
-          <Button type="button" onClick={onCancelButtonClick}>
+          <Button type="button" svgIcon={cancelIcon} onClick={closeDialog}>
             {t("common:cancel")}
           </Button>
-          <Button type="button" onClick={onSaveButtonClick}>
+          <Button
+            type="button"
+            svgIcon={checkIcon}
+            onClick={handleConfirmButtonClick}
+            themeColor={"primary"}
+          >
             {t("common:save")}
           </Button>
         </DialogActionsBar>

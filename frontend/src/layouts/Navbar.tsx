@@ -25,7 +25,7 @@ export default function Navbar(props: NavbarProps) {
         </a>
 
         <AppBarSection className="navbar-title">
-          <Typography.h2 fontWeight="bold">
+          <Typography.h2 style={{ marginBottom: 0 }} fontWeight="bold">
             {props.title ? props.title : "Onyks OWL"}
           </Typography.h2>
         </AppBarSection>
