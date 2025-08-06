@@ -27,6 +27,7 @@ import EventsPage from "./features/EventsPage";
 import HomePage from "./features/HomePage";
 import { Button } from "@progress/kendo-react-buttons";
 import "../../styles/features/lds/lds.scss";
+import { SwitchChangeEvent } from "@progress/kendo-react-inputs";
 
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav", "kendo"]);

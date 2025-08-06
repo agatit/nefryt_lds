@@ -8,6 +8,7 @@ import Login from "./features/auth/login";
 import LDS from "./features/lds/LDS";
 import { NavbarContextProvider } from "./contexts/navbarContext";
 import PrivateRoute from "./components/PrivateRoute";
+import { SwitchChangeEvent } from "@progress/kendo-react-inputs";
 
 function App() {
   const { t } = useTranslation(["common", "titles"]);
@@ -15,12 +16,23 @@ function App() {
 
   // Navbar stuff if any
   const [title, setTitle] = React.useState<string>(t("titles:" + pathname));
+  const [useMockup, setUseMockup] = React.useState<boolean>(false);
+  const handleUseMockupChange = React.useCallback(
+    (event: SwitchChangeEvent) => {
+      setUseMockup(event.value);
+    },
+    []
+  );
 
   return (
     <div className="App">
-      <Navbar title={title} />
+      <Navbar
+        title={title}
+        useMockup={useMockup}
+        handleOnUseMockupChange={handleUseMockupChange}
+      />
       <React.Suspense fallback={<LoadingPanel querySelectorString=".App" />}>
-        <NavbarContextProvider setTitle={setTitle}>
+        <NavbarContextProvider setTitle={setTitle} useMockup={useMockup}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
