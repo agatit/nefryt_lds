@@ -40,3 +40,9 @@ main.config-page {
 .config-detail-panel .k-alpha-slider {
   display: none;
 }
+
+// Kendo customization
+
+.config-page .k-table-row:hover {
+  cursor: pointer;
+}

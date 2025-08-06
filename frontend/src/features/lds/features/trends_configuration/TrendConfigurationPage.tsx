@@ -28,6 +28,16 @@ import TrendConfiguration from "./TrendConfiguration";
 import TrendDefConfiguration from "./TrendDefConfiguration";
 import TrendGroupConfiguration from "./TrendGroupConfiguration";
 import TrendUnitConfiguration from "./TrendUnitConfiguration";
+import TrendDefConfigurationDetailPanel from "./TrendDefConfigurationDetailPanel";
+import TrendGroupConfigurationDetailPanel from "./TrendGroupConfigurationDetailPanel";
+import TrendUnitConfigurationDetailPanel from "./TrendUnitConfigurationDetailPanel";
+
+export interface SelectionType {
+  trend: ParsedTrendType | null;
+  trendDef: TrendDefBase | null;
+  trendGroup: TrendGroup | null;
+  unit: Unit | null;
+}
 
 export interface ParsedTrendType extends MockupTrendType {
   trendType: string;
@@ -45,8 +55,6 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     React.useState<TrendGroup[]>(mockupTrendGroups);
   const [units, setUnits] = React.useState<Unit[]>(mockupUnits);
   const [trends, setTrends] = React.useState<MockupTrendType[]>(mockupTrends);
-
-  const [selected, setSelected] = React.useState<ParsedTrendType | null>(null);
 
   const [verticalPanes, setVerticalPanes] = React.useState<SplitterPaneProps[]>(
     [{ size: "66%" }, {}]
@@ -100,6 +108,110 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     setShowAddNewUnitDialog(false);
   }, []);
 
+  // Selection
+  const [selection, setSelection] = React.useState<SelectionType>({
+    trend: null,
+    trendDef: null,
+    trendGroup: null,
+    unit: null,
+  });
+  const isSelected = React.useMemo(
+    () =>
+      selection.trend !== null ||
+      selection.trendDef !== null ||
+      selection.trendGroup !== null ||
+      selection.unit !== null,
+    [selection]
+  );
+
+  const handleSelectedTrendChange = React.useCallback(
+    (value: ParsedTrendType) => {
+      setSelection({
+        trend: value,
+        trendDef: null,
+        trendGroup: null,
+        unit: null,
+      });
+    },
+    []
+  );
+
+  const handleSelectedTrendDefChange = React.useCallback(
+    (value: TrendDefBase) => {
+      setSelection({
+        trend: null,
+        trendDef: value,
+        trendGroup: null,
+        unit: null,
+      });
+    },
+    []
+  );
+
+  const handleSelectedTrendGroupChange = React.useCallback(
+    (value: TrendGroup) => {
+      setSelection({
+        trend: null,
+        trendDef: null,
+        trendGroup: value,
+        unit: null,
+      });
+    },
+    []
+  );
+
+  const handleSelectedUnitChange = React.useCallback((value: Unit) => {
+    setSelection({
+      trend: null,
+      trendDef: null,
+      trendGroup: null,
+      unit: value,
+    });
+  }, []);
+
+  const SelectedDetailPanel = React.useCallback((): React.JSX.Element => {
+    if (selection.trend)
+      return (
+        <TrendConfigurationDetailPanel
+          trendDefs={trendDefs}
+          trendGroups={trendGroups}
+          units={units}
+          trends={trends}
+          setTrends={setTrends}
+          selected={selection.trend}
+          enterAddNewTrend={openAddNewTrendDialog}
+        />
+      );
+    if (selection.trendDef)
+      return (
+        <TrendDefConfigurationDetailPanel
+          trendDefs={trendDefs}
+          setTrendDefs={setTrendDefs}
+          selected={selection.trendDef}
+          enterAddNewTrendDef={openAddNewTrendDefDialog}
+        />
+      );
+    if (selection.trendGroup)
+      return (
+        <TrendGroupConfigurationDetailPanel
+          trendGroups={trendGroups}
+          setTrendGroups={setTrendGroups}
+          selected={selection.trendGroup}
+          enterAddNewTrendGroup={openAddNewTrendGroupDialog}
+        />
+      );
+    if (selection.unit)
+      return (
+        <TrendUnitConfigurationDetailPanel
+          units={units}
+          setUnits={setUnits}
+          selected={selection.unit}
+          enterAddNewUnit={openAddNewUnitDialog}
+        />
+      );
+    return <></>;
+  }, [selection, trendDefs, trendGroups, units, trends, openAddNewTrendDialog]);
+
   return (
     <React.Fragment>
       <main className="config-page">
@@ -118,7 +230,8 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
             units={units}
             trends={trends}
             setTrends={setTrends}
-            setSelected={setSelected}
+            selected={selection.trend}
+            setSelected={handleSelectedTrendChange}
           />
 
           <TabStrip
@@ -133,6 +246,8 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 closeDialog={closeAddNewTrendDefDialog}
                 trendDefs={trendDefs}
                 setTrendDefs={setTrendDefs}
+                selected={selection.trendDef}
+                setSelected={handleSelectedTrendDefChange}
               />
             </TabStripTab>
             <TabStripTab title={t("config-page:trends_groups")}>
@@ -142,6 +257,8 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 closeDialog={closeAddNewTrendGroupDialog}
                 trendGroups={trendGroups}
                 setTrendGroups={setTrendGroups}
+                selected={selection.trendGroup}
+                setSelected={handleSelectedTrendGroupChange}
               />
             </TabStripTab>
             <TabStripTab title={t("config-page:trends_units")}>
@@ -151,27 +268,19 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 closeDialog={closeAddNewUnitDialog}
                 units={units}
                 setUnits={setUnits}
+                selected={selection.unit}
+                setSelected={handleSelectedUnitChange}
               />
             </TabStripTab>
           </TabStrip>
         </Splitter>
         <DetailPanel
-          className={
-            "config-detail-panel" + (selected !== null ? "" : " no-selected")
-          }
+          className={"config-detail-panel" + (isSelected ? "" : " no-selected")}
           flexGrow={1}
           extandable={false}
         >
-          {selected !== null ? (
-            <TrendConfigurationDetailPanel
-              trendDefs={trendDefs}
-              trendGroups={trendGroups}
-              units={units}
-              trends={trends}
-              setTrends={setTrends}
-              selected={selected}
-              enterAddNewTrend={openAddNewTrendDialog}
-            />
+          {isSelected ? (
+            <SelectedDetailPanel />
           ) : (
             <Typography.p style={{ marginBottom: 0 }}>
               {t("config-page:select_element_to_edit")}

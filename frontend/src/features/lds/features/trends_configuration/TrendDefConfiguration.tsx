@@ -3,6 +3,7 @@ import {
   Grid,
   GridColumn,
   GridSearchBox,
+  GridSelectionChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
 import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
@@ -12,6 +13,7 @@ import { TrendDefBase } from "../../../../services/api";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { Label } from "@progress/kendo-react-labels";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
 export interface TrendDefConfigurationProps {
   showDialog: boolean;
@@ -19,6 +21,8 @@ export interface TrendDefConfigurationProps {
   closeDialog: () => void;
   trendDefs: TrendDefBase[];
   setTrendDefs: (value: TrendDefBase[]) => void;
+  selected: TrendDefBase | null;
+  setSelected: (value: TrendDefBase) => void;
 }
 
 const TrendDefConfiguration = React.memo(function TrendDefConfiguration({
@@ -27,8 +31,24 @@ const TrendDefConfiguration = React.memo(function TrendDefConfiguration({
   closeDialog,
   trendDefs,
   setTrendDefs,
+  selected,
+  setSelected,
 }: TrendDefConfigurationProps) {
   const { t } = useTranslation(["common", "config-page"]);
+
+  const [select, setSelect] = React.useState<SelectDescriptor>();
+  React.useEffect(() => {
+    if (selected == null) setSelect({});
+  }, [selected]);
+
+  const handleSelectionChange = React.useCallback(
+    (event: GridSelectionChangeEvent) => {
+      const item: TrendDefBase = event.endDataItem;
+      setSelected(item);
+      setSelect(event.select);
+    },
+    [setSelected]
+  );
 
   const [trendDefID, setTrendDefID] = React.useState<string | undefined>();
   const [trendDefName, setTrendDefName] = React.useState<string | undefined>();
@@ -65,8 +85,11 @@ const TrendDefConfiguration = React.memo(function TrendDefConfiguration({
     <React.Fragment>
       <Grid
         data={trendDefs}
+        dataItemKey="ID"
         sortable={true}
         selectable={{ enabled: true, mode: "single" }}
+        select={select}
+        onSelectionChange={handleSelectionChange}
       >
         <GridToolbar>
           <GridSearchBox />

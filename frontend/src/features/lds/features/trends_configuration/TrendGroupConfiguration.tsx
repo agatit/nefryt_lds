@@ -3,6 +3,7 @@ import {
   Grid,
   GridColumn,
   GridSearchBox,
+  GridSelectionChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
 import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
@@ -12,6 +13,7 @@ import { TrendDefBase, TrendGroup } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { Label } from "@progress/kendo-react-labels";
+import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
 export interface TrendGroupConfigurationProps {
   showDialog: boolean;
@@ -19,6 +21,8 @@ export interface TrendGroupConfigurationProps {
   closeDialog: () => void;
   trendGroups: TrendGroup[];
   setTrendGroups: (value: TrendGroup[]) => void;
+  selected: TrendGroup | null;
+  setSelected: (valeu: TrendGroup) => void;
 }
 
 const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
@@ -27,8 +31,24 @@ const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
   closeDialog,
   trendGroups,
   setTrendGroups,
+  selected,
+  setSelected,
 }: TrendGroupConfigurationProps) {
   const { t } = useTranslation(["common", "config-page"]);
+
+  const [select, setSelect] = React.useState<SelectDescriptor>();
+  React.useEffect(() => {
+    if (selected == null) setSelect({});
+  }, [selected]);
+
+  const handleSelectionChange = React.useCallback(
+    (event: GridSelectionChangeEvent) => {
+      const item: TrendGroup = event.endDataItem;
+      setSelected(item);
+      setSelect(event.select);
+    },
+    [setSelected]
+  );
 
   const [trendGroupName, setTrendGroupName] = React.useState<
     string | undefined
@@ -60,12 +80,15 @@ const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
       <Grid
         data={trendGroups}
         sortable={true}
+        dataItemKey="ID"
         selectable={{ enabled: true, mode: "single" }}
+        select={select}
+        onSelectionChange={handleSelectionChange}
       >
         <GridToolbar>
           <GridSearchBox />
           <ButtonGroup>
-            <Button svgIcon={plusIcon}>
+            <Button svgIcon={plusIcon} onClick={openDialog}>
               {t("config-page:add_new_trend_group")}
             </Button>
           </ButtonGroup>

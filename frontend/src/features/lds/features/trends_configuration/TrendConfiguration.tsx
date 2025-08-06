@@ -26,6 +26,7 @@ import { MockupTrendType } from "../../../../data/mockup-data";
 import { TrendDefBase, TrendGroup, Unit } from "../../../../services/api";
 import { rgbaToHex } from "../../../../lib/utilis";
 import ColorGridCell from "../../components/ColorGridCell";
+import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
 export interface TrendConfigurationProps {
   showDialog: boolean;
@@ -36,6 +37,7 @@ export interface TrendConfigurationProps {
   units: Unit[];
   trends: MockupTrendType[];
   setTrends: (value: MockupTrendType[]) => void;
+  selected: ParsedTrendType | null;
   setSelected: (value: ParsedTrendType) => void;
 }
 
@@ -48,6 +50,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
   units,
   trends,
   setTrends,
+  selected,
   setSelected,
 }: TrendConfigurationProps) {
   const { t } = useTranslation(["common", "config-page"]);
@@ -63,12 +66,18 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
     });
   }, [trendDefs, trendGroups, trends]);
 
+  const [select, setSelect] = React.useState<SelectDescriptor>();
+  React.useEffect(() => {
+    if (selected == null) setSelect({});
+  }, [selected]);
+
   const handleSelectionChange = React.useCallback(
     (event: GridSelectionChangeEvent) => {
       const item: ParsedTrendType = event.endDataItem;
       setSelected(item);
+      setSelect(event.select);
     },
-    [trendDefs, trendGroups, setSelected]
+    [setSelected]
   );
 
   const [trendName, setTrendName] = React.useState<string | undefined>();
@@ -148,6 +157,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
         sortable={true}
         groupable={true}
         selectable={{ enabled: true, mode: "single" }}
+        select={select}
         filterable={true}
         onSelectionChange={handleSelectionChange}
       >

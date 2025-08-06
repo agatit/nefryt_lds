@@ -3,13 +3,17 @@ import {
   Grid,
   GridColumn,
   GridSearchBox,
+  GridSelectionChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
-import { plusIcon } from "@progress/kendo-svg-icons";
+import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { TrendDefBase, Unit } from "../../../../services/api";
-import { TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import { Label } from "@progress/kendo-react-labels";
+import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
 export interface TrendUnitConfigurationProps {
   showDialog: boolean;
@@ -17,6 +21,8 @@ export interface TrendUnitConfigurationProps {
   closeDialog: () => void;
   units: Unit[];
   setUnits: (value: Unit[]) => void;
+  selected: Unit | null;
+  setSelected: (value: Unit) => void;
 }
 
 const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
@@ -25,8 +31,24 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
   closeDialog,
   units,
   setUnits,
+  selected,
+  setSelected,
 }: TrendUnitConfigurationProps) {
   const { t } = useTranslation(["common", "config-page"]);
+
+  const [select, setSelect] = React.useState<SelectDescriptor>();
+  React.useEffect(() => {
+    if (selected == null) setSelect({});
+  }, [selected]);
+
+  const handleSelectionChange = React.useCallback(
+    (event: GridSelectionChangeEvent) => {
+      const item: Unit = event.endDataItem;
+      setSelected(item);
+      setSelect(event.select);
+    },
+    [setSelected]
+  );
 
   const [unitName, setUnitName] = React.useState<string | undefined>();
   const [unitSymbol, setUnitSymbol] = React.useState<string | undefined>();
@@ -76,12 +98,17 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
       <Grid
         data={units}
         sortable={true}
+        dataItemKey="ID"
         selectable={{ enabled: true, mode: "single" }}
+        select={select}
+        onSelectionChange={handleSelectionChange}
       >
         <GridToolbar>
           <GridSearchBox />
           <ButtonGroup>
-            <Button svgIcon={plusIcon}>{t("config-page:add_new_unit")}</Button>
+            <Button svgIcon={plusIcon} onClick={openDialog}>
+              {t("config-page:add_new_unit")}
+            </Button>
           </ButtonGroup>
         </GridToolbar>
         <GridColumn
@@ -100,6 +127,51 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
           field="Multiplier"
         />
       </Grid>
+      {showDialog && (
+        <Dialog
+          title={t("config-page:create_new_trend_group")}
+          onClose={cancelAddNewUnit}
+        >
+          <div>
+            <Label editorId="unitName">{t("config-page:name")}</Label>
+            <TextBox
+              id="unitName"
+              value={unitName}
+              onChange={handleUnitNameChange}
+            />
+          </div>
+          <div>
+            <Label editorId="unitSymbol">{t("config-page:symbol")}</Label>
+            <TextBox
+              id="unitSymbol"
+              value={unitSymbol}
+              onChange={handleUnitSymbolChange}
+            />
+          </div>
+          <div>
+            <Label editorId="unitMultiplier">
+              {t("config-page:multiplier")}
+            </Label>
+            <TextBox
+              id="unitMultiplier"
+              value={unitMultiplier}
+              onChange={handleUnitMultiplierChange}
+            />
+          </div>
+          <DialogActionsBar>
+            <Button svgIcon={cancelIcon} onClick={cancelAddNewUnit}>
+              {t("common:cancel")}
+            </Button>
+            <Button
+              svgIcon={checkIcon}
+              themeColor={"primary"}
+              onClick={confirmAddNewUnit}
+            >
+              {t("common:confirm")}
+            </Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
     </React.Fragment>
   );
 });
