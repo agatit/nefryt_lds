@@ -16,7 +16,7 @@ dependencies = [
     "passlib==1.7.4",
     "pyjwt>=2.4.0",
     "pymodbus==3.9.2",
-    "pymssql==2.3.4",
+    "pymssql==2.3.7",
     "pyodbc>=4.0.22",
     "python-dateutil>=2.6.0",
     "scipy>=1.8.1",
