@@ -9,9 +9,9 @@ from matplotlib.animation import FuncAnimation
 from sqlalchemy import select, and_, literal, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from config import setup_engine
 from database.models import lds
 from db import get_engine
-from simulator.config import setup_engine
 import matplotlib.pyplot as plt
 
 

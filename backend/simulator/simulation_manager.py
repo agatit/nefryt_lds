@@ -3,9 +3,9 @@ import logging
 import time
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from config import Settings
 from database import lds
 from db import get_engine
-from .config import Settings
 from .simulations.density_mass import SimulationDensityMass
 from .simulations.density_volume import SimulationDensityVolume
 

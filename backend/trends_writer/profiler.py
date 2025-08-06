@@ -6,10 +6,10 @@ import multiprocessing
 from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
+from config import setup_engine
 from database.models import lds
 from db import get_engine
-from trends_writer.config import Settings, setup_engine
-
+from trends_writer.config import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -65,13 +65,15 @@ class Profiler:
     @staticmethod
     def _start_process(trends_dict: dict, trends_count: int):
         Profiler.process = multiprocessing.Process(target=Profiler._process_queue,
-                                                   args=(Profiler.queue, trends_dict, trends_count, Settings.db_uri, Settings.log_profiler))
+                                                   args=(Profiler.queue, trends_dict, trends_count, Settings.db_uri,
+                                                         Settings.log_profiler))
         Profiler.process.daemon = True
         Profiler.process.start()
         logger.info("Profiler: Process started")
 
     @staticmethod
-    def _process_queue(queue: multiprocessing.Queue, trends_dict: dict, expected_trends_count: int, db_uri: str, log_profiler: bool):
+    def _process_queue(queue: multiprocessing.Queue, trends_dict: dict, expected_trends_count: int, db_uri: str,
+                       log_profiler: bool):
         setup_engine(db_uri)
         initialized_processes_count = 0
         first_timestamp = math.inf
@@ -93,7 +95,8 @@ class Profiler:
                     else:
                         Profiler.updates[timestamp]['total'][1] = (1, finished_count, perf_counter, time_used)
                 if Profiler.updates[timestamp][trend_id][0][0] == 0:
-                    logger.warning(f'Profiler: Already got start time for trend with id={trend_id} (timestamp={timestamp})')
+                    logger.warning(
+                        f'Profiler: Already got start time for trend with id={trend_id} (timestamp={timestamp})')
                 else:
                     Profiler.updates[timestamp][trend_id][0][0] -= 1
                     Profiler.updates[timestamp][trend_id][0][1] += 1
@@ -101,16 +104,19 @@ class Profiler:
                         Profiler.updates[timestamp][trend_id][1][0] = perf_counter
             elif operation == 0 and timestamp >= first_timestamp:
                 if timestamp in Profiler.updates:
-                    trends_count, (current_count, finished_count, start, time_used) = Profiler.updates[timestamp]['total']
+                    trends_count, (current_count, finished_count, start, time_used) = Profiler.updates[timestamp][
+                        'total']
                     if current_count == 1:
-                        time_used  += perf_counter - start
+                        time_used += perf_counter - start
                     finished_count += 1
                     current_count -= 1
                     Profiler.updates[timestamp]['total'][1] = (current_count, finished_count, start, time_used)
                     if Profiler.updates[timestamp][trend_id][1][0] is None and Profiler.updates[timestamp][trend_id][1][1] is None:
                         logger.warning(f'Profiler: No start time for trend with id={trend_id} (timestamp={timestamp})')
-                    elif Profiler.updates[timestamp][trend_id][1][0] is None and Profiler.updates[timestamp][trend_id][1][1] is not None:
-                        logger.warning(f'Profiler: Already got stop time for trend with id={trend_id} (timestamp={timestamp})')
+                    elif Profiler.updates[timestamp][trend_id][1][0] is None and \
+                            Profiler.updates[timestamp][trend_id][1][1] is not None:
+                        logger.warning(
+                            f'Profiler: Already got stop time for trend with id={trend_id} (timestamp={timestamp})')
                     elif Profiler.updates[timestamp][trend_id][0][1] == 1:
                         start_time = Profiler.updates[timestamp][trend_id][1][0]
                         trend_time_used = perf_counter - start_time
@@ -156,11 +162,11 @@ class Profiler:
                     with Session(get_engine()) as session:
                         profiler_data = session.get(lds.ProfilerData, k)
                         if profiler_data:
-                            profiler_data.Time10 = float(profiler_data.Time10)*0.9 + v[1][1]*0.1 \
+                            profiler_data.Time10 = float(profiler_data.Time10) * 0.9 + v[1][1] * 0.1 \
                                 if profiler_data.Time10 else v[1][1]
-                            profiler_data.Time100 = float(profiler_data.Time100)*0.99 + v[1][1]*0.01 \
+                            profiler_data.Time100 = float(profiler_data.Time100) * 0.99 + v[1][1] * 0.01 \
                                 if profiler_data.Time100 else v[1][1]
-                            profiler_data.Time1000 = float(profiler_data.Time1000)*0.999 + v[1][1]*0.001 \
+                            profiler_data.Time1000 = float(profiler_data.Time1000) * 0.999 + v[1][1] * 0.001 \
                                 if profiler_data.Time1000 else v[1][1]
                             if v[1][2] is not None:
                                 profiler_data.QueueSize = v[1][2]

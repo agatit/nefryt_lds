@@ -12,14 +12,14 @@ path = pathlib.Path(__file__).parent.resolve()
 class AppConfig(BaseModel):
     db_uri: str
     verbosity: str = 'INFO'
-    modbus_port: int = 502
+    trends_writer: dict
 
 
-_config = load_yaml(path, "config.yaml")
-
-Settings = AppConfig(**_config)
+app_config = load_yaml(path, "config.yaml")
+Settings = AppConfig(**app_config)
 logging.basicConfig(stream=sys.stdout, level=Settings.verbosity, force=True)
 
-def setup_engine():
-    db_url = Settings.db_uri
+
+def setup_engine(db_uri: str | None = None):
+    db_url = db_uri if db_uri else Settings.db_uri
     set_new_engine(create_engine(url=db_url, echo=False))

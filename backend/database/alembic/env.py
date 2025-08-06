@@ -1,19 +1,18 @@
 from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine
-
-from api.config import AppConfig, Settings
+from config import AppConfig, Settings
 from db import get_engine, set_new_engine
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-
 from sqlmodel import SQLModel
-from database.models import lds, editor # noqa
+from database.models import lds, editor  # noqa
 
 target_metadata = SQLModel.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -46,7 +45,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        include_object=include_object, # noqa
+        include_object=include_object,  # noqa
         compare_server_default=True,
         include_schemas=True
     )
@@ -70,7 +69,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            include_object = include_object,  # noqa
+            include_object=include_object,  # noqa
             compare_server_default=True,
             include_schemas=True
         )

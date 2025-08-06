@@ -6,12 +6,11 @@ from typing import List
 import numpy as np
 from sqlalchemy import select, and_, literal, text
 from sqlalchemy.orm import Session
+from config import setup_engine
 from database import lds
 from db import get_engine
-from trends_writer.config import setup_engine
 from multiprocessing.queues import Queue
 from trends_writer.trend.trend_manager import TrendManager
-
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ class TrendBase:
         logger.info(f"{self.__class__.__name__} ({self.id}): Trend initialized (params={self.params})")
 
     def run_trend_process(self):
-        self.process = Process(target=self.process_queue, args=(self.db_uri, ))
+        self.process = Process(target=self.process_queue, args=(self.db_uri,))
         self.process.start()
         logger.info(f"{self.__class__.__name__} ({self.id}): Process started")
 
@@ -53,14 +52,14 @@ class TrendBase:
             profiler_timestamp_diff = item[2]
             parent_id = item[3] if len(item) > 3 else None
 
-            if self.last_update is not None and self.last_update < timestamp-1:
+            if self.last_update is not None and self.last_update < timestamp - 1:
                 try:
                     qsize = self.queue.qsize()
                     logger.warning(f"{self.__class__.__name__} ({self.id}): Data not continuously updated "
-                                    f"(updated={timestamp - self.last_update} seconds ago, queue size={qsize})")
+                                   f"(updated={timestamp - self.last_update} seconds ago, queue size={qsize})")
                 except NotImplementedError:
                     logger.warning(f"{self.__class__.__name__} ({self.id}): Data not continuously updated "
-                                    f"(updated={timestamp - self.last_update} seconds ago)")
+                                   f"(updated={timestamp - self.last_update} seconds ago)")
 
             self.last_update = timestamp
             self.profiler_queue.put((1, self.id, timestamp + profiler_timestamp_diff, time.perf_counter(), None))
@@ -80,7 +79,8 @@ class TrendBase:
                 child.queue.put((data, timestamp, profiler_timestamp_diff, self.id))
             except Exception as e:
                 logger.exception(f"{self.__class__.__name__} ({self.id}): "
-                                 f"Child {child.__class__.__name__} ({child.id}) update error (timestamp={timestamp}): {e}", exc_info=True)
+                                 f"Child {child.__class__.__name__} ({child.id}) update error (timestamp={timestamp}): {e}",
+                                 exc_info=True)
 
         logger.debug(f"{self.__class__.__name__} ({self.id}): Finished updating children (timestamp={timestamp})")
         return timestamp
@@ -88,9 +88,10 @@ class TrendBase:
     def _read_params(self):
         stmt = (select(lds.TrendParamDef, lds.TrendParam)
                 .select_from(lds.Trend)
-                .join(lds.TrendDef, lds.Trend.TrendDefID == lds.TrendDef.ID) # noqa
+                .join(lds.TrendDef, lds.Trend.TrendDefID == lds.TrendDef.ID)  # noqa
                 .join(lds.TrendParamDef, lds.TrendDef.ID == lds.TrendParamDef.TrendDefID)
-                .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.Trend.ID == lds.TrendParam.TrendID))
+                .join(lds.TrendParam, and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
+                                           lds.Trend.ID == lds.TrendParam.TrendID))
                 .where(lds.Trend.ID == literal(self.id)))
 
         with Session(get_engine()) as session:
@@ -101,7 +102,7 @@ class TrendBase:
 
     def read_children(self):
         stmt = (select(lds.Trend.ID)
-                .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) # noqa
+                .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID)  # noqa
                 .join(lds.TrendParam, lds.TrendParam.TrendID == lds.Trend.ID)
                 .join(lds.TrendParamDef,
                       and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID,
@@ -115,15 +116,17 @@ class TrendBase:
         for trend_id in results:
             child_trend = TrendManager.get(trend_id)
             if child_trend is None:
-                logger.warning(f"{self.__class__.__name__} ({self.id}): No registered trend with id={trend_id} found for parent")
+                logger.warning(
+                    f"{self.__class__.__name__} ({self.id}): No registered trend with id={trend_id} found for parent")
             else:
                 self.children.append(child_trend)
-                logger.info(f"{self.__class__.__name__} ({self.id}): Found registered {child_trend.__class__.__name__} ({trend_id})")
+                logger.info(
+                    f"{self.__class__.__name__} ({self.id}): Found registered {child_trend.__class__.__name__} ({trend_id})")
 
     def _save(self, data: np.ndarray, timestamp: int):
         try:
             data = data.astype(np.uint16)
-            data = np.minimum(data, [np.iinfo(np.uint16).max-1] * len(data))  # FFFF reserved for error
+            data = np.minimum(data, [np.iinfo(np.uint16).max - 1] * len(data))  # FFFF reserved for error
             packed_data = struct.pack('<100H', *data)
 
             insert_stmt = text(f"EXEC Update_Insert_TrendData {self.id}, {timestamp}, :data")
@@ -135,7 +138,8 @@ class TrendBase:
         except Exception as e:
             with Session(get_engine()) as session:
                 session.rollback()
-            logger.exception(f"{self.__class__.__name__} ({self.id}): Update error (timestamp={timestamp}): {e}", exc_info=True)
+            logger.exception(f"{self.__class__.__name__} ({self.id}): Update error (timestamp={timestamp}): {e}",
+                             exc_info=True)
 
     def set_children_count(self, children_count: int):
         self.children_count = children_count

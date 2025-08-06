@@ -2,13 +2,13 @@ import multiprocessing
 import pathlib
 import logging.config
 from pydantic import BaseModel
-from sqlalchemy import create_engine
-from config_utils import load_yaml
-from db import set_new_engine
+from config import app_config
 import platform
 
 path = pathlib.Path(__file__).parent.resolve()
 default_manager_handler_filename = 'default_log.log'
+
+
 # TODO: remove log file creation when testing
 
 def set_manager_handler(default_manager_handler: dict) -> dict:
@@ -26,9 +26,9 @@ def set_manager_handler(default_manager_handler: dict) -> dict:
 
 def reset_manager_handler(manager_handler: dict) -> dict:
     return {
-      'class': 'logging.FileHandler',
-      'filename': default_manager_handler_filename,
-      'level': manager_handler['level']
+        'class': 'logging.FileHandler',
+        'filename': default_manager_handler_filename,
+        'level': manager_handler['level']
     }
 
 
@@ -39,8 +39,7 @@ class AppConfig(BaseModel):
     profiler_filename: str = 'profiler.log'
 
 
-_config = load_yaml(path, 'config.yaml')
-_logging_config = _config['logging']
+_logging_config = app_config['trends_writer']['logging']
 _logging_config['handlers']['manager'] = set_manager_handler(_logging_config['handlers']['manager'])
 for logger_name, logger_config in _logging_config['loggers'].items():
     level = logger_config.get('level', 'NOTSET')
@@ -54,7 +53,5 @@ except Exception as e:
     _logging_config['handlers']['manager'] = reset_manager_handler(_logging_config['handlers']['manager'])
     logging.config.dictConfig(_logging_config)
 
-Settings = AppConfig(**_config)
-
-def setup_engine(db_url: str = Settings.db_uri):
-    set_new_engine(create_engine(url=db_url, echo=False))
+app_config['trends_writer'].update(app_config)
+Settings = AppConfig(**app_config['trends_writer'])
