@@ -279,6 +279,12 @@ class TrendParam(TrendParamBase, table=True):
         {'schema': 'lds'}
     )
 
+    TrendID: int = Field(sa_column=Column(
+        Integer,
+        ForeignKey("lds.Trend.ID", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False
+    ))
+
 
 class Template(TemplateBase, table=True):
     __tablename__ = 'Template'

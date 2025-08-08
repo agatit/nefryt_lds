@@ -13,7 +13,8 @@ from api.routers.utils import map_lds_trend_param_and_lds_trend_param_def_to_tre
     map_tuple_to_trend_data_single, strip_strings, get_user_token
 from ..custom_page import CustomParams, CustomPage, use_custom_page
 from db import get_engine
-from ..schemas import Error, TrendDataMultiple, Information, UpdateTrend, TrendParamOut, TrendDataSingle, TrendBase
+from ..schemas import Error, TrendDataMultiple, Information, UpdateTrend, TrendParamOut, TrendDataSingle, TrendBase, \
+    TrendParamBase
 from database import lds
 
 router = APIRouter(prefix="/trend", tags=['trend'], dependencies=[Depends(get_user_token)])
@@ -328,6 +329,47 @@ async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[
         return page
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_params(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post('/{trend_id}/param', response_model=TrendParamOut | Error)
+async def create_trend_param(trend_id: Annotated[int, Path()], trend_param: Annotated[TrendParamBase, Body()],
+                             engine: Annotated[Engine, Depends(get_engine)]):
+    try:
+        trend_param_dict = trend_param.model_dump()
+        trend_param_dict.update({'TrendID': trend_id})
+        trend_param = lds.TrendParam(**trend_param_dict)
+        with Session(engine) as session:
+            session.add(trend_param)
+            session.commit()
+        response_content = await get_trend_param_by_id(trend_id, trend_param_dict['TrendParamDefID'], engine)
+        return JSONResponse(content=response_content.model_dump(), status_code=status.HTTP_201_CREATED)
+    except IntegrityError:
+        error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating trend param')
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
+    except Exception as e:
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in create_trend_param(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.delete('/{trend_id}/param/{trend_param_def_id}', response_model=Information | Error)
+async def delete_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()],
+                             engine: Annotated[Engine, Depends(get_engine)]):
+    try:
+        statement = (select(lds.TrendParam).where(and_(lds.TrendParam.TrendID == literal(trend_id),
+                                                       lds.TrendParam.TrendParamDefID == literal(trend_param_def_id))))
+        with Session(engine) as session:
+            trend_param_def = session.execute(statement).first()
+            if not trend_param_def:
+                error = Error(code=status.HTTP_404_NOT_FOUND,
+                              message='No trend param with id = ' + trend_param_def_id + ' for trend with id = ' + str(trend_id))
+                return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+            session.delete(trend_param_def[0])
+            session.commit()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                      message='Exception in delete_trend_param_by_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

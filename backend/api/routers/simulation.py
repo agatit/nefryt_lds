@@ -16,7 +16,6 @@ from db import get_engine
 from ..schemas import Error, SimulationDefBase, SimulationBase, Information, UpdateSimulation, SimulationParamOut, \
     UpdateSimulationParam, SimulationParamIn, SimulationDataOut
 
-# TODO: uzupełnić openapi
 router = APIRouter(prefix="/simulation", tags=["simulation"], dependencies=[Depends(get_user_token)])
 
 

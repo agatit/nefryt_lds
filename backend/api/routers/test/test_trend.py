@@ -792,6 +792,70 @@ def test_list_trend_params_should_return_ok_response_code_and_data_filtered_by_o
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_create_trend_param_should_return_created_response_code_and_created_trend_param_data(add_lds_objects):
+    trend_param_dict = {'TrendParamDefID': trend_param_def1.ID.strip(), 'Value': '1111'}
+    response = test_client.post("/trend/" + str(trend3.ID) + "/param", json=trend_param_dict)
+    assert response.status_code == status.HTTP_201_CREATED
+    returned_trend_param = response.json()
+    assert returned_trend_param['TrendID'] == trend3.ID
+    assert returned_trend_param['Value'] == trend_param_dict['Value']
+    assert returned_trend_param['TrendParamDefID'] == trend_param_dict['TrendParamDefID']
+    assert returned_trend_param['DataType'] == trend_param_def1.DataType.strip()
+    assert returned_trend_param['Name'] == trend_param_def1.Name.strip()
+    with Session(get_engine()) as session:
+        trend_params_count = session.execute(select(func.count()).select_from(lds.TrendParam)).fetchall()[0][0]
+    assert trend_params_count == len(trend_param_list) + 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_create_trend_param_should_return_conflict_response_code_and_error_when_key_not_unique(add_lds_objects):
+    trend_param_dict = {'TrendParamDefID': trend_param_def3.ID, 'Value': '1111'}
+    response = test_client.post("/trend/" + str(trend1.ID) + "/param", json=trend_param_dict)
+    assert response.status_code == status.HTTP_409_CONFLICT
+    error = response.json()
+    assert error['code'] == status.HTTP_409_CONFLICT
+    assert error['message'] == 'Integrity error when creating trend param'
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_create_trend_param_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(add_lds_objects):
+    trend_param_dict = {'TrendParamDefID': trend_param_def3.ID, 'Value': '1111'}
+    response = test_client.post("/trend/100/param", json=trend_param_dict)
+    assert response.status_code == status.HTTP_409_CONFLICT
+    error = response.json()
+    assert error['code'] == status.HTTP_409_CONFLICT
+    assert error['message'] == 'Integrity error when creating trend param'
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_create_trend_param_should_return_conflict_response_code_and_error_when_no_trend_param_def_with_given_id(add_lds_objects):
+    trend_param_dict = {'TrendParamDefID': trend_param_def3.ID+'a', 'Value': '1111'}
+    response = test_client.post(f"/trend/{trend1.ID}/param", json=trend_param_dict)
+    assert response.status_code == status.HTTP_409_CONFLICT
+    error = response.json()
+    assert error['code'] == status.HTTP_409_CONFLICT
+    assert error['message'] == 'Integrity error when creating trend param'
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_delete_trend_param_by_id_should_return_no_content_response_code_and_remove_trend_param(add_lds_objects):
+    response = test_client.delete("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    with Session(get_engine()) as session:
+        trend_params_count = session.execute(select(func.count()).select_from(lds.TrendParam)).fetchall()[0][0]
+    assert trend_params_count == len(trend_param_list) - 1
+
+
+def test_delete_trend_param_by_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id():
+    response = test_client.delete("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    error = response.json()
+    assert error['code'] == status.HTTP_404_NOT_FOUND
+    assert (error['message'] == 'No trend param with id = ' + trend_param1.TrendParamDefID +
+            ' for trend with id = ' + str(trend1.ID))
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
 def test_get_trend_param_by_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(add_lds_objects):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID)
     assert response.status_code == status.HTTP_200_OK

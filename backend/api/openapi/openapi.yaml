@@ -1568,8 +1568,72 @@ paths:
       summary: List trend params
       tags:
       - trends
-      x-openapi-router-controller: api.controllers.trends_controller
+    post:
+      description: Create new trend params
+      operationId: create_trend_param
+      parameters:
+        - description: The id of the trend to which create trend param
+          explode: false
+          in: path
+          name: trendID
+          required: true
+          schema:
+            type: integer
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTrendParam'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create new trend param
+      tags:
+        - trends
   /trend/{trendId}/param/{trendParamDefId}:
+    delete:
+      description: Deletes specific trend param
+      operationId: delete_trend_param_by_id
+      parameters:
+        - description: The id of the trend to delete
+          explode: false
+          in: path
+          name: trendId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: The id of the trend param to delete
+          explode: false
+          in: path
+          name: trendParamDefId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes trend param
+      tags:
+        - trends
     get:
       description: Info for specific trend param
       operationId: get_trend_param_by_id
@@ -1606,7 +1670,6 @@ paths:
       summary: Gets trend param detail
       tags:
       - trends
-      x-openapi-router-controller: api.controllers.trends_controller
     put:
       description: Updates trend param
       operationId: update_trend_param
@@ -1649,7 +1712,6 @@ paths:
       summary: Update trend params
       tags:
       - trends
-      x-openapi-router-controller: api.controllers.trends_controller
   /trend_def:
     get:
       description: List all trend defs
@@ -2471,7 +2533,7 @@ paths:
           name: simulationId
           required: true
           schema:
-            type: integer
+            type: string
           style: simple
         - description: The id of the simulation param to retrieve
           explode: false
@@ -2515,7 +2577,7 @@ paths:
           name: simulationParamDefId
           required: true
           schema:
-            type: integer
+            type: string
           style: simple
       requestBody:
         content:
@@ -2556,7 +2618,7 @@ paths:
           name: simulationParamDefId
           required: true
           schema:
-            type: integer
+            type: string
           style: simple
       responses:
         "204":
@@ -3250,6 +3312,19 @@ components:
       - TrendParamDefID
       - Value
       title: TrendParam
+      type: object
+    CreateTrendParam:
+      example:
+        TrendParamDefID: RAW_MIN
+        Value: 100
+      properties:
+        TrendParamDefID:
+          title: SimulationParamDefID
+          type: string
+        Value:
+          title: Value
+          type: string
+      title: CreateTrendParam
       type: object
     TrendParamDef:
       properties:
