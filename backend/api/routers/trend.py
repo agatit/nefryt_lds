@@ -1,10 +1,12 @@
+import json
 import struct
+import traceback
 from datetime import datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Query, Body, Path, Depends
 from fastapi_pagination.ext.sqlalchemy import paginate
 from odata_query.sqlalchemy import apply_odata_query
-from sqlalchemy import select, and_, Engine, literal, func
+from sqlalchemy import select, and_, Engine, literal, func, desc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
@@ -14,7 +16,7 @@ from api.routers.utils import map_lds_trend_param_and_lds_trend_param_def_to_tre
 from ..custom_page import CustomParams, CustomPage, use_custom_page
 from db import get_engine
 from ..schemas import Error, TrendDataMultiple, Information, UpdateTrend, TrendParamOut, TrendDataSingle, TrendBase, \
-    TrendParamBase
+    TrendParamBase, CurrentTrendData
 from database import lds
 
 router = APIRouter(prefix="/trend", tags=['trend'], dependencies=[Depends(get_user_token)])
@@ -55,13 +57,39 @@ async def create_trend(trend: Annotated[TrendBase, Body()], engine: Annotated[En
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=CustomPage[TrendDataMultiple] | Error)
+@router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=CustomPage[CurrentTrendData] | Error)
 async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[int, Path()],
                                  samples: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
                                  params: Annotated[CustomParams, Depends()],
                                  _: Annotated[None, Depends(use_custom_page)]):
     timestamp = int(datetime.now(timezone.utc).timestamp())
-    return await get_trend_data(trend_id_list, timestamp - period, timestamp, samples, engine, params, _)
+    timestamp_delta = 0
+    split_trend_id_list = trend_id_list.split(",")
+
+    statement = (select(lds.Trend)
+                 .where(and_(lds.Trend.ID.in_(split_trend_id_list), lds.Trend.TimeDelta > 0)) # noqa
+                 .order_by(desc(lds.Trend.TimeDelta))) # noqa
+    with Session(engine) as session:
+        trends = session.execute(statement).fetchall()
+
+        for trend in trends:
+            trend = trend[0]
+            statement = (select(lds.TrendData)
+                         .where(and_(lds.TrendData.TrendID == literal(trend.ID),
+                                     lds.TrendData.Time >= timestamp - trend.TimeDelta - 1)))
+            trends_data = session.execute(statement).fetchall()
+            if len(trends_data) > 0:
+                timestamp_delta = trend.TimeDelta
+                break
+
+    response = await get_trend_data(trend_id_list, timestamp - period - timestamp_delta,
+                                        timestamp - timestamp_delta, samples, engine, params, _)
+    if response.status_code != status.HTTP_200_OK:
+        return response
+    else:
+        response = CustomPage(**json.loads(response.body.decode()))
+        return CustomPage(items=[CurrentTrendData(LastTimestamp=timestamp - timestamp_delta, Data=response.items)],
+                   total=response.total, pages=response.pages, page=response.page, size=response.size)
 
 
 @router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=CustomPage[TrendDataMultiple] | Error)
@@ -151,7 +179,8 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                 time_data = next(iter_time_data, None)
         result_lists = extend_trend_data_dicts(result_lists, trend_timestamps, trend_timestamps_ms)
         items = map_dicts_to_trend_data_multiple(zip(trend_timestamps, trend_timestamps_ms), result_lists)
-        return CustomPage(items=items, total=samples, pages=pages, page=params.page, size=params.size)
+        return JSONResponse(content=CustomPage(items=items, total=samples, pages=pages, page=params.page, size=params.size).model_dump(),
+                            status_code=status.HTTP_200_OK)
     except Exception as e:
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_trend_data(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -340,6 +369,19 @@ async def create_trend_param(trend_id: Annotated[int, Path()], trend_param: Anno
         trend_param_dict.update({'TrendID': trend_id})
         trend_param = lds.TrendParam(**trend_param_dict)
         with Session(engine) as session:
+            statement1 = select(lds.Trend).where(lds.Trend.ID == literal(trend_id))  # noqa
+            trend = session.execute(statement1).fetchall()
+            if not trend:
+                error = Error(code=status.HTTP_409_CONFLICT, message='No trend with id = ' + str(trend_id))
+                return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
+            trend = trend[0][0]
+            statement2 = select(lds.TrendParamDef).where(
+                and_(lds.TrendParamDef.ID == literal(trend_param.TrendParamDefID),
+                     lds.TrendParamDef.TrendDefID == trend.TrendDefID))  # noqa
+            trend_param_def = session.execute(statement2).fetchall()
+            if not trend_param_def:
+                error = Error(code=status.HTTP_409_CONFLICT, message='No TrendParamDef with id = ' + trend_param.TrendParamDefID)
+                return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
             session.add(trend_param)
             session.commit()
         response_content = await get_trend_param_by_id(trend_id, trend_param_dict['TrendParamDefID'], engine)
@@ -348,6 +390,7 @@ async def create_trend_param(trend_id: Annotated[int, Path()], trend_param: Anno
         error = Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating trend param')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
+        traceback.print_exc()
         error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in create_trend_param(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

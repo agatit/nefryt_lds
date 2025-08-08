@@ -1,6 +1,6 @@
-from pydantic import Field, BaseModel
+from pydantic import BaseModel
 
 
 class TrendValue(BaseModel):
-    id: int = Field(alias='ID')
-    value: float | None = Field(None, alias='Value')
+    ID: int
+    Value: float | None = None

@@ -61,9 +61,9 @@ class TrendBase:
                     logger.warning(f"{self.__class__.__name__} ({self.id}): Data not continuously updated "
                                    f"(updated={timestamp - self.last_update} seconds ago)")
 
-            self.last_update = timestamp
             self.profiler_queue.put((1, self.id, timestamp + profiler_timestamp_diff, time.perf_counter(), None))
             self.update(data, timestamp, profiler_timestamp_diff, parent_id)
+            self.last_update = timestamp
             try:
                 qsize = self.queue.qsize()
             except NotImplementedError:
@@ -71,6 +71,8 @@ class TrendBase:
             self.profiler_queue.put((0, self.id, timestamp + profiler_timestamp_diff, time.perf_counter(), qsize))
 
     def update(self, data: np.ndarray, timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int | None = None):
+        if self.last_update is None:
+            self._update_trend_time_delta(profiler_timestamp_diff)
         self._save(data, timestamp)
         logger.debug(f"{self.__class__.__name__} ({self.id}): Started updating children (timestamp={timestamp})")
 
@@ -84,6 +86,13 @@ class TrendBase:
 
         logger.debug(f"{self.__class__.__name__} ({self.id}): Finished updating children (timestamp={timestamp})")
         return timestamp
+
+    def _update_trend_time_delta(self, time_delta: int):
+        with Session(get_engine()) as session:
+            trend = session.get(lds.Trend, self.id)
+            if trend:
+                trend.TimeDelta = time_delta
+                session.commit()
 
     def _read_params(self):
         stmt = (select(lds.TrendParamDef, lds.TrendParam)

@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from .trend_value import TrendValue
 
 
 class TrendDataMultiple(BaseModel):
-    timestamp_ms: int = Field(alias='TimestampMs')
-    timestamp: int = Field(alias='Timestamp')
-    data: list[TrendValue | None] | None = Field(None, alias='Data')
+    TimestampMs: int
+    Timestamp: int
+    Data: list[TrendValue | None] | None = None

@@ -1264,10 +1264,8 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/TrendDataMultiple'
-                type: array
-          description: A array of trend data
+                $ref: '#/components/schemas/CurrentTrendData'
+          description: An object with current trend data
         default:
           content:
             application/json:
@@ -3233,7 +3231,23 @@ components:
       required:
       - Timestamp
       - TimestampMs
-      title: TrendData
+      title: TrendDataMultiple
+      type: object
+    CurrentTrendData:
+      example:
+        LastTimestamp: 100
+        Data: []
+      properties:
+        Timestamp:
+          type: integer
+        Data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrendDataMultiple'
+      required:
+        - Timestamp
+        - Data
+      title: CurrentTrendData
       type: object
     TrendDef:
       example:

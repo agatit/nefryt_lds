@@ -32,6 +32,7 @@ class TrendBase(SQLModel):
                                    Integer,
                                    ForeignKey("lds.Node.ID", ondelete='SET NULL'),
                                    nullable=True))
+    TimeDelta: int = Field(0)
 
 
 class UpdateTrend(SQLModel):

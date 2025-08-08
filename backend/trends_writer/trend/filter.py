@@ -45,6 +45,9 @@ class TrendFilter(TrendBase):
                 self.profiler_queue.put((2, self.children_count, timestamp, None, None))
             logger.debug(f"{self.__class__.__name__} ({self.id}): Empty calculation results (timestamp={timestamp})")
 
+        if self.last_update is None:
+            self._update_trend_time_delta(profiler_timestamp_diff + self.window_size)
+
     def calculate(self) -> np.ndarray:
         raise NotImplementedError
 

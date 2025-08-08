@@ -67,6 +67,28 @@ def add_objects_with_children():
     return objs
 
 
+def add_objects_with_children_two_layers():
+    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2
+    trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
+    trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend4 = lds.Trend(ID=3, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
+    trend_param2 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=2, Value='2')
+    trend_param3 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=2, Value='1')
+    trend_param4 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=3, Value='7')
+    trend_param5 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=3, Value='2')
+    trend_param_def1 = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
+    trend_param_def2 = lds.TrendParamDef(ID='FILTER_WINDOW', TrendDefID='DERIV', Name='name', DataType='INT')
+    trend_param_def3 = lds.TrendParamDef(ID='TREND_ID', TrendDefID='DERIV', Name='name', DataType='TREND')
+    objs = [[trend_def1, trend_def2], [trend1, trend2, trend4],
+            [trend_param1, trend_param2, trend_param3, trend_param4, trend_param5],
+            [trend_param_def1, trend_param_def2, trend_param_def3]]
+
+    return objs
+
+
 def _get_trend_data_records_count():
     with Session(get_engine()) as session:
         return session.execute(select(func.count()).select_from(lds.TrendData)).fetchall()[0][0]
@@ -117,7 +139,7 @@ async def test_trend_data_should_write_only_when_correct_address(add_lds_objects
     port = 5023
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
-    await asyncio.sleep(5)
+    await asyncio.sleep(1)
     calls = 2
     tasks = 3
 
@@ -142,7 +164,7 @@ async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_ob
     port = 5024
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(1)
     calls = 10
 
     t = math.floor(time.time()) + 0.5
@@ -162,7 +184,7 @@ async def test_trend_data_should_not_update_data_when_the_same_primary_key_in_on
     port = 5025
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
-    await asyncio.sleep(5)
+    await asyncio.sleep(1)
     calls = 2
 
     t_start = 100
@@ -188,7 +210,7 @@ async def test_trend_data_should_update_data_when_the_same_primary_key_in_repeat
     port = 5026
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(1)
     calls = 3
 
     t_start = 100
@@ -220,7 +242,7 @@ async def test_profiler_should_write_data_to_database(add_lds_objects):
     plant = PipePlant()
     plant.last_timestamp = 0
     server_task = asyncio.create_task(run_server(plant, port))
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(1)
     calls = 10
 
     t = math.floor(time.time()) + 0.5
@@ -233,3 +255,31 @@ async def test_profiler_should_write_data_to_database(add_lds_objects):
     server_task.cancel()
 
     assert _get_profiler_data_active_trends_count() == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects_with_children_two_layers], indirect=True)
+async def test_trends_writer_should_update_trend_time_delta_in_database(add_lds_objects):
+    port = 5028
+    Profiler.init()
+    server_task = asyncio.create_task(run_server(PipePlant(), port))
+    await asyncio.sleep(1)
+
+    max_calls = 10
+    t = math.floor(time.time()) + 0.5
+    for i in range(max_calls):
+        await _send_data(port, int(trend_param1.Value), [randint(0, 255) for _ in range(100)])
+        await asyncio.sleep(t - time.time() + 1)
+        t += 1
+        with Session(get_engine()) as session:
+            trend_data = session.execute(select(lds.TrendData).where(lds.TrendData.TrendID == 2)).fetchall() # noqa
+        if len(trend_data) > 0:
+            break
+
+    server_task.cancel()
+
+    with Session(get_engine()) as session:
+        trends = session.execute(select(lds.Trend).order_by(lds.Trend.ID)).fetchall()
+    expected_deltas = [0, 2, 9]
+    for trend, expected_delta in zip(trends, expected_deltas):
+        assert trend[0].TimeDelta == expected_delta
