@@ -231,7 +231,6 @@ class Event(SQLModel, table=True):
         default=None,
         primary_key=True,
         sa_column_kwargs={"autoincrement": True},
-        sa_type=BigInteger
     )
     EventDefID: str = (
         Field(sa_column=Column(
