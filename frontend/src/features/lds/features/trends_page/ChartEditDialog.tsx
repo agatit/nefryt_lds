@@ -17,7 +17,12 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { AxisType, TreeViewDataItem } from "./TrendsPage";
-import { Trend, TrendDefBase } from "../../../../services/api";
+import {
+  Trend,
+  TrendDefBase,
+  TrendGroup,
+  Unit,
+} from "../../../../services/api";
 import {
   cancelIcon,
   checkIcon,
@@ -25,18 +30,15 @@ import {
   xIcon,
 } from "@progress/kendo-svg-icons";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
-import {
-  MockupTrendGroupType,
-  MockupTrendType,
-} from "../../../../data/mockup-data";
 
 export interface ChartEditDialogProps {
   useMockup: boolean;
   closeDialog: () => void;
   trendDefs: TrendDefBase[];
-  trendGroups: MockupTrendGroupType[];
+  trendGroups: TrendGroup[];
+  units: Unit[];
   mockupTrendTreeData: TreeViewDataItem[];
-  trendsState: Trend[] | MockupTrendType[];
+  trendsState: Trend[];
   axesState: AxisType[];
   onAxesStateChange: (value: AxisType[]) => void;
   onShowCursorBubbleChange: (value: boolean) => void;
@@ -48,6 +50,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   closeDialog,
   trendDefs,
   trendGroups,
+  units,
   mockupTrendTreeData,
   trendsState,
   axesState,
@@ -172,7 +175,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   }, []);
 
   const [newAxisName, setNewAxisName] = React.useState<string>("");
-  const draggedTrend = React.useRef<Trend | MockupTrendType>(null);
+  const draggedTrend = React.useRef<Trend>(null);
 
   const handleAxisNameChange = React.useCallback((e: TextBoxChangeEvent) => {
     if (e.value) setNewAxisName(e.value.toString());
@@ -181,16 +184,15 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   const fromDrag = React.useRef<boolean>(false);
   const createNewAxis = React.useCallback(() => {
     if (fromDrag.current) {
-      const unit = (
-        trendsState.find(
-          (trend) => trend.ID == draggedTrend.current?.ID
-        ) as MockupTrendType
-      ).Unit;
+      const trend = trendsState.find(
+        (trend) => trend.ID == draggedTrend.current?.ID
+      );
+      const unit = units.find((unit) => unit.ID == trend?.UnitID);
       setNewAxesState([
         ...newAxesState,
         {
           Name: newAxisName,
-          Unit: unit,
+          Unit: unit!.Symbol!,
           TrendIDs: [draggedTrend.current?.ID!],
           ScaleMax: 0,
           ScaleMin: 0,
@@ -210,7 +212,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
     }
 
     closeCreateAxisDialog();
-  }, [trendsState, newAxesState, newAxisName]);
+  }, [trendsState, units, newAxesState, newAxisName]);
 
   const handleTreeItemDragStart = React.useCallback(
     (e: TreeViewItemDragStartEvent) => {
@@ -257,13 +259,13 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
     (e: TreeViewItemDragEndEvent) => {
       onShowCursorBubbleChange(false);
       setDragging(false);
-      const trend = trendsState.find(
-        (trend) => trend.ID == e.item.id
-      )! as MockupTrendType;
+      const trend = trendsState.find((trend) => trend.ID == e.item.id)!;
+
+      const unit = units.find((unit) => unit.ID == trend.UnitID);
 
       if (mouseOverCreateNewAxisArea.current) {
         openCreateAxisDialog();
-        setNewAxisName(trend.Unit);
+        setNewAxisName(unit?.Symbol!);
         fromDrag.current = true;
 
         return;
@@ -288,14 +290,11 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
           if (i !== axisIndex) return axis;
           if (axis.TrendIDs.includes(e.item.id)) return axis;
 
-          let unit;
-          if (axis.TrendIDs.length == 0) unit = trend.Unit;
-
           if (indexArray.length < 2)
             // add at the end if dragged to axis name
             return {
               ...axis,
-              Unit: unit ? unit : axis.Unit,
+              Unit: unit?.Symbol!,
               TrendIDs: [...axis.TrendIDs, e.item.id],
             };
 
@@ -305,7 +304,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
               newArr.splice(trendIndex, 0, e.item.id);
               return {
                 ...axis,
-                Unit: unit ? unit : axis.Unit,
+                Unit: unit?.Symbol!,
                 TrendIDs: newArr,
               };
               break;
@@ -313,7 +312,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
               newArr.splice(trendIndex + 1, 0, e.item.id);
               return {
                 ...axis,
-                Unit: unit ? unit : axis.Unit,
+                Unit: unit?.Symbol!,
                 TrendIDs: newArr,
               };
           }

@@ -34,11 +34,10 @@ import { Template, Trend } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
-import { MockupTrendType } from "../../../../data/mockup-data";
 
 export interface TrendDetailPanelProps {
   isLoadingTrends: boolean;
-  trends: Trend[] | MockupTrendType[];
+  trends: Trend[];
   axesState: AxisType[];
   onAxesStateChange: (value: AxisType[]) => void;
   onChartEditButtonClick: React.MouseEventHandler<HTMLButtonElement>;

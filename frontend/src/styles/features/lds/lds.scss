@@ -1,5 +1,12 @@
+@use "../../../themes/variables.scss" as var;
+
 .router-lock-button {
   position: absolute;
   top: 95vh;
   left: 10px;
+}
+
+.k-drawer-content > div.content-loader {
+  height: var.$underAppBarHeight;
+  position: relative;
 }

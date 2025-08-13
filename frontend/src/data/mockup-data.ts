@@ -2,16 +2,22 @@ import {
   AxisType,
   TreeViewDataItem,
 } from "../features/lds/features/trends_page/TrendsPage";
-import { Template, TrendDefBase, Unit } from "../services/api";
+import {
+  Template,
+  Trend,
+  TrendDefBase,
+  TrendGroup,
+  Unit,
+} from "../services/api";
 
-export type MockupTrendType = {
-  ID: number;
-  TrendGroupID: number;
-  Color: string;
-  TrendDefID: string;
-  Name: string;
-  Unit: string;
-};
+// export type MockupTrendType = {
+//   ID: number;
+//   TrendGroupID: number;
+//   Color: string;
+//   TrendDefID: string;
+//   Name: string;
+//   Unit: string;
+// };
 
 export const mockupTrendDefs: TrendDefBase[] = [
   {
@@ -32,12 +38,7 @@ export const mockupTrendDefs: TrendDefBase[] = [
   },
 ];
 
-export interface MockupGroupType {
-  ID: number;
-  Name: string;
-}
-
-export const mockupTrendGroups: MockupGroupType[] = [
+export const mockupTrendGroups: TrendGroup[] = [
   {
     ID: 1,
     Name: "Ciśnienie",
@@ -46,16 +47,20 @@ export const mockupTrendGroups: MockupGroupType[] = [
     ID: 2,
     Name: "Temperatura",
   },
-]
+];
 
-export const mockupTrends: MockupTrendType[] = [
+export const mockupTrends: Trend[] = [
   {
     ID: 0,
     TrendGroupID: 1,
     Color: "#ff6358",
     TrendDefID: "QUICK",
     Name: "Ciśnienie 1",
-    Unit: "MPa",
+    UnitID: "MPa",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
   {
     ID: 1,
@@ -63,7 +68,11 @@ export const mockupTrends: MockupTrendType[] = [
     Color: "#ffe162",
     TrendDefID: "QUICK",
     Name: "Ciśnienie 2",
-    Unit: "MPa",
+    UnitID: "MPa",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
   {
     ID: 2,
@@ -71,7 +80,11 @@ export const mockupTrends: MockupTrendType[] = [
     Color: "#4cd180",
     TrendDefID: "QUICK",
     Name: "Ciśnienie 3",
-    Unit: "MPa",
+    UnitID: "MPa",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
   {
     ID: 3,
@@ -79,7 +92,11 @@ export const mockupTrends: MockupTrendType[] = [
     Color: "#4b5ffa",
     TrendDefID: "DERIV",
     Name: "Pochodna Ciśnienia 1",
-    Unit: "MPa/s",
+    UnitID: "MPa_s",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
   {
     ID: 4,
@@ -87,7 +104,11 @@ export const mockupTrends: MockupTrendType[] = [
     Color: "#ac58ff",
     TrendDefID: "DERIV",
     Name: "Pochodna Ciśnienia 2",
-    Unit: "MPa/s",
+    UnitID: "MPa_s",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
   {
     ID: 5,
@@ -95,7 +116,11 @@ export const mockupTrends: MockupTrendType[] = [
     Color: "#ff5892",
     TrendDefID: "QUICK",
     Name: "Temperatura 1",
-    Unit: "°C",
+    UnitID: "C",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
   {
     ID: 6,
@@ -103,7 +128,11 @@ export const mockupTrends: MockupTrendType[] = [
     Color: "#59ffc4",
     TrendDefID: "QUICK",
     Name: "Temperatura 2",
-    Unit: "°C",
+    UnitID: "C",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
   {
     ID: 7,
@@ -111,7 +140,11 @@ export const mockupTrends: MockupTrendType[] = [
     Color: "#ffc459",
     TrendDefID: "DERIV",
     Name: "Pochodna Temperatury 1",
-    Unit: "°C/s",
+    UnitID: "°C_s",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
   {
     ID: 8,
@@ -119,7 +152,11 @@ export const mockupTrends: MockupTrendType[] = [
     Color: "#4b9dd1",
     TrendDefID: "DERIV",
     Name: "Pochodna Temperatury 2",
-    Unit: "°C/s",
+    UnitID: "°C_s",
+    RawMin: 0,
+    RawMax: 10,
+    ScaledMin: 0,
+    ScaledMax: 10,
   },
 ];
 
@@ -132,17 +169,17 @@ export const mockupTrendTreeData: TreeViewDataItem[] = [
         id: 2,
         text: "Pomiary",
         items: [
-          { text: mockupTrends[0].Name, id: mockupTrends[0].ID },
-          { text: mockupTrends[1].Name, id: mockupTrends[1].ID },
-          { text: mockupTrends[2].Name, id: mockupTrends[2].ID },
+          { text: mockupTrends[0].Name!, id: mockupTrends[0].ID },
+          { text: mockupTrends[1].Name!, id: mockupTrends[1].ID },
+          { text: mockupTrends[2].Name!, id: mockupTrends[2].ID },
         ],
       },
       {
         id: 3,
         text: "Pochodne",
         items: [
-          { text: mockupTrends[3].Name, id: mockupTrends[3].ID },
-          { text: mockupTrends[4].Name, id: mockupTrends[4].ID },
+          { text: mockupTrends[3].Name!, id: mockupTrends[3].ID },
+          { text: mockupTrends[4].Name!, id: mockupTrends[4].ID },
         ],
       },
     ],
@@ -155,16 +192,16 @@ export const mockupTrendTreeData: TreeViewDataItem[] = [
         id: 5,
         text: "Pomiary",
         items: [
-          { text: mockupTrends[5].Name, id: mockupTrends[5].ID },
-          { text: mockupTrends[6].Name, id: mockupTrends[6].ID },
+          { text: mockupTrends[5].Name!, id: mockupTrends[5].ID },
+          { text: mockupTrends[6].Name!, id: mockupTrends[6].ID },
         ],
       },
       {
         id: 6,
         text: "Pochodne",
         items: [
-          { text: mockupTrends[7].Name, id: mockupTrends[7].ID },
-          { text: mockupTrends[8].Name, id: mockupTrends[8].ID },
+          { text: mockupTrends[7].Name!, id: mockupTrends[7].ID },
+          { text: mockupTrends[8].Name!, id: mockupTrends[8].ID },
         ],
       },
     ],

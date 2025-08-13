@@ -45,7 +45,7 @@ const Navbar = React.memo(function Navbar({
             <Label>Use Mockup Data</Label>
             <Switch
               className="mockup-switch"
-              value={useMockup}
+              checked={useMockup}
               onChange={handleOnUseMockupChange}
               onLabel={"Mockup"}
               offLabel={"Backend"}

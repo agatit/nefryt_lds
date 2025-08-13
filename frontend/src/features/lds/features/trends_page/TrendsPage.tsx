@@ -7,6 +7,8 @@ import {
   TrendDefApi,
   Template,
   Unit,
+  TemplateApi,
+  TemplateBase,
 } from "../../../../services/api";
 
 import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
@@ -26,9 +28,10 @@ import {
   mockupTrendGroupFromDB,
   mockupTrends,
   mockupTrendTreeData,
-  MockupTrendType,
   mockupUnits,
 } from "../../../../data/mockup-data";
+import { LDSContext } from "../../contexts/ldsContext";
+import { NavbarContext } from "../../../../contexts/navbarContext";
 
 const mainChartSampleSize = 500;
 const navigationChartSampleSize = 50;
@@ -102,11 +105,7 @@ function generateValue(date: Date, chart: number): number {
   );
 }
 
-export interface TrendsPageProps {
-  useMockup: boolean;
-}
-
-export default function TrendsPage({ useMockup }: TrendsPageProps) {
+export default function TrendsPage() {
   const auth = React.useContext(AuthContext);
   const refreshableRequest = useRefreshableRequest();
 
@@ -173,55 +172,29 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
   >(null);
 
   // DATA STUFF
+  const ldsContex = React.useContext(LDSContext);
+  React.useMemo(() => {
+    if (ldsContex == null)
+      throw new Error("LDS Context cannot be null to use TrendsPage");
+  }, [ldsContex]);
+  const { useMockup } = React.useContext(NavbarContext);
 
-  const trendDefApi = React.useMemo(
-    () => new TrendDefApi(auth?.config, host, axiosInstance),
+  // templates data and axes
+  const templateApi = React.useMemo(
+    () => new TemplateApi(auth?.config, host, axiosInstance),
     [auth]
   );
-  const trendApi = React.useMemo(
-    () => new TrendApi(auth?.config, host, axiosInstance),
-    [auth]
-  );
-
-  // Trends and trend defs
-  const [trendDefs, setTrendDefs] =
-    React.useState<TrendDefBase[]>(mockupTrendDefs);
-  const [trendsState, setTrendsState] = React.useState<
-    Trend[] | MockupTrendType[]
-  >(mockupTrends);
-  const [isLoadingTrends, setIsLoadingTrends] = React.useState<boolean>(false);
-  const trendLoadStatusRef = React.useRef<TrendLoadStatus>({
-    defsLoaded: false,
-    trendsLoaded: false,
-  });
-
-  const [axesState, setAxesState] = React.useState<AxisType[]>(
-    useMockup
-      ? mockupAxes
-      : [
-          {
-            Name: "Ciśnienia",
-            Unit: "MPa",
-            TrendIDs: [1, 2, 3, 4],
-            ScaleMax: 0,
-            ScaleMin: 0,
-          },
-        ]
-  );
-
-  const handleAxesStateChange = React.useCallback((value: AxisType[]) => {
-    if (value) setAxesState(value);
-  }, []);
-
-  const [unitsState, setUnitsState] = React.useState<Unit[]>(
-    useMockup ? mockupUnits : []
-  );
-
-  const [templatesState, setTemplatesState] = React.useState<Template[]>(
+  const [templates, setTemplates] = React.useState<Template[]>(
     useMockup ? mockupTemplates : []
   );
+
+  const isLoadingTemplates = React.useMemo(
+    () => templates.length > 0,
+    [templates]
+  );
+
   const handleTemplateStateChange = React.useCallback((value: Template[]) => {
-    if (value) setTemplatesState(value);
+    if (value) setTemplates(value);
   }, []);
 
   const handleSelectedTemplateChange = React.useCallback(
@@ -230,7 +203,7 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
 
       const newAxesState: AxisType[] = [];
       for (let axis of template.Axes) {
-        const unit = unitsState.find((u) => u.ID == axis.UnitID);
+        const unit = ldsContex!.units.find((u) => u.ID == axis.UnitID);
         newAxesState.push({
           Name: axis.Title,
           Unit: unit ? unit.Symbol! : "",
@@ -241,16 +214,39 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
       }
       setAxesState(newAxesState);
     },
-    [unitsState]
+    [ldsContex?.units]
   );
 
+  const [axesState, setAxesState] = React.useState<AxisType[]>(
+    useMockup ? mockupAxes : []
+  );
+
+  const loadTemplates = React.useCallback(async () => {
+    try {
+      const response = await refreshableRequest(
+        templateApi.listTemplatesTemplateGet.bind(templateApi)
+      );
+      console.log(response);
+      if (response?.data) setTemplates(response.data.items);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!useMockup) loadTemplates();
+  }, []);
+
+  const handleAxesStateChange = React.useCallback((value: AxisType[]) => {
+    if (value) setAxesState(value);
+  }, []);
+
   const handleCreateNewTemplate = React.useCallback(
-    (name: string) => {
-      // TODO: connect to api
-      let newTemplate: Template = {
+    async (name: string) => {
+      let newTemplate: TemplateBase = {
         Name: name,
         Axes: axesState.map((axis) => {
-          const unit = unitsState.find((u) => u.Symbol == axis.Unit);
+          const unit = ldsContex!.units.find((u) => u.Symbol == axis.Unit);
           return {
             TrendsID: axis.TrendIDs,
             Title: axis.Name,
@@ -259,62 +255,37 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
             ScaledMax: axis.ScaleMax,
           };
         }),
-        ID: templatesState.length, //tmp set id
       };
+      if (useMockup)
+        setTemplates([...templates, { ...newTemplate, ID: templates.length }]);
 
-      setTemplatesState([...templatesState, newTemplate]);
+      try {
+        const response = await refreshableRequest(
+          templateApi.createTemplateTemplatePost.bind(templateApi),
+          newTemplate
+        );
+        console.log(response);
+        if (response?.data) setTemplates([...templates, response.data]);
+      } catch (error) {
+        console.log(error);
+      }
     },
-    [templatesState, axesState]
+    [templates, axesState]
   );
 
-  // Trends Data
+  // trends data
   const [trendsData, setTrendsData] = React.useState<ChartSeriesTrendData[]>(
     []
   );
   const [navigatorData, setNavigatorData] = React.useState<
     ChartSeriesTrendData[]
   >([]);
-  const [isLoadingTrendsData, setIsLoadingTrendsData] =
-    React.useState<boolean>(true);
-  const trendsDataLoadStatusRef = React.useRef<boolean>(false);
+  const isLoadingTrendsData = React.useMemo(
+    () => trendsData.length == 0 || navigatorData.length == 0,
+    [trendsData, navigatorData]
+  );
 
-  // Loading from api
-
-  function checkIfTrendsLoaded() {
-    if (
-      trendLoadStatusRef.current.defsLoaded &&
-      trendLoadStatusRef.current.trendsLoaded
-    )
-      setIsLoadingTrends(false);
-  }
-
-  async function loadTrends() {
-    trendLoadStatusRef.current = { defsLoaded: false, trendsLoaded: false };
-
-    refreshableRequest(
-      trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi)
-    ).then((response) => {
-      trendLoadStatusRef.current.defsLoaded = true;
-      if (response?.data) setTrendDefs(response?.data.items);
-      checkIfTrendsLoaded();
-    });
-
-    refreshableRequest(trendApi.listTrendsTrendGet.bind(trendApi)).then(
-      (response) => {
-        trendLoadStatusRef.current.trendsLoaded = true;
-        if (response?.data) setTrendsState(response.data.items);
-        checkIfTrendsLoaded();
-      }
-    );
-  }
-
-  function checkIfTrendsDataLoaded() {
-    if (trendsDataLoadStatusRef) setIsLoadingTrendsData(false);
-  }
-
-  async function loadTrendsData() {
-    trendsDataLoadStatusRef.current = false;
-
+  const loadTrendsData = React.useCallback(async () => {
     var trendIdList: string = "";
     const trendIdArr: number[] = [];
 
@@ -325,56 +296,47 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
     trendIdArr.forEach((id) => {
       trendIdList += id.toString() + ",";
     });
-
-    refreshableRequest(
-      trendApi.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
-        trendApi
-      ),
-      trendIdList,
-      startDate.getTime(),
-      endDate.getTime(),
-      mainChartSampleSize,
-      1,
-      1000
-    )
-      .then((response) => {
-        const newTrendsData: ChartSeriesTrendData[] = trendIdArr.map((id) => {
-          return {
-            data: [],
-            id: id,
-            color: trendsState.find((trend) => trend.ID == id)?.Color!,
-          };
-        });
-        response?.data.items.forEach((item) => {
-          const timestamp = new Date(item.Timestamp * 1000);
-          item.Data?.forEach((dataitem) => {
-            const index = newTrendsData.findIndex((td) => td.id == dataitem.ID);
-            newTrendsData[index].data.push({
-              timestamp: timestamp,
-              value: dataitem.Value ? dataitem.Value : null,
-            });
+    try {
+      const response = await refreshableRequest(
+        ldsContex!.trendApi.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
+          ldsContex!.trendApi
+        ),
+        trendIdList,
+        startDate.getTime(),
+        endDate.getTime(),
+        mainChartSampleSize,
+        1,
+        1000
+      );
+      console.log(response);
+      const newTrendsData: ChartSeriesTrendData[] = trendIdArr.map((id) => {
+        return {
+          data: [],
+          id: id,
+          color: ldsContex!.trends.find((trend) => trend.ID == id)?.Color!,
+        };
+      });
+      response?.data.items.forEach((item) => {
+        const timestamp = new Date(item.Timestamp * 1000);
+        item.Data?.forEach((dataitem) => {
+          const index = newTrendsData.findIndex((td) => td.id == dataitem.ID);
+          newTrendsData[index].data.push({
+            timestamp: timestamp,
+            value: dataitem.Value ? dataitem.Value : null,
           });
         });
-
-        trendsDataLoadStatusRef.current = true;
-        checkIfTrendsDataLoaded();
-
-        setTrendsData(newTrendsData);
-      })
-      .catch((err) => {
-        if (err.status == 404) {
-          console.log("no data");
-        }
       });
-  }
+
+      setTrendsData(newTrendsData);
+    } catch (error) {
+      console.log(error);
+    }
+  }, [ldsContex, axesState]);
 
   // mockup data testing
 
   const generateTestData = React.useCallback(async () => {
     if (startDate == null || endDate == null) return;
-
-    trendLoadStatusRef.current = { defsLoaded: false, trendsLoaded: false };
-    trendsDataLoadStatusRef.current = false;
 
     const timeDiff = endDate.getTime() - startDate.getTime();
     const step = Math.floor(timeDiff / mainChartSampleSize);
@@ -395,7 +357,7 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
       }
     }
 
-    for (let trend of trendsState!) {
+    for (let trend of ldsContex!.trends) {
       if (!activeTrendsIDs!.includes(trend.ID!)) continue;
 
       const generatedData: ChartTrendData[] = [];
@@ -444,20 +406,22 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
 
     setTrendsData(newTrendsData);
     setNavigatorData(newNavData);
-
-    trendLoadStatusRef.current = { defsLoaded: true, trendsLoaded: true };
-    checkIfTrendsLoaded();
-    trendsDataLoadStatusRef.current = true;
-    checkIfTrendsDataLoaded();
-  }, [startDate, endDate, trendsState, axesState]);
+  }, [startDate, endDate, ldsContex?.trends, axesState]);
 
   React.useEffect(() => {
-    useMockup ? generateTestData() : loadTrends();
-  }, [startDate, endDate, axesState]);
+    useMockup ? generateTestData() : loadTrendsData();
+  }, [
+    useMockup,
+    startDate,
+    endDate,
+    axesState,
+    generateTestData,
+    loadTrendsData,
+  ]);
 
   React.useEffect(() => {
-    if (!isLoadingTrends && !useMockup) loadTrendsData();
-  }, [isLoadingTrends, axesState]);
+    if (!useMockup) loadTrendsData();
+  }, [axesState]);
 
   return (
     <React.Fragment>
@@ -478,8 +442,8 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
           highlightedTrendID={highlightedTrendID}
         />
         <TrendsDetailPanel
-          isLoadingTrends={isLoadingTrends}
-          trends={trendsState}
+          isLoadingTrends={isLoadingTrendsData}
+          trends={ldsContex!.trends}
           axesState={axesState}
           onAxesStateChange={handleAxesStateChange}
           onChartEditButtonClick={openChartEdit}
@@ -487,7 +451,7 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
           endDate={endDate}
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
-          templates={templatesState}
+          templates={templates}
           onSelectedTemplateChange={handleSelectedTemplateChange}
           handleCreateNewTemplate={handleCreateNewTemplate}
           onHighlightedTrendIDChange={setHighlightedTrendID}
@@ -497,10 +461,11 @@ export default function TrendsPage({ useMockup }: TrendsPageProps) {
         <ChartEditDialog
           useMockup={useMockup}
           closeDialog={closeChartEdit}
-          trendDefs={trendDefs}
+          trendDefs={ldsContex!.trendDefs}
           trendGroups={mockupTrendGroupFromDB}
+          units={ldsContex!.units}
           mockupTrendTreeData={mockupTrendTreeData}
-          trendsState={trendsState}
+          trendsState={ldsContex!.trends}
           axesState={axesState}
           onAxesStateChange={handleAxesStateChange}
           onShowCursorBubbleChange={handleShowCursorBubbleChange}

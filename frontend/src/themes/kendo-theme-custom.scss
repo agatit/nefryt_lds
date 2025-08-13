@@ -3,3 +3,6 @@
 @use "./variables.scss" as var;
 
 // Kendo customization
+.k-drawer-content {
+  min-height: var.$underAppBarHeight;
+}
