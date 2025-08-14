@@ -63,6 +63,62 @@ export interface Axis {
 /**
  * 
  * @export
+ * @interface CurrentTrendData
+ */
+export interface CurrentTrendData {
+    /**
+     * 
+     * @type {number}
+     * @memberof CurrentTrendData
+     */
+    'LastTimestamp': number;
+    /**
+     * 
+     * @type {Array<TrendDataMultiple>}
+     * @memberof CurrentTrendData
+     */
+    'Data'?: Array<TrendDataMultiple>;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageCurrentTrendData
+ */
+export interface CustomPageCurrentTrendData {
+    /**
+     * 
+     * @type {Array<CurrentTrendData>}
+     * @memberof CustomPageCurrentTrendData
+     */
+    'items': Array<CurrentTrendData>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageCurrentTrendData
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageCurrentTrendData
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageCurrentTrendData
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageCurrentTrendData
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
  * @interface CustomPageEventDef
  */
 export interface CustomPageEventDef {
@@ -1429,7 +1485,7 @@ export interface ResponseCreateSimulationSimulationPost {
      * @type {number}
      * @memberof ResponseCreateSimulationSimulationPost
      */
-    'DistanceMeters': number;
+    'ResolutionMeters': number;
     /**
      * 
      * @type {number}
@@ -1526,6 +1582,55 @@ export interface ResponseCreateTrendGroupTrendGroupPost {
 /**
  * 
  * @export
+ * @interface ResponseCreateTrendParamTrendTrendIdParamPost
+ */
+export interface ResponseCreateTrendParamTrendTrendIdParamPost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendParamTrendTrendIdParamPost
+     */
+    'TrendParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendParamTrendTrendIdParamPost
+     */
+    'Value': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTrendParamTrendTrendIdParamPost
+     */
+    'TrendID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendParamTrendTrendIdParamPost
+     */
+    'DataType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendParamTrendTrendIdParamPost
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTrendParamTrendTrendIdParamPost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateTrendParamTrendTrendIdParamPost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseCreateTrendTrendPost
  */
 export interface ResponseCreateTrendTrendPost {
@@ -1613,6 +1718,12 @@ export interface ResponseCreateTrendTrendPost {
      * @memberof ResponseCreateTrendTrendPost
      */
     'NodeID'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'TimeDelta'?: number;
     /**
      * 
      * @type {number}
@@ -1796,6 +1907,37 @@ export interface ResponseDeleteTrendByIdTrendTrendIdDelete {
      * 
      * @type {number}
      * @memberof ResponseDeleteTrendByIdTrendTrendIdDelete
+     */
+    'code': number;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
+ */
+export interface ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
+     */
+    'message': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
+     */
+    'affected': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
+     */
+    'status': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
      */
     'code': number;
 }
@@ -2164,7 +2306,7 @@ export interface ResponseGetSimulationByIdSimulationSimulationIdGet {
      * @type {number}
      * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
      */
-    'DistanceMeters': number;
+    'ResolutionMeters': number;
     /**
      * 
      * @type {number}
@@ -2463,6 +2605,12 @@ export interface ResponseGetTrendByIdTrendTrendIdGet {
      * @type {number}
      * @memberof ResponseGetTrendByIdTrendTrendIdGet
      */
+    'TimeDelta'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
     'code': number;
     /**
      * 
@@ -2479,10 +2627,10 @@ export interface ResponseGetTrendByIdTrendTrendIdGet {
 export interface ResponseGetTrendCurrentDataTrendTrendIdListCurrentDataPeriodSamplesGet {
     /**
      * 
-     * @type {Array<TrendDataMultiple>}
+     * @type {Array<CurrentTrendData>}
      * @memberof ResponseGetTrendCurrentDataTrendTrendIdListCurrentDataPeriodSamplesGet
      */
-    'items': Array<TrendDataMultiple>;
+    'items': Array<CurrentTrendData>;
     /**
      * 
      * @type {number}
@@ -2614,12 +2762,6 @@ export interface ResponseGetTrendGroupByIdTrendGroupTrendGroupIdGet {
 export interface ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet {
     /**
      * 
-     * @type {number}
-     * @memberof ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet
-     */
-    'TrendID': number;
-    /**
-     * 
      * @type {string}
      * @memberof ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet
      */
@@ -2630,6 +2772,12 @@ export interface ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet {
      * @memberof ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet
      */
     'Value': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetTrendParamByIdTrendTrendIdParamTrendParamDefIdGet
+     */
+    'TrendID': number;
     /**
      * 
      * @type {string}
@@ -3621,7 +3769,7 @@ export interface ResponseUpdateSimulationSimulationSimulationIdPut {
      * @type {number}
      * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
      */
-    'DistanceMeters': number;
+    'ResolutionMeters': number;
     /**
      * 
      * @type {number}
@@ -3723,12 +3871,6 @@ export interface ResponseUpdateTrendGroupTrendGroupTrendGroupIdPut {
 export interface ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut {
     /**
      * 
-     * @type {number}
-     * @memberof ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut
-     */
-    'TrendID': number;
-    /**
-     * 
      * @type {string}
      * @memberof ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut
      */
@@ -3739,6 +3881,12 @@ export interface ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut {
      * @memberof ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut
      */
     'Value': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTrendParamTrendTrendIdParamTrendParamDefIdPut
+     */
+    'TrendID': number;
     /**
      * 
      * @type {string}
@@ -3859,6 +4007,12 @@ export interface ResponseUpdateTrendTrendTrendIdPut {
      * @type {number}
      * @memberof ResponseUpdateTrendTrendTrendIdPut
      */
+    'TimeDelta'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
     'code': number;
     /**
      * 
@@ -3951,7 +4105,7 @@ export interface Simulation {
      * @type {number}
      * @memberof Simulation
      */
-    'DistanceMeters': number;
+    'ResolutionMeters': number;
     /**
      * 
      * @type {number}
@@ -3994,7 +4148,7 @@ export interface SimulationBase {
      * @type {number}
      * @memberof SimulationBase
      */
-    'DistanceMeters': number;
+    'ResolutionMeters': number;
 }
 /**
  * 
@@ -4007,7 +4161,7 @@ export interface SimulationDataBase {
      * @type {number}
      * @memberof SimulationDataBase
      */
-    'Distance'?: number;
+    'Distance': number;
     /**
      * 
      * @type {number}
@@ -4249,6 +4403,12 @@ export interface Trend {
      * @memberof Trend
      */
     'NodeID'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Trend
+     */
+    'TimeDelta'?: number;
 }
 /**
  * 
@@ -4340,6 +4500,12 @@ export interface TrendBase {
      * @memberof TrendBase
      */
     'NodeID'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendBase
+     */
+    'TimeDelta'?: number;
 }
 /**
  * 
@@ -4457,15 +4623,28 @@ export interface TrendGroupBase {
 /**
  * 
  * @export
+ * @interface TrendParamBase
+ */
+export interface TrendParamBase {
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendParamBase
+     */
+    'TrendParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TrendParamBase
+     */
+    'Value': string;
+}
+/**
+ * 
+ * @export
  * @interface TrendParamOut
  */
 export interface TrendParamOut {
-    /**
-     * 
-     * @type {number}
-     * @memberof TrendParamOut
-     */
-    'TrendID': number;
     /**
      * 
      * @type {string}
@@ -4478,6 +4657,12 @@ export interface TrendParamOut {
      * @memberof TrendParamOut
      */
     'Value': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof TrendParamOut
+     */
+    'TrendID': number;
     /**
      * 
      * @type {string}
@@ -4706,7 +4891,7 @@ export interface UpdateSimulation {
      * @type {number}
      * @memberof UpdateSimulation
      */
-    'DistanceMeters'?: number | null;
+    'ResolutionMeters'?: number | null;
 }
 /**
  * 
@@ -8130,6 +8315,50 @@ export const TrendApiAxiosParamCreator = function (configuration?: Configuration
     return {
         /**
          * 
+         * @summary Create Trend Param
+         * @param {number} trendId 
+         * @param {TrendParamBase} trendParamBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createTrendParamTrendTrendIdParamPost: async (trendId: number, trendParamBase: TrendParamBase, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendId' is not null or undefined
+            assertParamExists('createTrendParamTrendTrendIdParamPost', 'trendId', trendId)
+            // verify required parameter 'trendParamBase' is not null or undefined
+            assertParamExists('createTrendParamTrendTrendIdParamPost', 'trendParamBase', trendParamBase)
+            const localVarPath = `/trend/{trend_id}/param`
+                .replace(`{${"trend_id"}}`, encodeURIComponent(String(trendId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(trendParamBase, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Create Trend
          * @param {TrendBase} trendBase 
          * @param {*} [options] Override http request option.
@@ -8180,6 +8409,48 @@ export const TrendApiAxiosParamCreator = function (configuration?: Configuration
             assertParamExists('deleteTrendByIdTrendTrendIdDelete', 'trendId', trendId)
             const localVarPath = `/trend/{trend_id}`
                 .replace(`{${"trend_id"}}`, encodeURIComponent(String(trendId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Trend Param By Id
+         * @param {number} trendId 
+         * @param {string} trendParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete: async (trendId: number, trendParamDefId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendId' is not null or undefined
+            assertParamExists('deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete', 'trendId', trendId)
+            // verify required parameter 'trendParamDefId' is not null or undefined
+            assertParamExists('deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete', 'trendParamDefId', trendParamDefId)
+            const localVarPath = `/trend/{trend_id}/param/{trend_param_def_id}`
+                .replace(`{${"trend_id"}}`, encodeURIComponent(String(trendId)))
+                .replace(`{${"trend_param_def_id"}}`, encodeURIComponent(String(trendParamDefId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -8668,6 +8939,20 @@ export const TrendApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @summary Create Trend Param
+         * @param {number} trendId 
+         * @param {TrendParamBase} trendParamBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createTrendParamTrendTrendIdParamPost(trendId: number, trendParamBase: TrendParamBase, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateTrendParamTrendTrendIdParamPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createTrendParamTrendTrendIdParamPost(trendId, trendParamBase, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendApi.createTrendParamTrendTrendIdParamPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Create Trend
          * @param {TrendBase} trendBase 
          * @param {*} [options] Override http request option.
@@ -8690,6 +8975,20 @@ export const TrendApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTrendByIdTrendTrendIdDelete(trendId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TrendApi.deleteTrendByIdTrendTrendIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Trend Param By Id
+         * @param {number} trendId 
+         * @param {string} trendParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId: number, trendParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId, trendParamDefId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendApi.deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -8844,6 +9143,17 @@ export const TrendApiFactory = function (configuration?: Configuration, basePath
     return {
         /**
          * 
+         * @summary Create Trend Param
+         * @param {number} trendId 
+         * @param {TrendParamBase} trendParamBase 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createTrendParamTrendTrendIdParamPost(trendId: number, trendParamBase: TrendParamBase, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateTrendParamTrendTrendIdParamPost> {
+            return localVarFp.createTrendParamTrendTrendIdParamPost(trendId, trendParamBase, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Create Trend
          * @param {TrendBase} trendBase 
          * @param {*} [options] Override http request option.
@@ -8861,6 +9171,17 @@ export const TrendApiFactory = function (configuration?: Configuration, basePath
          */
         deleteTrendByIdTrendTrendIdDelete(trendId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteTrendByIdTrendTrendIdDelete> {
             return localVarFp.deleteTrendByIdTrendTrendIdDelete(trendId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Trend Param By Id
+         * @param {number} trendId 
+         * @param {string} trendParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId: number, trendParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete> {
+            return localVarFp.deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId, trendParamDefId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -8987,6 +9308,19 @@ export const TrendApiFactory = function (configuration?: Configuration, basePath
 export class TrendApi extends BaseAPI {
     /**
      * 
+     * @summary Create Trend Param
+     * @param {number} trendId 
+     * @param {TrendParamBase} trendParamBase 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendApi
+     */
+    public createTrendParamTrendTrendIdParamPost(trendId: number, trendParamBase: TrendParamBase, options?: RawAxiosRequestConfig) {
+        return TrendApiFp(this.configuration).createTrendParamTrendTrendIdParamPost(trendId, trendParamBase, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Create Trend
      * @param {TrendBase} trendBase 
      * @param {*} [options] Override http request option.
@@ -9007,6 +9341,19 @@ export class TrendApi extends BaseAPI {
      */
     public deleteTrendByIdTrendTrendIdDelete(trendId: number, options?: RawAxiosRequestConfig) {
         return TrendApiFp(this.configuration).deleteTrendByIdTrendTrendIdDelete(trendId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Trend Param By Id
+     * @param {number} trendId 
+     * @param {string} trendParamDefId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendApi
+     */
+    public deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId: number, trendParamDefId: string, options?: RawAxiosRequestConfig) {
+        return TrendApiFp(this.configuration).deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId, trendParamDefId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

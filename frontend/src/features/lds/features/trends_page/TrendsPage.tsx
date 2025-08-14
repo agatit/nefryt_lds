@@ -32,6 +32,9 @@ import {
 } from "../../../../data/mockup-data";
 import { LDSContext } from "../../contexts/ldsContext";
 import { NavbarContext } from "../../../../contexts/navbarContext";
+import { SvgIcon, Typography } from "@progress/kendo-react-common";
+import { useTranslation } from "react-i18next";
+import { arrowRightIcon } from "@progress/kendo-svg-icons";
 
 const mainChartSampleSize = 500;
 const navigationChartSampleSize = 50;
@@ -108,6 +111,7 @@ function generateValue(date: Date, chart: number): number {
 export default function TrendsPage() {
   const auth = React.useContext(AuthContext);
   const refreshableRequest = useRefreshableRequest();
+  const { t } = useTranslation(["common", "trends-page"]);
 
   // UI STUFF
   const [startDate, setStartDate] = React.useState<Date>(() => {
@@ -189,7 +193,7 @@ export default function TrendsPage() {
   );
 
   const isLoadingTemplates = React.useMemo(
-    () => templates.length > 0,
+    () => templates.length == 0,
     [templates]
   );
 
@@ -221,6 +225,10 @@ export default function TrendsPage() {
     useMockup ? mockupAxes : []
   );
 
+  const noAxes: boolean = React.useMemo(() => {
+    return axesState.length == 0;
+  }, [axesState]);
+
   const loadTemplates = React.useCallback(async () => {
     try {
       const response = await refreshableRequest(
@@ -235,7 +243,7 @@ export default function TrendsPage() {
 
   React.useEffect(() => {
     if (!useMockup) loadTemplates();
-  }, []);
+  }, [useMockup]);
 
   const handleAxesStateChange = React.useCallback((value: AxisType[]) => {
     if (value) setAxesState(value);
@@ -270,7 +278,7 @@ export default function TrendsPage() {
         console.log(error);
       }
     },
-    [templates, axesState]
+    [templates, axesState, useMockup]
   );
 
   // trends data
@@ -280,10 +288,16 @@ export default function TrendsPage() {
   const [navigatorData, setNavigatorData] = React.useState<
     ChartSeriesTrendData[]
   >([]);
-  const isLoadingTrendsData = React.useMemo(
-    () => trendsData.length == 0 || navigatorData.length == 0,
-    [trendsData, navigatorData]
-  );
+  const [isLoadingTrendsDataState, setLoadingTrendsDataState] = React.useState({
+    mainDataLoaded: false,
+    navDataLoaded: false,
+  });
+  const isLoadingTrendsData = React.useMemo(() => {
+    return (
+      !isLoadingTrendsDataState.mainDataLoaded &&
+      !isLoadingTrendsDataState.navDataLoaded
+    );
+  }, [isLoadingTrendsDataState]);
 
   const loadTrendsData = React.useCallback(async () => {
     var trendIdList: string = "";
@@ -296,6 +310,13 @@ export default function TrendsPage() {
     trendIdArr.forEach((id) => {
       trendIdList += id.toString() + ",";
     });
+
+    if (trendIdList.length == 0) {
+      // if no axes just leave
+      setLoadingTrendsDataState({ mainDataLoaded: true, navDataLoaded: true });
+      return;
+    }
+
     try {
       const response = await refreshableRequest(
         ldsContex!.trendApi.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
@@ -328,6 +349,7 @@ export default function TrendsPage() {
       });
 
       setTrendsData(newTrendsData);
+      setLoadingTrendsDataState({ mainDataLoaded: true, navDataLoaded: true });
     } catch (error) {
       console.log(error);
     }
@@ -406,9 +428,16 @@ export default function TrendsPage() {
 
     setTrendsData(newTrendsData);
     setNavigatorData(newNavData);
+    setLoadingTrendsDataState({ mainDataLoaded: true, navDataLoaded: true });
   }, [startDate, endDate, ldsContex?.trends, axesState]);
 
   React.useEffect(() => {
+    setTemplates(useMockup ? mockupTemplates : []);
+    setAxesState(useMockup ? mockupAxes : []);
+  }, [useMockup]);
+
+  React.useEffect(() => {
+    setLoadingTrendsDataState({ mainDataLoaded: false, navDataLoaded: false });
     useMockup ? generateTestData() : loadTrendsData();
   }, [
     useMockup,
@@ -419,30 +448,35 @@ export default function TrendsPage() {
     loadTrendsData,
   ]);
 
-  React.useEffect(() => {
-    if (!useMockup) loadTrendsData();
-  }, [axesState]);
-
   return (
     <React.Fragment>
       <main className="trends-page">
-        <TrendChart
-          isLoadingTrendsData={isLoadingTrendsData}
-          startDate={startDate}
-          endDate={endDate}
-          navigationStartDate={navigationStartDate}
-          navigationEndDate={navigationEndDate}
-          trendData={trendsData}
-          navigatorData={navigatorData}
-          axesState={axesState}
-          onStartDateChange={handleChartStartDateChange}
-          onEndDateChange={handleChartEndDateChange}
-          onShowCursorBubbleChange={handleShowCursorBubbleChange}
-          onCursorBubbleTextChange={handleCursorBubbleTextChange}
-          highlightedTrendID={highlightedTrendID}
-        />
+        {noAxes ? (
+          <div className="no-axes-container">
+            <Typography.p style={{ marginBottom: 0 }} fontSize="large">
+              {t("trends-page:add_trends_or_select_template")}
+            </Typography.p>
+            <SvgIcon icon={arrowRightIcon} size="large" />
+          </div>
+        ) : (
+          <TrendChart
+            isLoadingTrendsData={isLoadingTrendsData}
+            startDate={startDate}
+            endDate={endDate}
+            navigationStartDate={navigationStartDate}
+            navigationEndDate={navigationEndDate}
+            trendData={trendsData}
+            navigatorData={navigatorData}
+            axesState={axesState}
+            onStartDateChange={handleChartStartDateChange}
+            onEndDateChange={handleChartEndDateChange}
+            onShowCursorBubbleChange={handleShowCursorBubbleChange}
+            onCursorBubbleTextChange={handleCursorBubbleTextChange}
+            highlightedTrendID={highlightedTrendID}
+          />
+        )}
         <TrendsDetailPanel
-          isLoadingTrends={isLoadingTrendsData}
+          isLoading={isLoadingTemplates}
           trends={ldsContex!.trends}
           axesState={axesState}
           onAxesStateChange={handleAxesStateChange}

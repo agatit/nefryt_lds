@@ -16,6 +16,15 @@ main.trends-page {
   position: relative;
 }
 
+main.trends-page > .no-axes-container {
+  flex: 4 0 0;
+  overflow-y: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: not-allowed;
+}
+
 .chart-container > .main-chart {
   flex-grow: 1;
 }

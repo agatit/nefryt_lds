@@ -223,7 +223,7 @@ export default function LDS() {
   }, [trendDefApi, trendGroupApi, unitApi, trendApi]);
   React.useEffect(() => {
     if (!nav.useMockup) LoadData();
-  }, []);
+  }, [nav.useMockup]);
 
   const isLoadingContext = React.useMemo(
     () =>
