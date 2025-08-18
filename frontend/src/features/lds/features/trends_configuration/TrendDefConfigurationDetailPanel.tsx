@@ -13,17 +13,13 @@ import { Button } from "@progress/kendo-react-buttons";
 
 export interface TrendDefConfigurationDetailPanelProps {
   trendDefs: TrendDefBase[];
-  setTrendDefs: (value: TrendDefBase[]) => void;
   selected: TrendDefBase | null;
-  enterAddNewTrendDef: () => void;
 }
 
 const TrendDefConfigurationDetailPanel = React.memo(
   function TrendDefConfigurationDetailPanel({
     trendDefs,
-    setTrendDefs,
     selected,
-    enterAddNewTrendDef,
   }: TrendDefConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
 
@@ -63,21 +59,6 @@ const TrendDefConfigurationDetailPanel = React.memo(
       []
     );
 
-    const saveEdit = React.useCallback(() => {
-      const newTrendDef: TrendDefBase = {
-        ID: trendDefID!,
-        Name: trendDefName!,
-      };
-
-      setTrendDefs(
-        trendDefs.map((trendDef) => {
-          if (trendDef.ID == newTrendDef.ID) return newTrendDef;
-          return trendDef;
-        })
-      );
-      setInEdit(false);
-    }, [trendDefs, setTrendDefs, trendDefID, trendDefName]);
-
     return (
       <div className="detail-panel-content">
         <div className="item">
@@ -88,36 +69,12 @@ const TrendDefConfigurationDetailPanel = React.memo(
                 id="trendDefName"
                 value={trendDefName}
                 onChange={handleTrendDefNameChange}
+                disabled={true}
               />
             </div>
           </div>
         </div>
         <div className="separator" />
-        <div className="item">
-          {!inEdit ? (
-            <div className="item-row">
-              <Button svgIcon={pencilIcon} onClick={enterEdit}>
-                {t("common:edit")}
-              </Button>
-              <Button svgIcon={plusIcon} onClick={enterAddNewTrendDef}>
-                {t("config-page:add_new_trend_type")}
-              </Button>
-            </div>
-          ) : (
-            <div className="item-row">
-              <Button svgIcon={cancelIcon} onClick={cancelEdit}>
-                {t("common:cancel")}
-              </Button>
-              <Button
-                svgIcon={saveIcon}
-                onClick={saveEdit}
-                themeColor={"primary"}
-              >
-                {t("common:save")}
-              </Button>
-            </div>
-          )}
-        </div>
       </div>
     );
   }

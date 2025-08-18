@@ -22,8 +22,12 @@ import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
 import React from "react";
 import { ParsedTrendType } from "./TrendConfigurationPage";
 import { useTranslation } from "react-i18next";
-import { MockupTrendType } from "../../../../data/mockup-data";
-import { TrendDefBase, TrendGroup, Unit } from "../../../../services/api";
+import {
+  Trend,
+  TrendDefBase,
+  TrendGroup,
+  Unit,
+} from "../../../../services/api";
 import { rgbaToHex } from "../../../../lib/utilis";
 import ColorGridCell from "../../components/ColorGridCell";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
@@ -35,8 +39,8 @@ export interface TrendConfigurationProps {
   trendDefs: TrendDefBase[];
   trendGroups: TrendGroup[];
   units: Unit[];
-  trends: MockupTrendType[];
-  setTrends: (value: MockupTrendType[]) => void;
+  trends: Trend[];
+  addTrend: (value: Trend) => Promise<void>;
   selected: ParsedTrendType | null;
   setSelected: (value: ParsedTrendType) => void;
 }
@@ -49,7 +53,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
   trendGroups,
   units,
   trends,
-  setTrends,
+  addTrend,
   selected,
   setSelected,
 }: TrendConfigurationProps) {
@@ -57,11 +61,13 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
 
   const data = React.useMemo((): ParsedTrendType[] => {
     return trends.map((trend): ParsedTrendType => {
+      // const unit = units.find((unit) => unit.ID == trend.UnitID)!; //waiting for unit api fix
       return {
         ...trend,
         trendType: trendDefs.find((def) => def.ID == trend.TrendDefID)!.Name!,
         trendGroup: trendGroups.find((group) => group.ID == trend.TrendGroupID)!
           .Name!,
+        // unit: unit.Name! + " " + unit.Symbol!, //waiting for unit api fix
       };
     });
   }, [trendDefs, trendGroups, trends]);
@@ -126,20 +132,24 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
     closeDialog();
   }, [closeDialog]);
 
-  const confirmAddNewTrend = React.useCallback(() => {
-    const newTrend: MockupTrendType = {
+  const confirmAddNewTrend = React.useCallback(async () => {
+    const newTrend: Trend = {
       ID: trends.length + 100,
       Name: trendName!,
       TrendDefID: trendType!.ID,
       TrendGroupID: trendGroup!.ID,
-      Unit: trendUnit!.Symbol!,
+      UnitID: trendUnit!.ID,
       Color: trendColor!,
+      RawMin: 0,
+      RawMax: 0,
+      ScaledMin: 0,
+      ScaledMax: 0,
     };
-    setTrends([...trends, newTrend]);
+    await addTrend(newTrend);
     closeDialog();
   }, [
     closeDialog,
-    setTrends,
+    addTrend,
     trends,
     trendName,
     trendType,

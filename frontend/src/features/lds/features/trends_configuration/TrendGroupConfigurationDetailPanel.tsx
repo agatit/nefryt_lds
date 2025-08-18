@@ -12,16 +12,14 @@ import {
 import { Button } from "@progress/kendo-react-buttons";
 
 export interface TrendGroupConfigurationDetailPanelProps {
-  trendGroups: TrendGroup[];
-  setTrendGroups: (value: TrendGroup[]) => void;
+  editTrendGroup: (value: TrendGroup) => Promise<void>;
   selected: TrendGroup | null;
   enterAddNewTrendGroup: () => void;
 }
 
 const TrendGroupConfigurationDetailPanel = React.memo(
   function TrendGroupConfigurationDetailPanel({
-    trendGroups,
-    setTrendGroups,
+    editTrendGroup,
     selected,
     enterAddNewTrendGroup,
   }: TrendGroupConfigurationDetailPanelProps) {
@@ -63,20 +61,15 @@ const TrendGroupConfigurationDetailPanel = React.memo(
       []
     );
 
-    const saveEdit = React.useCallback(() => {
+    const saveEdit = React.useCallback(async () => {
       const newTrendGroup: TrendGroup = {
         ID: trendGroupID!,
         Name: trendGroupName!,
       };
 
-      setTrendGroups(
-        trendGroups.map((trendGroup) => {
-          if (trendGroup.ID == newTrendGroup.ID) return newTrendGroup;
-          return trendGroup;
-        })
-      );
+      await editTrendGroup(newTrendGroup);
       setInEdit(false);
-    }, [trendGroups, setTrendGroups, trendGroupID, trendGroupName]);
+    }, [editTrendGroup, trendGroupID, trendGroupName]);
 
     return (
       <div className="detail-panel-content">

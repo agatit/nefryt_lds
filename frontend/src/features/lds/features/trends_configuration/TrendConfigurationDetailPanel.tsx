@@ -18,17 +18,20 @@ import {
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendDefBase, TrendGroup, Unit } from "../../../../services/api";
+import {
+  Trend,
+  TrendDefBase,
+  TrendGroup,
+  Unit,
+} from "../../../../services/api";
 import { ParsedTrendType } from "./TrendConfigurationPage";
 import { rgbaToHex } from "../../../../lib/utilis";
-import { MockupTrendType } from "../../../../data/mockup-data";
 
 export interface TrendConfigurationDetailPanelProps {
   trendDefs: TrendDefBase[];
   trendGroups: TrendGroup[];
   units: Unit[];
-  trends: MockupTrendType[];
-  setTrends: (value: MockupTrendType[]) => void;
+  editTrend: (value: Trend) => Promise<void>;
   selected: ParsedTrendType | null;
   enterAddNewTrend: () => void;
 }
@@ -38,8 +41,7 @@ const TrendConfigurationDetailPanel = React.memo(
     trendDefs,
     trendGroups,
     units,
-    trends,
-    setTrends,
+    editTrend,
     selected,
     enterAddNewTrend,
   }: TrendConfigurationDetailPanelProps) {
@@ -48,15 +50,15 @@ const TrendConfigurationDetailPanel = React.memo(
     const setSelectedData = React.useCallback(
       (selectedTrend: ParsedTrendType) => {
         setTrendID(selectedTrend.ID);
-        setTrendName(selectedTrend.Name);
+        setTrendName(selectedTrend.Name!);
         setTrendType(
           trendDefs.find((def) => def.ID == selectedTrend.TrendDefID)!
         );
         setTrendGroup(
           trendGroups.find((group) => group.ID == selectedTrend.TrendGroupID)!
         );
-        setTrendUnit(units.find((unit) => unit.Symbol == selectedTrend.Unit));
-        setTrendColor(selectedTrend.Color);
+        setTrendUnit(units.find((unit) => unit.ID == selectedTrend.UnitID));
+        setTrendColor(selectedTrend.Color!);
       },
       [trendDefs, trendGroups]
     );
@@ -75,7 +77,7 @@ const TrendConfigurationDetailPanel = React.memo(
       selected?.ID
     );
     const [trendName, setTrendName] = React.useState<string | undefined>(
-      selected?.Name
+      selected?.Name!
     );
     const [trendType, setTrendType] = React.useState<TrendDefBase | undefined>(
       trendDefs.find((def) => def.ID == selected?.TrendDefID)
@@ -84,10 +86,10 @@ const TrendConfigurationDetailPanel = React.memo(
       trendGroups.find((group) => group.ID == selected?.TrendGroupID)
     );
     const [trendUnit, setTrendUnit] = React.useState<Unit | undefined>(
-      units.find((unit) => unit.Symbol == selected?.Unit)
+      units.find((unit) => unit.ID == selected?.UnitID)
     );
     const [trendColor, setTrendColor] = React.useState<string | undefined>(
-      selected?.Color
+      selected?.Color!
     );
 
     React.useEffect(() => {
@@ -125,25 +127,23 @@ const TrendConfigurationDetailPanel = React.memo(
       []
     );
 
-    const saveEdit = React.useCallback(() => {
-      const newTrend: MockupTrendType = {
+    const saveEdit = React.useCallback(async () => {
+      const newTrend: Trend = {
         ID: trendID!,
         Name: trendName!,
         TrendDefID: trendType!.ID,
         TrendGroupID: trendGroup!.ID,
-        Unit: trendUnit!.Symbol!,
+        UnitID: trendUnit!.ID!,
         Color: trendColor!,
+        RawMin: 0,
+        RawMax: 0,
+        ScaledMin: 0,
+        ScaledMax: 0,
       };
-
-      setTrends(
-        trends.map((trend) => {
-          if (trend.ID == newTrend.ID) return newTrend;
-          return trend;
-        })
-      );
+      await editTrend(newTrend);
       setInEdit(false);
     }, [
-      trends,
+      editTrend,
       trendID,
       trendName,
       trendType,

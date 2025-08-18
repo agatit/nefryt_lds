@@ -20,7 +20,7 @@ export interface TrendUnitConfigurationProps {
   openDialog: () => void;
   closeDialog: () => void;
   units: Unit[];
-  setUnits: (value: Unit[]) => void;
+  addUnit: (value: Unit) => Promise<void>;
   selected: Unit | null;
   setSelected: (value: Unit) => void;
 }
@@ -30,7 +30,7 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
   openDialog,
   closeDialog,
   units,
-  setUnits,
+  addUnit,
   selected,
   setSelected,
 }: TrendUnitConfigurationProps) {
@@ -82,16 +82,16 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
     closeDialog();
   }, [closeDialog]);
 
-  const confirmAddNewUnit = React.useCallback(() => {
+  const confirmAddNewUnit = React.useCallback(async () => {
     const newUnit: Unit = {
       ID: (units.length + 100).toString(),
       Name: unitName!,
       Symbol: unitSymbol!,
       Multiplier: unitMultiplier!,
     };
-    setUnits([...units, newUnit]);
+    await addUnit(newUnit);
     closeDialog();
-  }, [closeDialog, setUnits, units, unitName, unitSymbol, unitMultiplier]);
+  }, [closeDialog, addUnit, units, unitName, unitSymbol, unitMultiplier]);
 
   return (
     <React.Fragment>

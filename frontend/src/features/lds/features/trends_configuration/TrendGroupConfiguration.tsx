@@ -20,7 +20,7 @@ export interface TrendGroupConfigurationProps {
   openDialog: () => void;
   closeDialog: () => void;
   trendGroups: TrendGroup[];
-  setTrendGroups: (value: TrendGroup[]) => void;
+  addTrendGroup: (value: TrendGroup) => Promise<void>;
   selected: TrendGroup | null;
   setSelected: (valeu: TrendGroup) => void;
 }
@@ -30,7 +30,7 @@ const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
   openDialog,
   closeDialog,
   trendGroups,
-  setTrendGroups,
+  addTrendGroup,
   selected,
   setSelected,
 }: TrendGroupConfigurationProps) {
@@ -66,14 +66,14 @@ const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
     closeDialog();
   }, [closeDialog]);
 
-  const confirmAddNewTrendGroup = React.useCallback(() => {
+  const confirmAddNewTrendGroup = React.useCallback(async () => {
     const newTrendGroup: TrendGroup = {
       ID: trendGroups.length + 100,
       Name: trendGroupName!,
     };
-    setTrendGroups([...trendGroups, newTrendGroup]);
+    await addTrendGroup(newTrendGroup);
     closeDialog();
-  }, [closeDialog, setTrendGroups, trendGroups, trendGroupName]);
+  }, [closeDialog, addTrendGroup, trendGroups, trendGroupName]);
 
   return (
     <React.Fragment>

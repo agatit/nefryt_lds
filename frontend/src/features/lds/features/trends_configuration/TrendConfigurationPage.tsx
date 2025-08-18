@@ -6,7 +6,6 @@ import {
   mockupTrendDefs,
   mockupTrendGroups,
   mockupTrends,
-  MockupTrendType,
   mockupUnits,
 } from "../../../../data/mockup-data";
 import { AuthContext } from "../../../../contexts/authContext";
@@ -14,7 +13,12 @@ import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { useTranslation } from "react-i18next";
 import { Typography } from "@progress/kendo-react-common";
 
-import { TrendDefBase, TrendGroup, Unit } from "../../../../services/api";
+import {
+  Trend,
+  TrendDefBase,
+  TrendGroup,
+  Unit,
+} from "../../../../services/api";
 import {
   Splitter,
   SplitterOnChangeEvent,
@@ -31,6 +35,8 @@ import TrendUnitConfiguration from "./TrendUnitConfiguration";
 import TrendDefConfigurationDetailPanel from "./TrendDefConfigurationDetailPanel";
 import TrendGroupConfigurationDetailPanel from "./TrendGroupConfigurationDetailPanel";
 import TrendUnitConfigurationDetailPanel from "./TrendUnitConfigurationDetailPanel";
+import { LDSContext } from "../../contexts/ldsContext";
+import { NavbarContext } from "../../../../contexts/navbarContext";
 
 export interface SelectionType {
   trend: ParsedTrendType | null;
@@ -39,9 +45,10 @@ export interface SelectionType {
   unit: Unit | null;
 }
 
-export interface ParsedTrendType extends MockupTrendType {
+export interface ParsedTrendType extends Trend {
   trendType: string;
   trendGroup: string;
+  // unit: string; //waiting for unit api fix
 }
 
 const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
@@ -49,12 +56,13 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   const refreshableRequest = useRefreshableRequest();
   const { t } = useTranslation(["common", "config-page"]);
 
-  const [trendDefs, setTrendDefs] =
-    React.useState<TrendDefBase[]>(mockupTrendDefs);
-  const [trendGroups, setTrendGroups] =
-    React.useState<TrendGroup[]>(mockupTrendGroups);
-  const [units, setUnits] = React.useState<Unit[]>(mockupUnits);
-  const [trends, setTrends] = React.useState<MockupTrendType[]>(mockupTrends);
+  const ldsContex = React.useContext(LDSContext);
+  React.useMemo(() => {
+    if (ldsContex == null)
+      throw new Error(
+        "LDS Context cannot be null to use TrendConfigurationPage"
+      );
+  }, [ldsContex]);
 
   const [verticalPanes, setVerticalPanes] = React.useState<SplitterPaneProps[]>(
     [{ size: "66%" }, {}]
@@ -79,15 +87,6 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   }, []);
   const closeAddNewTrendDialog = React.useCallback(() => {
     setShowAddNewTrendDialog(false);
-  }, []);
-
-  const [showAddNewTrendDefDialog, setShowAddNewTrendDefDialog] =
-    React.useState<boolean>(false);
-  const openAddNewTrendDefDialog = React.useCallback(() => {
-    setShowAddNewTrendDefDialog(true);
-  }, []);
-  const closeAddNewTrendDefDialog = React.useCallback(() => {
-    setShowAddNewTrendDefDialog(false);
   }, []);
 
   const [showAddNewTrendGroupDialog, setShowAddNewTrendGroupDialog] =
@@ -173,11 +172,10 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     if (selection.trend)
       return (
         <TrendConfigurationDetailPanel
-          trendDefs={trendDefs}
-          trendGroups={trendGroups}
-          units={units}
-          trends={trends}
-          setTrends={setTrends}
+          trendDefs={ldsContex!.trendDefs}
+          trendGroups={ldsContex!.trendGroups}
+          units={ldsContex!.units}
+          editTrend={ldsContex!.updateTrend}
           selected={selection.trend}
           enterAddNewTrend={openAddNewTrendDialog}
         />
@@ -185,17 +183,14 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     if (selection.trendDef)
       return (
         <TrendDefConfigurationDetailPanel
-          trendDefs={trendDefs}
-          setTrendDefs={setTrendDefs}
+          trendDefs={ldsContex!.trendDefs}
           selected={selection.trendDef}
-          enterAddNewTrendDef={openAddNewTrendDefDialog}
         />
       );
     if (selection.trendGroup)
       return (
         <TrendGroupConfigurationDetailPanel
-          trendGroups={trendGroups}
-          setTrendGroups={setTrendGroups}
+          editTrendGroup={ldsContex!.updateTrendGroup}
           selected={selection.trendGroup}
           enterAddNewTrendGroup={openAddNewTrendGroupDialog}
         />
@@ -203,14 +198,13 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     if (selection.unit)
       return (
         <TrendUnitConfigurationDetailPanel
-          units={units}
-          setUnits={setUnits}
+          editUnit={ldsContex!.updateUnit}
           selected={selection.unit}
           enterAddNewUnit={openAddNewUnitDialog}
         />
       );
     return <></>;
-  }, [selection, trendDefs, trendGroups, units, trends, openAddNewTrendDialog]);
+  }, [selection, ldsContex, openAddNewTrendDialog]);
 
   return (
     <React.Fragment>
@@ -225,11 +219,11 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
             showDialog={showAddNewTrendDialog}
             openDialog={openAddNewTrendDialog}
             closeDialog={closeAddNewTrendDialog}
-            trendDefs={trendDefs}
-            trendGroups={trendGroups}
-            units={units}
-            trends={trends}
-            setTrends={setTrends}
+            trendDefs={ldsContex!.trendDefs}
+            trendGroups={ldsContex!.trendGroups}
+            units={ldsContex!.units}
+            trends={ldsContex!.trends}
+            addTrend={ldsContex!.addTrend}
             selected={selection.trend}
             setSelected={handleSelectedTrendChange}
           />
@@ -241,11 +235,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           >
             <TabStripTab title={t("config-page:trends_types")}>
               <TrendDefConfiguration
-                showDialog={showAddNewTrendDefDialog}
-                openDialog={openAddNewTrendDefDialog}
-                closeDialog={closeAddNewTrendDefDialog}
-                trendDefs={trendDefs}
-                setTrendDefs={setTrendDefs}
+                trendDefs={ldsContex!.trendDefs}
                 selected={selection.trendDef}
                 setSelected={handleSelectedTrendDefChange}
               />
@@ -255,8 +245,8 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 showDialog={showAddNewTrendGroupDialog}
                 openDialog={openAddNewTrendGroupDialog}
                 closeDialog={closeAddNewTrendGroupDialog}
-                trendGroups={trendGroups}
-                setTrendGroups={setTrendGroups}
+                trendGroups={ldsContex!.trendGroups}
+                addTrendGroup={ldsContex!.addTrendGroup}
                 selected={selection.trendGroup}
                 setSelected={handleSelectedTrendGroupChange}
               />
@@ -266,8 +256,8 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 showDialog={showAddNewUnitDialog}
                 openDialog={openAddNewUnitDialog}
                 closeDialog={closeAddNewUnitDialog}
-                units={units}
-                setUnits={setUnits}
+                units={ldsContex!.units}
+                addUnit={ldsContex!.addUnit}
                 selected={selection.unit}
                 setSelected={handleSelectedUnitChange}
               />

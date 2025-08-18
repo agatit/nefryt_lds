@@ -12,16 +12,14 @@ import {
 import { Button } from "@progress/kendo-react-buttons";
 
 export interface TrendUnitConfigurationDetailPanelProps {
-  units: Unit[];
-  setUnits: (value: Unit[]) => void;
+  editUnit: (value: Unit) => Promise<void>;
   selected: Unit | null;
   enterAddNewUnit: () => void;
 }
 
 const TrendUnitConfigurationDetailPanel = React.memo(
   function TrendUnitConfigurationDetailPanel({
-    units,
-    setUnits,
+    editUnit,
     selected,
     enterAddNewUnit,
   }: TrendUnitConfigurationDetailPanelProps) {
@@ -74,7 +72,7 @@ const TrendUnitConfigurationDetailPanel = React.memo(
       if (selected !== null) setSelectedData(selected);
     }, [selected]);
 
-    const saveEdit = React.useCallback(() => {
+    const saveEdit = React.useCallback(async () => {
       const newUnit: Unit = {
         ID: unitID!,
         Name: unitName,
@@ -82,14 +80,9 @@ const TrendUnitConfigurationDetailPanel = React.memo(
         Multiplier: unitMultiplier,
       };
 
-      setUnits(
-        units.map((unit) => {
-          if (unit.ID == newUnit.ID) return newUnit;
-          return unit;
-        })
-      );
+      await editUnit(newUnit);
       setInEdit(false);
-    }, [units, setUnits, unitID, unitName, unitSymbol, unitMultiplier]);
+    }, [editUnit, unitID, unitName, unitSymbol, unitMultiplier]);
 
     return (
       <div className="detail-panel-content">
