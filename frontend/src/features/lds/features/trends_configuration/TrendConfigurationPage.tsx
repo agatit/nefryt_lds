@@ -5,6 +5,7 @@ import { DetailPanel } from "onyks_shared_kendo";
 import {
   mockupTrendDefs,
   mockupTrendGroups,
+  MockupTrendParamDefType,
   mockupTrends,
   mockupUnits,
 } from "../../../../data/mockup-data";
@@ -37,9 +38,12 @@ import TrendGroupConfigurationDetailPanel from "./TrendGroupConfigurationDetailP
 import TrendUnitConfigurationDetailPanel from "./TrendUnitConfigurationDetailPanel";
 import { LDSContext } from "../../contexts/ldsContext";
 import { NavbarContext } from "../../../../contexts/navbarContext";
+import TrendParamDefConfiguration from "./TrendParamDefConfiguration";
+import TrendParamDefConfigurationDetailPanel from "./TrendParamDefConfigurationDetailPanel";
 
 export interface SelectionType {
   trend: ParsedTrendType | null;
+  trendParamDef: MockupTrendParamDefType | null;
   trendDef: TrendDefBase | null;
   trendGroup: TrendGroup | null;
   unit: Unit | null;
@@ -110,6 +114,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   // Selection
   const [selection, setSelection] = React.useState<SelectionType>({
     trend: null,
+    trendParamDef: null,
     trendDef: null,
     trendGroup: null,
     unit: null,
@@ -117,6 +122,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   const isSelected = React.useMemo(
     () =>
       selection.trend !== null ||
+      selection.trendParamDef !== null ||
       selection.trendDef !== null ||
       selection.trendGroup !== null ||
       selection.unit !== null,
@@ -127,6 +133,21 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     (value: ParsedTrendType) => {
       setSelection({
         trend: value,
+        trendParamDef: null,
+        trendDef: null,
+        trendGroup: null,
+        unit: null,
+      });
+    },
+    []
+  );
+
+  const handleSelectedTrendParamDefChange = React.useCallback(
+    (value: MockupTrendParamDefType) => {
+      console.log(value);
+      setSelection({
+        trend: null,
+        trendParamDef: value,
         trendDef: null,
         trendGroup: null,
         unit: null,
@@ -139,6 +160,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     (value: TrendDefBase) => {
       setSelection({
         trend: null,
+        trendParamDef: null,
         trendDef: value,
         trendGroup: null,
         unit: null,
@@ -151,6 +173,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     (value: TrendGroup) => {
       setSelection({
         trend: null,
+        trendParamDef: null,
         trendDef: null,
         trendGroup: value,
         unit: null,
@@ -162,6 +185,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   const handleSelectedUnitChange = React.useCallback((value: Unit) => {
     setSelection({
       trend: null,
+      trendParamDef: null,
       trendDef: null,
       trendGroup: null,
       unit: value,
@@ -180,13 +204,14 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           enterAddNewTrend={openAddNewTrendDialog}
         />
       );
-    if (selection.trendDef)
+    if (selection.trendParamDef)
       return (
-        <TrendDefConfigurationDetailPanel
-          trendDefs={ldsContex!.trendDefs}
-          selected={selection.trendDef}
+        <TrendParamDefConfigurationDetailPanel
+          selected={selection.trendParamDef}
         />
       );
+    if (selection.trendDef)
+      return <TrendDefConfigurationDetailPanel selected={selection.trendDef} />;
     if (selection.trendGroup)
       return (
         <TrendGroupConfigurationDetailPanel
@@ -238,6 +263,13 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 trendDefs={ldsContex!.trendDefs}
                 selected={selection.trendDef}
                 setSelected={handleSelectedTrendDefChange}
+              />
+            </TabStripTab>
+            <TabStripTab title={t("config-page:trends_params")}>
+              <TrendParamDefConfiguration
+                trendParamDefs={ldsContex!.trendParamDefs}
+                selected={selection.trendParamDef}
+                setSelected={handleSelectedTrendParamDefChange}
               />
             </TabStripTab>
             <TabStripTab title={t("config-page:trends_groups")}>

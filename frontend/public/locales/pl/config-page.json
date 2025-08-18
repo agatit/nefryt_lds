@@ -12,11 +12,13 @@
   "trends_types": "Typy trendów",
   "trends_groups": "Grupy trendów",
   "trends_units": "Jednostki trendów",
+  "trends_params": "Parametry trendów",
   "add_new_trend_type": "Dodaj nowy typ trendów",
   "add_new_trend_group": "Dodaj nową grupę trendów",
   "add_new_unit": "Dodaj nową jednostkę",
   "create_new_trend_type": "Utwórz nowy typ trendów",
   "create_new_trend_group": "Utwórz nową grupę trendów",
   "create_new_unit": "Utwórz nową jednostkę",
-  "select_element_to_edit": "Wybierz element aby edytować"
+  "select_element_to_edit": "Wybierz element aby edytować",
+  "data_type": "Typ parametru"
 }

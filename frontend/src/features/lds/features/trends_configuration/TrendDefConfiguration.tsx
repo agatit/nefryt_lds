@@ -1,4 +1,3 @@
-import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
 import {
   Grid,
   GridColumn,
@@ -6,13 +5,9 @@ import {
   GridSelectionChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
-import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { TrendDefBase } from "../../../../services/api";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import { Label } from "@progress/kendo-react-labels";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
 export interface TrendDefConfigurationProps {

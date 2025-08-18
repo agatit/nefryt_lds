@@ -41,15 +41,17 @@ import {
   TrendDefBase,
   TrendGroup,
   TrendGroupApi,
+  TrendParamBase,
   Unit,
   UnitApi,
 } from "../../services/api";
 import { axiosInstance, host } from "../../lib/apiUtilities";
 import { useRefreshableRequest } from "../../hooks/useRefreshableRequest";
-import { error } from "console";
 import {
   mockupTrendDefs,
   mockupTrendGroups,
+  mockupTrendParamDefs,
+  MockupTrendParamDefType,
   mockupTrends,
   mockupUnits,
 } from "../../data/mockup-data";
@@ -173,12 +175,15 @@ export default function LDS() {
   const [trends, setTrends] = React.useState<Trend[]>(
     nav.useMockup ? mockupTrends : []
   );
+  const [trendParamDefs, setTrendParamDefs] =
+    React.useState<MockupTrendParamDefType[]>(mockupTrendParamDefs);
 
   React.useEffect(() => {
     setTrendDefs(nav.useMockup ? mockupTrendDefs : []);
     setTrendGroups(nav.useMockup ? mockupTrendGroups : []);
     setUnits(nav.useMockup ? mockupUnits : []);
     setTrends(nav.useMockup ? mockupTrends : []);
+    setTrendParamDefs(mockupTrendParamDefs);
   }, [nav.useMockup]);
 
   // TODO ADD HOOK TO HANDLE ALL ERRORS
@@ -478,6 +483,7 @@ export default function LDS() {
               addTrendGroup={addTrendGroup}
               updateTrendGroup={updateTrendGroup}
               deleteTrendGroup={deleteTrendGroup}
+              trendParamDefs={trendParamDefs}
               unitApi={unitApi}
               units={units}
               setUnits={setUnits}

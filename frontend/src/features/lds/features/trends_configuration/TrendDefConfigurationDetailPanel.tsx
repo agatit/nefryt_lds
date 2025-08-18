@@ -3,46 +3,22 @@ import { useTranslation } from "react-i18next";
 import { TrendDefBase } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
-import {
-  cancelIcon,
-  pencilIcon,
-  plusIcon,
-  saveIcon,
-} from "@progress/kendo-svg-icons";
-import { Button } from "@progress/kendo-react-buttons";
 
 export interface TrendDefConfigurationDetailPanelProps {
-  trendDefs: TrendDefBase[];
   selected: TrendDefBase | null;
 }
 
 const TrendDefConfigurationDetailPanel = React.memo(
   function TrendDefConfigurationDetailPanel({
-    trendDefs,
     selected,
   }: TrendDefConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
 
     const setSelectedData = React.useCallback(
       (selectedTrendDef: TrendDefBase) => {
-        setTrendDefID(selectedTrendDef.ID);
         setTrendDefName(selectedTrendDef.Name ?? "");
       },
       []
-    );
-
-    const [inEdit, setInEdit] = React.useState<boolean>(false);
-
-    const enterEdit = React.useCallback(() => {
-      setInEdit(true);
-    }, []);
-    const cancelEdit = React.useCallback(() => {
-      setInEdit(false);
-      if (selected !== null) setSelectedData(selected);
-    }, [selected, setSelectedData]);
-
-    const [trendDefID, setTrendDefID] = React.useState<string | undefined>(
-      selected?.ID
     );
     const [trendDefName, setTrendDefName] = React.useState<string | undefined>(
       selected?.Name ?? ""

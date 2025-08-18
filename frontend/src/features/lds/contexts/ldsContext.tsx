@@ -8,6 +8,7 @@ import {
   Unit,
   UnitApi,
 } from "../../../services/api";
+import { MockupTrendParamDefType } from "../../../data/mockup-data";
 
 export type LDSContextType = {
   trendDefs: TrendDefBase[];
@@ -17,6 +18,7 @@ export type LDSContextType = {
   addTrend: (value: Trend) => Promise<void>;
   updateTrend: (value: Trend) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
+  trendParamDefs: MockupTrendParamDefType[];
   trendGroupApi: TrendGroupApi;
   trendGroups: TrendGroup[];
   setTrendGroups: (value: TrendGroup[]) => void;
@@ -41,6 +43,8 @@ interface LDSContextProviderProps extends PropsWithChildren {
   addTrend: (value: Trend) => Promise<void>;
   updateTrend: (value: Trend) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
+  trendParamDefs: MockupTrendParamDefType[];
+
   trendGroupApi: TrendGroupApi;
   trendGroups: TrendGroup[];
   setTrendGroups: (value: TrendGroup[]) => void;
@@ -64,6 +68,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
   addTrend,
   updateTrend,
   deleteTrend,
+  trendParamDefs,
   trendGroupApi,
   trendGroups,
   setTrendGroups,
@@ -86,6 +91,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addTrend,
       updateTrend,
       deleteTrend,
+      trendParamDefs,
       trendGroupApi,
       trendGroups,
       setTrendGroups,
@@ -106,6 +112,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addTrend,
       updateTrend,
       deleteTrend,
+      trendParamDefs,
       trendGroupApi,
       trendGroups,
       addTrendGroup,
