@@ -1,24 +1,21 @@
 import atexit
 import logging
 import math
-import threading
 import time
 from multiprocessing import Process
 import numpy as np
-from matplotlib.animation import FuncAnimation
 from sqlalchemy import select, and_, literal, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from config import setup_engine
+from config import setup_engine, Settings
 from database.models import lds
 from db import get_engine
-import matplotlib.pyplot as plt
+
+# TODO: skrypt do prezentacji danych symulacji
 
 
 class SimulationBase:
-    def __init__(self, simulation: lds.Simulation, db_uri: str, plot_sim: bool = False):
-        # self.time_buffer = 1
-        self.last_timestamp = 0
+    def __init__(self, simulation: lds.Simulation, db_uri: str = None):
         self.lds_simulation = simulation
         self._read_params()
         try:
@@ -46,6 +43,9 @@ class SimulationBase:
         if self.flow_trend is None:
             raise ValueError(f'No flow trend with id = {flow_trend_id} for simulation {self.lds_simulation.ID}')
 
+        self.time_buffer = self.calculate_time_buffer()
+        self.simulation_timestamp = int(time.time()) - self.time_buffer
+        self.last_success = self.simulation_timestamp - 1
         self.distances = self.calculate_distances()
         segments_number = math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) \
             if math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) > 200 \
@@ -54,8 +54,9 @@ class SimulationBase:
         self.simulation_data: np.ndarray = np.zeros(segments_number)
         self.simulation_data_gradient: np.ndarray = np.zeros(segments_number)
         self.db_uri = db_uri
+        if self.db_uri:
+            self.save_simulation_data()
         self.process = None
-        self.plot_sim = plot_sim
         atexit.register(self._shutdown)
 
         # self.pipe_volume = self.pipe_area * self.segments_length
@@ -96,33 +97,47 @@ class SimulationBase:
         self.process = Process(target=self.run_simulation, args=(self.db_uri, ))
         self.process.start()
         logging.info(f"{self.__class__.__name__} ({self.lds_simulation.ID}) started")
+
+    def calculate_time_buffer(self):
+        return max(self.simulation_trend.TimeDelta, self.flow_trend.TimeDelta) + 3
         
     def calculate_distances(self):
         return [distance for distance in range(0, self.pipeline_length, self.lds_simulation.ResolutionMeters)]
 
-    def calculate_simulation_data_on_start(self, current_timestamp: int):
+    def calculate_simulation_data_on_start(self):
         raise NotImplementedError
 
-    def calculate_simulation_data(self, current_timestamp: int):
+    def calculate_simulation_data(self):
         raise NotImplementedError
 
-    def save_simulation_data(self, timestamp: int):
+    def save_simulation_data(self):
+        print('saving simulation')
+        # print(time.time())
+        # print(self.simulation_data)
         if len(self.simulation_data) == 0:
             logging.warning(f'Empty simulation data for simulation with id={self.lds_simulation.ID}')
             return
-        db_data = [lds.SimulationData(SimulationID=self.lds_simulation.ID, Time=timestamp, Distance=0, Data=self.simulation_data[0])]
+        db_data = [lds.SimulationData(SimulationID=self.lds_simulation.ID, Time=self.simulation_timestamp,
+                                      Distance=0, Data=np.round(self.simulation_data[0]))]
+        # print(self.distances)
         if len(self.distances) >= 2:
             iter_distance = iter(self.distances[1:])
             distance = next(iter_distance)
             while distance is not None:
-                print(distance)
-                print(self.simulation_segment_length)
+                # print(distance)
+                # print('==============')
+                # print(distance)
+                # print(self.simulation_segment_length)
                 idx = int(distance // self.simulation_segment_length)
-                print(idx)
+                # print(idx)
                 sim_data1 = self.simulation_data[idx]
                 sim_data2 = self.simulation_data[idx + 1]
-                distance_diff1 = abs(idx*self.lds_simulation.ResolutionMeters - distance)
-                distance_diff2 = abs((idx+1)*self.lds_simulation.ResolutionMeters - distance)
+                # print(sim_data1)
+                # print(sim_data2)
+                distance_diff1 = abs(idx*self.simulation_segment_length - distance)
+                distance_diff2 = abs((idx+1)*self.simulation_segment_length - distance)
+                # print(distance_diff1)
+                # print(distance_diff2)
                 if sim_data1 is None and sim_data2 is None:
                     calculated_data = None
                 elif sim_data1 is None:
@@ -132,7 +147,9 @@ class SimulationBase:
                 else:
                     calculated_data = ((((self.simulation_segment_length - distance_diff1) / self.simulation_segment_length) * sim_data1)
                                        + (((self.simulation_segment_length - distance_diff2) / self.simulation_segment_length) * sim_data2))
-                db_data.append(lds.SimulationData(SimulationID=self.lds_simulation.ID, Time=timestamp, Distance=distance, Data=calculated_data))
+                db_data.append(lds.SimulationData(SimulationID=self.lds_simulation.ID, Time=self.simulation_timestamp,
+                                                  Distance=distance, Data=calculated_data))
+                # print(calculated_data)
                 distance = next(iter_distance, None)
 
         with Session(get_engine()) as session:
@@ -142,10 +159,8 @@ class SimulationBase:
 
     def run_simulation(self, db_uri: str):
         setup_engine(db_uri)
-        # current_timestamp = int(time.time()) - self.time_buffer
-        current_timestamp = int(time.time()) - 1
-        self.calculate_simulation_data_on_start(current_timestamp)
-        self._run_simulation_loop(current_timestamp)
+        self.calculate_simulation_data_on_start()
+        self._run_simulation_loop()
         # if self.plot_sim:
         #     fig, ax = plt.subplots()
         #
@@ -169,21 +184,25 @@ class SimulationBase:
         # else:
         # self._run_simulation_loop(current_timestamp)
 
-    def _run_simulation_loop(self, current_timestamp: int):
-        simulation_time = 0
-        while True:
-            start_time = time.perf_counter()
-            try:
-                self.calculate_simulation_data(current_timestamp)
-            except Exception as e:
-                logging.warning(f"{self.__class__.__name__} ({self.lds_simulation.ID}) error while simulation data read: {e}")
+    def _run_simulation_loop(self):
+        simulation_length = 1
+        try:
+            while True:
+                start_time = time.perf_counter()
+                try:
+                    self.calculate_simulation_data()
+                except Exception as e:
+                    logging.warning(f"{self.__class__.__name__} ({self.lds_simulation.ID}) error while simulation data read: {e}")
 
-            if simulation_time % self.lds_simulation.RefreshTimeSeconds == 0:
-                self.save_simulation_data(current_timestamp)
+                if simulation_length % self.lds_simulation.RefreshTimeSeconds == 0:
+                    self.save_simulation_data()
 
-            if 1 - (time.perf_counter() - start_time) > 0:
-                time.sleep(1 - (time.perf_counter() - start_time))
-            simulation_time += 1
+                if 1 - (time.perf_counter() - start_time) > 0:
+                    time.sleep(1 - (time.perf_counter() - start_time))
+                simulation_length += 1
+                self.simulation_timestamp += 1
+        except KeyboardInterrupt:
+            logging.info(f"{self.__class__.__name__} ({self.lds_simulation.ID}) closed")
 
     def _delete_data_from_db(self):
         try:

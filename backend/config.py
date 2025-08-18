@@ -12,6 +12,7 @@ path = pathlib.Path(__file__).parent.resolve()
 class AppConfig(BaseModel):
     db_uri: str
     verbosity: str = 'INFO'
+    tests: bool = False
     trends_writer: dict
 
 
