@@ -20,5 +20,8 @@
   "create_new_trend_group": "Utwórz nową grupę trendów",
   "create_new_unit": "Utwórz nową jednostkę",
   "select_element_to_edit": "Wybierz element aby edytować",
-  "data_type": "Typ parametru"
+  "data_type": "Typ parametru",
+  "sure_you_want_delete_trend": "Czy jesteś pewien że chcesz usunąć Trend?",
+  "sure_you_want_delete_trend_group": "Czy jesteś pewien że chcesz usunąć Grupę trendów?",
+  "sure_you_want_delete_unit": "Czy jesteś pewien że chcesz usunąć jednostkę?"
 }

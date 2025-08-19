@@ -12,5 +12,7 @@
   "time": "Czas",
   "from": "Od",
   "to": "Do",
-  "confirm": "Zatwierdź"
+  "confirm": "Zatwierdź",
+  "delete": "Usuń",
+  "confirm_deletion": "Potwierdź usunięcie"
 }

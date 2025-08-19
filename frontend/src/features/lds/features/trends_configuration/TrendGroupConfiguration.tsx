@@ -6,7 +6,12 @@ import {
   GridSelectionChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
-import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
+import {
+  cancelIcon,
+  checkIcon,
+  plusIcon,
+  trashIcon,
+} from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { TrendDefBase, TrendGroup } from "../../../../services/api";
@@ -21,6 +26,7 @@ export interface TrendGroupConfigurationProps {
   closeDialog: () => void;
   trendGroups: TrendGroup[];
   addTrendGroup: (value: TrendGroup) => Promise<void>;
+  deleteTrendGroup: (value: TrendGroup) => Promise<void>;
   selected: TrendGroup | null;
   setSelected: (valeu: TrendGroup) => void;
 }
@@ -31,6 +37,7 @@ const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
   closeDialog,
   trendGroups,
   addTrendGroup,
+  deleteTrendGroup,
   selected,
   setSelected,
 }: TrendGroupConfigurationProps) {
@@ -75,6 +82,20 @@ const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
     closeDialog();
   }, [closeDialog, addTrendGroup, trendGroups, trendGroupName]);
 
+  // Deletion dialog
+  const [showDeletionDialog, setShowDeletionDialog] =
+    React.useState<boolean>(false);
+  const openDeletionDialog = React.useCallback(() => {
+    setShowDeletionDialog(true);
+  }, []);
+  const closeDeletionDialog = React.useCallback(() => {
+    setShowDeletionDialog(false);
+  }, []);
+
+  const confirmDeletion = React.useCallback(async () => {
+    await deleteTrendGroup(selected!);
+  }, [selected, deleteTrendGroup]);
+
   return (
     <React.Fragment>
       <Grid
@@ -91,6 +112,11 @@ const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
             <Button svgIcon={plusIcon} onClick={openDialog}>
               {t("config-page:add_new_trend_group")}
             </Button>
+            {selected && (
+              <Button svgIcon={trashIcon} onClick={openDeletionDialog}>
+                {t("common:delete")}
+              </Button>
+            )}
           </ButtonGroup>
         </GridToolbar>
         <GridColumn title={t("config-page:id")} sortable={true} field="ID" />
@@ -123,6 +149,26 @@ const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
               onClick={confirmAddNewTrendGroup}
             >
               {t("common:confirm")}
+            </Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
+      {showDeletionDialog && (
+        <Dialog
+          title={t("common:confirm_deletion")}
+          onClose={closeDeletionDialog}
+        >
+          {t("config-page:sure_you_want_delete_trend_group")}
+          <DialogActionsBar>
+            <Button svgIcon={cancelIcon} onClick={closeDeletionDialog}>
+              {t("common:cancel")}
+            </Button>
+            <Button
+              svgIcon={trashIcon}
+              onClick={confirmDeletion}
+              themeColor={"primary"}
+            >
+              {t("common:delete")}
             </Button>
           </DialogActionsBar>
         </Dialog>

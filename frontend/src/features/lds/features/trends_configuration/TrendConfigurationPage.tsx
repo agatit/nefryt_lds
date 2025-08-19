@@ -192,6 +192,48 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     });
   }, []);
 
+  const handleSelectedTrendDeletion = React.useCallback(
+    async (value: Trend) => {
+      await ldsContex!.deleteTrend(value);
+      setSelection({
+        trend: null,
+        trendParamDef: null,
+        trendDef: null,
+        trendGroup: null,
+        unit: null,
+      });
+    },
+    [ldsContex]
+  );
+
+  const handleSelectedTrendGroupDeletion = React.useCallback(
+    async (value: TrendGroup) => {
+      await ldsContex!.deleteTrendGroup(value);
+      setSelection({
+        trend: null,
+        trendParamDef: null,
+        trendDef: null,
+        trendGroup: null,
+        unit: null,
+      });
+    },
+    [ldsContex]
+  );
+
+  const handleSelectedUnitDeletion = React.useCallback(
+    async (value: Unit) => {
+      await ldsContex!.deleteUnit(value);
+      setSelection({
+        trend: null,
+        trendParamDef: null,
+        trendDef: null,
+        trendGroup: null,
+        unit: null,
+      });
+    },
+    [ldsContex]
+  );
+
   const SelectedDetailPanel = React.useCallback((): React.JSX.Element => {
     if (selection.trend)
       return (
@@ -200,6 +242,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           trendGroups={ldsContex!.trendGroups}
           units={ldsContex!.units}
           editTrend={ldsContex!.updateTrend}
+          deleteTrend={handleSelectedTrendDeletion}
           selected={selection.trend}
           enterAddNewTrend={openAddNewTrendDialog}
         />
@@ -216,6 +259,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
       return (
         <TrendGroupConfigurationDetailPanel
           editTrendGroup={ldsContex!.updateTrendGroup}
+          deleteTrendGroup={handleSelectedTrendGroupDeletion}
           selected={selection.trendGroup}
           enterAddNewTrendGroup={openAddNewTrendGroupDialog}
         />
@@ -224,6 +268,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
       return (
         <TrendUnitConfigurationDetailPanel
           editUnit={ldsContex!.updateUnit}
+          deleteUnit={handleSelectedUnitDeletion}
           selected={selection.unit}
           enterAddNewUnit={openAddNewUnitDialog}
         />
@@ -249,6 +294,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
             units={ldsContex!.units}
             trends={ldsContex!.trends}
             addTrend={ldsContex!.addTrend}
+            deleteTrend={handleSelectedTrendDeletion}
             selected={selection.trend}
             setSelected={handleSelectedTrendChange}
           />
@@ -279,6 +325,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 closeDialog={closeAddNewTrendGroupDialog}
                 trendGroups={ldsContex!.trendGroups}
                 addTrendGroup={ldsContex!.addTrendGroup}
+                deleteTrendGroup={handleSelectedTrendGroupDeletion}
                 selected={selection.trendGroup}
                 setSelected={handleSelectedTrendGroupChange}
               />
@@ -290,6 +337,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 closeDialog={closeAddNewUnitDialog}
                 units={ldsContex!.units}
                 addUnit={ldsContex!.addUnit}
+                deleteUnit={handleSelectedUnitDeletion}
                 selected={selection.unit}
                 setSelected={handleSelectedUnitChange}
               />

@@ -8,11 +8,14 @@ import {
   pencilIcon,
   plusIcon,
   saveIcon,
+  trashIcon,
 } from "@progress/kendo-svg-icons";
 import { Button } from "@progress/kendo-react-buttons";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 export interface TrendUnitConfigurationDetailPanelProps {
   editUnit: (value: Unit) => Promise<void>;
+  deleteUnit: (value: Unit) => Promise<void>;
   selected: Unit | null;
   enterAddNewUnit: () => void;
 }
@@ -20,6 +23,7 @@ export interface TrendUnitConfigurationDetailPanelProps {
 const TrendUnitConfigurationDetailPanel = React.memo(
   function TrendUnitConfigurationDetailPanel({
     editUnit,
+    deleteUnit,
     selected,
     enterAddNewUnit,
   }: TrendUnitConfigurationDetailPanelProps) {
@@ -84,6 +88,20 @@ const TrendUnitConfigurationDetailPanel = React.memo(
       setInEdit(false);
     }, [editUnit, unitID, unitName, unitSymbol, unitMultiplier]);
 
+    // Deletion dialog
+    const [showDialog, setShowDialog] = React.useState<boolean>(false);
+    const openDialog = React.useCallback(() => {
+      setShowDialog(true);
+    }, []);
+    const closeDialog = React.useCallback(() => {
+      setShowDialog(false);
+    }, []);
+
+    const confirmDeletion = React.useCallback(async () => {
+      await deleteUnit(selected!);
+      setInEdit(false);
+    }, [selected, deleteUnit]);
+
     return (
       <div className="detail-panel-content">
         <div className="item">
@@ -94,6 +112,7 @@ const TrendUnitConfigurationDetailPanel = React.memo(
                 id="unitName"
                 value={unitName}
                 onChange={handleUnitNameChange}
+                disabled={!inEdit}
               />
             </div>
             <div>
@@ -102,6 +121,7 @@ const TrendUnitConfigurationDetailPanel = React.memo(
                 id="unitSymbol"
                 value={unitSymbol}
                 onChange={handleUnitSymbolChange}
+                disabled={!inEdit}
               />
             </div>
             <div>
@@ -112,6 +132,7 @@ const TrendUnitConfigurationDetailPanel = React.memo(
                 id="unitMultiplier"
                 value={unitMultiplier}
                 onChange={handleUnitMultiplierChange}
+                disabled={!inEdit}
               />
             </div>
           </div>
@@ -132,6 +153,9 @@ const TrendUnitConfigurationDetailPanel = React.memo(
               <Button svgIcon={cancelIcon} onClick={cancelEdit}>
                 {t("common:cancel")}
               </Button>
+              <Button svgIcon={trashIcon} onClick={openDialog}>
+                {t("common:delete")}
+              </Button>
               <Button
                 svgIcon={saveIcon}
                 onClick={saveEdit}
@@ -142,6 +166,23 @@ const TrendUnitConfigurationDetailPanel = React.memo(
             </div>
           )}
         </div>
+        {showDialog && (
+          <Dialog title={t("common:confirm_deletion")} onClose={closeDialog}>
+            {t("config-page:sure_you_want_delete_unit")}
+            <DialogActionsBar>
+              <Button svgIcon={cancelIcon} onClick={closeDialog}>
+                {t("common:cancel")}
+              </Button>
+              <Button
+                svgIcon={trashIcon}
+                onClick={confirmDeletion}
+                themeColor={"primary"}
+              >
+                {t("common:delete")}
+              </Button>
+            </DialogActionsBar>
+          </Dialog>
+        )}
       </div>
     );
   }

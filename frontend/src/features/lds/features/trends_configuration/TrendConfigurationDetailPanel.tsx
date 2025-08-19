@@ -15,6 +15,7 @@ import {
   pencilIcon,
   plusIcon,
   saveIcon,
+  trashIcon,
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -26,12 +27,14 @@ import {
 } from "../../../../services/api";
 import { ParsedTrendType } from "./TrendConfigurationPage";
 import { rgbaToHex } from "../../../../lib/utilis";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 export interface TrendConfigurationDetailPanelProps {
   trendDefs: TrendDefBase[];
   trendGroups: TrendGroup[];
   units: Unit[];
   editTrend: (value: Trend) => Promise<void>;
+  deleteTrend: (value: Trend) => Promise<void>;
   selected: ParsedTrendType | null;
   enterAddNewTrend: () => void;
 }
@@ -42,6 +45,7 @@ const TrendConfigurationDetailPanel = React.memo(
     trendGroups,
     units,
     editTrend,
+    deleteTrend,
     selected,
     enterAddNewTrend,
   }: TrendConfigurationDetailPanelProps) {
@@ -152,6 +156,21 @@ const TrendConfigurationDetailPanel = React.memo(
       trendColor,
     ]);
 
+    // Deletion dialog
+    const [showDialog, setShowDialog] = React.useState<boolean>(false);
+    const openDialog = React.useCallback(() => {
+      setShowDialog(true);
+    }, []);
+    const closeDialog = React.useCallback(() => {
+      setShowDialog(false);
+    }, []);
+
+    const confirmDeletion = React.useCallback(async () => {
+      const { trendType, trendGroup, ...selectedTrend } = selected!;
+      await deleteTrend(selectedTrend);
+      setInEdit(false);
+    }, [selected, deleteTrend]);
+
     return (
       <div className="detail-panel-content">
         <div className="item">
@@ -230,6 +249,9 @@ const TrendConfigurationDetailPanel = React.memo(
               <Button svgIcon={cancelIcon} onClick={cancelEdit}>
                 {t("common:cancel")}
               </Button>
+              <Button svgIcon={trashIcon} onClick={openDialog}>
+                {t("common:delete")}
+              </Button>
               <Button
                 svgIcon={saveIcon}
                 onClick={saveEdit}
@@ -240,6 +262,23 @@ const TrendConfigurationDetailPanel = React.memo(
             </div>
           )}
         </div>
+        {showDialog && (
+          <Dialog title={t("common:confirm_deletion")} onClose={closeDialog}>
+            {t("config-page:sure_you_want_delete_trend")}
+            <DialogActionsBar>
+              <Button svgIcon={cancelIcon} onClick={closeDialog}>
+                {t("common:cancel")}
+              </Button>
+              <Button
+                svgIcon={trashIcon}
+                onClick={confirmDeletion}
+                themeColor={"primary"}
+              >
+                {t("common:delete")}
+              </Button>
+            </DialogActionsBar>
+          </Dialog>
+        )}
       </div>
     );
   }

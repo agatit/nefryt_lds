@@ -18,7 +18,12 @@ import {
   TextBoxChangeEvent,
 } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
-import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
+import {
+  cancelIcon,
+  checkIcon,
+  plusIcon,
+  trashIcon,
+} from "@progress/kendo-svg-icons";
 import React from "react";
 import { ParsedTrendType } from "./TrendConfigurationPage";
 import { useTranslation } from "react-i18next";
@@ -41,6 +46,7 @@ export interface TrendConfigurationProps {
   units: Unit[];
   trends: Trend[];
   addTrend: (value: Trend) => Promise<void>;
+  deleteTrend: (value: Trend) => Promise<void>;
   selected: ParsedTrendType | null;
   setSelected: (value: ParsedTrendType) => void;
 }
@@ -54,6 +60,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
   units,
   trends,
   addTrend,
+  deleteTrend,
   selected,
   setSelected,
 }: TrendConfigurationProps) {
@@ -158,6 +165,20 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
     trendColor,
   ]);
 
+  // Deletion dialog
+  const [showDeletionDialog, setShowDeletionDialog] =
+    React.useState<boolean>(false);
+  const openDeletionDialog = React.useCallback(() => {
+    setShowDeletionDialog(true);
+  }, []);
+  const closeDeletionDialog = React.useCallback(() => {
+    setShowDeletionDialog(false);
+  }, []);
+
+  const confirmDeletion = React.useCallback(async () => {
+    await deleteTrend(selected!);
+  }, [selected, deleteTrend]);
+
   return (
     <React.Fragment>
       <Grid
@@ -177,6 +198,11 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
             <Button svgIcon={plusIcon} onClick={openDialog}>
               {t("config-page:add_new_trend")}
             </Button>
+            {selected && (
+              <Button svgIcon={trashIcon} onClick={openDeletionDialog}>
+                {t("common:delete")}
+              </Button>
+            )}
           </ButtonGroup>
         </GridToolbar>
         <GridColumn
@@ -278,6 +304,26 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
               onClick={confirmAddNewTrend}
             >
               {t("common:confirm")}
+            </Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
+      {showDeletionDialog && (
+        <Dialog
+          title={t("common:confirm_deletion")}
+          onClose={closeDeletionDialog}
+        >
+          {t("config-page:sure_you_want_delete_trend")}
+          <DialogActionsBar>
+            <Button svgIcon={cancelIcon} onClick={closeDeletionDialog}>
+              {t("common:cancel")}
+            </Button>
+            <Button
+              svgIcon={trashIcon}
+              onClick={confirmDeletion}
+              themeColor={"primary"}
+            >
+              {t("common:delete")}
             </Button>
           </DialogActionsBar>
         </Dialog>
