@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
-from api.schemas import LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
+from api.schemas import TrendDefBase, TrendBase, TrendParamBase, \
     TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase, SimulationParamBase, \
     SimulationDataBase
 from api.schemas import base
@@ -40,7 +40,7 @@ class MethodParamDef(SQLModel, table=True):
     DataType: str | None = Field(None, sa_column=Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-class Node(LdsNodeBase, table=True):
+class Node(base.LdsNode, table=True):
     __tablename__ = 'Node'
     __table_args__ = (
         {'schema': 'lds'}
@@ -109,7 +109,7 @@ class Unit(base.Unit, table=True):
     ID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False, primary_key=True))
 
 
-class Link(LinkBase, table=True):
+class Link(base.Link, table=True):
     __tablename__ = 'Link'
     __table_args__ = (
         {'schema': 'lds'}
@@ -288,7 +288,7 @@ class TrendParam(TrendParamBase, table=True):
     ))
 
 
-class Template(TemplateBase, table=True):
+class Template(base.Template, table=True):
     __tablename__ = 'Template'
     __table_args__ = (
         {'schema': 'lds'}

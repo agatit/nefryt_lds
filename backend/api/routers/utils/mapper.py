@@ -1,7 +1,7 @@
 from api.routers.utils import to_dict, strip_strings_in_dict
-from ...schemas import api
-from api.schemas import TrendDataMultiple, TrendValue, TrendDataSingle, Node, \
-    NodeOut, EditorNodeBase, TrendParamOut, SimulationParamOut, SimulationParamIn, SimulationDataOut, SimulationDataBase
+from ...schemas import api, base
+from api.schemas import (TrendDataMultiple, TrendValue, TrendDataSingle,
+                         TrendParamOut, SimulationParamOut, SimulationParamIn, SimulationDataOut, SimulationDataBase)
 from database import lds, editor
 
 
@@ -48,11 +48,11 @@ def map_tuple_to_trend_data_single(values: tuple) -> TrendDataSingle:
     )
 
 
-def map_node_to_lds_node(node: Node) -> lds.Node:
+def map_node_to_lds_node(node: api.NodeCreate) -> lds.Node:
     return lds.Node(**node.model_dump(exclude={'TrendID', 'EditorParams'}))
 
 
-def map_node_to_editor_node(node_id: int, node: Node) -> editor.Node | None:
+def map_node_to_editor_node(node_id: int, node: api.NodeCreate) -> editor.Node | None:
     if node.EditorParams:
         editor_node_dict = {'ID': node_id,
                             'PosX': node.EditorParams.PosX,
@@ -61,15 +61,15 @@ def map_node_to_editor_node(node_id: int, node: Node) -> editor.Node | None:
     return None
 
 
-def map_lds_node_and_editor_node_to_node_out(lds_node: lds.Node, editor_node: editor.Node) -> NodeOut:
+def map_lds_node_and_editor_node_to_node_out(lds_node: lds.Node, editor_node: editor.Node) -> api.Node:
     node_out_dict = to_dict(lds_node)
     editor_params = None
     if editor_node:
         editor_node_dict = to_dict(editor_node)
         editor_node_dict.pop('ID')
-        editor_params = EditorNodeBase(**editor_node_dict)
+        editor_params = base.EditorNode(**editor_node_dict)
     node_out_dict.update({'EditorParams': editor_params})
-    return NodeOut(**strip_strings_in_dict(node_out_dict))
+    return api.Node(**strip_strings_in_dict(node_out_dict))
 
 
 def map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out\

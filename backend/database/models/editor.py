@@ -1,9 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import SQLModel, Field
-from api.schemas import EditorNodeBase
+from api.schemas import base
 
 
-class Node(EditorNodeBase, table=True):
+class Node(base.EditorNode, table=True):
     __tablename__ = 'Node'
     __table_args__ = (
         {'schema': 'editor'}

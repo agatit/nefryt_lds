@@ -4,7 +4,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
-from api.schemas import Axis
+from api.schemas.base import Axis
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
 from api.app import app
 from db import get_engine
@@ -20,7 +20,7 @@ trend_def_list = [trend_def1, trend_def2]
 trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
 trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
 trend_list = [trend1, trend2]
-unit = lds.Unit(ID='Unit1')
+unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
 axis1 = Axis(TrendsID=[1], Title='Axis1', UnitID=unit.ID, ScaledMin=0.5, ScaledMax=1.5)
 axis2 = Axis(TrendsID=[1, 2], Title='Axis2', UnitID=unit.ID, ScaledMin=1.5, ScaledMax=2.5)
 axis3 = Axis(TrendsID=[1, 2, 3], Title='Axis3', UnitID=unit.ID, ScaledMax=2.5, ScaledMin=3.5)
@@ -43,7 +43,7 @@ def reset_templates_objects():
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
     trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
     trend_list = [trend1, trend2]
-    unit = lds.Unit(ID='Unit1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
     template1 = lds.Template(ID=1, Name='Template1', Axes=[])
     template2 = lds.Template(ID=2, Name='Template2', Axes=[axis1.model_dump(), axis2.model_dump()])
     template3 = lds.Template(ID=3, Name='Template3', Axes=[axis3.model_dump()])

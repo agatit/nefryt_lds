@@ -30,8 +30,9 @@ async def list_event_defs(engine: Annotated[Engine, Depends(get_engine)], params
 
 
 @router.post('', response_model=lds.EventDef | api.Error)
-async def create_event_def(event_def: Annotated[lds.EventDef, Body()], engine: Annotated[Engine, Depends(get_engine)]):
+async def create_event_def(event_def: Annotated[api.EventDefCreate, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
+        event_def = lds.EventDef(**event_def.model_dump())
         with Session(engine) as session:
             session.add(event_def)
             session.commit()
