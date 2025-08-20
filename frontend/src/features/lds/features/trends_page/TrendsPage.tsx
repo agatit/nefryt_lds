@@ -11,7 +11,6 @@ import {
   TemplateBase,
 } from "../../../../services/api";
 
-import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
 import "../../../../styles/layouts/detail-panel.scss";
 import "../../../../styles/features/lds/features/trendPage.scss";
@@ -35,6 +34,7 @@ import { NavbarContext } from "../../../../contexts/navbarContext";
 import { SvgIcon, Typography } from "@progress/kendo-react-common";
 import { useTranslation } from "react-i18next";
 import { arrowRightIcon } from "@progress/kendo-svg-icons";
+import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
 
 const mainChartSampleSize = 500;
 const navigationChartSampleSize = 50;
@@ -110,7 +110,7 @@ function generateValue(date: Date, chart: number): number {
 
 export default function TrendsPage() {
   const auth = React.useContext(AuthContext);
-  const refreshableRequest = useRefreshableRequest();
+  const handleApiResponse = useHandleApiResponse();
   const { t } = useTranslation(["common", "trends-page"]);
 
   // UI STUFF
@@ -231,7 +231,7 @@ export default function TrendsPage() {
 
   const loadTemplates = React.useCallback(async () => {
     try {
-      const response = await refreshableRequest(
+      const response = await handleApiResponse(
         templateApi.listTemplatesTemplateGet.bind(templateApi)
       );
       console.log(response);
@@ -268,7 +268,7 @@ export default function TrendsPage() {
         setTemplates([...templates, { ...newTemplate, ID: templates.length }]);
 
       try {
-        const response = await refreshableRequest(
+        const response = await handleApiResponse(
           templateApi.createTemplateTemplatePost.bind(templateApi),
           newTemplate
         );
@@ -318,7 +318,7 @@ export default function TrendsPage() {
     }
 
     try {
-      const response = await refreshableRequest(
+      const response = await handleApiResponse(
         ldsContex!.trendApi.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
           ldsContex!.trendApi
         ),

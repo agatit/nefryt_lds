@@ -31,6 +31,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     ) {
       removeCookie("auth", { path: "/" }); //if refresh token expired remove auth cookie in order to redirect to login page
       navigate("/login");
+      location.reload();
       return;
     }
     const authApi = new AuthApi(
