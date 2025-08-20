@@ -54,6 +54,10 @@ export function useHandleApiResponse() {
 
       return response;
     } catch (err: any) {
+      timerRef.current = setTimeout(() => {
+        appContext.closeNotification();
+      }, timeToCloseNotification);
+      console.log(err);
       switch (err.status) {
         // Client errors
         case 400:
@@ -70,9 +74,10 @@ export function useHandleApiResponse() {
           break;
         case 404:
           appContext.showNotification({
-            notificationType: errorType,
-            message: t("api:failed_request_something_went_wrong"),
+            notificationType: { icon: true, style: "warning" },
+            message: t("api:no_data"),
           });
+          return err;
           break;
         case 418:
           appContext.showNotification({
@@ -100,12 +105,6 @@ export function useHandleApiResponse() {
           });
           break;
       }
-
-      console.log(err);
-      timerRef.current = setTimeout(() => {
-        appContext.closeNotification();
-      }, timeToCloseNotification);
-
       return;
     }
   }
