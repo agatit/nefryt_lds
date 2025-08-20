@@ -91,6 +91,7 @@ def cleanup_processes_after_tests():
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_database(request):
+    Settings.tests = True
     db_type = request.config.db_type
     test_db_uri = TestSettings.test_model.db_uri.format(db_password=TestSettings.password_settings.password_test)
     test_db_name = TestSettings.test_model.db_name

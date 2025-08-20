@@ -36,11 +36,15 @@ class SimulationManager:
         for simulation in self.simulations:
             simulation.run_process()
 
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            logging.info("Simulator module shutdown")
+        if Settings.tests:
+            return self.simulations
+        else:
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                logging.info("Simulator module shutdown")
+            return None
 
     def shutdown_processes(self):
         for simulation in self.simulations:

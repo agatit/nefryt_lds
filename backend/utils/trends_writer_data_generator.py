@@ -4,7 +4,7 @@ import time
 from pymodbus.client import AsyncModbusTcpClient
 
 GENERATION_TIME_SECONDS = 1000
-REGISTERS = [1000, 2000]
+REGISTERS = [20000, 21000]
 
 
 async def _send_data(client: AsyncModbusTcpClient, addr: int, data: list[int]):

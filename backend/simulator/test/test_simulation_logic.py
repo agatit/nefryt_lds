@@ -1,13 +1,12 @@
 import asyncio
+import contextlib
 import math
 import struct
 import time
-
 import numpy as np
 import pytest
-from sqlalchemy import text
+from sqlalchemy import text, select, delete
 from sqlalchemy.orm import Session
-
 from database.models import lds
 from db import get_engine
 from simulator.simulation_manager import SimulationManager
@@ -15,26 +14,52 @@ from simulator.simulation_manager import SimulationManager
 
 def add_objects():
     trend_def = lds.TrendDef(ID='QUICK', Name='TrendDefName')
-    unit = lds.Unit(ID='DensityUnit')
+    unit = lds.Unit(ID='Density')
     trend = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=0, RawMax=1, ScaledMin=0, ScaledMax=100, UnitID=unit.ID)
     simulation_def = lds.SimulationDef(ID='DENSITY_VOLUME', Name='SimulationDefName')
     length_param_def = lds.SimulationParamDef(ID='LENGTH', SimulationDefID=simulation_def.ID)
+    width_param_def = lds.SimulationParamDef(ID='WIDTH', SimulationDefID=simulation_def.ID)
     flow_trend_param_def = lds.SimulationParamDef(ID='FLOW_TREND', SimulationDefID=simulation_def.ID)
-    simulation = lds.Simulation(ID=1, SimulationDefID='SimDefID', TrendID=1, Name='Sim', RefreshTimeSeconds=2,
+    simulation = lds.Simulation(ID=1, SimulationDefID=simulation_def.ID, TrendID=1, Name='Sim', RefreshTimeSeconds=2,
                                 ResolutionMeters=10)
     pipeline_length_param = lds.SimulationParam(SimulationDefID=simulation_def.ID, SimulationID=simulation.ID,
                                                 SimulationParamDefID=length_param_def.ID, Value=100)
+    width_param = lds.SimulationParam(SimulationDefID=simulation_def.ID, SimulationID=simulation.ID,
+                                      SimulationParamDefID=width_param_def.ID, Value=1.1283)
+    flow_trend_param = lds.SimulationParam(SimulationDefID=simulation_def.ID, SimulationID=simulation.ID,
+                                           SimulationParamDefID=flow_trend_param_def.ID, Value=2)
+    flow_trend = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=-1, RawMax=1, ScaledMin=0, ScaledMax=100)
+    lds_objects = [[trend_def], [unit], [trend, flow_trend], [simulation_def], [length_param_def, flow_trend_param_def, width_param_def],
+                   [simulation], [pipeline_length_param, flow_trend_param, width_param]]
+
+    return lds_objects
+
+
+def add_objects_with_time_delta():
+    trend_def = lds.TrendDef(ID='QUICK', Name='TrendDefName')
+    unit = lds.Unit(ID='Density')
+    trend = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=0, RawMax=1, ScaledMin=0, ScaledMax=100, UnitID=unit.ID, TimeDelta=5)
+    simulation_def = lds.SimulationDef(ID='DENSITY_VOLUME', Name='SimulationDefName')
+    length_param_def = lds.SimulationParamDef(ID='LENGTH', SimulationDefID=simulation_def.ID)
+    width_param_def = lds.SimulationParamDef(ID='WIDTH', SimulationDefID=simulation_def.ID)
+    flow_trend_param_def = lds.SimulationParamDef(ID='FLOW_TREND', SimulationDefID=simulation_def.ID)
+    simulation = lds.Simulation(ID=1, SimulationDefID=simulation_def.ID, TrendID=1, Name='Sim', RefreshTimeSeconds=2,
+                                ResolutionMeters=10)
+    pipeline_length_param = lds.SimulationParam(SimulationDefID=simulation_def.ID, SimulationID=simulation.ID,
+                                                SimulationParamDefID=length_param_def.ID, Value=100)
+    width_param = lds.SimulationParam(SimulationDefID=simulation_def.ID, SimulationID=simulation.ID,
+                                      SimulationParamDefID=width_param_def.ID, Value=1.1283)
     flow_trend_param = lds.SimulationParam(SimulationDefID=simulation_def.ID, SimulationID=simulation.ID,
                                            SimulationParamDefID=flow_trend_param_def.ID, Value=2)
     flow_trend = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=0, RawMax=1, ScaledMin=0, ScaledMax=100)
-    lds_objects = [[trend_def], [unit], [trend, flow_trend], [simulation_def], [length_param_def, flow_trend_param_def],
-                   [simulation], [pipeline_length_param, flow_trend_param]]
+    lds_objects = [[trend_def], [unit], [trend, flow_trend], [simulation_def], [length_param_def, flow_trend_param_def, width_param_def],
+                   [simulation], [pipeline_length_param, flow_trend_param, width_param]]
 
     return lds_objects
 
 
 def add_flow_data(t, timestamp):
-    data = np.array([t*20 + i//5 for i in range(100)])
+    data = np.array([t+1] * 100)
     data = data.astype(np.uint16)
     packed_data = struct.pack('<100H', *data)
 
@@ -43,8 +68,9 @@ def add_flow_data(t, timestamp):
         session.execute(insert_stmt, {"data": packed_data})
         session.commit()
 
-def add_trend_data(timestamp):
-    data = 10 * np.ones(100)
+
+def add_const_trend_data(timestamp):
+    data = 1000 * np.ones(100)
     data = data.astype(np.uint16)
     packed_data = struct.pack('<100H', *data)
 
@@ -54,37 +80,706 @@ def add_trend_data(timestamp):
         session.commit()
 
 
+def add_trend_data(t, timestamp):
+    data = np.array([1000+t*100+i for i in range(100)])
+    data = data.astype(np.uint16)
+    packed_data = struct.pack('<100H', *data)
+
+    statement = text(f"EXEC Update_Insert_TrendData 1, {timestamp}, :data")
+    with Session(get_engine()) as session:
+        session.execute(statement, {"data": packed_data})
+        session.commit()
+
+
+def add_incorrect_trend_data(timestamp):
+    data = np.zeros(100)
+    data = data.astype(np.uint16)
+    packed_data = struct.pack('<100H', *data)
+
+    insert_stmt = text(f"EXEC Update_Insert_TrendData 1, {timestamp}, :data")
+    with Session(get_engine()) as session:
+        session.execute(insert_stmt, {"data": packed_data})
+        session.commit()
+
+
+def add_incorrect_flow_data(timestamp):
+    data = np.array([-i for i in range(100)])
+    data = data.astype(np.uint16)
+    packed_data = struct.pack('<100H', *data)
+
+    insert_stmt = text(f"EXEC Update_Insert_TrendData 2, {timestamp}, :data")
+    with Session(get_engine()) as session:
+        session.execute(insert_stmt, {"data": packed_data})
+        session.commit()
+
+
+def get_simulation_data():
+    with Session(get_engine()) as session:
+        simulation_data = session.execute(select(lds.SimulationData)).all()
+
+    return [d[0].Data for d in simulation_data]
+
+
+def shutdown_processes(simulations):
+    for simulation in simulations:
+        simulation.process.terminate()
+        simulation.process.join(1)
+
+
+@pytest.fixture
+def run_simulations_for_test():
+    @contextlib.asynccontextmanager
+    async def _start():
+        simulations = await SimulationManager().start_simulations()
+        try:
+            yield simulations
+        finally:
+            shutdown_processes(simulations)
+    return _start
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
-async def test_simulation_logic_when_both_trends_data_is_correct(add_lds_objects):
-    server_task = asyncio.create_task(SimulationManager().start_simulations())
-    await asyncio.sleep(2)
-    sim_time = 10
-
-    t = math.floor(time.time()) + 0.5
-    for i in range(sim_time):
-        await _send_data(port, int(trend_param1.Value), [randint(0, 255) for _ in range(100)])
-        await asyncio.sleep(t - time.time() + 1)
+async def test_simulation_logic_when_both_trends_data_are_regularly_saved(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_const_trend_data(t)
         t += 1
+        await asyncio.sleep(t - time.time() + 1)
 
-    server_task.cancel()
-
-    @pytest.mark.asyncio
-    @pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
-    async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_objects):
-        port = 5022
-        Profiler.init()
-        server_task = asyncio.create_task(run_server(PipePlant(), port))
-        await asyncio.sleep(5)
-        calls = 2
-
-        t = math.floor(time.time()) + 0.5
-        for i in range(calls):
-            await _send_data(port, int(trend_param1.Value), [randint(0, 255) for _ in range(100)])
-            await asyncio.sleep(t - time.time() + 1)
+    async with run_simulations_for_test():
+        sim_time = 10
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time):
+            add_flow_data(i+time_buffer, t)
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
             t += 1
+            await asyncio.sleep(t - time.time() + 1)
 
-        server_task.cancel()
 
-        assert _get_trend_data_records_count() == calls
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_no_new_trend_data(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_trend_data(i, t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time1 = 5
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time1):
+            add_flow_data(i+time_buffer, t)
+            add_trend_data(i+time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+        sim_time2 = 7
+        for i in range(sim_time2):
+            add_flow_data(i+sim_time1+time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_no_trend_data(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time1 = 5
+        expected_data = [0] * 10
+        for i in range(sim_time1):
+            add_flow_data(i+time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+        assert data == expected_data
+
+        sim_time2 = 5
+        for i in range(sim_time2):
+            add_const_trend_data(t)
+            add_flow_data(i+sim_time1+time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+        assert data != expected_data
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_no_new_trend_data_and_no_trend_data_in_db(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_trend_data(i, t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time1 = 5
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time1):
+            add_flow_data(i+time_buffer, t)
+            add_trend_data(i+time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+        statement = delete(lds.TrendData).where(lds.TrendData.TrendID == 1) # noqa
+        with Session(get_engine()) as session:
+            session.execute(statement)
+            session.commit()
+
+        sim_time2 = 5
+        for i in range(sim_time2):
+            add_flow_data(i+sim_time1+time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_both_trends_data_are_stopped(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_const_trend_data(t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time1 = 5
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time1):
+            add_flow_data(i+time_buffer, t)
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+        sim_time2 = 10
+        for i in range(sim_time2):
+            data = get_simulation_data()
+            assert len(data) == 10
+            if i > 7:
+                assert data == previous_data
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_no_both_trends_data(add_lds_objects, run_simulations_for_test):
+    t = math.floor(time.time())
+    async with run_simulations_for_test():
+        sim_time = 5
+        expected_data = [0] * 10
+        for i in range(sim_time):
+            data = get_simulation_data()
+            assert len(data) == 10
+            assert data == expected_data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_no_new_flow_data_should_use_older_data_in_max_time_gap(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_const_trend_data(t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time1 = 5
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time1):
+            add_flow_data(i+time_buffer, t)
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+        sim_time2 = 6
+        for i in range(sim_time2):
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_no_flow_data(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_const_trend_data(t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time1 = 2
+        expected_data = [0] * 10
+        for i in range(sim_time1):
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+        assert data == expected_data
+
+        sim_time2 = 8
+        for i in range(sim_time2):
+            add_const_trend_data(t)
+            add_flow_data(i+time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+        assert data != expected_data
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_no_new_flow_data_should_not_use_older_data_over_max_time_gap(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_const_trend_data(t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time1 = 8
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time1):
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+        sim_time2 = 4
+        for i in range(sim_time2):
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            assert previous_data == data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_trend_data_is_not_regularly_saved(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        if i == 1:
+            add_trend_data(i, t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time = 10
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time):
+            add_flow_data(i+time_buffer, t)
+            if i % 2 == 1:
+                add_trend_data(i+time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_flow_trend_data_is_not_regularly_saved(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        if i % 2 == 0:
+            add_flow_data(i, t)
+        add_trend_data(i, t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time = 10
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time):
+            add_trend_data(i+time_buffer, t)
+            if i % 3 == 2:
+                add_flow_data(i + time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_both_trends_data_are_not_regularly_saved(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        if i == 0:
+            add_flow_data(i, t)
+        if i == 1:
+            add_trend_data(i, t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time = 10
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time):
+            if i % 2 == 0:
+                add_flow_data(i+time_buffer, t)
+            if i % 4 == 2:
+                add_trend_data(i + time_buffer, t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects_with_time_delta], indirect=True)
+async def test_simulation_logic_when_trend_has_time_delta(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_const_trend_data(t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time = 12
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time):
+            add_flow_data(i+time_buffer, t)
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if i < 6:
+                assert data == previous_data
+            elif stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_trend_writer_saves_data_with_past_timestamps(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    time_diff = 10
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t-time_diff)
+        add_const_trend_data(t-time_diff)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time = 10
+        expected_data = [0] * 10
+        for i in range(sim_time):
+            add_flow_data(i+time_buffer, t-time_diff)
+            add_const_trend_data(t-time_diff)
+            data = get_simulation_data()
+            assert len(data) == 10
+            assert data == expected_data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_trend_writer_saves_data_with_future_timestamps(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    time_diff = 8
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t+time_diff)
+        add_const_trend_data(t+time_diff)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time = 12
+        expected_data = [0] * 10
+        for i in range(sim_time):
+            add_flow_data(i+time_buffer, t+time_diff)
+            add_const_trend_data(t+time_diff)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if i <= time_diff:
+                assert data == expected_data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+        assert data != expected_data
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_trend_data_have_incorrect_values(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_const_trend_data(t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time = 10
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time):
+            add_flow_data(i+time_buffer, t)
+            add_incorrect_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_flow_trend_data_have_incorrect_values(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_const_trend_data(t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time = 10
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time):
+            add_incorrect_flow_data(t)
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if i > 4:
+                assert previous_data == data
+            elif stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_objects], indirect=True)
+async def test_simulation_logic_when_flow_trend_data_is_changing(add_lds_objects, run_simulations_for_test):
+    time_buffer = 3
+    t = math.floor(time.time())
+    for i in range(time_buffer):
+        add_flow_data(i, t)
+        add_const_trend_data(t)
+        t += 1
+        await asyncio.sleep(t - time.time() + 1)
+
+    async with run_simulations_for_test():
+        sim_time1 = 6
+        previous_data = [0] * 10
+        stage = 0
+        for i in range(sim_time1):
+            add_incorrect_flow_data(t)
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if i > 4:
+                assert previous_data == data
+            elif stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
+
+        sim_time2 = 8
+        stage = 0
+        for i in range(sim_time2):
+            add_flow_data(i+time_buffer+sim_time1, t)
+            add_const_trend_data(t)
+            data = get_simulation_data()
+            assert len(data) == 10
+            if i < 2:
+                assert previous_data == data
+            elif stage == 0 and previous_data != data:
+                stage = 1
+            elif stage == 1:
+                stage = 2
+            elif stage == 2:
+                assert previous_data != data
+                stage = 1
+            previous_data = data
+            t += 1
+            await asyncio.sleep(t - time.time() + 1)
