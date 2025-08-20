@@ -1,16 +1,17 @@
 from api.routers.utils import to_dict, strip_strings_in_dict
-from api.schemas import EventOut, TrendDataMultiple, TrendValue, TrendDataSingle, Node, \
+from ...schemas import api
+from api.schemas import TrendDataMultiple, TrendValue, TrendDataSingle, Node, \
     NodeOut, EditorNodeBase, TrendParamOut, SimulationParamOut, SimulationParamIn, SimulationDataOut, SimulationDataBase
 from database import lds, editor
 
 
-def map_lds_event_and_lds_event_def_to_event_out(lds_event: lds.Event, lds_event_def: lds.EventDef) -> EventOut:
+def map_lds_event_and_lds_event_def_to_event_out(lds_event: lds.Event, lds_event_def: lds.EventDef) -> api.Event:
     lds_event_dict = to_dict(lds_event)
     lds_event_def_dict = to_dict(lds_event_def)
     lds_event_def_dict.pop('ID')
     lds_event_dict.update(lds_event_def_dict)
     lds_event_dict = strip_strings_in_dict(lds_event_dict)
-    return EventOut(**lds_event_dict)
+    return api.Event(**lds_event_dict)
 
 
 def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParamOut: # noqa

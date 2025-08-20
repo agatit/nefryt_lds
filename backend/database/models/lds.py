@@ -2,12 +2,13 @@ from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
-from api.schemas import EventDefBase, LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
-    UnitBase, TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase, SimulationParamBase, \
+from api.schemas import LdsNodeBase, LinkBase, TrendDefBase, TrendBase, TrendParamBase, TemplateBase, \
+    TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase, SimulationParamBase, \
     SimulationDataBase
+from api.schemas import base
 
 
-class EventDef(EventDefBase, table=True):
+class EventDef(base.EventDef, table=True):
     __tablename__ = 'EventDef'
     __table_args__ = (
         {'schema': 'lds'}
@@ -99,11 +100,13 @@ class TrendGroup(TrendGroupBase, table=True):
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True, nullable=False))
 
 
-class Unit(UnitBase, table=True):
+class Unit(base.Unit, table=True):
     __tablename__ = 'Unit'
     __table_args__ = (
         {'schema': 'lds'}
     )
+
+    ID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False, primary_key=True))
 
 
 class Link(LinkBase, table=True):

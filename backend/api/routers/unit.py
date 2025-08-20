@@ -11,7 +11,7 @@ from starlette.responses import JSONResponse, Response
 from api.routers.utils import get_user_token, strip_strings
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
-from ..schemas import Error, UpdateUnit, UnitBase
+from ..schemas import Error, api
 from database import lds
 
 router = APIRouter(prefix="/unit", tags=["unit"], dependencies=[Depends(get_user_token)])
@@ -34,7 +34,7 @@ async def list_units(engine: Annotated[Engine, Depends(get_engine)], params: Ann
 
 
 @router.post('', response_model=lds.Unit | Error)
-async def create_unit(unit: Annotated[UnitBase, Body()], engine: Annotated[Engine, Depends(get_engine)]):
+async def create_unit(unit: Annotated[api.UnitCreate, Body()], engine: Annotated[Engine, Depends(get_engine)]):
     try:
         unit = lds.Unit(**unit.model_dump())
         with Session(engine) as session:
@@ -82,7 +82,7 @@ async def get_unit_by_id(unit_id: Annotated[str, Path()], engine: Annotated[Engi
 
 
 @router.put('/{unit_id}', response_model=lds.Unit | Error)
-async def update_unit(unit_id: Annotated[str, Path()], updated_unit: Annotated[UpdateUnit, Body()],
+async def update_unit(unit_id: Annotated[str, Path()], updated_unit: Annotated[api.UnitUpdate, Body()],
                       engine: Annotated[Engine, Depends(get_engine)]):
     try:
         with Session(engine) as session:

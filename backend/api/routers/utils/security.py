@@ -6,7 +6,7 @@ from jwt import InvalidTokenError, InvalidSignatureError, ExpiredSignatureError
 import jwt
 from passlib.context import CryptContext
 from starlette import status
-from api.schemas import LoginPermissions
+from ...schemas import api
 
 SECRET_KEY = "45bfa25ea5ae73f9f46909ac22e5ff72d51362129e210e3bc2c728957ee18230"
 ALGORITHM = "HS256"
@@ -78,7 +78,7 @@ def decode_token(encoded_token: str) -> dict:
     return jwt.decode(encoded_token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
-def prepare_login_permissions(username: str, permissions: list[str], success: bool) -> LoginPermissions:
+def prepare_login_permissions(username: str, permissions: list[str], success: bool) -> api.LoginPermissions:
     current_time = datetime.now(tz=timezone.utc)
     expiration_time_token = get_expiration_time(hours=1, current_time=current_time)
     expiration_time_refresh_token = get_expiration_time(hours=24, current_time=current_time)
@@ -94,7 +94,7 @@ def prepare_login_permissions(username: str, permissions: list[str], success: bo
         'refreshTokenExpiration': expiration_time_refresh_token,
         'permissions': permissions
     }
-    return LoginPermissions(**login_permissions)
+    return api.LoginPermissions(**login_permissions)
 
 
 def verify_password(plain_password: str, hashed_password: str):

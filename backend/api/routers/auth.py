@@ -1,13 +1,13 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Depends
 from api.routers.utils import prepare_login_permissions, get_refresh_token
-from ..schemas import Login, LoginPermissions
+from ..schemas import api
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=LoginPermissions)
-async def auth_login(login_data: Annotated[Login, Body()]):
+@router.post("/login", response_model=api.LoginPermissions)
+async def auth_login(login_data: Annotated[api.Login, Body()]):
     # TODO: real check of credentials
     if login_data.username == "admin":
         permissions = ["admin", "confirm"]
@@ -19,7 +19,7 @@ async def auth_login(login_data: Annotated[Login, Body()]):
     return prepare_login_permissions(username, permissions, success)
 
 
-@router.post("/refresh", response_model=LoginPermissions)
+@router.post("/refresh", response_model=api.LoginPermissions)
 async def auth_refresh(token: Annotated[dict, Depends(get_refresh_token)]):
     permissions = token.get('perms')
     permissions.remove('refresh')
