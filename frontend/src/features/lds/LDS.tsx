@@ -41,15 +41,17 @@ import {
   TrendDefBase,
   TrendGroup,
   TrendGroupApi,
+  TrendParamBase,
   Unit,
   UnitApi,
 } from "../../services/api";
 import { axiosInstance, host } from "../../lib/apiUtilities";
 import { useRefreshableRequest } from "../../hooks/useRefreshableRequest";
-import { error } from "console";
 import {
   mockupTrendDefs,
   mockupTrendGroups,
+  mockupTrendParamDefs,
+  MockupTrendParamDefType,
   mockupTrends,
   mockupUnits,
 } from "../../data/mockup-data";
@@ -173,13 +175,237 @@ export default function LDS() {
   const [trends, setTrends] = React.useState<Trend[]>(
     nav.useMockup ? mockupTrends : []
   );
+  const [trendParamDefs, setTrendParamDefs] =
+    React.useState<MockupTrendParamDefType[]>(mockupTrendParamDefs);
 
   React.useEffect(() => {
     setTrendDefs(nav.useMockup ? mockupTrendDefs : []);
     setTrendGroups(nav.useMockup ? mockupTrendGroups : []);
     setUnits(nav.useMockup ? mockupUnits : []);
     setTrends(nav.useMockup ? mockupTrends : []);
+    setTrendParamDefs(mockupTrendParamDefs);
   }, [nav.useMockup]);
+
+  // TODO ADD HOOK TO HANDLE ALL ERRORS
+  const addTrend = React.useCallback(
+    async (value: Trend) => {
+      if (nav.useMockup) {
+        setTrends([...trends, value]);
+        return;
+      }
+
+      try {
+        const response = await refreshableRequest(
+          trendApi.createTrendTrendPost,
+          value
+        );
+        console.log(response);
+        if (response?.data) setTrends([...trends, response.data]);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, trends, trendApi]
+  );
+
+  const updateTrend = React.useCallback(
+    async (value: Trend) => {
+      if (nav.useMockup) {
+        setTrends(
+          trends.map((trend) => {
+            if (trend.ID == value.ID) return value;
+            return trend;
+          })
+        );
+        return;
+      }
+
+      const { ID, ...updateTrend } = value;
+      try {
+        // const response = await refreshableRequest(trendApi.updateTrendTrendTrendIdPut, ID, updateTrend); // api updateTrend type needs fixing
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, trends, trendApi]
+  );
+
+  const deleteTrend = React.useCallback(
+    async (value: Trend) => {
+      if (nav.useMockup) {
+        setTrends(trends.filter((trend) => trend.ID !== value.ID));
+        return;
+      }
+
+      try {
+        const response = await refreshableRequest(
+          trendApi.deleteTrendByIdTrendTrendIdDelete,
+          value.ID
+        );
+        console.log(response);
+        setTrends(trends.filter((trend) => trend.ID !== value.ID));
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, trends, trendApi]
+  );
+
+  const addTrendGroup = React.useCallback(
+    async (value: TrendGroup) => {
+      if (nav.useMockup) {
+        setTrendGroups([...trendGroups, value]);
+        return;
+      }
+
+      try {
+        const response = await refreshableRequest(
+          trendGroupApi.createTrendGroupTrendGroupPost,
+          value
+        );
+        console.log(response);
+        if (response?.data) setTrendGroups([...trendGroups, response.data]);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, trendGroups, trendGroupApi]
+  );
+
+  const updateTrendGroup = React.useCallback(
+    async (value: TrendGroup) => {
+      if (nav.useMockup) {
+        setTrendGroups(
+          trendGroups.map((trendGroup) => {
+            if (trendGroup.ID == value.ID) return value;
+            return trendGroup;
+          })
+        );
+        return;
+      }
+
+      const { ID, ...updateTrendGroup } = value;
+      try {
+        const response = await refreshableRequest(
+          trendGroupApi.updateTrendGroupTrendGroupTrendGroupIdPut,
+          ID,
+          updateTrendGroup
+        );
+        console.log(response);
+        if (response?.data)
+          setTrendGroups(
+            trendGroups.map((trendGroup) => {
+              if (trendGroup.ID == response.data.ID) return response.data;
+              return trendGroup;
+            })
+          );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, trendGroups, trendGroupApi]
+  );
+
+  const deleteTrendGroup = React.useCallback(
+    async (value: TrendGroup) => {
+      if (nav.useMockup) {
+        setTrendGroups(
+          trendGroups.filter((trendGroup) => trendGroup.ID !== value.ID)
+        );
+        return;
+      }
+
+      try {
+        const response = await refreshableRequest(
+          trendGroupApi.deleteTrendGroupByIdTrendGroupTrendGroupIdDelete,
+          value.ID
+        );
+        console.log(response);
+        setTrendGroups(
+          trendGroups.filter((trendGroup) => trendGroup.ID !== value.ID)
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, trendGroups, trendGroupApi]
+  );
+
+  const addUnit = React.useCallback(
+    async (value: Unit) => {
+      if (nav.useMockup) {
+        setUnits([...units, value]);
+        return;
+      }
+
+      try {
+        const response = await refreshableRequest(
+          unitApi.createUnitUnitPost,
+          value
+        );
+        console.log(response);
+        if (response?.data) setUnits([...units, response.data]);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, units, unitApi]
+  );
+
+  const updateUnit = React.useCallback(
+    async (value: Unit) => {
+      if (nav.useMockup) {
+        setUnits(
+          units.map((unit) => {
+            if (unit.ID == value.ID) return value;
+            return unit;
+          })
+        );
+        return;
+      }
+
+      const { ID, ...updateUnit } = value;
+      try {
+        const response = await refreshableRequest(
+          unitApi.updateUnitUnitUnitIdPut,
+          ID,
+          updateUnit
+        );
+        console.log(response);
+        if (response?.data)
+          setUnits(
+            units.map((unit) => {
+              if (unit.ID == response.data.ID) return response.data;
+              return unit;
+            })
+          );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, units, unitApi]
+  );
+
+  const deleteUnit = React.useCallback(
+    async (value: Unit) => {
+      if (nav.useMockup) {
+        setUnits(units.filter((unit) => unit.ID !== value.ID));
+        return;
+      }
+
+      try {
+        const response = await refreshableRequest(
+          unitApi.deleteUnitByIdUnitUnitIdDelete,
+          value.ID
+        );
+        console.log(response);
+        setUnits(units.filter((unit) => unit.ID !== value.ID));
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, units, unitApi]
+  );
 
   const LoadData = React.useCallback(async () => {
     //maybe split into separate function to avoid .then() mess
@@ -223,7 +449,7 @@ export default function LDS() {
   }, [trendDefApi, trendGroupApi, unitApi, trendApi]);
   React.useEffect(() => {
     if (!nav.useMockup) LoadData();
-  }, []);
+  }, [nav.useMockup]);
 
   const isLoadingContext = React.useMemo(
     () =>
@@ -254,12 +480,22 @@ export default function LDS() {
               trendGroupApi={trendGroupApi}
               trendGroups={trendGroups}
               setTrendGroups={setTrendGroups}
+              addTrendGroup={addTrendGroup}
+              updateTrendGroup={updateTrendGroup}
+              deleteTrendGroup={deleteTrendGroup}
+              trendParamDefs={trendParamDefs}
               unitApi={unitApi}
               units={units}
               setUnits={setUnits}
+              addUnit={addUnit}
+              updateUnit={updateUnit}
+              deleteUnit={deleteUnit}
               trendApi={trendApi}
               trends={trends}
               setTrends={setTrends}
+              addTrend={addTrend}
+              updateTrend={updateTrend}
+              deleteTrend={deleteTrend}
             >
               <Routes>
                 <Route path="/" element={<HomePage key={"home-page"} />} />

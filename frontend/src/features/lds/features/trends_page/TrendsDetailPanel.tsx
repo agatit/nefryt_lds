@@ -36,7 +36,7 @@ import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
 
 export interface TrendDetailPanelProps {
-  isLoadingTrends: boolean;
+  isLoading: boolean;
   trends: Trend[];
   axesState: AxisType[];
   onAxesStateChange: (value: AxisType[]) => void;
@@ -52,7 +52,7 @@ export interface TrendDetailPanelProps {
 }
 
 const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
-  isLoadingTrends,
+  isLoading,
   trends,
   axesState,
   onAxesStateChange,
@@ -78,6 +78,10 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
   );
 
   // chart
+  const noAxes = React.useMemo(() => {
+    return axesState.length == 0;
+  }, [axesState]);
+
   const axisTreeRef = React.useRef<any>(null);
 
   const axisTree: TreeViewDataItem[] = React.useMemo(() => {
@@ -241,61 +245,71 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
         onSelect={handleTabSelect}
       >
         <TabStripTab title={t("trends-page:chart_management")}>
-          {!isLoadingTrends ? (
+          {!isLoading ? (
             <div className="detail-panel-content">
-              <div className="item">
-                {/* <Typography.p fontSize="large" margin={0}>
+              {noAxes ? (
+                <Typography.p style={{ marginBottom: 0 }}>
+                  {t("trends-page:add_trends_or_select_template")}
+                </Typography.p>
+              ) : (
+                <React.Fragment>
+                  <div className="item">
+                    {/* <Typography.p fontSize="large" margin={0}>
                   {t("trends-page:chart_legend")}
                 </Typography.p> */}
-                <div className="legend-container">
-                  <TreeView
-                    ref={axisTreeRef}
-                    draggable={true}
-                    data={processTreeViewItems(axisTree, {
-                      expand: expandAxesTree,
-                    })}
-                    expandIcons={true}
-                    onExpandChange={handleExpandAxesTreeChange}
-                    item={TreeCustomItem}
-                  />
-                </div>
-              </div>
-              <div className="separator" />
-              <div className="item">
-                {/* <Typography.p fontSize="large" margin={0}>
+                    <div className="legend-container">
+                      <TreeView
+                        ref={axisTreeRef}
+                        draggable={true}
+                        data={processTreeViewItems(axisTree, {
+                          expand: expandAxesTree,
+                        })}
+                        expandIcons={true}
+                        onExpandChange={handleExpandAxesTreeChange}
+                        item={TreeCustomItem}
+                      />
+                    </div>
+                  </div>
+                  <div className="separator" />
+                  <div className="item">
+                    {/* <Typography.p fontSize="large" margin={0}>
                   {t("trends-page:time_interval")}
                 </Typography.p> */}
-                <div className="item-column">
-                  <div>
-                    <Label>{t("common:from")}</Label>
-                    <DateTimePicker
-                      format={"dd/MM/yy HH:mm:ss"}
-                      value={startDate}
-                      onChange={onStartDateChange}
-                    />
+                    <div className="item-column">
+                      <div>
+                        <Label>{t("common:from")}</Label>
+                        <DateTimePicker
+                          format={"dd/MM/yy HH:mm:ss"}
+                          value={startDate}
+                          onChange={onStartDateChange}
+                        />
+                      </div>
+                      <div>
+                        <Label>{t("common:to")}</Label>
+                        <DateTimePicker
+                          format={"dd/MM/yy HH:mm:ss"}
+                          value={endDate}
+                          onChange={onEndDateChange}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <Label>{t("common:to")}</Label>
-                    <DateTimePicker
-                      format={"dd/MM/yy HH:mm:ss"}
-                      value={endDate}
-                      onChange={onEndDateChange}
-                    />
-                  </div>
-                </div>
-              </div>
+                </React.Fragment>
+              )}
               <div className="separator" />
               <div className="item">
                 <div className="item-row">
                   <Button svgIcon={pencilIcon} onClick={onChartEditButtonClick}>
                     {t("common:edit")}
                   </Button>
-                  <Button
-                    svgIcon={saveIcon}
-                    onClick={handleSaveTemplateButtonClick}
-                  >
-                    {t("trends-page:save_as_template")}
-                  </Button>
+                  {!noAxes && (
+                    <Button
+                      svgIcon={saveIcon}
+                      onClick={handleSaveTemplateButtonClick}
+                    >
+                      {t("trends-page:save_as_template")}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

@@ -333,3 +333,43 @@ export const mockupTrendGroupFromDB: MockupTrendGroupType[] = [
     Name: "Automatyka",
   },
 ];
+
+export interface MockupTrendParamDefType {
+  ID: string;
+  TrendDefID: string;
+  Name: string;
+  DataType: string;
+}
+
+export const mockupTrendParamDefs: MockupTrendParamDefType[] = [
+  {
+    ID: "FILTER_WINDOW",
+    TrendDefID: "DERIV",
+    Name: "Okno filtrowania",
+    DataType: "INT",
+  },
+  {
+    ID: "FILTER_WINDOW",
+    TrendDefID: "MEAN",
+    Name: "Okno filtrowania",
+    DataType: "INT",
+  },
+  {
+    ID: "MODBUS_REGISTER",
+    TrendDefID: "QUICK",
+    Name: "Rejestr modbus",
+    DataType: "INT",
+  },
+  {
+    ID: "TREND_A",
+    TrendDefID: "DIFF",
+    Name: "TrendID A",
+    DataType: "TREND",
+  },
+  {
+    ID: "TREND_B",
+    TrendDefID: "DIFF",
+    Name: "TrendID B",
+    DataType: "TREND",
+  },
+];

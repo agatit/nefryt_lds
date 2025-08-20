@@ -6,7 +6,12 @@ import {
   GridSelectionChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
-import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
+import {
+  cancelIcon,
+  checkIcon,
+  plusIcon,
+  trashIcon,
+} from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { TrendDefBase, Unit } from "../../../../services/api";
@@ -20,7 +25,8 @@ export interface TrendUnitConfigurationProps {
   openDialog: () => void;
   closeDialog: () => void;
   units: Unit[];
-  setUnits: (value: Unit[]) => void;
+  addUnit: (value: Unit) => Promise<void>;
+  deleteUnit: (value: Unit) => Promise<void>;
   selected: Unit | null;
   setSelected: (value: Unit) => void;
 }
@@ -30,7 +36,8 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
   openDialog,
   closeDialog,
   units,
-  setUnits,
+  addUnit,
+  deleteUnit,
   selected,
   setSelected,
 }: TrendUnitConfigurationProps) {
@@ -82,16 +89,30 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
     closeDialog();
   }, [closeDialog]);
 
-  const confirmAddNewUnit = React.useCallback(() => {
+  const confirmAddNewUnit = React.useCallback(async () => {
     const newUnit: Unit = {
       ID: (units.length + 100).toString(),
       Name: unitName!,
       Symbol: unitSymbol!,
       Multiplier: unitMultiplier!,
     };
-    setUnits([...units, newUnit]);
+    await addUnit(newUnit);
     closeDialog();
-  }, [closeDialog, setUnits, units, unitName, unitSymbol, unitMultiplier]);
+  }, [closeDialog, addUnit, units, unitName, unitSymbol, unitMultiplier]);
+
+  // Deletion dialog
+  const [showDeletionDialog, setShowDeletionDialog] =
+    React.useState<boolean>(false);
+  const openDeletionDialog = React.useCallback(() => {
+    setShowDeletionDialog(true);
+  }, []);
+  const closeDeletionDialog = React.useCallback(() => {
+    setShowDeletionDialog(false);
+  }, []);
+
+  const confirmDeletion = React.useCallback(async () => {
+    await deleteUnit(selected!);
+  }, [selected, deleteUnit]);
 
   return (
     <React.Fragment>
@@ -109,6 +130,11 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
             <Button svgIcon={plusIcon} onClick={openDialog}>
               {t("config-page:add_new_unit")}
             </Button>
+            {selected && (
+              <Button svgIcon={trashIcon} onClick={openDeletionDialog}>
+                {t("common:delete")}
+              </Button>
+            )}
           </ButtonGroup>
         </GridToolbar>
         <GridColumn
@@ -168,6 +194,26 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
               onClick={confirmAddNewUnit}
             >
               {t("common:confirm")}
+            </Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
+      {showDeletionDialog && (
+        <Dialog
+          title={t("common:confirm_deletion")}
+          onClose={closeDeletionDialog}
+        >
+          {t("config-page:sure_you_want_delete_unit")}
+          <DialogActionsBar>
+            <Button svgIcon={cancelIcon} onClick={closeDeletionDialog}>
+              {t("common:cancel")}
+            </Button>
+            <Button
+              svgIcon={trashIcon}
+              onClick={confirmDeletion}
+              themeColor={"primary"}
+            >
+              {t("common:delete")}
             </Button>
           </DialogActionsBar>
         </Dialog>

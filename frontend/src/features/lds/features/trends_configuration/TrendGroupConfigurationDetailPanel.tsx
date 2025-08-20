@@ -8,20 +8,22 @@ import {
   pencilIcon,
   plusIcon,
   saveIcon,
+  trashIcon,
 } from "@progress/kendo-svg-icons";
 import { Button } from "@progress/kendo-react-buttons";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 export interface TrendGroupConfigurationDetailPanelProps {
-  trendGroups: TrendGroup[];
-  setTrendGroups: (value: TrendGroup[]) => void;
+  editTrendGroup: (value: TrendGroup) => Promise<void>;
+  deleteTrendGroup: (value: TrendGroup) => Promise<void>;
   selected: TrendGroup | null;
   enterAddNewTrendGroup: () => void;
 }
 
 const TrendGroupConfigurationDetailPanel = React.memo(
   function TrendGroupConfigurationDetailPanel({
-    trendGroups,
-    setTrendGroups,
+    editTrendGroup,
+    deleteTrendGroup,
     selected,
     enterAddNewTrendGroup,
   }: TrendGroupConfigurationDetailPanelProps) {
@@ -63,20 +65,29 @@ const TrendGroupConfigurationDetailPanel = React.memo(
       []
     );
 
-    const saveEdit = React.useCallback(() => {
+    const saveEdit = React.useCallback(async () => {
       const newTrendGroup: TrendGroup = {
         ID: trendGroupID!,
         Name: trendGroupName!,
       };
 
-      setTrendGroups(
-        trendGroups.map((trendGroup) => {
-          if (trendGroup.ID == newTrendGroup.ID) return newTrendGroup;
-          return trendGroup;
-        })
-      );
+      await editTrendGroup(newTrendGroup);
       setInEdit(false);
-    }, [trendGroups, setTrendGroups, trendGroupID, trendGroupName]);
+    }, [editTrendGroup, trendGroupID, trendGroupName]);
+
+    // Deletion dialog
+    const [showDialog, setShowDialog] = React.useState<boolean>(false);
+    const openDialog = React.useCallback(() => {
+      setShowDialog(true);
+    }, []);
+    const closeDialog = React.useCallback(() => {
+      setShowDialog(false);
+    }, []);
+
+    const confirmDeletion = React.useCallback(async () => {
+      await deleteTrendGroup(selected!);
+      setInEdit(false);
+    }, [selected, deleteTrendGroup]);
 
     return (
       <div className="detail-panel-content">
@@ -88,6 +99,7 @@ const TrendGroupConfigurationDetailPanel = React.memo(
                 id="trendGroupName"
                 value={trendGroupName}
                 onChange={handleTrendGroupNameChange}
+                disabled={!inEdit}
               />
             </div>
           </div>
@@ -108,6 +120,9 @@ const TrendGroupConfigurationDetailPanel = React.memo(
               <Button svgIcon={cancelIcon} onClick={cancelEdit}>
                 {t("common:cancel")}
               </Button>
+              <Button svgIcon={trashIcon} onClick={openDialog}>
+                {t("common:delete")}
+              </Button>
               <Button
                 svgIcon={saveIcon}
                 onClick={saveEdit}
@@ -118,6 +133,23 @@ const TrendGroupConfigurationDetailPanel = React.memo(
             </div>
           )}
         </div>
+        {showDialog && (
+          <Dialog title={t("common:confirm_deletion")} onClose={closeDialog}>
+            {t("config-page:sure_you_want_delete_trend_group")}
+            <DialogActionsBar>
+              <Button svgIcon={cancelIcon} onClick={closeDialog}>
+                {t("common:cancel")}
+              </Button>
+              <Button
+                svgIcon={trashIcon}
+                onClick={confirmDeletion}
+                themeColor={"primary"}
+              >
+                {t("common:delete")}
+              </Button>
+            </DialogActionsBar>
+          </Dialog>
+        )}
       </div>
     );
   }

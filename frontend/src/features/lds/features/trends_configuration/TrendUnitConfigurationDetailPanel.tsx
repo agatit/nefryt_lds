@@ -8,20 +8,22 @@ import {
   pencilIcon,
   plusIcon,
   saveIcon,
+  trashIcon,
 } from "@progress/kendo-svg-icons";
 import { Button } from "@progress/kendo-react-buttons";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 export interface TrendUnitConfigurationDetailPanelProps {
-  units: Unit[];
-  setUnits: (value: Unit[]) => void;
+  editUnit: (value: Unit) => Promise<void>;
+  deleteUnit: (value: Unit) => Promise<void>;
   selected: Unit | null;
   enterAddNewUnit: () => void;
 }
 
 const TrendUnitConfigurationDetailPanel = React.memo(
   function TrendUnitConfigurationDetailPanel({
-    units,
-    setUnits,
+    editUnit,
+    deleteUnit,
     selected,
     enterAddNewUnit,
   }: TrendUnitConfigurationDetailPanelProps) {
@@ -74,7 +76,7 @@ const TrendUnitConfigurationDetailPanel = React.memo(
       if (selected !== null) setSelectedData(selected);
     }, [selected]);
 
-    const saveEdit = React.useCallback(() => {
+    const saveEdit = React.useCallback(async () => {
       const newUnit: Unit = {
         ID: unitID!,
         Name: unitName,
@@ -82,14 +84,23 @@ const TrendUnitConfigurationDetailPanel = React.memo(
         Multiplier: unitMultiplier,
       };
 
-      setUnits(
-        units.map((unit) => {
-          if (unit.ID == newUnit.ID) return newUnit;
-          return unit;
-        })
-      );
+      await editUnit(newUnit);
       setInEdit(false);
-    }, [units, setUnits, unitID, unitName, unitSymbol, unitMultiplier]);
+    }, [editUnit, unitID, unitName, unitSymbol, unitMultiplier]);
+
+    // Deletion dialog
+    const [showDialog, setShowDialog] = React.useState<boolean>(false);
+    const openDialog = React.useCallback(() => {
+      setShowDialog(true);
+    }, []);
+    const closeDialog = React.useCallback(() => {
+      setShowDialog(false);
+    }, []);
+
+    const confirmDeletion = React.useCallback(async () => {
+      await deleteUnit(selected!);
+      setInEdit(false);
+    }, [selected, deleteUnit]);
 
     return (
       <div className="detail-panel-content">
@@ -101,6 +112,7 @@ const TrendUnitConfigurationDetailPanel = React.memo(
                 id="unitName"
                 value={unitName}
                 onChange={handleUnitNameChange}
+                disabled={!inEdit}
               />
             </div>
             <div>
@@ -109,6 +121,7 @@ const TrendUnitConfigurationDetailPanel = React.memo(
                 id="unitSymbol"
                 value={unitSymbol}
                 onChange={handleUnitSymbolChange}
+                disabled={!inEdit}
               />
             </div>
             <div>
@@ -119,6 +132,7 @@ const TrendUnitConfigurationDetailPanel = React.memo(
                 id="unitMultiplier"
                 value={unitMultiplier}
                 onChange={handleUnitMultiplierChange}
+                disabled={!inEdit}
               />
             </div>
           </div>
@@ -139,6 +153,9 @@ const TrendUnitConfigurationDetailPanel = React.memo(
               <Button svgIcon={cancelIcon} onClick={cancelEdit}>
                 {t("common:cancel")}
               </Button>
+              <Button svgIcon={trashIcon} onClick={openDialog}>
+                {t("common:delete")}
+              </Button>
               <Button
                 svgIcon={saveIcon}
                 onClick={saveEdit}
@@ -149,6 +166,23 @@ const TrendUnitConfigurationDetailPanel = React.memo(
             </div>
           )}
         </div>
+        {showDialog && (
+          <Dialog title={t("common:confirm_deletion")} onClose={closeDialog}>
+            {t("config-page:sure_you_want_delete_unit")}
+            <DialogActionsBar>
+              <Button svgIcon={cancelIcon} onClick={closeDialog}>
+                {t("common:cancel")}
+              </Button>
+              <Button
+                svgIcon={trashIcon}
+                onClick={confirmDeletion}
+                themeColor={"primary"}
+              >
+                {t("common:delete")}
+              </Button>
+            </DialogActionsBar>
+          </Dialog>
+        )}
       </div>
     );
   }
