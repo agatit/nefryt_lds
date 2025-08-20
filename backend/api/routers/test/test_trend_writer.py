@@ -9,9 +9,14 @@ from database import lds
 import pytest
 
 trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
-trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-trend2 = lds.Trend(ID=3, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
-trend3 = lds.Trend(ID=5, TrendDefID=trend_def.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+trend_group = lds.TrendGroup(ID=1, Name='Group1')
+unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                   Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2,
+                   Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Red')
+trend3 = lds.Trend(ID=4, TrendDefID=trend_def.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                   Name='Trend4', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow')
 trend_list = [trend1, trend2, trend3]
 profiler_data1 = lds.ProfilerData(ID=1, Time10=0.1, Time100=0.2245, Time1000=0.25, QueueSize=5)
 profiler_data2 = lds.ProfilerData(ID=3, Time10=0.2, Time100=0.3, Time1000=0.5, QueueSize=1)
@@ -21,19 +26,24 @@ profiler_data_list = [profiler_data1, profiler_data2, profiler_data3]
 
 def reset_profiler_data_objects():
     global trend_def, trend1, trend2, trend3, trend_list, profiler_data1, profiler_data2, \
-        profiler_data3, profiler_data_list
+        profiler_data3, profiler_data_list, trend_group, unit
 
     trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
-    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-    trend2 = lds.Trend(ID=3, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
-    trend3 = lds.Trend(ID=5, TrendDefID=trend_def.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+    trend2 = lds.Trend(ID=3, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2,
+                       Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Red')
+    trend3 = lds.Trend(ID=5, TrendDefID=trend_def.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend4', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow')
     trend_list = [trend1, trend2, trend3]
     profiler_data1 = lds.ProfilerData(ID=1, Time10=0.123456, Time100=0.2, Time1000=0.25, QueueSize=5)
     profiler_data2 = lds.ProfilerData(ID=3, Time10=0.2, Time100=0.3, Time1000=0.5, QueueSize=1)
     profiler_data3 = lds.ProfilerData(ID=5)
     profiler_data_list = [profiler_data1, profiler_data2, profiler_data3]
 
-    return [trend_def], trend_list, profiler_data_list
+    return [trend_def], [trend_group], [unit], trend_list, profiler_data_list
 
 
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]

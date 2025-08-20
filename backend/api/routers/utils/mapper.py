@@ -1,7 +1,6 @@
 from api.routers.utils import to_dict, strip_strings_in_dict
 from ...schemas import api, base
-from api.schemas import (TrendDataMultiple, TrendValue, TrendDataSingle,
-                         TrendParamOut, SimulationParamOut, SimulationParamIn, SimulationDataOut, SimulationDataBase)
+from api.schemas import (SimulationParamOut, SimulationParamIn, SimulationDataOut, SimulationDataBase)
 from database import lds, editor
 
 
@@ -14,23 +13,23 @@ def map_lds_event_and_lds_event_def_to_event_out(lds_event: lds.Event, lds_event
     return api.Event(**lds_event_dict)
 
 
-def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> TrendParamOut: # noqa
+def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> api.TrendParam: # noqa
     lds_trend_param_dict = to_dict(lds_trend_param)
     lds_trend_param_def_dict = to_dict(lds_trend_param_def)
     lds_trend_param_def_dict.pop('TrendDefID')
     lds_trend_param_def_dict.pop('ID')
     lds_trend_param_dict.update(lds_trend_param_def_dict)
-    return TrendParamOut(**strip_strings_in_dict(lds_trend_param_dict))
+    return api.TrendParam(**strip_strings_in_dict(lds_trend_param_dict))
 
 
-def map_dicts_to_trend_data_multiple(timestamps: zip, trend_values_dict: dict) -> list[TrendDataMultiple]:
+def map_dicts_to_trend_data_multiple(timestamps: zip, trend_values_dict: dict) -> list[api.TrendDataMultiple]:
     trend_datas = []
     for counter, timestamp in enumerate(timestamps):
         trend_values = [
-            TrendValue(ID=trend_id, Value=trend_values_dict[trend_id][counter][0])
+            api.TrendValue(ID=trend_id, Value=trend_values_dict[trend_id][counter][0])
             for trend_id in trend_values_dict
         ]
-        trend_data = TrendDataMultiple(
+        trend_data = api.TrendDataMultiple(
             Timestamp=timestamp[0],
             TimestampMs=timestamp[1],
             Data=trend_values
@@ -40,8 +39,8 @@ def map_dicts_to_trend_data_multiple(timestamps: zip, trend_values_dict: dict) -
     return trend_datas
 
 
-def map_tuple_to_trend_data_single(values: tuple) -> TrendDataSingle:
-    return TrendDataSingle(
+def map_tuple_to_trend_data_single(values: tuple) -> api.TrendDataSingle:
+    return api.TrendDataSingle(
         Timestamp=values[1],
         TimestampMs=values[2],
         Value=values[0]

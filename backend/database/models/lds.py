@@ -2,9 +2,7 @@ from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
-from api.schemas import TrendDefBase, TrendBase, TrendParamBase, \
-    TrendGroupBase, ProfilerDataBase, SimulationDefBase, SimulationBase, SimulationParamBase, \
-    SimulationDataBase
+from api.schemas import SimulationDefBase, SimulationBase, SimulationParamBase, SimulationDataBase
 from api.schemas import base
 
 
@@ -84,14 +82,14 @@ class TrendData(SQLModel, table=True):
     Data: bytes = Field(sa_column=Column(BINARY(200), nullable=False))
 
 
-class TrendDef(TrendDefBase, table=True):
+class TrendDef(base.TrendDef, table=True):
     __tablename__ = 'TrendDef'
     __table_args__ = (
         {'schema': 'lds'}
     )
 
 
-class TrendGroup(TrendGroupBase, table=True):
+class TrendGroup(base.TrendGroup, table=True):
     __tablename__ = 'TrendGroup'
     __table_args__ = (
         {'schema': 'lds'}
@@ -184,7 +182,7 @@ class PipelineParam(SQLModel, table=True):
     Value: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-class Trend(TrendBase, table=True):
+class Trend(base.Trend, table=True):
     __tablename__ = 'Trend'
     __table_args__ = (
         ForeignKeyConstraint(
@@ -194,6 +192,8 @@ class Trend(TrendBase, table=True):
         ),
         {'schema': 'lds'}
     )
+
+    ID: int = Field(sa_column=Column(Integer, Identity(start=1000, increment=1), nullable=False, primary_key=True))
 
 
 class TrendParamDef(SQLModel, table=True):
@@ -274,7 +274,7 @@ class MethodParam(SQLModel, table=True):
     Value: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-class TrendParam(TrendParamBase, table=True):
+class TrendParam(base.TrendParam, table=True):
     __tablename__ = 'TrendParam'
     __table_args__ = (
         PrimaryKeyConstraint('TrendParamDefID', 'TrendID', name='TrendParam_pk'),
@@ -297,7 +297,7 @@ class Template(base.Template, table=True):
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))
 
 
-class ProfilerData(ProfilerDataBase, table=True):
+class ProfilerData(base.ProfilerData, table=True):
     __tablename__ = 'ProfilerData'
     __table_args__ = (
         {'schema': 'lds'}

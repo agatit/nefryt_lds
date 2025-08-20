@@ -10,12 +10,12 @@ from starlette.responses import JSONResponse
 from api.routers.utils import strip_strings, get_user_token
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
-from ..schemas import Error, TrendDefBase
+from ..schemas import api
 
 router = APIRouter(prefix="/trend_def", tags=["trend_def"], dependencies=[Depends(get_user_token)])
 
 
-@router.get('', response_model=CustomPage[TrendDefBase] | Error)
+@router.get('', response_model=CustomPage[lds.TrendDef] | api.Error)
 async def list_trend_defs(engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
                           _: Annotated[None, Depends(use_custom_page)],
                           odata_filter: Annotated[str | None, Query(alias='filter')] = None):
@@ -28,5 +28,5 @@ async def list_trend_defs(engine: Annotated[Engine, Depends(get_engine)], params
         page.items = [strip_strings(lds_trend_def) for lds_trend_def in page.items]
         return page
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_defs(): ' + str(e))
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_defs(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -7,7 +7,7 @@ from config import setup_engine
 from db import get_engine
 from .routers import (events_router, event_defs_router, trend_defs_router, trend_router, auth_router, link_router,
                       node_router, template_router, unit_router, trend_groups_router, trend_writer_router,
-                      simulation_router)
+                      simulation_router, trend_params_router, trend_data_router)
 from .schemas import Error
 
 setup_engine()
@@ -16,6 +16,8 @@ app = FastAPI(title='Nefryt LDS API',
 add_pagination(app)
 app.include_router(auth_router)
 app.include_router(trend_router)
+app.include_router(trend_params_router)
+app.include_router(trend_data_router)
 app.include_router(template_router)
 app.include_router(trend_defs_router)
 app.include_router(events_router)

@@ -17,8 +17,12 @@ simulation_def1 = lds.SimulationDef(ID='DENSITY', Name='DensitySimulation')
 simulation_def2 = lds.SimulationDef(ID='WAVE', Name='WaveSimulation')
 simulation_def_list = [simulation_def1, simulation_def2]
 trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
-trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
+trend_group = lds.TrendGroup(ID=1, Name='Group1')
+unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                   Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2,
+                   Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Red')
 simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
                              ResolutionMeters=500)
 simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
@@ -61,14 +65,18 @@ def reset_simulation_def_objects():
 
 def reset_simulation_objects():
     global simulation_def1, simulation_def2, simulation_def_list, trend_def, trend1, trend2, simulation1, \
-        simulation2, simulation3, simulation4, simulation_list
+        simulation2, simulation3, simulation4, simulation_list, trend_group, unit
 
     simulation_def1 = lds.SimulationDef(ID='DENSITY', Name='DensitySimulation')
     simulation_def2 = lds.SimulationDef(ID='WAVE', Name='WaveSimulation')
     simulation_def_list = [simulation_def1, simulation_def2]
     trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
-    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-    trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+    trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2,
+                       Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Red')
     simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
                                  ResolutionMeters=500)
     simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
@@ -79,21 +87,25 @@ def reset_simulation_objects():
                                  ResolutionMeters=100)
     simulation_list = [simulation1, simulation2, simulation3, simulation4]
 
-    return [simulation_def_list, [trend_def], [trend1, trend2], simulation_list]
+    return [simulation_def_list, [trend_def], [trend_group], [unit], [trend1, trend2], simulation_list]
 
 
 def reset_simulation_param_objects():
     global simulation_def1, simulation_def2, simulation_def_list, trend_def, trend1, trend2, simulation1, \
         simulation2, simulation3, simulation4, simulation_list, simulation_param_def1, simulation_param_def2, \
         simulation_param_def3, simulation_param_list, simulation_param1, simulation_param2, simulation_param3, \
-        simulation_param4, simulation_param_def_list
+        simulation_param4, simulation_param_def_list, trend_group, unit
 
     simulation_def1 = lds.SimulationDef(ID='DENSITY', Name='DensitySimulation')
     simulation_def2 = lds.SimulationDef(ID='WAVE', Name='WaveSimulation')
     simulation_def_list = [simulation_def1, simulation_def2]
     trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
-    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-    trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+    trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2,
+                       Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Red')
     simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
                                  ResolutionMeters=500)
     simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
@@ -124,7 +136,7 @@ def reset_simulation_param_objects():
                                             Value='1500')
     simulation_param_list = [simulation_param1, simulation_param2, simulation_param3, simulation_param4]
 
-    return [simulation_def_list, [trend_def], [trend1, trend2], simulation_list, simulation_param_def_list, 
+    return [simulation_def_list, [trend_def], [trend_group], [unit], [trend1, trend2], simulation_list, simulation_param_def_list,
             simulation_param_list]
 
 
@@ -133,14 +145,18 @@ def reset_simulation_data_objects():
         simulation2, simulation3, simulation4, simulation_list, simulation_param_def1, simulation_param_def2, \
         simulation_param_def3, simulation_param_list, simulation_param1, simulation_param2, simulation_param3, \
         simulation_param4, simulation_param_def_list, simulation_data1, simulation_data2, simulation_data3, \
-        simulation_data4, simulation_data5, simulation_data_list
+        simulation_data4, simulation_data5, simulation_data_list, trend_group, unit
 
     simulation_def1 = lds.SimulationDef(ID='DENSITY', Name='DensitySimulation')
     simulation_def2 = lds.SimulationDef(ID='WAVE', Name='WaveSimulation')
     simulation_def_list = [simulation_def1, simulation_def2]
     trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
-    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-    trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2)
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+    trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2,
+                       Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Red')
     simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
                                  ResolutionMeters=500)
     simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
@@ -177,7 +193,7 @@ def reset_simulation_data_objects():
     simulation_data5 = lds.SimulationData(SimulationID=2, Time=25, Distance=500, Data=2)
     simulation_data_list = [simulation_data1, simulation_data2, simulation_data3, simulation_data4, simulation_data5]
 
-    return [simulation_def_list, [trend_def], [trend1, trend2], simulation_list, simulation_param_def_list,
+    return [simulation_def_list, [trend_def], [trend_group], [unit], [trend1, trend2], simulation_list, simulation_param_def_list,
             simulation_param_list, simulation_data_list]
 
 

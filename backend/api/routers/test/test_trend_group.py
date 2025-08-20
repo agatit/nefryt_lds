@@ -22,10 +22,12 @@ def reset_trend_group_objects():
     trend_group1 = lds.TrendGroup(ID=1, Name='Group 1', AnalysisOnly=False)
     trend_group2 = lds.TrendGroup(ID=2, Name='Group 2', AnalysisOnly=True)
     trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
-    trend = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5, TrendGroupID=trend_group1.ID)
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group1.ID, UnitID=unit.ID, Color='Black')
     trend_groups_list = [trend_group1, trend_group2]
 
-    return [[trend_def], trend_groups_list, [trend]]
+    return [[trend_def], trend_groups_list, [unit], [trend]]
 
 
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
