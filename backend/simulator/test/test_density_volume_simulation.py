@@ -66,7 +66,6 @@ def test_density_volume_simulation_simulates_correctly_when_density_and_flow_are
                             simulation = lds.Simulation(ID=1, SimulationDefID='SimDefID', TrendID=1, Name='Sim', RefreshTimeSeconds=5, ResolutionMeters=10)
                             sim = SimulationDensityVolume(simulation)
                             sim.simulation_timestamp = 1
-                            sim.last_success = 0
 
                             previous_simulation_data = np.zeros_like(sim.simulation_data)
                             ts = 1

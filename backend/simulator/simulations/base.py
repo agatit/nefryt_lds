@@ -7,11 +7,9 @@ import numpy as np
 from sqlalchemy import select, and_, literal, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from config import setup_engine, Settings
+from config import setup_engine
 from database.models import lds
 from db import get_engine
-
-# TODO: skrypt do prezentacji danych symulacji
 
 
 class SimulationBase:
@@ -45,7 +43,6 @@ class SimulationBase:
 
         self.time_buffer = self.calculate_time_buffer()
         self.simulation_timestamp = int(time.time()) - self.time_buffer
-        self.last_success = self.simulation_timestamp - 1
         self.distances = self.calculate_distances()
         segments_number = math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) \
             if math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) > 200 \
@@ -57,6 +54,7 @@ class SimulationBase:
         if self.db_uri:
             self.save_simulation_data()
         self.process = None
+        self.previous_timestamp_diff = 0
         atexit.register(self._shutdown)
 
         # self.pipe_volume = self.pipe_area * self.segments_length
@@ -111,33 +109,20 @@ class SimulationBase:
         raise NotImplementedError
 
     def save_simulation_data(self):
-        print('saving simulation')
-        # print(time.time())
-        # print(self.simulation_data)
         if len(self.simulation_data) == 0:
             logging.warning(f'Empty simulation data for simulation with id={self.lds_simulation.ID}')
             return
         db_data = [lds.SimulationData(SimulationID=self.lds_simulation.ID, Time=self.simulation_timestamp,
                                       Distance=0, Data=np.round(self.simulation_data[0]))]
-        # print(self.distances)
         if len(self.distances) >= 2:
             iter_distance = iter(self.distances[1:])
             distance = next(iter_distance)
             while distance is not None:
-                # print(distance)
-                # print('==============')
-                # print(distance)
-                # print(self.simulation_segment_length)
                 idx = int(distance // self.simulation_segment_length)
-                # print(idx)
                 sim_data1 = self.simulation_data[idx]
                 sim_data2 = self.simulation_data[idx + 1]
-                # print(sim_data1)
-                # print(sim_data2)
                 distance_diff1 = abs(idx*self.simulation_segment_length - distance)
                 distance_diff2 = abs((idx+1)*self.simulation_segment_length - distance)
-                # print(distance_diff1)
-                # print(distance_diff2)
                 if sim_data1 is None and sim_data2 is None:
                     calculated_data = None
                 elif sim_data1 is None:
@@ -149,7 +134,6 @@ class SimulationBase:
                                        + (((self.simulation_segment_length - distance_diff2) / self.simulation_segment_length) * sim_data2))
                 db_data.append(lds.SimulationData(SimulationID=self.lds_simulation.ID, Time=self.simulation_timestamp,
                                                   Distance=distance, Data=calculated_data))
-                # print(calculated_data)
                 distance = next(iter_distance, None)
 
         with Session(get_engine()) as session:
@@ -159,6 +143,8 @@ class SimulationBase:
 
     def run_simulation(self, db_uri: str):
         setup_engine(db_uri)
+        self.simulation_timestamp = int(time.time()) - self.time_buffer
+        self._check_timestamp_compatibility()
         self.calculate_simulation_data_on_start()
         self._run_simulation_loop()
         # if self.plot_sim:
@@ -184,8 +170,22 @@ class SimulationBase:
         # else:
         # self._run_simulation_loop(current_timestamp)
 
+    def _check_timestamp_compatibility(self):
+        statement = (select(lds.TrendData)
+                     .where(lds.TrendData.TrendID == self.flow_trend.ID) # noqa
+                     .where(lds.TrendData.Time > self.simulation_timestamp)
+                     .limit(1))
+
+        with Session(get_engine()) as session:
+            data = session.execute(statement).scalars().first()
+
+        if data is not None and data.Time > int(time.time()) + 1:
+            logging.warning(f'Timestamp difference between Trends Writer and Simulation modules, '
+                            f'simulator may not calculate and save most recent data'
+                            f'(current gap: {data.Time - int(time.time())} seconds)')
+
     def _run_simulation_loop(self):
-        simulation_length = 1
+        simulation_duration = 1
         try:
             while True:
                 start_time = time.perf_counter()
@@ -194,12 +194,12 @@ class SimulationBase:
                 except Exception as e:
                     logging.warning(f"{self.__class__.__name__} ({self.lds_simulation.ID}) error while simulation data read: {e}")
 
-                if simulation_length % self.lds_simulation.RefreshTimeSeconds == 0:
+                if simulation_duration % self.lds_simulation.RefreshTimeSeconds == 0:
                     self.save_simulation_data()
 
                 if 1 - (time.perf_counter() - start_time) > 0:
                     time.sleep(1 - (time.perf_counter() - start_time))
-                simulation_length += 1
+                simulation_duration += 1
                 self.simulation_timestamp += 1
         except KeyboardInterrupt:
             logging.info(f"{self.__class__.__name__} ({self.lds_simulation.ID}) closed")
