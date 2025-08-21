@@ -64,18 +64,11 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
             lds_trends = session.execute(statement).all()
 
         params_ids = ['RawMin', 'RawMax', 'ScaledMin', 'ScaledMax']
-        default_lds_trends_scale = {params_ids[0]: 0,
-                                    params_ids[1]: 1,
-                                    params_ids[2]: 0,
-                                    params_ids[3]: 1}
 
         for lds_trend, in lds_trends:
-            try:
-                lds_trends_scales[lds_trend.ID] = {
-                    param_id: getattr(lds_trend, param_id) for param_id in params_ids
-                }
-            except (AttributeError, TypeError):
-                lds_trends_scales[lds_trend.ID] = default_lds_trends_scale
+            lds_trends_scales[lds_trend.ID] = {
+                param_id: getattr(lds_trend, param_id) for param_id in params_ids
+            }
 
         samples, inc_samples = calculate_samples_count(samples, begin, end)
         trend_timestamps, trend_timestamps_ms = calculate_full_timestamps_lists(samples, begin, inc_samples)

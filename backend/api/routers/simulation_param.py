@@ -1,4 +1,3 @@
-import traceback
 from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Body, Path
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -124,7 +123,6 @@ async def update_simulation_param(simulation_id: Annotated[int, Path()],
         error = api.Error(code=status.HTTP_409_CONFLICT, message='Integrity error when updating simulation')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
-        traceback.print_exc()
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                       message='Exception in update_simulation_param(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from api.routers.utils import strip_strings, get_user_token
-from .trend_param import update_trend_param
 from ..custom_page import CustomParams, CustomPage, use_custom_page
 from db import get_engine
 from ..schemas import api
@@ -95,13 +94,8 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
                               message='No trend with id = ' + str(trend_id))
                 return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
             updated_trend_dict = updated_trend.model_dump(by_alias=True, exclude_unset=True)
-            trend_params_ids = ['RawMin', 'RawMax', 'ScaledMax', 'ScaledMin']
             for k, v in updated_trend_dict.items():
                 setattr(trend, k, v)
-                if k in trend_params_ids:
-                    trend_param_id = [char.upper() if char.islower() else '_' + char.upper() for char in k]
-                    trend_param_id = ''.join(trend_param_id).lstrip('_')
-                    await update_trend_param(trend_id, trend_param_id, str(v), engine)
             session.commit()
             session.refresh(trend)
         return strip_strings(trend)

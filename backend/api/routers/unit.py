@@ -27,6 +27,7 @@ async def list_units(engine: Annotated[Engine, Depends(get_engine)], params: Ann
             statement = apply_odata_query(statement, odata_filter)
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
+        page.items = [strip_strings(unit) for unit in page.items]
         return page
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_units(): ' + str(e))
@@ -77,7 +78,7 @@ async def get_unit_by_id(unit_id: Annotated[str, Path()], engine: Annotated[Engi
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         return strip_strings(unit)
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_unit_by_id(): ' + str(e))
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_unit_by_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

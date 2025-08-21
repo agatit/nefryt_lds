@@ -146,8 +146,6 @@ async def update_trend_param(trend_id: Annotated[int, Path()], trend_param_def_i
                 return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
             lds_trend_param = lds_trend_param[0][0]
             lds_trend_param.Value = updated_trend_param_value
-            field_name = ''.join(word.capitalize() for word in trend_param_def_id.lower().split('_'))
-            setattr(lds_trend, field_name, updated_trend_param_value)
             session.commit()
         return await get_trend_param_by_id(trend_id, trend_param_def_id, engine)
     except Exception as e:

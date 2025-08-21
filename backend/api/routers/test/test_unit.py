@@ -45,10 +45,10 @@ def test_list_units_should_return_ok_response_code_and_correct_units(add_lds_obj
     items = response.json()['items']
     assert len(items) == len(units_list)
     for expected_unit, returned_unit in zip(units_list, items):
-        assert returned_unit['ID'] == expected_unit.ID
+        assert returned_unit['ID'] == expected_unit.ID.strip()
         assert returned_unit['Name'] == expected_unit.Name
         assert returned_unit['Symbol'] == expected_unit.Symbol
-        assert returned_unit['BaseID'] == expected_unit.BaseID
+        assert returned_unit['BaseID'] == expected_unit.BaseID.strip()
         assert returned_unit['Multiplier'] == (str(expected_unit.Multiplier) if expected_unit.Multiplier else None)
 
 
@@ -87,10 +87,10 @@ def test_list_units_should_return_ok_response_code_and_data_filtered_by_odata_qu
     items = response.json()['items']
     assert len(items) == 2
     for expected_unit, returned_unit in zip(units_list[:-1], items):
-        assert returned_unit['ID'] == expected_unit.ID
+        assert returned_unit['ID'] == expected_unit.ID.strip()
         assert returned_unit['Name'] == expected_unit.Name
         assert returned_unit['Symbol'] == expected_unit.Symbol
-        assert returned_unit['BaseID'] == expected_unit.BaseID
+        assert returned_unit['BaseID'] == expected_unit.BaseID.strip()
         assert returned_unit['Multiplier'] == (str(expected_unit.Multiplier) if expected_unit.Multiplier else None)
 
 
