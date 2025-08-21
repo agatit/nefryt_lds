@@ -2,7 +2,6 @@ from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
-from api.schemas import SimulationDefBase, SimulationBase, SimulationParamBase, SimulationDataBase
 from api.schemas import base
 
 
@@ -304,14 +303,14 @@ class ProfilerData(base.ProfilerData, table=True):
     )
 
 
-class SimulationDef(SimulationDefBase, table=True):
+class SimulationDef(base.SimulationDef, table=True):
     __tablename__ = 'SimulationDef'
     __table_args__ = (
         {'schema': 'lds'}
     )
 
 
-class Simulation(SimulationBase, table=True):
+class Simulation(base.Simulation, table=True):
     __tablename__ = 'Simulation'
     __table_args__ = (
         {'schema': 'lds'}
@@ -336,7 +335,7 @@ class SimulationParamDef(SQLModel, table=True):
     DataType: str | None = Field(None, sa_column=Column(VARCHAR(20, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-class SimulationParam(SimulationParamBase, table=True):
+class SimulationParam(base.SimulationParam, table=True):
     __tablename__ = 'SimulationParam'
     __table_args__ = (
         PrimaryKeyConstraint('SimulationID', 'SimulationParamDefID', name='SimulationParam_pk'),
@@ -351,9 +350,17 @@ class SimulationParam(SimulationParamBase, table=True):
     SimulationDefID: str = Field(sa_column=Column(
         CHAR(20, 'SQL_Polish_CP1250_CS_AS'),
         nullable=False))
+    SimulationParamDefID: str = Field(sa_column=Column(
+        CHAR(30, 'SQL_Polish_CP1250_CS_AS'),
+        nullable=False))
+    SimulationID: int = Field(sa_column=Column(
+        Integer,
+        ForeignKey("lds.Simulation.ID", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False
+    ))
 
 
-class SimulationData(SimulationDataBase, table=True):
+class SimulationData(base.SimulationData, table=True):
     __tablename__ = 'SimulationData'
     __table_args__ = (
         PrimaryKeyConstraint('SimulationID', 'Distance', name='SimulationData_pk'),

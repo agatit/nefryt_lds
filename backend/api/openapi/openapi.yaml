@@ -2417,7 +2417,7 @@ paths:
       summary: Updates simulation
       tags:
         - simulations
-  /simulation/defs:
+  /simulation_def:
     get:
       description: List all simulation defs
       operationId: list_simulation_defs
@@ -2581,7 +2581,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateSimulationParam'
+              type: string
       responses:
         "200":
           content:
@@ -3634,23 +3634,6 @@ components:
         - DataType
         - Name
       title: SimulationParam
-      type: object
-    UpdateSimulationParam:
-      example:
-        SimulationID: 1
-        SimulationParamDefID: WIDTH
-        Value: 100
-      properties:
-        SimulationParamDefID:
-          title: SimulationParamDefID
-          type: string
-        SimulationID:
-          title: SimulationID
-          type: integer
-        Value:
-          title: Value
-          type: string
-      title: UpdateSimulationParam
       type: object
     CreateSimulationParam:
       example:

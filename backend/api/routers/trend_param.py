@@ -130,7 +130,7 @@ async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_de
 
 @router.put('/{trend_id}/param/{trend_param_def_id}', response_model=api.TrendParam | api.Error)
 async def update_trend_param(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()],
-                             updated_trend_value: Annotated[str, Body()],
+                             updated_trend_param_value: Annotated[str, Body()],
                              engine: Annotated[Engine, Depends(get_engine)]):
     try:
         statement = (select(lds.TrendParam).
@@ -145,9 +145,9 @@ async def update_trend_param(trend_id: Annotated[int, Path()], trend_param_def_i
                                       + ' and trendParamDef with id = ' + trend_param_def_id.strip())
                 return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
             lds_trend_param = lds_trend_param[0][0]
-            lds_trend_param.Value = updated_trend_value
+            lds_trend_param.Value = updated_trend_param_value
             field_name = ''.join(word.capitalize() for word in trend_param_def_id.lower().split('_'))
-            setattr(lds_trend, field_name, updated_trend_value)
+            setattr(lds_trend, field_name, updated_trend_param_value)
             session.commit()
         return await get_trend_param_by_id(trend_id, trend_param_def_id, engine)
     except Exception as e:

@@ -12,3 +12,6 @@ from .trend_writer import router as trend_writer_router
 from .simulation import router as simulation_router
 from .trend_param import router as trend_params_router
 from .trend_data import router as trend_data_router
+from .simulation_def import router as simulation_defs_router
+from .simulation_data import router as simulation_data_router
+from .simulation_param import router as simulation_params_router

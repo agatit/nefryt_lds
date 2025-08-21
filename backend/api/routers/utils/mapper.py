@@ -1,6 +1,5 @@
 from api.routers.utils import to_dict, strip_strings_in_dict
 from ...schemas import api, base
-from api.schemas import (SimulationParamOut, SimulationParamIn, SimulationDataOut, SimulationDataBase)
 from database import lds, editor
 
 
@@ -72,22 +71,22 @@ def map_lds_node_and_editor_node_to_node_out(lds_node: lds.Node, editor_node: ed
 
 
 def map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out\
-                (lds_simulation_param: lds.SimulationParam, lds_simulation_param_def: lds.SimulationParamDef) -> SimulationParamOut:
+                (lds_simulation_param: lds.SimulationParam, lds_simulation_param_def: lds.SimulationParamDef) -> api.SimulationParam:
     lds_simulation_param_dict = to_dict(lds_simulation_param)
     lds_simulation_param_dict.pop('SimulationDefID')
     lds_simulation_param_def_dict = to_dict(lds_simulation_param_def)
     lds_simulation_param_def_dict.pop('SimulationDefID')
     lds_simulation_param_def_dict.pop('ID')
     simulation_param_out_dict = lds_simulation_param_dict | lds_simulation_param_def_dict
-    return SimulationParamOut(**strip_strings_in_dict(simulation_param_out_dict))
+    return api.SimulationParam(**strip_strings_in_dict(simulation_param_out_dict))
 
 
-def map_simulation_param_base_to_lds_simulation_param(simulation_param: SimulationParamIn, lds_simulation: lds.Simulation) -> lds.SimulationParam:
+def map_simulation_param_base_to_lds_simulation_param(simulation_param: api.SimulationParamCreate, lds_simulation: lds.Simulation) -> lds.SimulationParam:
     return lds.SimulationParam(**simulation_param.model_dump()
                                      | {'SimulationDefID': lds_simulation.SimulationDefID, 'SimulationID': lds_simulation.ID})
 
 
-def map_lds_simulation_data_to_simulation_data_out(simulation_data_list: list[lds.SimulationData], distances: list[int]) -> SimulationDataOut:
+def map_lds_simulation_data_to_simulation_data_out(simulation_data_list: list[lds.SimulationData], distances: list[int]) -> api.SimulationData:
     iter_lds_simulation_data = iter(simulation_data_list)
     lds_simulation_data = next(iter_lds_simulation_data, None)
     simulation_data_out_dict = {
@@ -98,16 +97,16 @@ def map_lds_simulation_data_to_simulation_data_out(simulation_data_list: list[ld
     for distance in distances:
         if not lds_simulation_data:
             simulation_data_out_dict['Data'].append(
-                SimulationDataBase(Distance=distance, Data=None)
+                base.SimulationData(Distance=distance, Data=None)
             )
         elif lds_simulation_data.Distance == distance:
             simulation_data_out_dict['Data'].append(
-                SimulationDataBase(Distance=distance, Data=lds_simulation_data.Data)
+                base.SimulationData(Distance=distance, Data=lds_simulation_data.Data)
             )
             lds_simulation_data = next(iter_lds_simulation_data, None)
         else:
             simulation_data_out_dict['Data'].append(
-                SimulationDataBase(Distance=distance, Data=None)
+                base.SimulationData(Distance=distance, Data=None)
             )
 
-    return SimulationDataOut(**simulation_data_out_dict)
+    return api.SimulationData(**simulation_data_out_dict)
