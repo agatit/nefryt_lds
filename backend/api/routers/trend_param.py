@@ -39,8 +39,40 @@ async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [
-            map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def)
+            map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
             for lds_trend_param, _, lds_trend_param_def in page.items
+        ]
+        return page
+    except Exception as e:
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_params(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get('/{trend_id}/param/all', response_model=CustomPage[api.TrendParam] | api.Error)
+async def list_required_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
+                            params: Annotated[CustomParams, Depends()], _: Annotated[None, Depends(use_custom_page)],
+                            odata_filter: Annotated[str | None, Query(alias='filter')] = None):
+    try:
+        statement = select(1).where(lds.Trend.ID == literal(trend_id)) # noqa
+        with Session(engine) as session:
+            trend_exists = session.execute(statement).first()
+        if not trend_exists:
+            error = api.Error(code=status.HTTP_404_NOT_FOUND, message='No trend with id = ' + str(trend_id))
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+        statement = (
+            select(lds.TrendParamDef, lds.TrendParam, lds.Trend)
+            .join(lds.TrendParamDef, lds.Trend.TrendDefID == lds.TrendParamDef.TrendDefID) # noqa
+            .join(lds.TrendParam,
+                  and_(lds.TrendParamDef.ID == lds.TrendParam.TrendParamDefID, lds.Trend.ID == lds.TrendParam.TrendID), isouter=True)
+            .where(lds.Trend.ID == literal(trend_id))
+            .order_by(lds.TrendParamDef.ID))
+        if odata_filter is not None:
+            statement = apply_odata_query(statement, odata_filter)
+        with Session(engine) as session:
+            page = paginate(session, statement, params=params)
+        page.items = [
+            map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
+            for lds_trend_param_def, lds_trend_param, _ in page.items
         ]
         return page
     except Exception as e:
@@ -121,7 +153,7 @@ async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_de
                                   + ' and trendParamDef with id = ' + trend_param_def_id.strip())
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         lds_trend_param, _, lds_trend_param_def = results[0]
-        return map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def)
+        return map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                       message='Exception in get_trend_param_by_id(): ' + str(e))

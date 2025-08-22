@@ -14,11 +14,11 @@ from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
 from ..schemas import api
 
-router = APIRouter(prefix="/simulation", tags=["simulation"], dependencies=[Depends(get_user_token)])
+router = APIRouter(prefix="/simulation", tags=["simulation_param"], dependencies=[Depends(get_user_token)])
 
 
 @router.get('/{simulation_id}/param', response_model=CustomPage[api.SimulationParam] | api.Error)
-async def list_simulation_params_by_simulation_id(simulation_id: Annotated[int, Path()],
+async def list_simulation_params(simulation_id: Annotated[int, Path()],
                                                   engine: Annotated[Engine, Depends(get_engine)],
                                                   params: Annotated[CustomParams, Depends()],
                                                   _: Annotated[None, Depends(use_custom_page)],
@@ -45,7 +45,7 @@ async def list_simulation_params_by_simulation_id(simulation_id: Annotated[int, 
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [
-            map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param, lds_simulation_param_def)
+            map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param, lds_simulation_param_def, simulation_id)
             for lds_simulation_param, lds_simulation_param_def in page.items
         ]
         return page
@@ -55,8 +55,45 @@ async def list_simulation_params_by_simulation_id(simulation_id: Annotated[int, 
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@router.get('/{simulation_id}/param/all', response_model=CustomPage[api.SimulationParam] | api.Error)
+async def list_required_simulation_params(simulation_id: Annotated[int, Path()],
+                                                  engine: Annotated[Engine, Depends(get_engine)],
+                                                  params: Annotated[CustomParams, Depends()],
+                                                  _: Annotated[None, Depends(use_custom_page)],
+                                                  odata_filter: Annotated[str | None, Query(alias='filter')] = None):
+    try:
+        statement = select(1).where(lds.Simulation.ID == literal(simulation_id))  # noqa
+        with Session(engine) as session:
+            simulation_exists = session.execute(statement).first()
+        if not simulation_exists:
+            error = api.Error(code=status.HTTP_404_NOT_FOUND, message='No simulation with id = ' + str(simulation_id))
+            return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+
+        statement = (
+            select(lds.SimulationParamDef, lds.SimulationParam, lds.Simulation)
+            .join(lds.SimulationParamDef, lds.Simulation.SimulationDefID == lds.SimulationParamDef.SimulationDefID) # noqa
+            .join(lds.SimulationParam,
+                  and_(lds.SimulationParamDef.ID == lds.SimulationParam.SimulationParamDefID, lds.Simulation.ID == lds.SimulationParam.SimulationID), isouter=True)
+            .where(lds.Simulation.ID == literal(simulation_id))
+            .order_by(lds.SimulationParamDef.ID))
+
+        if odata_filter is not None:
+            statement = apply_odata_query(statement, odata_filter)
+        with Session(engine) as session:
+            page = paginate(session, statement, params=params)
+        page.items = [
+            map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param, lds_simulation_param_def, simulation_id)
+            for lds_simulation_param_def, lds_simulation_param, _ in page.items
+        ]
+        return page
+    except Exception as e:
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                      message='Exception in list_simulation_params_by_simulation_id(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @router.get('/{simulation_id}/param/{simulation_param_def_id}', response_model=api.SimulationParam | api.Error)
-async def get_simulation_param_by_simulation_param_def_id(simulation_id: Annotated[int, Path()],
+async def get_simulation_param_by_id(simulation_id: Annotated[int, Path()],
                                                           simulation_param_def_id: Annotated[str, Path()],
                                                           engine: Annotated[Engine, Depends(get_engine)]):
     try:
@@ -85,7 +122,7 @@ async def get_simulation_param_by_simulation_param_def_id(simulation_id: Annotat
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         lds_simulation_param, lds_simulation_param_def = results[0]
         return map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param,
-                                                                                             lds_simulation_param_def)
+                                                                                             lds_simulation_param_def, simulation_id)
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                       message='Exception in get_simulation_param_by_simulation_param_def_id(): ' + str(e))
@@ -118,7 +155,7 @@ async def update_simulation_param(simulation_id: Annotated[int, Path()],
             lds_simulation_param = lds_simulation_param[0][0]
             lds_simulation_param.Value = updated_simulation_param_value
             session.commit()
-        return await get_simulation_param_by_simulation_param_def_id(simulation_id, simulation_param_def_id, engine)
+        return await get_simulation_param_by_id(simulation_id, simulation_param_def_id, engine)
     except IntegrityError:
         error = api.Error(code=status.HTTP_409_CONFLICT, message='Integrity error when updating simulation')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
@@ -149,7 +186,7 @@ async def create_simulation_param(simulation_id: Annotated[int, Path()],
             session.commit()
             session.refresh(lds_simulation_param)
         simulation_param_out = (map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out
-                   (lds_simulation_param, lds_simulation_param_def))
+                   (lds_simulation_param, lds_simulation_param_def, simulation_id))
 
         return JSONResponse(content=simulation_param_out.model_dump(), status_code=status.HTTP_201_CREATED)
     except IntegrityError:

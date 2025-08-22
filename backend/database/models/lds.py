@@ -350,9 +350,6 @@ class SimulationParam(base.SimulationParam, table=True):
     SimulationDefID: str = Field(sa_column=Column(
         CHAR(20, 'SQL_Polish_CP1250_CS_AS'),
         nullable=False))
-    SimulationParamDefID: str = Field(sa_column=Column(
-        CHAR(30, 'SQL_Polish_CP1250_CS_AS'),
-        nullable=False))
     SimulationID: int = Field(sa_column=Column(
         Integer,
         ForeignKey("lds.Simulation.ID", ondelete="CASCADE", onupdate="CASCADE"),

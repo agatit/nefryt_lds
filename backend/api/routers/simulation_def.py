@@ -12,7 +12,7 @@ from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
 from ..schemas import api
 
-router = APIRouter(prefix="/simulation_def", tags=["simulation"], dependencies=[Depends(get_user_token)])
+router = APIRouter(prefix="/simulation_def", tags=["simulation_def"], dependencies=[Depends(get_user_token)])
 
 
 @router.get('', response_model=CustomPage[lds.SimulationDef] | api.Error)

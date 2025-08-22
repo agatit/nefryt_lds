@@ -12,8 +12,15 @@ def map_lds_event_and_lds_event_def_to_event_out(lds_event: lds.Event, lds_event
     return api.Event(**lds_event_dict)
 
 
-def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam, lds_trend_param_def: lds.TrendParamDef) -> api.TrendParam: # noqa
-    lds_trend_param_dict = to_dict(lds_trend_param)
+def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam | None, lds_trend_param_def: lds.TrendParamDef, trend_id: int) -> api.TrendParam:
+    if lds_trend_param is None:
+        lds_trend_param_dict = {
+            'TrendID': trend_id,
+            'TrendParamDefID': lds_trend_param_def.ID,
+            'Value': None
+        }
+    else:
+        lds_trend_param_dict = to_dict(lds_trend_param)
     lds_trend_param_def_dict = to_dict(lds_trend_param_def)
     lds_trend_param_def_dict.pop('TrendDefID')
     lds_trend_param_def_dict.pop('ID')
@@ -71,9 +78,16 @@ def map_lds_node_and_editor_node_to_node_out(lds_node: lds.Node, editor_node: ed
 
 
 def map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out\
-                (lds_simulation_param: lds.SimulationParam, lds_simulation_param_def: lds.SimulationParamDef) -> api.SimulationParam:
-    lds_simulation_param_dict = to_dict(lds_simulation_param)
-    lds_simulation_param_dict.pop('SimulationDefID')
+                (lds_simulation_param: lds.SimulationParam | None, lds_simulation_param_def: lds.SimulationParamDef, simulation_id: int) -> api.SimulationParam:
+    if lds_simulation_param is None:
+        lds_simulation_param_dict = {
+            'SimulationID': simulation_id,
+            'SimulationParamDefID': lds_simulation_param_def.ID,
+            'Value': None
+        }
+    else:
+        lds_simulation_param_dict = to_dict(lds_simulation_param)
+        lds_simulation_param_dict.pop('SimulationDefID')
     lds_simulation_param_def_dict = to_dict(lds_simulation_param_def)
     lds_simulation_param_def_dict.pop('SimulationDefID')
     lds_simulation_param_def_dict.pop('ID')

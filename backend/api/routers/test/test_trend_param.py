@@ -167,6 +167,78 @@ def test_list_trend_params_should_return_ok_response_code_and_data_filtered_by_o
     assert returned_trend_param['Name'] == trend_param_def3.Name.strip()
 
 
+@pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
+def test_list_required_trend_params_should_return_ok_response_code_and_empty_list_when_no_trend_param_defs_for_given_trend_id(add_lds_objects):  # noqa
+    response = test_client.get("/trend/" + str(trend1.ID) + "/param/all")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()['items']) == 0
+
+
+def test_list_required_trend_params_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+    response = test_client.get("/trend/" + str(trend1.ID) + "/param/all")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    error = response.json()
+    assert error['code'] == status.HTTP_404_NOT_FOUND
+    assert error['message'] == 'No trend with id = ' + str(trend1.ID)
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_required_trend_params_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(add_lds_objects):
+    response = test_client.get("/trend/" + str(trend3.ID) + "/param/all")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == len(trend_param_list)
+    for expected_trend_param_def, expected_trend_param, returned_trend_param in (
+            zip(trend_param_def_list, trend_param_list, items)):
+        assert returned_trend_param['TrendID'] == trend3.ID
+        assert returned_trend_param['Value'] is None
+        assert returned_trend_param['TrendParamDefID'] == expected_trend_param.TrendParamDefID.strip()
+        assert returned_trend_param['DataType'] == expected_trend_param_def.DataType.strip()
+        assert returned_trend_param['Name'] == expected_trend_param_def.Name.strip()
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_required_trend_params_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 2
+    page = 1
+    response = test_client.get("/trend/" + str(trend3.ID) + f"/param/all?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == size
+    assert response.json()['total'] == len(trend_param_list)
+    assert response.json()['pages'] == len(trend_param_list) // size if len(trend_param_list) % size == 0 \
+        else len(trend_param_list) // size + 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_required_trend_params_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/trend/" + str(trend3.ID) + "/param/all")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(trend_param_list)
+    assert response.json()['total'] == len(trend_param_list)
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_required_trend_params_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'ID eq \'{trend_param_def3.ID.strip()}\''
+    response = test_client.get("/trend/" + str(trend3.ID) + f"/param/all?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_trend_param = items[0]
+    assert returned_trend_param['TrendID'] == trend3.ID
+    assert returned_trend_param['Value'] is None
+    assert returned_trend_param['TrendParamDefID'] == trend_param3.TrendParamDefID.strip()
+    assert returned_trend_param['DataType'] == trend_param_def3.DataType.strip()
+    assert returned_trend_param['Name'] == trend_param_def3.Name.strip()
+
+
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
 def test_create_trend_param_should_return_created_response_code_and_created_trend_param_data(add_lds_objects):
     trend_param_dict = {'TrendParamDefID': trend_param_def1.ID.strip(), 'Value': '1111'}

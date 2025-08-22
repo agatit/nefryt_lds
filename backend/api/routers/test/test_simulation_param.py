@@ -28,7 +28,7 @@ simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Na
                              ResolutionMeters=500)
 simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
                              ResolutionMeters=10)
-simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
+simulation4 = lds.Simulation(ID=4, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
                              ResolutionMeters=100)
 simulation_list = [simulation1, simulation2, simulation3, simulation4]
 simulation_param_def1 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='DENSITY', Name='Pipeline length', DataType='INT')
@@ -50,6 +50,32 @@ simulation_data3 = lds.SimulationData(SimulationID=1, Time=20, Distance=1000, Da
 simulation_data4 = lds.SimulationData(SimulationID=2, Time=25, Distance=0, Data=1)
 simulation_data5 = lds.SimulationData(SimulationID=2, Time=25, Distance=500, Data=2)
 simulation_data_list = [simulation_data1, simulation_data2, simulation_data3, simulation_data4, simulation_data5]
+
+def reset_simulation_objects():
+    global simulation_def1, simulation_def2, simulation_def_list, trend_def, trend1, trend2, simulation1, \
+        simulation2, simulation3, simulation4, simulation_list, trend_group, unit
+
+    simulation_def1 = lds.SimulationDef(ID='DENSITY', Name='DensitySimulation')
+    simulation_def2 = lds.SimulationDef(ID='WAVE', Name='WaveSimulation')
+    simulation_def_list = [simulation_def1, simulation_def2]
+    trend_def = lds.TrendDef(ID='ID_1', Name='TrendDef1')
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+    trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin=0.2, ScaledMax=1.2,
+                       Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Red')
+    simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
+                                 ResolutionMeters=500)
+    simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
+                                 ResolutionMeters=500)
+    simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
+                                 ResolutionMeters=10)
+    simulation4 = lds.Simulation(ID=4, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
+                                 ResolutionMeters=100)
+    simulation_list = [simulation1, simulation2, simulation3, simulation4]
+
+    return [simulation_def_list, [trend_def], [trend_group], [unit], [trend1, trend2], simulation_list]
 
 
 def reset_simulation_param_objects():
@@ -74,7 +100,7 @@ def reset_simulation_param_objects():
                                  ResolutionMeters=500)
     simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
                                  ResolutionMeters=10)
-    simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
+    simulation4 = lds.Simulation(ID=4, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
                                  ResolutionMeters=100)
     simulation_list = [simulation1, simulation2, simulation3, simulation4]
     simulation_param_def1 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='DENSITY', Name='Pipeline length',
@@ -174,6 +200,78 @@ def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_
     assert returned_simulation_param['SimulationID'] == simulation_param2.SimulationID
     assert returned_simulation_param['SimulationParamDefID'] == simulation_param2.SimulationParamDefID.strip()
     assert returned_simulation_param['Value'] == simulation_param2.Value
+    assert returned_simulation_param['DataType'] == simulation_param_def2.DataType
+    assert returned_simulation_param['Name'] == simulation_param_def2.Name
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_empty_list_when_no_simulation_params_for_given_simulation_id(add_lds_objects):  # noqa
+    response = test_client.get("/simulation/" + str(simulation2.ID) + "/param/all")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()['items']) == 0
+
+
+def test_list_required_simulation_params_by_simulation_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+    response = test_client.get("/simulation/" + str(simulation2.ID) + "/param/all")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    error = response.json()
+    assert error['code'] == status.HTTP_404_NOT_FOUND
+    assert error['message'] == 'No simulation with id = ' + str(simulation2.ID)
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_simulation_params_for_given_simulation_id(add_lds_objects):
+    response = test_client.get("/simulation/" + str(simulation4.ID) + "/param/all")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 2
+    for expected_simulation_param_def, expected_simulation_param, returned_simulation_param in (
+            zip(simulation_param_def_list, simulation_param_list, items)):
+        assert returned_simulation_param['SimulationID'] == simulation4.ID
+        assert returned_simulation_param['SimulationParamDefID'] == expected_simulation_param.SimulationParamDefID.strip()
+        assert returned_simulation_param['Value'] is None
+        assert returned_simulation_param['DataType'] == expected_simulation_param_def.DataType
+        assert returned_simulation_param['Name'] == expected_simulation_param_def.Name
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 1
+    page = 2
+    response = test_client.get("/simulation/" + str(simulation4.ID) + f"/param/all?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == size
+    assert response.json()['total'] == 2
+    assert response.json()['pages'] == 2 // size if 2 % size == 0 \
+        else 2 // size + 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/simulation/" + str(simulation4.ID) + "/param/all")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == 2
+    assert response.json()['total'] == 2
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'ID eq \'{simulation_param2.SimulationParamDefID.strip()}\''
+    response = test_client.get("/simulation/" + str(simulation4.ID) + f"/param/all?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_simulation_param = items[0]
+    assert returned_simulation_param['SimulationID'] == simulation4.ID
+    assert returned_simulation_param['SimulationParamDefID'] == simulation_param2.SimulationParamDefID.strip()
+    assert returned_simulation_param['Value'] is None
     assert returned_simulation_param['DataType'] == simulation_param_def2.DataType
     assert returned_simulation_param['Name'] == simulation_param_def2.Name
 

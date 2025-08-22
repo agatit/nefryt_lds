@@ -10,7 +10,7 @@ from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
 from ..schemas import api
 
-router = APIRouter(prefix="/simulation", tags=["simulation"], dependencies=[Depends(get_user_token)])
+router = APIRouter(prefix="/simulation", tags=["simulation_data"], dependencies=[Depends(get_user_token)])
 
 
 @router.get('/{simulation_id}/data', response_model=CustomPage[api.SimulationData] | api.Error)

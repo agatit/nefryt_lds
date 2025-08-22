@@ -33,9 +33,9 @@ class SimulationBase:
                                  f'for simulation {self.lds_simulation.ID}')
 
         try:
-           flow_trend_id = self.params['FLOW_TREND']
+           flow_trend_id = self.params['FLOW_TREND_ID']
         except KeyError:
-            raise ValueError(f'No param \'FLOW_TREND\' for simulation {self.lds_simulation.ID}')
+            raise ValueError(f'No param \'FLOW_TREND_ID\' for simulation {self.lds_simulation.ID}')
 
         self._read_flow_trend(flow_trend_id)
         if self.flow_trend is None:
