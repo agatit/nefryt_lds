@@ -1,0 +1,12 @@
+{
+  "element_created_successfully": "Element utworzony pomyślnie",
+  "element_updated_successfully": "Element zaktualizowany pomyślnie",
+  "element_deleted_successfully": "Element usunięty pomyślnie",
+  "failed_request_reload_and_try_again": "Żądanie się nie powiodło! Odśwież stronę i spróbuj ponownie",
+  "failed_request_you_dont_have_permission_action": "Żądanie się nie powiodło! Nie masz uprawnienie do wykonania tej akcji",
+  "no_data": "Brak danych",
+  "server_is_teapot_you_little_dum_dum": "Serwer jest czajnikiem ty mały głuptasku!",
+  "failed_request_internal_server_error": "Żądanie się nie powiodło! Błąd wewnętrzny serwera",
+  "failed_request_server_is_not_responding": "Żądanie się nie powiodło! Serwer nie odpowiada",
+  "encountered_unknown_error_while_fetching_data": "Napotkano nieznany błąd podczas próby żądania"
+}

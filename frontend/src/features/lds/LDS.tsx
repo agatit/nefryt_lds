@@ -46,7 +46,6 @@ import {
   UnitApi,
 } from "../../services/api";
 import { axiosInstance, host } from "../../lib/apiUtilities";
-import { useRefreshableRequest } from "../../hooks/useRefreshableRequest";
 import {
   mockupTrendDefs,
   mockupTrendGroups,
@@ -56,6 +55,7 @@ import {
   mockupUnits,
 } from "../../data/mockup-data";
 import { Loader } from "@progress/kendo-react-indicators";
+import { useHandleApiResponse } from "../../hooks/useHandleApiResponse";
 
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav", "kendo"]);
@@ -144,7 +144,7 @@ export default function LDS() {
 
   // LDS context and data loading
   const auth = React.useContext(AuthContext);
-  const refreshableRequest = useRefreshableRequest();
+  const handleApiResponse = useHandleApiResponse();
 
   const trendDefApi = React.useMemo(
     () => new TrendDefApi(auth?.config, host, axiosInstance),
@@ -195,8 +195,8 @@ export default function LDS() {
       }
 
       try {
-        const response = await refreshableRequest(
-          trendApi.createTrendTrendPost,
+        const response = await handleApiResponse(
+          trendApi.createTrendTrendPost.bind(trendApi),
           value
         );
         console.log(response);
@@ -222,7 +222,7 @@ export default function LDS() {
 
       const { ID, ...updateTrend } = value;
       try {
-        // const response = await refreshableRequest(trendApi.updateTrendTrendTrendIdPut, ID, updateTrend); // api updateTrend type needs fixing
+        // const response = await handleApiResponse(trendApi.updateTrendTrendTrendIdPut, ID, updateTrend); // api updateTrend type needs fixing
       } catch (error) {
         console.log(error);
       }
@@ -238,8 +238,8 @@ export default function LDS() {
       }
 
       try {
-        const response = await refreshableRequest(
-          trendApi.deleteTrendByIdTrendTrendIdDelete,
+        const response = await handleApiResponse(
+          trendApi.deleteTrendByIdTrendTrendIdDelete.bind(trendApi),
           value.ID
         );
         console.log(response);
@@ -259,8 +259,8 @@ export default function LDS() {
       }
 
       try {
-        const response = await refreshableRequest(
-          trendGroupApi.createTrendGroupTrendGroupPost,
+        const response = await handleApiResponse(
+          trendGroupApi.createTrendGroupTrendGroupPost.bind(trendGroupApi),
           value
         );
         console.log(response);
@@ -286,8 +286,10 @@ export default function LDS() {
 
       const { ID, ...updateTrendGroup } = value;
       try {
-        const response = await refreshableRequest(
-          trendGroupApi.updateTrendGroupTrendGroupTrendGroupIdPut,
+        const response = await handleApiResponse(
+          trendGroupApi.updateTrendGroupTrendGroupTrendGroupIdPut.bind(
+            trendGroupApi
+          ),
           ID,
           updateTrendGroup
         );
@@ -316,8 +318,10 @@ export default function LDS() {
       }
 
       try {
-        const response = await refreshableRequest(
-          trendGroupApi.deleteTrendGroupByIdTrendGroupTrendGroupIdDelete,
+        const response = await handleApiResponse(
+          trendGroupApi.deleteTrendGroupByIdTrendGroupTrendGroupIdDelete.bind(
+            trendGroupApi
+          ),
           value.ID
         );
         console.log(response);
@@ -339,8 +343,8 @@ export default function LDS() {
       }
 
       try {
-        const response = await refreshableRequest(
-          unitApi.createUnitUnitPost,
+        const response = await handleApiResponse(
+          unitApi.createUnitUnitPost.bind(unitApi),
           value
         );
         console.log(response);
@@ -366,8 +370,8 @@ export default function LDS() {
 
       const { ID, ...updateUnit } = value;
       try {
-        const response = await refreshableRequest(
-          unitApi.updateUnitUnitUnitIdPut,
+        const response = await handleApiResponse(
+          unitApi.updateUnitUnitUnitIdPut.bind(unitApi),
           ID,
           updateUnit
         );
@@ -394,8 +398,8 @@ export default function LDS() {
       }
 
       try {
-        const response = await refreshableRequest(
-          unitApi.deleteUnitByIdUnitUnitIdDelete,
+        const response = await handleApiResponse(
+          unitApi.deleteUnitByIdUnitUnitIdDelete.bind(unitApi),
           value.ID
         );
         console.log(response);
@@ -409,7 +413,7 @@ export default function LDS() {
 
   const LoadData = React.useCallback(async () => {
     //maybe split into separate function to avoid .then() mess
-    refreshableRequest(trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi))
+    handleApiResponse(trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi))
       .then((response) => {
         console.log(response);
         if (response?.data) setTrendDefs(response?.data.items);
@@ -418,7 +422,7 @@ export default function LDS() {
         console.log(error);
       });
 
-    refreshableRequest(
+    handleApiResponse(
       trendGroupApi.listTrendGroupsTrendGroupGet.bind(trendGroupApi)
     )
       .then((response) => {
@@ -429,7 +433,7 @@ export default function LDS() {
         console.log(error);
       });
 
-    refreshableRequest(unitApi.listUnitsUnitGet.bind(unitApi))
+    handleApiResponse(unitApi.listUnitsUnitGet.bind(unitApi))
       .then((response) => {
         console.log(response);
         if (response?.data) setUnits(response?.data.items);
@@ -438,7 +442,7 @@ export default function LDS() {
         console.log(error);
       });
 
-    refreshableRequest(trendApi.listTrendsTrendGet.bind(trendApi))
+    handleApiResponse(trendApi.listTrendsTrendGet.bind(trendApi))
       .then((response) => {
         console.log(response);
         if (response?.data) setTrends(response?.data.items);

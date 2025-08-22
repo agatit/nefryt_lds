@@ -9,8 +9,6 @@ import {
   mockupTrends,
   mockupUnits,
 } from "../../../../data/mockup-data";
-import { AuthContext } from "../../../../contexts/authContext";
-import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { useTranslation } from "react-i18next";
 import { Typography } from "@progress/kendo-react-common";
 
@@ -37,7 +35,6 @@ import TrendDefConfigurationDetailPanel from "./TrendDefConfigurationDetailPanel
 import TrendGroupConfigurationDetailPanel from "./TrendGroupConfigurationDetailPanel";
 import TrendUnitConfigurationDetailPanel from "./TrendUnitConfigurationDetailPanel";
 import { LDSContext } from "../../contexts/ldsContext";
-import { NavbarContext } from "../../../../contexts/navbarContext";
 import TrendParamDefConfiguration from "./TrendParamDefConfiguration";
 import TrendParamDefConfigurationDetailPanel from "./TrendParamDefConfigurationDetailPanel";
 
@@ -56,8 +53,6 @@ export interface ParsedTrendType extends Trend {
 }
 
 const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
-  const auth = React.useContext(AuthContext);
-  const refreshableRequest = useRefreshableRequest();
   const { t } = useTranslation(["common", "config-page"]);
 
   const ldsContex = React.useContext(LDSContext);

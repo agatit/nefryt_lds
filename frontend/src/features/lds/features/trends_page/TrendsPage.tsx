@@ -9,9 +9,9 @@ import {
   Unit,
   TemplateApi,
   TemplateBase,
+  TrendDataMultiple,
 } from "../../../../services/api";
 
-import { useRefreshableRequest } from "../../../../hooks/useRefreshableRequest";
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
 import "../../../../styles/layouts/detail-panel.scss";
 import "../../../../styles/features/lds/features/trendPage.scss";
@@ -35,6 +35,8 @@ import { NavbarContext } from "../../../../contexts/navbarContext";
 import { SvgIcon, Typography } from "@progress/kendo-react-common";
 import { useTranslation } from "react-i18next";
 import { arrowRightIcon } from "@progress/kendo-svg-icons";
+import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
+import { AppContext } from "../../../../contexts/appContext";
 
 const mainChartSampleSize = 500;
 const navigationChartSampleSize = 50;
@@ -110,8 +112,9 @@ function generateValue(date: Date, chart: number): number {
 
 export default function TrendsPage() {
   const auth = React.useContext(AuthContext);
-  const refreshableRequest = useRefreshableRequest();
+  const handleApiResponse = useHandleApiResponse();
   const { t } = useTranslation(["common", "trends-page"]);
+  const appContext = React.useContext(AppContext);
 
   // UI STUFF
   const [startDate, setStartDate] = React.useState<Date>(() => {
@@ -203,7 +206,14 @@ export default function TrendsPage() {
 
   const handleSelectedTemplateChange = React.useCallback(
     (template: Template) => {
-      if (template.Axes == null || template.Axes.length == 0) return;
+      if (template.Axes == null || template.Axes.length == 0) {
+        appContext.showNotification({
+          notificationType: { icon: true, style: "warning" },
+          message: t("trends-page:selected_template_is_empty"),
+        });
+        setTimeout(appContext.closeNotification.bind(appContext), 5000);
+        return;
+      }
 
       const newAxesState: AxisType[] = [];
       for (let axis of template.Axes) {
@@ -231,7 +241,7 @@ export default function TrendsPage() {
 
   const loadTemplates = React.useCallback(async () => {
     try {
-      const response = await refreshableRequest(
+      const response = await handleApiResponse(
         templateApi.listTemplatesTemplateGet.bind(templateApi)
       );
       console.log(response);
@@ -268,7 +278,7 @@ export default function TrendsPage() {
         setTemplates([...templates, { ...newTemplate, ID: templates.length }]);
 
       try {
-        const response = await refreshableRequest(
+        const response = await handleApiResponse(
           templateApi.createTemplateTemplatePost.bind(templateApi),
           newTemplate
         );
@@ -318,18 +328,27 @@ export default function TrendsPage() {
     }
 
     try {
-      const response = await refreshableRequest(
+      const response = await handleApiResponse(
         ldsContex!.trendApi.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
           ldsContex!.trendApi
         ),
         trendIdList,
-        startDate.getTime(),
-        endDate.getTime(),
+        Math.floor(startDate.getTime() / 1000),
+        Math.floor(endDate.getTime() / 1000),
         mainChartSampleSize,
         1,
         1000
       );
       console.log(response);
+
+      if (response.status == 404) {
+        setLoadingTrendsDataState({
+          mainDataLoaded: true,
+          navDataLoaded: true,
+        });
+        return;
+      }
+
       const newTrendsData: ChartSeriesTrendData[] = trendIdArr.map((id) => {
         return {
           data: [],
@@ -337,7 +356,8 @@ export default function TrendsPage() {
           color: ldsContex!.trends.find((trend) => trend.ID == id)?.Color!,
         };
       });
-      response?.data.items.forEach((item) => {
+
+      response?.data.items.forEach((item: TrendDataMultiple) => {
         const timestamp = new Date(item.Timestamp * 1000);
         item.Data?.forEach((dataitem) => {
           const index = newTrendsData.findIndex((td) => td.id == dataitem.ID);
@@ -439,14 +459,7 @@ export default function TrendsPage() {
   React.useEffect(() => {
     setLoadingTrendsDataState({ mainDataLoaded: false, navDataLoaded: false });
     useMockup ? generateTestData() : loadTrendsData();
-  }, [
-    useMockup,
-    startDate,
-    endDate,
-    axesState,
-    generateTestData,
-    loadTrendsData,
-  ]);
+  }, [useMockup, startDate, endDate, axesState, generateTestData]);
 
   return (
     <React.Fragment>
