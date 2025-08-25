@@ -1,11 +1,11 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendDefBase } from "../../../../services/api";
+import { TrendDef } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
 
 export interface TrendDefConfigurationDetailPanelProps {
-  selected: TrendDefBase | null;
+  selected: TrendDef | null;
 }
 
 const TrendDefConfigurationDetailPanel = React.memo(
@@ -14,12 +14,9 @@ const TrendDefConfigurationDetailPanel = React.memo(
   }: TrendDefConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
 
-    const setSelectedData = React.useCallback(
-      (selectedTrendDef: TrendDefBase) => {
-        setTrendDefName(selectedTrendDef.Name ?? "");
-      },
-      []
-    );
+    const setSelectedData = React.useCallback((selectedTrendDef: TrendDef) => {
+      setTrendDefName(selectedTrendDef.Name ?? "");
+    }, []);
     const [trendDefName, setTrendDefName] = React.useState<string | undefined>(
       selected?.Name ?? ""
     );

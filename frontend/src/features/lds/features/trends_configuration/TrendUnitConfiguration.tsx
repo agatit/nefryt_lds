@@ -14,7 +14,7 @@ import {
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendDefBase, Unit } from "../../../../services/api";
+import { Unit } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { Label } from "@progress/kendo-react-labels";
@@ -112,6 +112,7 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
 
   const confirmDeletion = React.useCallback(async () => {
     await deleteUnit(selected!);
+    closeDeletionDialog();
   }, [selected, deleteUnit]);
 
   return (

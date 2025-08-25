@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendDefBase, Unit } from "../../../../services/api";
+import { Unit, UnitCreate } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
 import {
@@ -79,8 +79,8 @@ const TrendUnitConfigurationDetailPanel = React.memo(
     const saveEdit = React.useCallback(async () => {
       const newUnit: Unit = {
         ID: unitID!,
-        Name: unitName,
-        Symbol: unitSymbol,
+        Name: unitName!,
+        Symbol: unitSymbol!,
         Multiplier: unitMultiplier,
       };
 

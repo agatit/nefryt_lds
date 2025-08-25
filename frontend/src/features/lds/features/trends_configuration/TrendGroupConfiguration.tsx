@@ -14,7 +14,7 @@ import {
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendDefBase, TrendGroup } from "../../../../services/api";
+import { TrendGroup } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { Label } from "@progress/kendo-react-labels";

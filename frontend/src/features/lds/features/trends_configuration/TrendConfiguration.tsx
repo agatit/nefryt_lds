@@ -27,12 +27,7 @@ import {
 import React from "react";
 import { ParsedTrendType } from "./TrendConfigurationPage";
 import { useTranslation } from "react-i18next";
-import {
-  Trend,
-  TrendDefBase,
-  TrendGroup,
-  Unit,
-} from "../../../../services/api";
+import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
 import { rgbaToHex } from "../../../../lib/utilis";
 import ColorGridCell from "../../components/ColorGridCell";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
@@ -41,7 +36,7 @@ export interface TrendConfigurationProps {
   showDialog: boolean;
   openDialog: () => void;
   closeDialog: () => void;
-  trendDefs: TrendDefBase[];
+  trendDefs: TrendDef[];
   trendGroups: TrendGroup[];
   units: Unit[];
   trends: Trend[];
@@ -68,13 +63,13 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
 
   const data = React.useMemo((): ParsedTrendType[] => {
     return trends.map((trend): ParsedTrendType => {
-      // const unit = units.find((unit) => unit.ID == trend.UnitID)!; //waiting for unit api fix
+      const unit = units.find((unit) => unit.ID == trend.UnitID)!;
       return {
         ...trend,
         trendType: trendDefs.find((def) => def.ID == trend.TrendDefID)!.Name!,
         trendGroup: trendGroups.find((group) => group.ID == trend.TrendGroupID)!
           .Name!,
-        // unit: unit.Name! + " " + unit.Symbol!, //waiting for unit api fix
+        unit: unit.Name! + " [" + unit.Symbol! + "]",
       };
     });
   }, [trendDefs, trendGroups, trends]);
@@ -94,7 +89,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
   );
 
   const [trendName, setTrendName] = React.useState<string | undefined>();
-  const [trendType, setTrendType] = React.useState<TrendDefBase | undefined>();
+  const [trendType, setTrendType] = React.useState<TrendDef | undefined>();
   const [trendGroup, setTrendGroup] = React.useState<TrendGroup | undefined>();
   const [trendUnit, setTrendUnit] = React.useState<Unit | undefined>();
   const [trendColor, setTrendColor] = React.useState<string | undefined>();
@@ -177,6 +172,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
 
   const confirmDeletion = React.useCallback(async () => {
     await deleteTrend(selected!);
+    closeDeletionDialog();
   }, [selected, deleteTrend]);
 
   return (
@@ -229,7 +225,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
           title={t("config-page:unit")}
           sortable={true}
           groupable={true}
-          field="Unit"
+          field="unit"
         />
         <GridColumn
           title={t("config-page:color")}

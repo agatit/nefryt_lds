@@ -2,7 +2,7 @@ import React, { PropsWithChildren } from "react";
 import {
   Trend,
   TrendApi,
-  TrendDefBase,
+  TrendDef,
   TrendGroup,
   TrendGroupApi,
   Unit,
@@ -11,7 +11,7 @@ import {
 import { MockupTrendParamDefType } from "../../../data/mockup-data";
 
 export type LDSContextType = {
-  trendDefs: TrendDefBase[];
+  trendDefs: TrendDef[];
   trendApi: TrendApi;
   trends: Trend[];
   setTrends: (value: Trend[]) => void;
@@ -36,7 +36,7 @@ export type LDSContextType = {
 export const LDSContext = React.createContext<LDSContextType | null>(null);
 
 interface LDSContextProviderProps extends PropsWithChildren {
-  trendDefs: TrendDefBase[];
+  trendDefs: TrendDef[];
   trendApi: TrendApi;
   trends: Trend[];
   setTrends: (value: Trend[]) => void;

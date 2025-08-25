@@ -7,13 +7,13 @@ import {
 } from "@progress/kendo-react-grid";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendDefBase } from "../../../../services/api";
+import { TrendDef } from "../../../../services/api";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
 export interface TrendDefConfigurationProps {
-  trendDefs: TrendDefBase[];
-  selected: TrendDefBase | null;
-  setSelected: (value: TrendDefBase) => void;
+  trendDefs: TrendDef[];
+  selected: TrendDef | null;
+  setSelected: (value: TrendDef) => void;
 }
 
 const TrendDefConfiguration = React.memo(function TrendDefConfiguration({
@@ -30,7 +30,7 @@ const TrendDefConfiguration = React.memo(function TrendDefConfiguration({
 
   const handleSelectionChange = React.useCallback(
     (event: GridSelectionChangeEvent) => {
-      const item: TrendDefBase = event.endDataItem;
+      const item: TrendDef = event.endDataItem;
       setSelected(item);
       setSelect(event.select);
     },
