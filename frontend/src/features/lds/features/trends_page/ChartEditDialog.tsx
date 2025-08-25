@@ -17,12 +17,7 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { AxisType, TreeViewDataItem } from "./TrendsPage";
-import {
-  Trend,
-  TrendDefBase,
-  TrendGroup,
-  Unit,
-} from "../../../../services/api";
+import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
 import {
   cancelIcon,
   checkIcon,
@@ -34,7 +29,7 @@ import { chartLegendIcon } from "../../components/chartLegendIcon";
 export interface ChartEditDialogProps {
   useMockup: boolean;
   closeDialog: () => void;
-  trendDefs: TrendDefBase[];
+  trendDefs: TrendDef[];
   trendGroups: TrendGroup[];
   units: Unit[];
   mockupTrendTreeData: TreeViewDataItem[];

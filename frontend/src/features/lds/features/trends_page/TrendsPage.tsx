@@ -3,13 +3,14 @@ import { AuthContext } from "../../../../contexts/authContext";
 import {
   Trend,
   TrendApi,
-  TrendDefBase,
+  TrendDef,
   TrendDefApi,
   Template,
   Unit,
   TemplateApi,
-  TemplateBase,
   TrendDataMultiple,
+  TrendDataApi,
+  TemplateCreate,
 } from "../../../../services/api";
 
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
@@ -261,7 +262,7 @@ export default function TrendsPage() {
 
   const handleCreateNewTemplate = React.useCallback(
     async (name: string) => {
-      let newTemplate: TemplateBase = {
+      let newTemplate: TemplateCreate = {
         Name: name,
         Axes: axesState.map((axis) => {
           const unit = ldsContex!.units.find((u) => u.Symbol == axis.Unit);
@@ -292,6 +293,9 @@ export default function TrendsPage() {
   );
 
   // trends data
+  const trendDataApi = React.useRef<TrendDataApi>(
+    new TrendDataApi(auth?.config, host, axiosInstance)
+  );
   const [trendsData, setTrendsData] = React.useState<ChartSeriesTrendData[]>(
     []
   );
@@ -329,8 +333,8 @@ export default function TrendsPage() {
 
     try {
       const response = await handleApiResponse(
-        ldsContex!.trendApi.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
-          ldsContex!.trendApi
+        trendDataApi.current.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
+          trendDataApi.current
         ),
         trendIdList,
         Math.floor(startDate.getTime() / 1000),

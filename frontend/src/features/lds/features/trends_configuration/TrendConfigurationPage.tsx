@@ -12,12 +12,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Typography } from "@progress/kendo-react-common";
 
-import {
-  Trend,
-  TrendDefBase,
-  TrendGroup,
-  Unit,
-} from "../../../../services/api";
+import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
 import {
   Splitter,
   SplitterOnChangeEvent,
@@ -41,7 +36,7 @@ import TrendParamDefConfigurationDetailPanel from "./TrendParamDefConfigurationD
 export interface SelectionType {
   trend: ParsedTrendType | null;
   trendParamDef: MockupTrendParamDefType | null;
-  trendDef: TrendDefBase | null;
+  trendDef: TrendDef | null;
   trendGroup: TrendGroup | null;
   unit: Unit | null;
 }
@@ -49,7 +44,7 @@ export interface SelectionType {
 export interface ParsedTrendType extends Trend {
   trendType: string;
   trendGroup: string;
-  // unit: string; //waiting for unit api fix
+  unit: string;
 }
 
 const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
@@ -151,18 +146,15 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     []
   );
 
-  const handleSelectedTrendDefChange = React.useCallback(
-    (value: TrendDefBase) => {
-      setSelection({
-        trend: null,
-        trendParamDef: null,
-        trendDef: value,
-        trendGroup: null,
-        unit: null,
-      });
-    },
-    []
-  );
+  const handleSelectedTrendDefChange = React.useCallback((value: TrendDef) => {
+    setSelection({
+      trend: null,
+      trendParamDef: null,
+      trendDef: value,
+      trendGroup: null,
+      unit: null,
+    });
+  }, []);
 
   const handleSelectedTrendGroupChange = React.useCallback(
     (value: TrendGroup) => {

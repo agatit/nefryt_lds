@@ -38,10 +38,9 @@ import {
   Trend,
   TrendApi,
   TrendDefApi,
-  TrendDefBase,
+  TrendDef,
   TrendGroup,
   TrendGroupApi,
-  TrendParamBase,
   Unit,
   UnitApi,
 } from "../../services/api";
@@ -163,7 +162,7 @@ export default function LDS() {
     [auth]
   );
 
-  const [trendDefs, setTrendDefs] = React.useState<TrendDefBase[]>(
+  const [trendDefs, setTrendDefs] = React.useState<TrendDef[]>(
     nav.useMockup ? mockupTrendDefs : []
   );
   const [trendGroups, setTrendGroups] = React.useState<TrendGroup[]>(
@@ -186,7 +185,6 @@ export default function LDS() {
     setTrendParamDefs(mockupTrendParamDefs);
   }, [nav.useMockup]);
 
-  // TODO ADD HOOK TO HANDLE ALL ERRORS
   const addTrend = React.useCallback(
     async (value: Trend) => {
       if (nav.useMockup) {
@@ -222,7 +220,19 @@ export default function LDS() {
 
       const { ID, ...updateTrend } = value;
       try {
-        // const response = await handleApiResponse(trendApi.updateTrendTrendTrendIdPut, ID, updateTrend); // api updateTrend type needs fixing
+        const response = await handleApiResponse(
+          trendApi.updateTrendTrendTrendIdPut.bind(trendApi),
+          ID,
+          updateTrend
+        );
+        console.log(response);
+        if (response?.data)
+          setTrends(
+            trends.map((trend) => {
+              if (trend.ID == response.data.ID) return response.data;
+              return trend;
+            })
+          );
       } catch (error) {
         console.log(error);
       }

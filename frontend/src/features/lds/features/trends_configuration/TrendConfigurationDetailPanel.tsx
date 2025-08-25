@@ -19,18 +19,13 @@ import {
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Trend,
-  TrendDefBase,
-  TrendGroup,
-  Unit,
-} from "../../../../services/api";
+import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
 import { ParsedTrendType } from "./TrendConfigurationPage";
 import { rgbaToHex } from "../../../../lib/utilis";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 export interface TrendConfigurationDetailPanelProps {
-  trendDefs: TrendDefBase[];
+  trendDefs: TrendDef[];
   trendGroups: TrendGroup[];
   units: Unit[];
   editTrend: (value: Trend) => Promise<void>;
@@ -83,7 +78,7 @@ const TrendConfigurationDetailPanel = React.memo(
     const [trendName, setTrendName] = React.useState<string | undefined>(
       selected?.Name!
     );
-    const [trendType, setTrendType] = React.useState<TrendDefBase | undefined>(
+    const [trendType, setTrendType] = React.useState<TrendDef | undefined>(
       trendDefs.find((def) => def.ID == selected?.TrendDefID)
     );
     const [trendGroup, setTrendGroup] = React.useState<TrendGroup | undefined>(

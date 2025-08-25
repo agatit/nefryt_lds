@@ -2,13 +2,7 @@ import {
   AxisType,
   TreeViewDataItem,
 } from "../features/lds/features/trends_page/TrendsPage";
-import {
-  Template,
-  Trend,
-  TrendDefBase,
-  TrendGroup,
-  Unit,
-} from "../services/api";
+import { Template, Trend, TrendDef, TrendGroup, Unit } from "../services/api";
 
 // export type MockupTrendType = {
 //   ID: number;
@@ -19,7 +13,7 @@ import {
 //   Unit: string;
 // };
 
-export const mockupTrendDefs: TrendDefBase[] = [
+export const mockupTrendDefs: TrendDef[] = [
   {
     ID: "QUICK",
     Name: "Point series trend",

@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendDefBase, TrendGroup } from "../../../../services/api";
+import { TrendGroup } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
 import {
@@ -87,6 +87,7 @@ const TrendGroupConfigurationDetailPanel = React.memo(
     const confirmDeletion = React.useCallback(async () => {
       await deleteTrendGroup(selected!);
       setInEdit(false);
+      closeDialog();
     }, [selected, deleteTrendGroup]);
 
     return (
