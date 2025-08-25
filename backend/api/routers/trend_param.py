@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
-from api.routers.utils import map_lds_trend_param_and_lds_trend_param_def_to_trend_param, get_user_token
+from api.routers.utils import map_lds_trend_param_and_lds_trend_param_def_to_trend_param, get_user_token, strip_strings
 from ..custom_page import CustomParams, CustomPage, use_custom_page
 from db import get_engine
 from ..schemas import api
@@ -16,8 +16,26 @@ from database import lds
 router = APIRouter(prefix="/trend", tags=['trend_param'], dependencies=[Depends(get_user_token)])
 
 
+@router.get('/param/def', response_model=CustomPage[lds.TrendParamDef] | api.Error)
+async def list_trend_param_defs(engine: Annotated[Engine, Depends(get_engine)],
+                                params: Annotated[CustomParams, Depends()],
+                                _: Annotated[None, Depends(use_custom_page)],
+                                odata_filter: Annotated[str | None, Query(alias='filter')] = None):
+    try:
+        statement = select(lds.TrendParamDef).order_by(lds.TrendParamDef.ID)
+        if odata_filter is not None:
+            statement = apply_odata_query(statement, odata_filter)
+        with Session(engine) as session:
+            page = paginate(session, statement, params=params)
+        page.items = [strip_strings(lds_trend_param_def) for lds_trend_param_def in page.items]
+        return page
+    except Exception as e:
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_param_defs(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @router.get('/{trend_id}/param', response_model=CustomPage[api.TrendParam] | api.Error)
-async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
+async def list_trend_params_by_trend_id(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
                             params: Annotated[CustomParams, Depends()], _: Annotated[None, Depends(use_custom_page)],
                             odata_filter: Annotated[str | None, Query(alias='filter')] = None):
     try:
@@ -44,12 +62,12 @@ async def list_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[
         ]
         return page
     except Exception as e:
-        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_params(): ' + str(e))
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_params_by_trend_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.get('/{trend_id}/param/all', response_model=CustomPage[api.TrendParam] | api.Error)
-async def list_required_trend_params(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
+async def list_required_trend_params_by_trend_id(trend_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
                             params: Annotated[CustomParams, Depends()], _: Annotated[None, Depends(use_custom_page)],
                             odata_filter: Annotated[str | None, Query(alias='filter')] = None):
     try:
@@ -76,7 +94,7 @@ async def list_required_trend_params(trend_id: Annotated[int, Path()], engine: A
         ]
         return page
     except Exception as e:
-        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_trend_params(): ' + str(e))
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_required_trend_params_by_trend_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

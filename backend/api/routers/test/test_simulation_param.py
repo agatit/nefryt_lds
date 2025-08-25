@@ -34,7 +34,7 @@ simulation_list = [simulation1, simulation2, simulation3, simulation4]
 simulation_param_def1 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='DENSITY', Name='Pipeline length', DataType='INT')
 simulation_param_def2 = lds.SimulationParamDef(ID='WIDTH', SimulationDefID='DENSITY', Name='Pipeline width', DataType='FLOAT')
 simulation_param_def3 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='WAVE', Name='Pipeline length', DataType='INT')
-simulation_param_def_list = [simulation_param_def1, simulation_param_def2, simulation_param_def3]
+simulation_param_def_list = [simulation_param_def1, simulation_param_def3, simulation_param_def2]
 simulation_param1 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='LENGTH', SimulationDefID=simulation1.SimulationDefID,
                                         Value='1500')
 simulation_param2 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='WIDTH', SimulationDefID=simulation1.SimulationDefID,
@@ -109,7 +109,7 @@ def reset_simulation_param_objects():
                                                    DataType='FLOAT')
     simulation_param_def3 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='WAVE', Name='Pipeline length',
                                                    DataType='INT')
-    simulation_param_def_list = [simulation_param_def1, simulation_param_def2, simulation_param_def3]
+    simulation_param_def_list = [simulation_param_def1, simulation_param_def3, simulation_param_def2]
     simulation_param1 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='LENGTH',
                                             SimulationDefID=simulation1.SimulationDefID,
                                             Value='1500')
@@ -130,6 +130,68 @@ def reset_simulation_param_objects():
 
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
 test_client = TestClient(app)
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
+def test_list_simulation_param_defs_should_return_ok_response_code_and_empty_list_when_no_simulation_param_defs(add_lds_objects):
+    response = test_client.get("/simulation/param/def")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()['items']) == 0
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
+def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_simulation_param_defs(add_lds_objects):
+    response = test_client.get("/simulation/param/def")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == len(simulation_param_def_list)
+    print(items)
+    for expected_simulation_param_def, returned_simulation_param_def in zip(simulation_param_def_list, items):
+        assert returned_simulation_param_def['ID'] == expected_simulation_param_def.ID.strip()
+        assert returned_simulation_param_def['SimulationDefID'] == expected_simulation_param_def.SimulationDefID.strip()
+        assert returned_simulation_param_def['Name'] == expected_simulation_param_def.Name
+        assert returned_simulation_param_def['DataType'] == expected_simulation_param_def.DataType
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
+def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 2
+    page = 2
+    response = test_client.get(f"/simulation/param/def?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(simulation_param_def_list) - size
+    assert response.json()['total'] == len(simulation_param_def_list)
+    assert response.json()['pages'] == len(simulation_param_def_list) // size if len(simulation_param_def_list) % size == 0 \
+        else len(simulation_param_def_list) // size + 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
+def test_list_simulation_param_defs_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/simulation/param/def")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(simulation_param_def_list)
+    assert response.json()['total'] == len(simulation_param_def_list)
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
+def test_list_simulation_param_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'DataType ne \'{simulation_param_def1.DataType}\''
+    response = test_client.get(f"/simulation/param/def?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_simulation_param_def = items[0]
+    assert returned_simulation_param_def['ID'] == simulation_param_def2.ID.strip()
+    assert returned_simulation_param_def['SimulationDefID'] == simulation_param_def2.SimulationDefID.strip()
+    assert returned_simulation_param_def['Name'] == simulation_param_def2.Name
+    assert returned_simulation_param_def['DataType'] == simulation_param_def2.DataType
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
@@ -153,8 +215,9 @@ def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
     assert len(items) == 2
+    expected_simulation_param_def_list = [simulation_param_def1, simulation_param_def2]
     for expected_simulation_param_def, expected_simulation_param, returned_simulation_param in (
-            zip(simulation_param_def_list, simulation_param_list, items)):
+            zip(expected_simulation_param_def_list, simulation_param_list, items)):
         assert returned_simulation_param['SimulationID'] == expected_simulation_param.SimulationID
         assert returned_simulation_param['SimulationParamDefID'] == expected_simulation_param.SimulationParamDefID.strip()
         assert returned_simulation_param['Value'] == expected_simulation_param.Value
@@ -225,8 +288,9 @@ def test_list_required_simulation_params_by_simulation_id_should_return_ok_respo
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
     assert len(items) == 2
+    expected_simulation_param_def_list = [simulation_param_def1, simulation_param_def2]
     for expected_simulation_param_def, expected_simulation_param, returned_simulation_param in (
-            zip(simulation_param_def_list, simulation_param_list, items)):
+            zip(expected_simulation_param_def_list, simulation_param_list, items)):
         assert returned_simulation_param['SimulationID'] == simulation4.ID
         assert returned_simulation_param['SimulationParamDefID'] == expected_simulation_param.SimulationParamDefID.strip()
         assert returned_simulation_param['Value'] is None

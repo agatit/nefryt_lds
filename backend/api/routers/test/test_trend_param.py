@@ -96,13 +96,74 @@ test_client = TestClient(app)
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
-def test_list_trend_params_should_return_ok_response_code_and_empty_list_when_no_trend_params_for_given_trend_id(add_lds_objects):  # noqa
+def test_list_trend_param_defs_should_return_ok_response_code_and_empty_list_when_no_trend_param_defs(add_lds_objects):
+    response = test_client.get("/trend/param/def")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()['items']) == 0
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trend_param_defs_should_return_ok_response_code_and_correct_trend_param_defs(add_lds_objects):
+    response = test_client.get("/trend/param/def")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == len(trend_param_def_list)
+    for expected_trend_param_def, returned_trend_param_def in zip(trend_param_def_list, items):
+        assert returned_trend_param_def['ID'] == expected_trend_param_def.ID.strip()
+        assert returned_trend_param_def['TrendDefID'] == expected_trend_param_def.TrendDefID.strip()
+        assert returned_trend_param_def['Name'] == expected_trend_param_def.Name
+        assert returned_trend_param_def['DataType'] == expected_trend_param_def.DataType
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trend_param_defs_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+    size = 2
+    page = 2
+    response = test_client.get(f"/trend/param/def?size={size}&page={page}")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(trend_param_def_list) - size
+    assert response.json()['total'] == len(trend_param_def_list)
+    assert response.json()['pages'] == len(trend_param_def_list) // size if len(trend_param_def_list) % size == 0 \
+        else len(trend_param_def_list) // size + 1
+    assert response.json()['size'] == size
+    assert response.json()['page'] == page
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trend_param_defs_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+    response = test_client.get("/trend/param/def")
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 5
+    assert len(response.json()['items']) == len(trend_param_def_list)
+    assert response.json()['total'] == len(trend_param_def_list)
+    assert response.json()['pages'] == 1
+    assert response.json()['size'] == 50
+    assert response.json()['page'] == 1
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_list_trend_param_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+    odata_filter = f'DataType ne \'{trend_param_def1.DataType}\''
+    response = test_client.get(f"/trend/param/def?filter={odata_filter}")
+    assert response.status_code == status.HTTP_200_OK
+    items = response.json()['items']
+    assert len(items) == 1
+    returned_trend_param_def = items[0]
+    assert returned_trend_param_def['ID'] == trend_param_def3.ID.strip()
+    assert returned_trend_param_def['TrendDefID'] == trend_param_def3.TrendDefID.strip()
+    assert returned_trend_param_def['Name'] == trend_param_def3.Name
+    assert returned_trend_param_def['DataType'] == trend_param_def3.DataType
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_empty_list_when_no_trend_params_for_given_trend_id(add_lds_objects):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-def test_list_trend_params_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_list_trend_params_by_trend_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -111,7 +172,7 @@ def test_list_trend_params_should_return_not_found_response_code_and_error_when_
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_params_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(add_lds_objects):
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(add_lds_objects):
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -126,7 +187,7 @@ def test_list_trend_params_should_return_ok_response_code_and_correct_trend_para
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_params_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
     size = 3
     page = 1
     response = test_client.get("/trend/" + str(trend1.ID) + f"/param?size={size}&page={page}")
@@ -141,7 +202,7 @@ def test_list_trend_params_should_return_ok_response_code_and_correct_page_data(
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_params_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -153,7 +214,7 @@ def test_list_trend_params_should_return_ok_response_code_and_default_page_data(
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_params_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
     odata_filter = f'Value eq {trend_param3.Value}'
     response = test_client.get("/trend/" + str(trend1.ID) + f"/param?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -168,13 +229,13 @@ def test_list_trend_params_should_return_ok_response_code_and_data_filtered_by_o
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
-def test_list_required_trend_params_should_return_ok_response_code_and_empty_list_when_no_trend_param_defs_for_given_trend_id(add_lds_objects):  # noqa
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_empty_list_when_no_trend_param_defs_for_given_trend_id(add_lds_objects):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-def test_list_required_trend_params_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_list_required_trend_params_by_trend_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
     response = test_client.get("/trend/" + str(trend1.ID) + "/param/all")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -183,7 +244,7 @@ def test_list_required_trend_params_should_return_not_found_response_code_and_er
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_required_trend_params_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(add_lds_objects):
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(add_lds_objects):
     response = test_client.get("/trend/" + str(trend3.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -198,7 +259,7 @@ def test_list_required_trend_params_should_return_ok_response_code_and_correct_t
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_required_trend_params_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
     size = 2
     page = 1
     response = test_client.get("/trend/" + str(trend3.ID) + f"/param/all?size={size}&page={page}")
@@ -213,7 +274,7 @@ def test_list_required_trend_params_should_return_ok_response_code_and_correct_p
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_required_trend_params_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
     response = test_client.get("/trend/" + str(trend3.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -225,7 +286,7 @@ def test_list_required_trend_params_should_return_ok_response_code_and_default_p
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_required_trend_params_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
     odata_filter = f'ID eq \'{trend_param_def3.ID.strip()}\''
     response = test_client.get("/trend/" + str(trend3.ID) + f"/param/all?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK

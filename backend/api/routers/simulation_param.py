@@ -8,8 +8,9 @@ from database import lds
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
-from api.routers.utils import get_user_token, map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out, \
-    map_simulation_param_base_to_lds_simulation_param
+from api.routers.utils import get_user_token, \
+    map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out, \
+    map_simulation_param_base_to_lds_simulation_param, strip_strings
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
 from ..schemas import api
@@ -17,8 +18,27 @@ from ..schemas import api
 router = APIRouter(prefix="/simulation", tags=["simulation_param"], dependencies=[Depends(get_user_token)])
 
 
+@router.get('/param/def', response_model=CustomPage[lds.SimulationParamDef] | api.Error)
+async def list_simulation_param_defs(engine: Annotated[Engine, Depends(get_engine)],
+                                     params: Annotated[CustomParams, Depends()],
+                                     _: Annotated[None, Depends(use_custom_page)],
+                                     odata_filter: Annotated[str | None, Query(alias='filter')] = None):
+    try:
+        statement = select(lds.SimulationParamDef).order_by(lds.SimulationParamDef.ID)
+        if odata_filter is not None:
+            statement = apply_odata_query(statement, odata_filter)
+        with Session(engine) as session:
+            page = paginate(session, statement, params=params)
+        page.items = [strip_strings(lds_simulation_param_def) for lds_simulation_param_def in page.items]
+        return page
+    except Exception as e:
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in list_simulation_param_defs(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 @router.get('/{simulation_id}/param', response_model=CustomPage[api.SimulationParam] | api.Error)
-async def list_simulation_params(simulation_id: Annotated[int, Path()],
+async def list_simulation_params_by_simulation_id(simulation_id: Annotated[int, Path()],
                                                   engine: Annotated[Engine, Depends(get_engine)],
                                                   params: Annotated[CustomParams, Depends()],
                                                   _: Annotated[None, Depends(use_custom_page)],
@@ -56,7 +76,7 @@ async def list_simulation_params(simulation_id: Annotated[int, Path()],
 
 
 @router.get('/{simulation_id}/param/all', response_model=CustomPage[api.SimulationParam] | api.Error)
-async def list_required_simulation_params(simulation_id: Annotated[int, Path()],
+async def list_required_simulation_params_by_simulation_id(simulation_id: Annotated[int, Path()],
                                                   engine: Annotated[Engine, Depends(get_engine)],
                                                   params: Annotated[CustomParams, Depends()],
                                                   _: Annotated[None, Depends(use_custom_page)],
@@ -88,7 +108,7 @@ async def list_required_simulation_params(simulation_id: Annotated[int, Path()],
         return page
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                      message='Exception in list_simulation_params_by_simulation_id(): ' + str(e))
+                      message='Exception in list_required_simulation_params_by_simulation_id(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

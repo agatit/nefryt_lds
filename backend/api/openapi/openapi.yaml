@@ -1509,11 +1509,114 @@ paths:
       summary: Update trend
       tags:
       - trends
-      x-openapi-router-controller: api.controllers.trends_controller
+  /trend/param/def:
+    get:
+      description: List all trend param defs
+      operationId: list_trend_param_defs
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TrendParamDef'
+                type: array
+          description: An array of trend param defs
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: List trend param defs
+      tags:
+        - trends
+  /trend/{trendId}/param/all:
+    get:
+      description: List all required trend params
+      operationId: list_required_trend_params_by_trend_id
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: The id of the trend to retrieve
+          explode: false
+          in: path
+          name: trendId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TrendParam'
+                type: array
+          description: A array of params
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List trend params
+      tags:
+        - trends
   /trend/{trendId}/param:
     get:
       description: List all trend params
-      operationId: list_trend_params
+      operationId: list_trend_params_by_trend_id
       parameters:
         - description: Page number
           in: query
@@ -2446,6 +2549,110 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
       summary: List simulation defs
+      tags:
+        - simulations
+  /simulation/param/def:
+    get:
+      description: List all simulation param defs
+      operationId: list_simulation_param_defs
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SimulationParamDef'
+                type: array
+          description: An array of trend param defs
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: List simulation param defs
+      tags:
+        - simulations
+  /simulation/{simulationId}/param/all:
+    get:
+      description: List all required simulation params
+      operationId: list_required_simulation_params_by_simulation_id
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: The id of the simulation to retrieve
+          explode: false
+          in: path
+          name: simulationId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SimulationParam'
+                type: array
+          description: An array of params
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List simulation params
       tags:
         - simulations
   /simulation/{simulationId}/param:
@@ -3550,6 +3757,25 @@ components:
           title: QueueSize
           type: number
       title: ProfilerGeneralData
+      type: object
+    SimulationParamDef:
+      properties:
+        ID:
+          example: 0
+          nullable: false
+          readOnly: true
+          type: integer
+        SimulationDefID:
+          nullable: false
+          type: integer
+        Name:
+          pattern: ^.{0,30}
+          type: string
+        DataType:
+          pattern: ^.{0,6}
+          type: string
+      required:
+        - SimulationDefID
       type: object
     SimulationDef:
       example:
