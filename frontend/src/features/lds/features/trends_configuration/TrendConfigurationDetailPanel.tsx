@@ -134,10 +134,10 @@ const TrendConfigurationDetailPanel = React.memo(
         TrendGroupID: trendGroup!.ID,
         UnitID: trendUnit!.ID!,
         Color: trendColor!,
-        RawMin: 0,
-        RawMax: 0,
-        ScaledMin: 0,
-        ScaledMax: 0,
+        RawMin: -10000,
+        RawMax: 10000,
+        ScaledMin: -10000,
+        ScaledMax: 10000,
       };
       await editTrend(newTrend);
       setInEdit(false);

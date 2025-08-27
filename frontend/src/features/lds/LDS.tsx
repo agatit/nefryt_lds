@@ -24,7 +24,7 @@ import {
   DrawerRouterItemProps,
 } from "onyks_shared_kendo";
 import KendoLocalizationWrapper from "../../components/KendoLocalizationWrapper";
-import TrendsPage from "./features/trends_page/TrendsPage";
+import TrendsPage from "./features/trends/TrendsPage";
 import TrendConfigurationPage from "./features/trends_configuration/TrendConfigurationPage";
 import LeakProbabilityPage from "./features/LeakProbabilityPage";
 import EventsPage from "./features/EventsPage";
@@ -55,6 +55,7 @@ import {
 } from "../../data/mockup-data";
 import { Loader } from "@progress/kendo-react-indicators";
 import { useHandleApiResponse } from "../../hooks/useHandleApiResponse";
+import TrendsCurrentPage from "./features/trends/TrendsCurrentPage";
 
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav", "kendo"]);
@@ -66,7 +67,6 @@ export default function LDS() {
   const [routerItems, setRouterItems] = React.useState<DrawerRouterItemProps[]>(
     [
       {
-        id: 1,
         text: t("nav:home"),
         svgIcon: homeIcon,
         selected: pathname == "/",
@@ -76,7 +76,15 @@ export default function LDS() {
         separator: true,
       },
       {
-        id: 2,
+        text: t("nav:trends_current_readings"),
+        svgIcon: chartLineIcon,
+        selected: pathname == "/trends-current",
+        route: "/trends-current",
+      },
+      {
+        separator: true,
+      },
+      {
         text: t("nav:trends"),
         svgIcon: chartLineIcon,
         selected: pathname == "/trends",
@@ -86,7 +94,6 @@ export default function LDS() {
         separator: true,
       },
       {
-        id: 3,
         text: t("nav:trend_configuration"),
         svgIcon: wrenchIcon,
         selected: pathname == "/trend-configuration",
@@ -105,7 +112,6 @@ export default function LDS() {
         separator: true,
       },
       {
-        id: 5,
         text: t("nav:events"),
         svgIcon: planIcon,
         selected: pathname == "/events",
@@ -513,6 +519,10 @@ export default function LDS() {
             >
               <Routes>
                 <Route path="/" element={<HomePage key={"home-page"} />} />
+                <Route
+                  path="/trends-current"
+                  element={<TrendsCurrentPage key={"trends-current-page"} />}
+                />
                 <Route
                   path="/trends"
                   element={<TrendsPage key={"trends-page"} />}

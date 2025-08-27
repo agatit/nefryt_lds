@@ -1,7 +1,7 @@
 import {
   AxisType,
   TreeViewDataItem,
-} from "../features/lds/features/trends_page/TrendsPage";
+} from "../features/lds/features/trends/TrendsPage";
 import { Template, Trend, TrendDef, TrendGroup, Unit } from "../services/api";
 
 // export type MockupTrendType = {
@@ -134,7 +134,7 @@ export const mockupTrends: Trend[] = [
     Color: "#ffc459",
     TrendDefID: "DERIV",
     Name: "Pochodna Temperatury 1",
-    UnitID: "°C_s",
+    UnitID: "C_s",
     RawMin: 0,
     RawMax: 10,
     ScaledMin: 0,
@@ -146,7 +146,7 @@ export const mockupTrends: Trend[] = [
     Color: "#4b9dd1",
     TrendDefID: "DERIV",
     Name: "Pochodna Temperatury 2",
-    UnitID: "°C_s",
+    UnitID: "C_s",
     RawMin: 0,
     RawMax: 10,
     ScaledMin: 0,

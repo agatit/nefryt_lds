@@ -18,13 +18,13 @@ import ScaleScrollBar, {
   ScaleScrollBarChangeEvent,
 } from "../../../../components/ScaleScrollBar";
 import { throttle } from "../../../../lib/utilis";
-import { AxisType, ChartSeriesTrendData } from "./TrendsPage";
 import CursorBubble from "../../../../components/CursorBubble";
 import { useResizeObserver } from "../../../../hooks/useResizeObserver";
 import { Loader } from "@progress/kendo-react-indicators";
 import { SvgIcon } from "@progress/kendo-react-common";
 import { xCircleIcon } from "@progress/kendo-svg-icons";
 import { useTranslation } from "react-i18next";
+import { AxisType, ChartSeriesTrendData } from "./utils";
 
 const chartScaleThrottleMs = 50;
 
@@ -36,15 +36,16 @@ interface MinMaxType {
 interface ChartComponentProps {
   isLoadingTrendsData: boolean;
   trendData: ChartSeriesTrendData[];
-  navigatorData: ChartSeriesTrendData[];
+  navigationChart: boolean;
+  navigatorData?: ChartSeriesTrendData[];
   axesState: AxisType[];
   trendMinMaxValue: MinMaxType;
   valueAxisState: MinMaxType[];
   handleOnPlotHover: (event: PlotAreaHoverEvent) => void;
   startDate: Date;
   endDate: Date;
-  navigationStartDate: Date;
-  navigationEndDate: Date;
+  navigationStartDate?: Date;
+  navigationEndDate?: Date;
   isEmpty: boolean;
   highlightedTrendID: number | null;
 }
@@ -52,6 +53,7 @@ interface ChartComponentProps {
 const ChartComponent = React.memo(function ChartComponent({
   isLoadingTrendsData,
   trendData,
+  navigationChart,
   navigatorData,
   axesState,
   trendMinMaxValue,
@@ -119,6 +121,7 @@ const ChartComponent = React.memo(function ChartComponent({
   }, [trendData, axesState, highlightedTrendID]);
 
   const navigationChartSeriesItems = React.useMemo(() => {
+    if (!navigationChart || navigatorData == undefined) return;
     return navigatorData.map((trend) => {
       return (
         <ChartSeriesItem
@@ -184,32 +187,34 @@ const ChartComponent = React.memo(function ChartComponent({
           </ChartNoDataOverlay>
         )}
       </Chart>
-      <Chart
-        key={"navigation-chart"}
-        className="navigation-chart"
-        renderAs="svg"
-        onPlotAreaHover={handleOnPlotHover}
-        transitions={false}
-        style={{ height: "15vh" }}
-      >
-        <ChartCategoryAxis>
-          <ChartCategoryAxisItem
-            baseUnit={"auto"}
-            maxDivisions={20}
-            labels={{ visible: false }}
-            name="navigatorAxis"
-            min={navigationStartDate}
-            max={navigationEndDate}
-          />
-        </ChartCategoryAxis>
-        <ChartValueAxis>
-          <ChartValueAxisItem
-            name="valueNavigatorAxis"
-            labels={{ visible: false }}
-          />
-        </ChartValueAxis>
-        <ChartSeries>{navigationChartSeriesItems}</ChartSeries>
-      </Chart>
+      {navigationChart && (
+        <Chart
+          key={"navigation-chart"}
+          className="navigation-chart"
+          renderAs="svg"
+          onPlotAreaHover={handleOnPlotHover}
+          transitions={false}
+          style={{ height: "15vh" }}
+        >
+          <ChartCategoryAxis>
+            <ChartCategoryAxisItem
+              baseUnit={"auto"}
+              maxDivisions={20}
+              labels={{ visible: false }}
+              name="navigatorAxis"
+              min={navigationStartDate}
+              max={navigationEndDate}
+            />
+          </ChartCategoryAxis>
+          <ChartValueAxis>
+            <ChartValueAxisItem
+              name="valueNavigatorAxis"
+              labels={{ visible: false }}
+            />
+          </ChartValueAxis>
+          <ChartSeries>{navigationChartSeriesItems}</ChartSeries>
+        </Chart>
+      )}
       {isLoadingTrendsData && (
         <Loader
           className="chart-loader"
@@ -362,13 +367,14 @@ export interface TrendChartProps {
   isLoadingTrendsData: boolean;
   startDate: Date;
   endDate: Date;
-  navigationStartDate: Date;
-  navigationEndDate: Date;
+  navigationChart: boolean;
+  navigationStartDate?: Date;
+  navigationEndDate?: Date;
   trendData: ChartSeriesTrendData[];
-  navigatorData: ChartSeriesTrendData[];
+  navigatorData?: ChartSeriesTrendData[];
   axesState: AxisType[];
-  onStartDateChange: (value: Date) => void;
-  onEndDateChange: (value: Date) => void;
+  onStartDateChange?: (value: Date) => void;
+  onEndDateChange?: (value: Date) => void;
   onShowCursorBubbleChange: (value: boolean) => void;
   onCursorBubbleTextChange: (value: string) => void;
   highlightedTrendID: number | null;
@@ -378,6 +384,7 @@ const TrendChart = React.memo(function TrendChart({
   isLoadingTrendsData,
   startDate,
   endDate,
+  navigationChart = false,
   navigationStartDate,
   navigationEndDate,
   trendData,
@@ -561,6 +568,7 @@ const TrendChart = React.memo(function TrendChart({
 
   const handleSelectStart = React.useCallback(
     (handle: HandleType) => {
+      if (!navigationChart) return;
       onShowCursorBubbleChange(true);
       grabbedHandle.current = handle;
       selectStartDate.current = startDate;
@@ -570,9 +578,10 @@ const TrendChart = React.memo(function TrendChart({
   );
 
   const handleSelectEnd = React.useCallback(() => {
+    if (!navigationChart) return;
     onShowCursorBubbleChange(false);
-    onStartDateChange(selectStartDate.current);
-    onEndDateChange(selectEndDate.current);
+    onStartDateChange!(selectStartDate.current);
+    onEndDateChange!(selectEndDate.current);
   }, []);
 
   const handleOnPlotHover = React.useCallback((e: PlotAreaHoverEvent) => {
@@ -603,6 +612,7 @@ const TrendChart = React.memo(function TrendChart({
         <ChartComponent
           isLoadingTrendsData={isLoadingTrendsData}
           trendData={isEmpty ? [] : trendData}
+          navigationChart={navigationChart}
           navigatorData={navigatorData}
           axesState={axesState}
           trendMinMaxValue={trendMinMaxValue}
@@ -617,10 +627,12 @@ const TrendChart = React.memo(function TrendChart({
         />
       </div>
       {scaleScrollBars}
-      <NavigationSelectComponent
-        onSelectStart={handleSelectStart}
-        onSelectEnd={handleSelectEnd}
-      />
+      {navigationChart && (
+        <NavigationSelectComponent
+          onSelectStart={handleSelectStart}
+          onSelectEnd={handleSelectEnd}
+        />
+      )}
     </React.Fragment>
   );
 });
