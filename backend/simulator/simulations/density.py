@@ -5,7 +5,7 @@ from typing import Callable
 import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, and_
 from sqlalchemy.orm import Session
 from database.models import lds
 from db import get_engine
@@ -24,90 +24,198 @@ class SimulationDensityBase(SimulationBase):
             raise ValueError(f'\'WIDTH\' param for simulation {self.lds_simulation.ID} must be a float')
         self.pipeline_area = (pipeline_width/2)**2 * math.pi
         self.previous_correct_density_time = 0
+        self.window_size = 5
+        self.max_flow_gap_in_seconds = 3
         self.density_interp = None
         self.velocity_interp = None
         self.flow_data = None
 
     def calculate_simulation_data_on_start(self):
-        # TODO: load data on start if possible
-        pass
-        # previous_distance = 0
-        # timestamp = current_timestamp - 1
-        # buffer_size = 100
-        # previous_flow = None
-        # previous_density = None
-        #
-        # iter_flow_trend = iter([])
-        # iter_density_trend = iter([])
-        # flow_trend_data = None
-        # density_trend_data = None
-        #
-        # while True:
-        #     if flow_trend_data is None:
-        #         statement = (select(lds.TrendData)
-        #                     .where(lds.TrendData.TrendID == self.flow_trend.ID) # noqa
-        #                     .where(lds.TrendData.Time <= timestamp)
-        #                     .order_by(desc(lds.TrendData.Time)) # noqa
-        #                     .limit(buffer_size))
-        #         with Session(get_engine()) as session:
-        #             results_flow_trend = session.execute(statement).scalars().all()
-        #
-        #         iter_flow_trend = iter(results_flow_trend)
-        #         flow_trend_data = next(iter_flow_trend, None)
-        #         if flow_trend_data is None:
-        #             logging.warning(f'Cannot simulate full data on start of simulation with id={self.lds_simulation.ID} '
-        #                             f'cause: not enough flow trend with id={self.flow_trend.ID} data')
-        #             break
-        #
-        #     if self.flow_trend.RawMin >= 0:
-        #         one_second_data = struct.unpack("H" * 100, flow_trend_data.Data)
-        #     else:
-        #         one_second_data = struct.unpack("h" * 100, flow_trend_data.Data)
-        #     avg_past_flow = (sum(one_second_data) / len(one_second_data)) / float(self.flow_unit.Multiplier)
-        #     if flow_trend_data.Time != timestamp and previous_flow is not None:
-        #         delta_flow = (avg_past_flow - previous_flow[0]) / (previous_flow[1] - flow_trend_data.Time)
-        #         avg_past_flow = previous_flow[0] + (previous_flow[1] - timestamp) * delta_flow
-        #     elif flow_trend_data.Time == timestamp:
-        #         previous_flow = (avg_past_flow, flow_trend_data.Time)
-        #         flow_trend_data = next(iter_flow_trend, None)
-        #     velocity = self.calculate_velocity(avg_past_flow, 0)
-        #
-        #     if density_trend_data is None:
-        #         statement = (select(lds.TrendData)
-        #                     .where(lds.TrendData.TrendID == self.simulation_trend.ID)
-        #                     .where(lds.TrendData.Time <= timestamp)
-        #                     .order_by(desc(lds.TrendData.Time)) # noqa
-        #                     .limit(buffer_size))
-        #         with Session(get_engine()) as session:
-        #             results_density_trend = session.execute(statement).scalars().all()
-        #
-        #         iter_density_trend = iter(results_density_trend)
-        #         density_trend_data = next(iter_density_trend, None)
-        #         if density_trend_data is None:
-        #             logging.warning(
-        #                 f'Cannot simulate full data on start of simulation with id={self.lds_simulation.ID} '
-        #                 f'cause: not enough density trend with id={self.simulation_trend.ID} data')
-        #             break
-        #
-        #     if self.simulation_trend.RawMin >= 0:
-        #         one_second_data = struct.unpack("H" * 100, density_trend_data.Data)
-        #     else:
-        #         one_second_data = struct.unpack("h" * 100, density_trend_data.Data)
-        #     avg_past_density = (sum(one_second_data) / len(one_second_data)) / float(self.simulation_unit.Multiplier)
-        #     density = None
-        #     if density_trend_data.Time != timestamp and previous_density is not None:
-        #         delta_density = (avg_past_density - previous_density[0]) / (previous_density[1] - density_trend_data.Time)
-        #         density = previous_density[0] + (previous_density[1] - timestamp) * delta_density
-        #     elif density_trend_data.Time == timestamp:
-        #         density = avg_past_density
-        #         previous_density = (avg_past_density, density_trend_data.Time)
-        #         density_trend_data = next(iter_density_trend, None)
-        #
-        #     previous_distance += velocity
-        #     self.simulation_data.append(SimulatorData(Distance=previous_distance, Data=density))
-        #     if previous_distance >= self.pipeline_length:
-        #         break
-        #     timestamp -= 1
+        distance_covered = 0
+        default_buffer_size = 100
+        last_timestamp = self.simulation_timestamp
+        first_calculated_timestamp = None
+        flows = []
+        densities = []
+
+        while distance_covered < self.pipeline_length and first_calculated_timestamp is None:
+            buffer_size = default_buffer_size
+            new_flows, buffer_size, first_calculated_timestamp = self._read_start_flow_data(last_timestamp, buffer_size)
+            flows += new_flows.values()
+
+            if len(new_flows) < buffer_size - 1:
+                buffer_size = len(new_flows) + 1
+
+            densities += self._read_start_density_data(last_timestamp, buffer_size)
+
+            if buffer_size > 0:
+                densities, new_buffer_size = self._fill_density_data(densities, last_timestamp, buffer_size)
+                if new_buffer_size != buffer_size:
+                    flows = flows[:len(densities)]
+                    first_calculated_timestamp = last_timestamp - new_buffer_size - 1
+                    break
+                #TODO: dist covered condition change (after fixing simulation)
+                velocity_data = self.calculate_velocity(np.array(flows[-buffer_size+1:]), densities[-buffer_size+1:])
+                avg_velocity = np.average(velocity_data) / 100
+                distance_covered += avg_velocity * (buffer_size-1)
+
+            last_timestamp -= buffer_size - 1
+
+        first_calculated_timestamp = last_timestamp if not first_calculated_timestamp else first_calculated_timestamp
+        for i, (flow, density) in enumerate(zip(reversed(flows), reversed(densities))):
+            timestamps = np.arange(first_calculated_timestamp, first_calculated_timestamp + 1, 0.01)
+            density_timestamps = np.linspace(first_calculated_timestamp + i, first_calculated_timestamp + i + 1, len(density))
+            self.density_interp = interp1d(density_timestamps, density, kind='linear', fill_value='extrapolate')
+            velocity_data = self.calculate_velocity(flow, density)
+            self.velocity_interp = interp1d(timestamps, velocity_data, kind='linear', fill_value='extrapolate')
+            sol = solve_ivp(fun=self._deriv, t_span=[first_calculated_timestamp + i, first_calculated_timestamp + i + 1],
+                            y0=self.simulation_data)
+            self.simulation_data = sol.y[:, -1]  # noqa
+            # self.save_simulation_data()
+
+    def _read_start_flow_data(self, last_timestamp: int, buffer_size: int) -> (dict, int, int | None):
+        first_calculated_timestamp = None
+        mean_data_count = 10
+        new_flows = {}
+        statement_flow = (select(lds.TrendData)
+                          .where(lds.TrendData.TrendID == self.flow_trend.ID)
+                          .where(and_(lds.TrendData.Time <= last_timestamp, lds.TrendData.Time >= last_timestamp - buffer_size))
+                          .order_by(desc(lds.TrendData.Time)))  # noqa
+
+        with Session(get_engine()) as session:
+            flow_data_pack = session.scalars(statement_flow).all()
+
+        if len(flow_data_pack) <= 2 or flow_data_pack[0].Time != last_timestamp:
+            first_calculated_timestamp = last_timestamp
+            buffer_size = 0
+
+        if buffer_size > 0:
+            for prev_flow_data, next_flow_data in zip(flow_data_pack[2:], flow_data_pack):
+                t_prev = prev_flow_data.Time
+                t_next = next_flow_data.Time
+                if t_next - t_prev > self.max_flow_gap_in_seconds + 1:
+                    buffer_size = len(new_flows) + 1 if len(new_flows) != 0 else 0
+                    first_calculated_timestamp = last_timestamp - len(new_flows)
+                    break
+                else:
+                    if self.flow_trend.RawMin >= 0:
+                        data_prev = struct.unpack("H" * 100, prev_flow_data.Data)
+                        data_next = struct.unpack("H" * 100, next_flow_data.Data)
+                    else:
+                        data_prev = struct.unpack("h" * 100, prev_flow_data.Data)
+                        data_next = struct.unpack("h" * 100, next_flow_data.Data)
+
+                    mean_data_prev = (sum(data_prev[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
+                    mean_data_next = (sum(data_next[:mean_data_count]) / mean_data_count) * float(self.flow_unit.Multiplier)
+                    diff_t = t_next - t_prev - 1
+                    diff_data = mean_data_next - mean_data_prev
+                    for ts in range(t_prev + 1, t_next):
+                        flow = lambda t, m=mean_data_prev, tp=t_prev, dt=diff_t, dd=diff_data: (
+                                m + ((t - tp - 1) / dt) * dd)
+                        timestamps = np.arange(ts, ts + 1, 0.01)
+                        new_flows[ts] = np.array(flow(timestamps))
+
+        return new_flows, buffer_size, first_calculated_timestamp
+
+    def _read_start_density_data(self, last_timestamp: int, buffer_size: int) -> list:
+        densities = []
+        statement_density = (((select(lds.TrendData)
+                               .where(lds.TrendData.TrendID == self.simulation_trend.ID))
+                              .where(and_(lds.TrendData.Time < last_timestamp, lds.TrendData.Time > last_timestamp - buffer_size)))
+                             .order_by(desc(lds.TrendData.Time)))  # noqa
+
+        with Session(get_engine()) as session:
+            density_trend_pack = session.scalars(statement_density).all()
+
+        density_data_iter = iter(density_trend_pack)
+        density_data = next(density_data_iter, None)
+
+        for i in range(buffer_size - 1):
+            if density_data and density_data.Time >= last_timestamp - i - 1:
+                if self.simulation_trend.RawMin >= 0:
+                    data = struct.unpack("H" * 100, density_data.Data)
+                else:
+                    data = struct.unpack("h" * 100, density_data.Data)
+                data = [(sum(data[i * self.window_size:(i + 1) * self.window_size]) / self.window_size)
+                        * float(self.simulation_unit.Multiplier) for i in range(100 // self.window_size)]
+                densities.append(data)
+                density_data = next(density_data_iter, None)
+            else:
+                densities.append(None)
+
+        return densities
+
+    def _fill_density_data(self, densities: list, last_timestamp: int, buffer_size: int):
+        if densities[-1] is None:
+            statement_density = (((select(lds.TrendData)
+                                   .where(lds.TrendData.TrendID == self.simulation_trend.ID))
+                                  .where(lds.TrendData.Time <= last_timestamp - buffer_size)) # noqa
+                                 .order_by(desc(lds.TrendData.Time)) # noqa
+                                 .limit(1))
+
+            with Session(get_engine()) as session:
+                prev_density_trend_data = session.execute(statement_density).scalars().first()
+
+            if prev_density_trend_data:
+                if self.simulation_trend.RawMin >= 0:
+                    prev_data = struct.unpack("H" * 100, prev_density_trend_data.Data)
+                else:
+                    prev_data = struct.unpack("h" * 100, prev_density_trend_data.Data)
+
+                prev_data = [(sum(prev_data[i * self.window_size:(i + 1) * self.window_size]) / self.window_size)
+                             * float(self.simulation_unit.Multiplier) for i in range(100 // self.window_size)][-1]
+                prev_t = prev_density_trend_data.Time + 1 - (1 / (100 // self.window_size))
+                last_not_none_idx = next((len(densities) - i for i, j in enumerate(reversed(densities), 1) if j is not None), None)
+                if last_not_none_idx is None:
+                    densities = densities[:-buffer_size]
+                    buffer_size = 0
+                    return densities, buffer_size
+                next_data = densities[last_not_none_idx][0]
+                next_t = self.simulation_timestamp - last_not_none_idx - 1
+                diff_t = next_t - prev_t
+                curr_t = self.simulation_timestamp - len(densities)
+                densities[-1] = [prev_data + ((curr_t + diff * (1 / (100 // self.window_size)) - prev_t) / diff_t)
+                                 * (next_data - prev_data) for diff in range(100 // self.window_size)]
+            else:
+                last_not_none_idx = next((len(densities) - i for i, j in enumerate(reversed(densities), 1) if j is not None), None)
+                if last_not_none_idx is None:
+                    densities = densities[:-buffer_size+1]
+                    buffer_size = 0
+                    return densities, buffer_size
+                else:
+                    buffer_size -= (len(densities) - last_not_none_idx)
+                    densities = densities[:last_not_none_idx+1]
+
+        if densities[0] is None:
+            first_density = next((density for density in densities if density is not None))
+            for i in range(len(densities)):
+                if densities[i]:
+                    break
+                else:
+                    densities[i] = [first_density[-1]] * (100 // self.window_size)
+
+        i = len(densities) - buffer_size + 1
+        while i < len(densities):
+            if densities[i] is None:
+                j = i+1
+                while j < len(densities) and densities[j] is None:
+                    j += 1
+
+                prev_data = densities[-buffer_size + i][-1]
+                prev_t = i
+                next_data = densities[-buffer_size + j + 1][0]
+                next_t = j
+                diff_t = next_t - prev_t
+
+                for curr_t in range(i, j):
+                    densities[curr_t] = [prev_data + ((curr_t + diff * (1 / (100 // self.window_size)) - prev_t) / diff_t)
+                                         * (next_data - prev_data) for diff in range(100 // self.window_size)]
+
+                i = j
+            else:
+                i += 1
+
+        return densities, buffer_size
 
     def calculate_simulation_data(self):
         density_data = self._get_current_density_data()
@@ -122,7 +230,6 @@ class SimulationDensityBase(SimulationBase):
                 velocity_data = self.calculate_velocity(flow_data, density_data)
                 self.velocity_interp = interp1d(flow_timestamps, velocity_data, kind='linear', fill_value='extrapolate')
                 self._refresh_simulation_data()
-
 
     def _get_current_density_data(self) -> list | None:
         window_size = 5
@@ -146,13 +253,15 @@ class SimulationDensityBase(SimulationBase):
                 last_density = -1
                 window = 0
                 while last_density < 0 and (window + 1)*window_size <= 100:
-                    last_density = sum(density_data[-(window+1)*window_size:-(window*window_size+1)])/window_size
+                    last_density = ((sum(density_data[-(window+1)*window_size:-(window*window_size+1)])/window_size)
+                                    * float(self.simulation_unit.Multiplier))
 
                 last_density = last_density if last_density > 0 else \
                     (float(self.density_interp(self.simulation_timestamp)) if self.density_interp is not None else 1)
                 return [last_density] * (100 // window_size)
 
-            density_data = [sum(density_data[i*window_size:(i+1)*window_size])/window_size for i in range(100//window_size)]
+            density_data = [(sum(density_data[i*window_size:(i+1)*window_size])/window_size)
+                            * float(self.simulation_unit.Multiplier) for i in range(100//window_size)]
             if min(density_data) <= 0:
                 logging.warning(f'Simulation {self.lds_simulation.ID} density data have incorrect values'
                                 f'(should not be <= 0, replacing those values with last values)')
@@ -173,7 +282,6 @@ class SimulationDensityBase(SimulationBase):
 
     def _get_current_flow_data(self) -> Callable | None:
         mean_data_count = 10
-        max_time_gap = 3
         statement_prev = (select(lds.TrendData)
                            .where(lds.TrendData.TrendID == self.flow_trend.ID)  # noqa
                            .where(lds.TrendData.Time < self.simulation_timestamp)  # noqa
@@ -192,7 +300,7 @@ class SimulationDensityBase(SimulationBase):
             logging.warning(f'No previous flow trend data for simulation with id={self.lds_simulation.ID},'
                             f'timestamp {self.simulation_timestamp}, no new simulation data will be saved')
             return None
-        elif (self.simulation_timestamp - data_prev.Time - 1) > max_time_gap:
+        elif (self.simulation_timestamp - data_prev.Time - 1) > self.max_flow_gap_in_seconds:
             if self.simulation_timestamp - data_prev.Time - 1 == self.previous_timestamp_diff:
                 logging.warning(f'Timestamp difference between Trends Writer and Simulation modules, '
                                 f'no new simulation data will be saved until timestamps are within maximum time gap'
@@ -210,7 +318,7 @@ class SimulationDensityBase(SimulationBase):
                 data_prev = struct.unpack("H" * 100, data_prev.Data)
             else:
                 data_prev = struct.unpack("h" * 100, data_prev.Data)
-            mean_data_prev = sum(data_prev[-mean_data_count:]) / mean_data_count
+            mean_data_prev = (sum(data_prev[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
             return lambda t: np.ones_like(t) * (mean_data_prev if mean_data_prev > 0 else 0)
         else:
             t_prev = data_prev.Time
@@ -222,12 +330,12 @@ class SimulationDensityBase(SimulationBase):
                 data_prev = struct.unpack("h" * 100, data_prev.Data)
                 data_next = struct.unpack("h" * 100, data_next.Data)
 
-            mean_data_prev = sum(data_prev[-mean_data_count:]) / mean_data_count
+            mean_data_prev = (sum(data_prev[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
             if mean_data_prev < 0:
                 logging.warning(f'Simulation {self.lds_simulation.ID} flow previous data have incorrect values'
                                 f'(should not be < 0, replacing this value with zero flow)')
                 mean_data_prev = 0
-            mean_data_next = sum(data_next[:mean_data_count]) / mean_data_count
+            mean_data_next = (sum(data_next[:mean_data_count]) / mean_data_count) * float(self.flow_unit.Multiplier)
             if mean_data_next < 0:
                 logging.warning(f'Simulation {self.lds_simulation.ID} flow next data have incorrect values'
                                 f'(should not be < 0, replacing this value with zero flow)')

@@ -42,3 +42,5 @@ trends_writer:
         level: WARNING
         handlers: [console]
         propagate: False
+simulator:
+  displayer_port: 11111

@@ -1,8 +1,10 @@
 import atexit
 import logging
 import math
+import threading
 import time
 from multiprocessing import Process
+from multiprocessing.connection import Listener
 import numpy as np
 from sqlalchemy import select, and_, literal, delete
 from sqlalchemy.exc import SQLAlchemyError
@@ -10,6 +12,7 @@ from sqlalchemy.orm import Session
 from config import setup_engine
 from database.models import lds
 from db import get_engine
+from simulator.config import SimulatorSettings
 
 
 class SimulationBase:
@@ -23,11 +26,11 @@ class SimulationBase:
         except ValueError:
             raise ValueError(f'\'LENGTH\' param for simulation {self.lds_simulation.ID} must be an integer')
 
-        self.simulation_trend = self._read_trend()
+        self.simulation_trend = self._read_trend(self.lds_simulation.TrendID)
         if self.simulation_trend is None:
             raise ValueError(f'No trend with id={self.lds_simulation.TrendID} for simulation with id={self.lds_simulation.ID}')
 
-        self.simulation_unit = self._read_unit()
+        self.simulation_unit = self._read_unit(self.simulation_trend.UnitID)
         if self.simulation_unit is None:
             raise ValueError(f'No unit with id = {self.simulation_trend.UnitID} for trend with id = {self.lds_simulation.TrendID} '
                                  f'for simulation {self.lds_simulation.ID}')
@@ -37,28 +40,32 @@ class SimulationBase:
         except KeyError:
             raise ValueError(f'No param \'FLOW_TREND_ID\' for simulation {self.lds_simulation.ID}')
 
-        self._read_flow_trend(flow_trend_id)
+        self.flow_trend = self._read_trend(flow_trend_id)
         if self.flow_trend is None:
             raise ValueError(f'No flow trend with id = {flow_trend_id} for simulation {self.lds_simulation.ID}')
+
+        self.flow_unit = self._read_unit(self.flow_trend.UnitID)
+        if self.flow_unit is None:
+            raise ValueError(
+                f'No unit with id = {self.flow_trend.UnitIDD} for flow trend with id = {flow_trend_id} '
+                f'for simulation {self.lds_simulation.ID}')
 
         self.time_buffer = self.calculate_time_buffer()
         self.simulation_timestamp = int(time.time()) - self.time_buffer
         self.distances = self.calculate_distances()
         segments_number = math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) \
-            if math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) > 200 \
-            else (200 if self.pipeline_length > 200 else self.pipeline_length)
+            if math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) > 250 else 250
         self.simulation_segment_length = self.pipeline_length / segments_number
         self.simulation_data: np.ndarray = np.zeros(segments_number)
         self.simulation_data_gradient: np.ndarray = np.zeros(segments_number)
         self.db_uri = db_uri
         if self.db_uri:
             self.save_simulation_data()
-        self.process = None
         self.previous_timestamp_diff = 0
+        self.process = None
+        self.displayer_listener = None
+        self.displayer_connection = None
         atexit.register(self._shutdown)
-
-        # self.pipe_volume = self.pipe_area * self.segments_length
-
 
     def _read_params(self):
         statement = (select(lds.SimulationParamDef, lds.SimulationParam)
@@ -74,22 +81,17 @@ class SimulationBase:
         for simulation_param_def, simulation_param in read_params:
             self.params[simulation_param_def.ID.strip()] = simulation_param.Value
 
-    def _read_trend(self):
+    @staticmethod
+    def _read_trend(trend_id: int):
         with Session(get_engine()) as session:
-            lds_trend = session.get(lds.Trend, self.lds_simulation.TrendID)
+            lds_trend = session.get(lds.Trend, trend_id)
         return lds_trend
 
-    def _read_unit(self):
-        if self.simulation_trend.UnitID is None:
-            return None
+    @staticmethod
+    def _read_unit(unit_id: str):
         with Session(get_engine()) as session:
-            unit: lds.Unit | None = session.get(lds.Unit, self.simulation_trend.UnitID)
+            unit: lds.Unit | None = session.get(lds.Unit, unit_id)
         return unit
-
-    def _read_flow_trend(self, flow_trend_id: int):
-        with Session(get_engine()) as session:
-            lds_trend = session.get(lds.Trend, flow_trend_id)
-        self.flow_trend = lds_trend
 
     def run_process(self):
         self.process = Process(target=self.run_simulation, args=(self.db_uri, ))
@@ -145,30 +147,10 @@ class SimulationBase:
         setup_engine(db_uri)
         self.simulation_timestamp = int(time.time()) - self.time_buffer
         self._check_timestamp_compatibility()
+        if SimulatorSettings.displayer_port:
+            threading.Thread(target=self._run_simulation_data_sender, daemon=True).start()
         self.calculate_simulation_data_on_start()
         self._run_simulation_loop()
-        # if self.plot_sim:
-        #     fig, ax = plt.subplots()
-        #
-        #     def _update_simulation_plot(_):
-        #         xs = [data.Distance for data in self.simulation_data]
-        #         ys = [data.Data if data.Data is not None else 0 for data in self.simulation_data]
-        #
-        #         ax.clear()
-        #         ax.set_title(f'Simulation {self.lds_simulation.ID} in timestamp {int(time.time())}')
-        #         ax.plot(xs, ys)
-        #         fig.canvas.draw()
-        #
-        #     threading.Thread(
-        #         target=self._run_simulation_loop,
-        #         args=(current_timestamp,),
-        #         daemon=True
-        #     ).start()
-        #
-        #     anim = FuncAnimation(fig, _update_simulation_plot, cache_frame_data=False, interval=1000)  # noqa
-        #     plt.show()
-        # else:
-        # self._run_simulation_loop(current_timestamp)
 
     def _check_timestamp_compatibility(self):
         statement = (select(lds.TrendData)
@@ -204,6 +186,20 @@ class SimulationBase:
         except KeyboardInterrupt:
             logging.info(f"{self.__class__.__name__} ({self.lds_simulation.ID}) closed")
 
+    def _run_simulation_data_sender(self):
+        self.displayer_listener = Listener(('localhost',
+                                            SimulatorSettings.displayer_port+self.lds_simulation.ID), authkey=b'secret')
+        while True:
+            if not self.displayer_connection:
+                self.displayer_connection = self.displayer_listener.accept()
+            try:
+                self.displayer_connection.send((self.pipeline_length, self.simulation_data))
+            except (BrokenPipeError, ConnectionResetError, EOFError):
+                self.displayer_connection.close()
+                self.displayer_connection = None
+            finally:
+                time.sleep(1)
+
     def _delete_data_from_db(self):
         try:
             statement = delete(lds.SimulationData).where(lds.SimulationData.SimulationID == self.lds_simulation.ID) # noqa
@@ -215,6 +211,10 @@ class SimulationBase:
 
     def _shutdown(self):
         self._delete_data_from_db()
+        if self.displayer_connection:
+            self.displayer_connection.close()
+        if self.displayer_listener:
+            self.displayer_listener.close()
         if self.process:
             self.process.terminate()
             self.process.join()

@@ -14,6 +14,7 @@ class AppConfig(BaseModel):
     verbosity: str = 'INFO'
     tests: bool = False
     trends_writer: dict
+    simulator: dict
 
 
 app_config = load_yaml(path, "config.yaml")
