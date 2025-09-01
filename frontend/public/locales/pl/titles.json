@@ -6,5 +6,6 @@
   "/trend-configuration": "Konfiguracja trendów",
   "/leak-probability-map": "Mapa prawdopodobieństwa wycieków",
   "/events": "Wydarzenia",
-  "/trends-current": "Trendy odczyt na bieżąco"
+  "/trends-current": "Trendy odczyt na bieżąco",
+  "/simulator": "Symulator"
 }

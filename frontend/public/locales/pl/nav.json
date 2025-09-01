@@ -7,5 +7,6 @@
   "events": "Wydarzenia",
   "trend_types_configuration": "Konfiguracja typów",
   "trend_groups_configuration": "Konfiguracja grup",
-  "trends_current_readings": "Trendy odczyt bieżący"
+  "trends_current_readings": "Trendy odczyt bieżący",
+  "simulator": "Symulator"
 }

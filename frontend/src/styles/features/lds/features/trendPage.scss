@@ -102,13 +102,6 @@ main.trends-page > .no-axes-container {
   padding: k-spacing(1) k-spacing(5) k-spacing(1) k-spacing(5);
 }
 
-.chart-loader {
-  position: absolute !important;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
 .grabbing,
 .grabbing * {
   cursor: grabbing !important;

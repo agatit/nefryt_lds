@@ -5,9 +5,11 @@ import {
 } from "@progress/kendo-react-layout";
 import {
   chartLineIcon,
+  chartLineStackedMarkersIcon,
   chevronDownIcon,
   chevronRightIcon,
   dropletIcon,
+  graphIcon,
   homeIcon,
   kpiStatusOpenIcon,
   lockIcon,
@@ -56,6 +58,7 @@ import {
 import { Loader } from "@progress/kendo-react-indicators";
 import { useHandleApiResponse } from "../../hooks/useHandleApiResponse";
 import TrendsCurrentPage from "./features/trends/TrendsCurrentPage";
+import SimulatorPage from "./features/simulator/SimulatorPage";
 
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav", "kendo"]);
@@ -77,7 +80,7 @@ export default function LDS() {
       },
       {
         text: t("nav:trends_current_readings"),
-        svgIcon: chartLineIcon,
+        svgIcon: graphIcon,
         selected: pathname == "/trends-current",
         route: "/trends-current",
       },
@@ -89,6 +92,15 @@ export default function LDS() {
         svgIcon: chartLineIcon,
         selected: pathname == "/trends",
         route: "/trends",
+      },
+      {
+        separator: true,
+      },
+      {
+        text: t("nav:simulator"),
+        svgIcon: chartLineStackedMarkersIcon,
+        selected: pathname == "/simulator",
+        route: "/simulator",
       },
       {
         separator: true,
@@ -526,6 +538,10 @@ export default function LDS() {
                 <Route
                   path="/trends"
                   element={<TrendsPage key={"trends-page"} />}
+                />
+                <Route
+                  path="simulator"
+                  element={<SimulatorPage key={"simulator-page"} />}
                 />
                 <Route
                   path="/trend-configuration"

@@ -103,10 +103,8 @@ export default function TrendsCurrentPage() {
     useMockup ? mockupTemplates : []
   );
 
-  const isLoadingTemplates = React.useMemo(
-    () => templates.length == 0,
-    [templates]
-  );
+  const [isLoadingTemplates, setIsLoadingTemplates] =
+    React.useState<boolean>(false);
 
   const handleTemplateStateChange = React.useCallback((value: Template[]) => {
     if (value) setTemplates(value);
@@ -148,6 +146,7 @@ export default function TrendsCurrentPage() {
   }, [axesState]);
 
   const loadTemplates = React.useCallback(async () => {
+    setIsLoadingTemplates(true);
     try {
       const response = await handleApiResponse(
         templateApi.listTemplatesTemplateGet.bind(templateApi)
@@ -157,6 +156,7 @@ export default function TrendsCurrentPage() {
     } catch (error) {
       console.log(error);
     }
+    setIsLoadingTemplates(false);
   }, []);
 
   React.useEffect(() => {
