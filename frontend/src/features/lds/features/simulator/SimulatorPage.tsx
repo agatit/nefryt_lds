@@ -190,6 +190,7 @@ export default function TrendsCurrentPage() {
         1
       );
       console.log(response);
+      setTimeToRefresh(selectedSimulation.RefreshTimeSeconds);
       if (response.data) {
         setSimulationData(response.data.items[0].Data);
         setSimulationCurrentDateTime(
@@ -207,6 +208,8 @@ export default function TrendsCurrentPage() {
     },
     []
   );
+
+  const [timeToRefresh, setTimeToRefresh] = React.useState(0);
 
   React.useEffect(() => {
     if (selectedSimulation == undefined) return;
@@ -264,6 +267,7 @@ export default function TrendsCurrentPage() {
           dateTime={simulationCurrentDateTime}
           selectedSimulation={selectedSimulation}
           onSelectedSimulationChange={handleSelectedSimulationChange}
+          startTimeToRefresh={timeToRefresh}
         />
       </main>
     </React.Fragment>

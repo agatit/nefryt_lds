@@ -28,6 +28,7 @@ export interface SimulatorDetailPanelProps {
   dateTime: Date;
   selectedSimulation: Simulation | undefined;
   onSelectedSimulationChange: (value: Simulation) => void;
+  startTimeToRefresh: number;
 }
 
 const SimulatorDetailPanel = React.memo(function SimulatorDetailPanel({
@@ -40,6 +41,7 @@ const SimulatorDetailPanel = React.memo(function SimulatorDetailPanel({
   selectedSimulation,
   dateTime,
   onSelectedSimulationChange,
+  startTimeToRefresh,
 }: SimulatorDetailPanelProps) {
   const { t } = useTranslation(["common", "simulator-page"]);
 
@@ -71,6 +73,25 @@ const SimulatorDetailPanel = React.memo(function SimulatorDetailPanel({
     },
     [simulations]
   );
+
+  const timeToRefreshRef = React.useRef(startTimeToRefresh);
+  const [timeToRefresh, setTimeToRefresh] = React.useState(startTimeToRefresh);
+
+  React.useEffect(() => {
+    timeToRefreshRef.current = startTimeToRefresh;
+    setTimeToRefresh(timeToRefreshRef.current);
+
+    const interval = setInterval(() => {
+      timeToRefreshRef.current = timeToRefreshRef.current - 1;
+      if (timeToRefreshRef.current == 0)
+        timeToRefreshRef.current = startTimeToRefresh;
+      setTimeToRefresh(timeToRefreshRef.current);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [selectedSimulation, startTimeToRefresh]);
 
   return (
     <DetailPanel className="chart-detail-panel" flexGrow={1} extandable={false}>
@@ -106,12 +127,10 @@ const SimulatorDetailPanel = React.memo(function SimulatorDetailPanel({
               <div className="item">
                 <div className="item-row">
                   <Typography.p style={{ marginBottom: 0 }}>
-                    {t("simulator-page:refresh_time")}
+                    {t("simulator-page:time_to_refresh")}
                   </Typography.p>
                 </div>
-                <div className="item-row">
-                  {selectedSimulation.RefreshTimeSeconds + " s"}
-                </div>
+                <div className="item-row">{timeToRefresh + " s"}</div>
               </div>
               <div className="separator" />
               <div className="item">
