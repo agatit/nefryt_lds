@@ -43,4 +43,6 @@ trends_writer:
         handlers: [console]
         propagate: False
 simulator:
-  displayer_port: 11111
+  displayer_ports:
+    1: 11111
+    2: 22222

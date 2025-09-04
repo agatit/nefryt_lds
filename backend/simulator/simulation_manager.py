@@ -7,10 +7,11 @@ from config import Settings
 from database import lds
 from db import get_engine
 from .simulations.density_mass import SimulationDensityMass
-from .simulations.density_volume import SimulationDensityVolume
+from .simulations.density_volume import SimulationDensityRKVolume, SimulationDensityPCHIPVolume
 
 SIMULATION_CLASSES = {
-    'DENSITY_VOLUME': SimulationDensityVolume,
+    'DENSITY_VOLUME_RK': SimulationDensityRKVolume,
+    'DENSITY_VOLUME_PCHIP': SimulationDensityPCHIPVolume,
     'DENSITY_MASS': SimulationDensityMass,
 }
 

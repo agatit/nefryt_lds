@@ -3,7 +3,7 @@ import math
 import struct
 from typing import Callable
 import numpy as np
-from scipy.interpolate import interp1d, PchipInterpolator
+from scipy.interpolate import interp1d
 from sqlalchemy import select, desc, and_
 from sqlalchemy.orm import Session
 from database.models import lds
@@ -336,31 +336,7 @@ class SimulationDensityBase(SimulationBase):
             return lambda t: mean_data_prev + ((t - t_prev - 1) / diff_t) * diff_data
 
     def _refresh_simulation_data(self, timestamp: int):
-        substeps = 5
-        dx = self.pipeline_length / len(self.simulation_data)
-        arr_x = np.arange(len(self.simulation_data))
+        raise NotImplementedError
 
-        dt = 1 / substeps
-        for substep in range(substeps):
-            t0 = timestamp + substep * dt
-            t1 = t0 + dt
-            timestamps = np.linspace(t0, t1, 11)
-            flows = self.flow_interp(timestamps)
-            flow_in_step = np.trapezoid(flows, timestamps)
-            # TODO: prepare density_data
-            velocity = self.calculate_velocity(flow_in_step, [])
-            dists_in_cells = velocity / dx
-            d0 = float(self.density_interp(0.5 * (t0 + t1)))
-
-            interp = PchipInterpolator(
-                arr_x,
-                self.simulation_data,
-                extrapolate=True
-            )
-            y_new: np.ndarray = interp(arr_x - dists_in_cells)
-            y_new[arr_x - dists_in_cells < 0] = d0
-
-            self.simulation_data = y_new
-
-    def calculate_velocity(self, flow_data: np.ndarray, density_data: list) -> np.ndarray:
+    def calculate_velocity(self, flow_data: np.ndarray, density_data: np.ndarray | None) -> np.ndarray:
         raise NotImplementedError

@@ -147,7 +147,7 @@ class SimulationBase:
         setup_engine(db_uri)
         self.simulation_timestamp = int(time.time()) - self.time_buffer
         self._check_timestamp_compatibility()
-        if SimulatorSettings.displayer_port:
+        if SimulatorSettings.displayer_ports and self.lds_simulation.ID in SimulatorSettings.displayer_ports.keys():
             threading.Thread(target=self._run_simulation_data_sender, daemon=True).start()
         self.calculate_simulation_data_on_start()
         self.save_simulation_data()
@@ -180,7 +180,7 @@ class SimulationBase:
                 if simulation_duration % self.lds_simulation.RefreshTimeSeconds == 0:
                     self.save_simulation_data()
 
-                if 1 - (time.perf_counter() - start_time) > 0:
+                if 1 - (time.perf_counter() - start_time) > 0 and self.simulation_timestamp >= time.time() - self.time_buffer:
                     time.sleep(1 - (time.perf_counter() - start_time))
                 simulation_duration += 1
                 self.simulation_timestamp += 1
@@ -188,8 +188,8 @@ class SimulationBase:
             logging.info(f"{self.__class__.__name__} ({self.lds_simulation.ID}) closed")
 
     def _run_simulation_data_sender(self):
-        self.displayer_listener = Listener(('localhost',
-                                            SimulatorSettings.displayer_port+self.lds_simulation.ID), authkey=b'secret')
+        self.displayer_listener = Listener(('localhost', SimulatorSettings.displayer_ports[self.lds_simulation.ID]),
+                                           authkey=b'secret')
         while True:
             if not self.displayer_connection:
                 self.displayer_connection = self.displayer_listener.accept()
