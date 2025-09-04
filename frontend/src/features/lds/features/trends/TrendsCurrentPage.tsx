@@ -421,7 +421,7 @@ export default function TrendsCurrentPage() {
           useMockup={useMockup}
           closeDialog={closeChartEdit}
           trendDefs={ldsContex!.trendDefs}
-          trendGroups={mockupTrendGroupFromDB}
+          trendGroups={ldsContex!.trendGroups}
           units={ldsContex!.units}
           trendsState={ldsContex!.trends}
           axesState={axesState}

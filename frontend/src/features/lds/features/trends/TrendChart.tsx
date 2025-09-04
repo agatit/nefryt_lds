@@ -547,7 +547,7 @@ const TrendChart = React.memo(function TrendChart({
             top: ssBarVerticalStyle.current.top,
             left: style.left,
             height: ssBarVerticalStyle.current.height,
-            display: isEmpty || chartRenderCounter.current < 2 ? "none" : "",
+            display: isEmpty || chartRenderCounter.current < 1 ? "none" : "",
           }}
           max={trendMinMaxValue.max}
           min={trendMinMaxValue.min}
