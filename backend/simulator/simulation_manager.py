@@ -23,7 +23,7 @@ class SimulationManager:
     async def start_simulations(self):
         statement = select(lds.Simulation)
         with Session(get_engine()) as session:
-            simulations = session.execute(statement).all()[:][0]
+            simulations = session.scalars(statement).all()
 
         for simulation in simulations:
             try:

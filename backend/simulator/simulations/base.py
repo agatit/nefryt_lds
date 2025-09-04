@@ -54,7 +54,7 @@ class SimulationBase:
         self.simulation_timestamp = int(time.time()) - self.time_buffer
         self.distances = self.calculate_distances()
         segments_number = math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) \
-            if math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) > 250 else 250
+            if math.ceil(self.pipeline_length / self.lds_simulation.ResolutionMeters) > 1000 else 1000
         self.simulation_segment_length = self.pipeline_length / segments_number
         self.simulation_data: np.ndarray = np.zeros(segments_number)
         self.simulation_data_gradient: np.ndarray = np.zeros(segments_number)
@@ -150,6 +150,7 @@ class SimulationBase:
         if SimulatorSettings.displayer_port:
             threading.Thread(target=self._run_simulation_data_sender, daemon=True).start()
         self.calculate_simulation_data_on_start()
+        self.save_simulation_data()
         self._run_simulation_loop()
 
     def _check_timestamp_compatibility(self):

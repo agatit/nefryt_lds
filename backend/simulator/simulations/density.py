@@ -3,8 +3,7 @@ import math
 import struct
 from typing import Callable
 import numpy as np
-from scipy.integrate import solve_ivp
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, PchipInterpolator
 from sqlalchemy import select, desc, and_
 from sqlalchemy.orm import Session
 from database.models import lds
@@ -22,23 +21,24 @@ class SimulationDensityBase(SimulationBase):
             raise ValueError(f'No \'WIDTH\' param for simulation {self.lds_simulation.ID}')
         except ValueError:
             raise ValueError(f'\'WIDTH\' param for simulation {self.lds_simulation.ID} must be a float')
-        self.pipeline_area = (pipeline_width/2)**2 * math.pi
+        self.pipeline_area = np.ones_like(self.simulation_data) * (pipeline_width/2)**2 * math.pi
+        self.pipeline_area[len(self.simulation_data)//2:] *= 10
         self.previous_correct_density_time = 0
         self.window_size = 5
         self.max_flow_gap_in_seconds = 3
         self.density_interp = None
-        self.velocity_interp = None
-        self.flow_data = None
+        self.flow_interp = None
 
     def calculate_simulation_data_on_start(self):
-        distance_covered = 0
+        volume_covered = 0
         default_buffer_size = 100
         last_timestamp = self.simulation_timestamp
+        pipeline_volume = sum(self.pipeline_area * self.simulation_segment_length)
         first_calculated_timestamp = None
         flows = []
         densities = []
 
-        while distance_covered < self.pipeline_length and first_calculated_timestamp is None:
+        while volume_covered < pipeline_volume and first_calculated_timestamp is None:
             buffer_size = default_buffer_size
             new_flows, buffer_size, first_calculated_timestamp = self._read_start_flow_data(last_timestamp, buffer_size)
             flows += new_flows.values()
@@ -54,24 +54,19 @@ class SimulationDensityBase(SimulationBase):
                     flows = flows[:len(densities)]
                     first_calculated_timestamp = last_timestamp - new_buffer_size - 1
                     break
-                #TODO: dist covered condition change (after fixing simulation)
-                velocity_data = self.calculate_velocity(np.array(flows[-buffer_size+1:]), densities[-buffer_size+1:])
-                avg_velocity = np.average(velocity_data) / 100
-                distance_covered += avg_velocity * (buffer_size-1)
+                for i, (one_sec_flow_interp, one_sec_density) in enumerate(zip(flows[-buffer_size+1:], densities[-buffer_size+1:])):
+                    timestamps = np.arange(last_timestamp - buffer_size + i + 1, last_timestamp - buffer_size + i + 2, 100)
+                    one_sec_flow = one_sec_flow_interp(timestamps)
+                    volume_covered += np.mean(one_sec_flow)
 
             last_timestamp -= buffer_size - 1
 
         first_calculated_timestamp = last_timestamp if not first_calculated_timestamp else first_calculated_timestamp
         for i, (flow, density) in enumerate(zip(reversed(flows), reversed(densities))):
-            timestamps = np.arange(first_calculated_timestamp, first_calculated_timestamp + 1, 0.01)
             density_timestamps = np.linspace(first_calculated_timestamp + i, first_calculated_timestamp + i + 1, len(density))
             self.density_interp = interp1d(density_timestamps, density, kind='linear', fill_value='extrapolate')
-            velocity_data = self.calculate_velocity(flow, density)
-            self.velocity_interp = interp1d(timestamps, velocity_data, kind='linear', fill_value='extrapolate')
-            sol = solve_ivp(fun=self._deriv, t_span=[first_calculated_timestamp + i, first_calculated_timestamp + i + 1],
-                            y0=self.simulation_data)
-            self.simulation_data = sol.y[:, -1]  # noqa
-            # self.save_simulation_data()
+            self.flow_interp = flow
+            self._refresh_simulation_data(first_calculated_timestamp + i)
 
     def _read_start_flow_data(self, last_timestamp: int, buffer_size: int) -> (dict, int, int | None):
         first_calculated_timestamp = None
@@ -112,8 +107,7 @@ class SimulationDensityBase(SimulationBase):
                     for ts in range(t_prev + 1, t_next):
                         flow = lambda t, m=mean_data_prev, tp=t_prev, dt=diff_t, dd=diff_data: (
                                 m + ((t - tp - 1) / dt) * dd)
-                        timestamps = np.arange(ts, ts + 1, 0.01)
-                        new_flows[ts] = np.array(flow(timestamps))
+                        new_flows[ts] = flow
 
         return new_flows, buffer_size, first_calculated_timestamp
 
@@ -220,16 +214,12 @@ class SimulationDensityBase(SimulationBase):
     def calculate_simulation_data(self):
         density_data = self._get_current_density_data()
         if density_data is not None:
-            flow_data_linear_interp = self._get_current_flow_data()
+            self.flow_interp = self._get_current_flow_data()
 
-            if flow_data_linear_interp:
-                flow_timestamps = np.arange(self.simulation_timestamp, self.simulation_timestamp + 1, 0.01)
-                flow_data = flow_data_linear_interp(flow_timestamps)
+            if self.flow_interp:
                 density_timestamps = np.linspace(self.simulation_timestamp, self.simulation_timestamp + 1, len(density_data))
                 self.density_interp = interp1d(density_timestamps, density_data, kind='linear', fill_value='extrapolate')
-                velocity_data = self.calculate_velocity(flow_data, density_data)
-                self.velocity_interp = interp1d(flow_timestamps, velocity_data, kind='linear', fill_value='extrapolate')
-                self._refresh_simulation_data()
+                self._refresh_simulation_data(self.simulation_timestamp)
 
     def _get_current_density_data(self) -> list | None:
         window_size = 5
@@ -345,14 +335,32 @@ class SimulationDensityBase(SimulationBase):
 
             return lambda t: mean_data_prev + ((t - t_prev - 1) / diff_t) * diff_data
 
-    def _refresh_simulation_data(self):
-        sol = solve_ivp(fun=self._deriv, t_span=[self.simulation_timestamp, self.simulation_timestamp + 1], y0=self.simulation_data)
-        self.simulation_data = sol.y[:, -1] # noqa
+    def _refresh_simulation_data(self, timestamp: int):
+        substeps = 5
+        dx = self.pipeline_length / len(self.simulation_data)
+        arr_x = np.arange(len(self.simulation_data))
 
-    def _deriv(self, t: float, y: np.array):
-        self.pipe_density_gradient = - np.diff(y, prepend=self.density_interp(t)) / self.lds_simulation.ResolutionMeters
-        pipe_velocity = self.velocity_interp(t) / self.pipeline_area
-        return pipe_velocity * self.pipe_density_gradient
+        dt = 1 / substeps
+        for substep in range(substeps):
+            t0 = timestamp + substep * dt
+            t1 = t0 + dt
+            timestamps = np.linspace(t0, t1, 11)
+            flows = self.flow_interp(timestamps)
+            flow_in_step = np.trapezoid(flows, timestamps)
+            # TODO: prepare density_data
+            velocity = self.calculate_velocity(flow_in_step, [])
+            dists_in_cells = velocity / dx
+            d0 = float(self.density_interp(0.5 * (t0 + t1)))
 
-    def calculate_velocity(self, flow_data: np.ndarray, density_data: list) -> list:
+            interp = PchipInterpolator(
+                arr_x,
+                self.simulation_data,
+                extrapolate=True
+            )
+            y_new: np.ndarray = interp(arr_x - dists_in_cells)
+            y_new[arr_x - dists_in_cells < 0] = d0
+
+            self.simulation_data = y_new
+
+    def calculate_velocity(self, flow_data: np.ndarray, density_data: list) -> np.ndarray:
         raise NotImplementedError
