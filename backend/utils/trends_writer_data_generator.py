@@ -19,6 +19,7 @@ def sinus(amp, freq, offset, t):
 def sawtooth(amp, freq, offset, t):
     return amp * (((t % (1/freq)) * freq) % 1) + offset
 
+
 def const_change(start, change, t):
     return start + change * t
 

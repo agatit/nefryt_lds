@@ -8,9 +8,9 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from simulator.config import SimulatorSettings
 
-
 simulation_datas = {}
 stop_flag = threading.Event()
+
 
 def receive_data(simulation_id):
     conn = Client(('localhost', SimulatorSettings.displayer_ports[simulation_id]), authkey=b'secret')
@@ -56,6 +56,7 @@ def display_simulation_data():
             stop_flag.set()
     else:
         print('No port set in Simulator module settings')
+
 
 if __name__ == '__main__':
     display_simulation_data()

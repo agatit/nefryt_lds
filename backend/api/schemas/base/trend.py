@@ -1,5 +1,7 @@
+from pydantic import model_validator
 from sqlalchemy import Column, Integer, ForeignKey, CHAR, Float, String
 from sqlmodel import SQLModel, Field
+from typing_extensions import Self
 
 
 class Trend(SQLModel):
@@ -32,3 +34,11 @@ class Trend(SQLModel):
                                    ForeignKey("lds.Node.ID", ondelete='SET NULL'),
                                    nullable=True))
     TimeDelta: int = Field(0)
+
+    @model_validator(mode='after')
+    def check_is_min_smaller_than_max(self) -> Self:
+        if self.RawMin is not None and self.RawMax is not None and self.RawMin >= self.RawMax:
+            raise ValueError('RawMin must be smaller than RawMax')
+        if self.ScaledMin is not None and self.ScaledMax is not None and self.ScaledMin >= self.ScaledMax:
+            raise ValueError('ScaledMin must be smaller than ScaledMax')
+        return self

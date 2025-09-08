@@ -166,6 +166,22 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(add_lds_objects):  # noqa
+    samples = 5
+    response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time+0.5) +
+                               "/" + str(trend_data3.Time+0.5) + "/" + str(samples))
+    assert response.status_code == status.HTTP_200_OK
+    returned_trend_datas = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_datas):
+        timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time+0.5, trend_data3.Time+0.5, samples)
+        trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time+0.5, trend_data3.Time+0.5, samples)
+        assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
+        assert returned_trend_data['TimestampMs'] == timestamp_ms
+        assert returned_trend_data['Data'][0]['ID'] == trend_data_list[trend_data_num].TrendID
+        assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
 def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(add_lds_objects):  # noqa
     samples = 4
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
@@ -307,6 +323,24 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
         for count, returned_trend_data in enumerate(returned_trend_datas):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
             trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
+            assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
+            assert returned_trend_data['TimestampMs'] == timestamp_ms
+            assert returned_trend_data['Data'][0]['ID'] == trend_data_list[trend_data_num].TrendID
+            assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(add_lds_objects):  # noqa
+    with patch('api.routers.trend_data.datetime') as mock_datetime:
+        mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
+        samples = 5
+        response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
+                                   str(trend_data3.Time - trend_data1.Time - 0.5) + "/" + str(samples))
+        assert response.status_code == status.HTTP_200_OK
+        returned_trend_datas = response.json()['items'][0]['Data']
+        for count, returned_trend_data in enumerate(returned_trend_datas):
+            timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time + 0.5, trend_data3.Time, samples)
+            trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time + 0.5, trend_data3.Time, samples)
             assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
             assert returned_trend_data['TimestampMs'] == timestamp_ms
             assert returned_trend_data['Data'][0]['ID'] == trend_data_list[trend_data_num].TrendID
@@ -473,6 +507,21 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(add_lds_objects):  # noqa
+    samples = 8
+    response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time+0.5) +
+                               "/" + str(trend_data3.Time+0.5) + "/" + str(samples))
+    assert response.status_code == status.HTTP_200_OK
+    returned_trend_datas = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_datas):
+        timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time+0.5, trend_data3.Time+0.5, samples)
+        trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time+0.5, trend_data3.Time+0.5, samples)
+        assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
+        assert returned_trend_data['TimestampMs'] == timestamp_ms
+        assert returned_trend_data['Value'] == calculate_expected_value(trend1, timestamp_ms)
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
 def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(add_lds_objects):  # noqa
     samples = 4
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
@@ -609,10 +658,9 @@ def calculate_expected_value(trend: lds.Trend, timestamp_ms: int) -> float:
             / (trend.RawMax - trend.RawMin) + trend.ScaledMin)
 
 
-def calculate_expected_timestamp_ms(count: int, time1: int, time2: int, samples: int) -> int:
-    return (count * (((time2 - time1 + 1) * 100) // samples)) % 100 * 10
+def calculate_expected_timestamp_ms(count: int, time1: float, time2: float, samples: int) -> int:
+    return int(100 * (time1 - int(time1)) + (count * ((time2 - time1) * 100) // (samples-1))) % 100 * 10
 
 
-def calculate_expected_trend_data_number(count: int, time1: int, time2: int, samples: int) -> int:
-    return ((count * (((time2 - time1 + 1) * 100) // samples)) // 100
-            % (time2 - time1 + 1))
+def calculate_expected_trend_data_number(count: int, time1: float, time2: float, samples: int) -> int:
+    return int(100 * (time1 - int(time1)) + (count * ((time2 - time1) * 100) // (samples-1))) // 100

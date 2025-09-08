@@ -17,7 +17,7 @@ router = APIRouter(prefix="/trend", tags=['trend_data'], dependencies=[Depends(g
 
 
 @router.get('/{trend_id_list}/current_data/{period}/{samples}', response_model=CustomPage[api.CurrentTrendData] | api.Error)
-async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[int, Path()],
+async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: Annotated[float, Path()],
                                  samples: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)],
                                  params: Annotated[CustomParams, Depends()],
                                  _: Annotated[None, Depends(use_custom_page)]):
@@ -52,8 +52,8 @@ async def get_trend_current_data(trend_id_list: Annotated[str, Path()], period: 
 
 
 @router.get('/{trend_id_list}/data/{begin}/{end}/{samples}', response_model=CustomPage[api.TrendDataMultiple] | api.Error)
-async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[int, Path()],
-                         end: Annotated[int, Path()], samples: Annotated[int, Path()],
+async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated[float, Path()],
+                         end: Annotated[float, Path()], samples: Annotated[int, Path()],
                          engine: Annotated[Engine, Depends(get_engine)], params: Annotated[CustomParams, Depends()],
                          _: Annotated[None, Depends(use_custom_page)]):
     try:
@@ -69,9 +69,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
             lds_trends_scales[lds_trend.ID] = {
                 param_id: getattr(lds_trend, param_id) for param_id in params_ids
             }
-
-        samples, inc_samples = calculate_samples_count(samples, begin, end)
-        trend_timestamps, trend_timestamps_ms = calculate_full_timestamps_lists(samples, begin, inc_samples)
+        trend_timestamps, trend_timestamps_ms = calculate_full_timestamps_lists(samples, begin, end)
 
         statement = (
             select(func.count()).
@@ -83,8 +81,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
             all_data_count = session.execute(statement).scalar()
 
         if all_data_count == 0:
-            error = api.Error(code=status.HTTP_404_NOT_FOUND,
-                          message='No data')
+            error = api.Error(code=status.HTTP_404_NOT_FOUND, message='No data')
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
 
         start_pos, pages = calculate_page_data(samples, params)
@@ -139,8 +136,8 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
 
 
 @router.get('/{trend_id}/single_data/{begin}/{end}/{samples}', response_model=CustomPage[api.TrendDataSingle] | api.Error)
-async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotated[int, Path()],
-                                end: Annotated[int, Path()], samples: Annotated[int, Path()],
+async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotated[float, Path()],
+                                end: Annotated[float, Path()], samples: Annotated[int, Path()],
                                 engine: Annotated[Engine, Depends(get_engine)],
                                 _: Annotated[None, Depends(use_custom_page)],
                                 params: Annotated[CustomParams, Depends()]):
@@ -161,8 +158,7 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
         except (AttributeError, TypeError):
             lds_trend_scales = default_lds_trends_scale
 
-        samples, inc_samples = calculate_samples_count(samples, begin, end)
-        trend_timestamps, trend_timestamps_ms = calculate_full_timestamps_lists(samples, begin, inc_samples)
+        trend_timestamps, trend_timestamps_ms = calculate_full_timestamps_lists(samples, begin, end)
 
         statement = (
             select(func.count()).
@@ -174,8 +170,7 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
             all_data_count = session.execute(statement).scalar()
 
         if all_data_count == 0:
-            error = api.Error(code=status.HTTP_404_NOT_FOUND,
-                          message='No data')
+            error = api.Error(code=status.HTTP_404_NOT_FOUND, message='No data')
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
 
         start_pos, pages = calculate_page_data(samples, params)
@@ -219,7 +214,7 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
         items = [map_tuple_to_trend_data_single(val) for val in result_list]
         return CustomPage(items=items, total=samples, pages=pages, page=params.page, size=params.size)
     except Exception as e:
-        error = Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_single_trend_data(): ' + str(e))  # noqa
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_single_trend_data(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -243,14 +238,6 @@ def extend_trend_data_list(result_list, trend_timestamps, trend_timestamps_ms):
     return result_list
 
 
-def calculate_samples_count(samples: int, begin: int, end: int) -> (int, int):
-    samples = samples if samples > 0 else 1
-    inc_samples = (100 * (end - begin + 1)) // samples
-    inc_samples = inc_samples if inc_samples > 0 else 1
-    samples = 100 * (end - begin + 1) // inc_samples
-    return samples, inc_samples
-
-
 def calculate_page_data(samples: int, params: CustomParams) -> (int, int):
     page_no = params.page
     page_size = params.size
@@ -260,22 +247,22 @@ def calculate_page_data(samples: int, params: CustomParams) -> (int, int):
     return start_pos, pages
 
 
-def calculate_full_timestamps_lists(samples: int, begin: int, inc_samples: int) -> (list, list):
+def calculate_full_timestamps_lists(samples: int, begin: float, end: float) -> (list, list):
     trend_timestamps = []
     trend_timestamps_ms = []
-    timestamp = begin
-    sample_in_timestamp = 0
-    for _ in range(samples):
-        trend_timestamps.append(timestamp)
-        trend_timestamps_ms.append(sample_in_timestamp * 10)
-        timestamp += (sample_in_timestamp + inc_samples) // 100
-        sample_in_timestamp = (sample_in_timestamp + inc_samples) % 100
+    if samples > 1:
+        for i in range(samples):
+            sample_position = int(100 * begin + (i * ((end - begin) * 100) // (samples-1)))
+            trend_timestamps.append(sample_position // 100)
+            trend_timestamps_ms.append(sample_position % 100 * 10)
+    else:
+        trend_timestamps.append(int(begin))
+        trend_timestamps_ms.append(int(begin % 1 * 1000))
 
     return trend_timestamps, trend_timestamps_ms
 
 
-def calculate_page_timestamps_lists(start_pos: int, trend_timestamps: list, trend_timestamps_ms: list, page_size: int) \
-        -> (list, list):
+def calculate_page_timestamps_lists(start_pos: int, trend_timestamps: list, trend_timestamps_ms: list, page_size: int) -> (list, list):
     if start_pos >= len(trend_timestamps):
         trend_timestamps = []
         trend_timestamps_ms = []

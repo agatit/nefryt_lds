@@ -96,9 +96,13 @@ async def update_trend(trend_id: Annotated[int, Path()], updated_trend: Annotate
             updated_trend_dict = updated_trend.model_dump(by_alias=True, exclude_unset=True)
             for k, v in updated_trend_dict.items():
                 setattr(trend, k, v)
+            lds.Trend.model_validate(trend)
             session.commit()
             session.refresh(trend)
         return strip_strings(trend)
+    except ValueError as e:
+        error = api.Error(code=status.HTTP_422_UNPROCESSABLE_ENTITY, message=str(e.errors()[0]['ctx']['error']))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_trend(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

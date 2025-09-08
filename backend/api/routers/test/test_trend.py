@@ -172,6 +172,27 @@ def test_create_trend_should_return_created_response_code_and_created_trend_data
     assert trends_count == 1
 
 
+@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
+def test_create_trend_should_return_unprocessable_entity_response_code_when_model_condition_not_met(add_lds_objects):
+    trend_dict = {'TrendDefID': 'ID_1', 'RawMin': 100,
+                  'RawMax': 100, 'ScaledMin': -1.5, 'ScaledMax': 2.25,
+                  'UnitID': unit.ID, 'TrendGroupID': trend_group.ID, 'Color': 'Blue', 'Name': 'New trend'}
+    response = test_client.post("/trend", json=trend_dict)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    error = response.json()
+    assert error['code'] == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert error['message'] == 'RawMin must be smaller than RawMax'
+
+    trend_dict = {'TrendDefID': 'ID_1', 'RawMin': 100,
+                  'RawMax': 1000, 'ScaledMin': -1.5, 'ScaledMax': -2.25,
+                  'UnitID': unit.ID, 'TrendGroupID': trend_group.ID, 'Color': 'Blue', 'Name': 'New trend'}
+    response = test_client.post("/trend", json=trend_dict)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    error = response.json()
+    assert error['code'] == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert error['message'] == 'ScaledMin must be smaller than ScaledMax'
+
+
 def test_create_trend_should_return_conflict_response_code_and_error_when_no_trend_def_with_given_id():
     trend_dict = {'ID': 1, 'TrendDefID': 'ID_1', 'RawMin': 100,
                   'RawMax': 1000, 'ScaledMin': -1.5, 'ScaledMax': 2.25,
@@ -222,7 +243,7 @@ def test_get_trend_by_id_should_return_not_found_response_code_and_error_when_no
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_update_trend_by_id_should_return_ok_response_code_and_trend_of_given_id(add_lds_objects):
+def test_update_trend_should_return_ok_response_code_and_trend_of_given_id(add_lds_objects):
     update_trend_dict = {'TrendDefID': 'ID_1', 'RawMin': 100, 'RawMax': 1500,
                          'ScaledMin': 1.3, 'ScaledMax': 9.99}
     response = test_client.put("/trend/" + str(trend2.ID), json=update_trend_dict)
@@ -236,7 +257,24 @@ def test_update_trend_by_id_should_return_ok_response_code_and_trend_of_given_id
     assert returned_trend['ScaledMax'] == update_trend_dict['ScaledMax']
 
 
-def test_update_trend_by_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
+def test_update_trend_should_return_unprocessable_entity_response_code_when_model_condition_not_met(add_lds_objects):
+    update_trend_dict = {'RawMax': 0}
+    response = test_client.put("/trend/" + str(trend2.ID), json=update_trend_dict)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    error = response.json()
+    assert error['code'] == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert error['message'] == 'RawMin must be smaller than RawMax'
+
+    update_trend_dict = {'ScaledMin': 10000}
+    response = test_client.put("/trend/" + str(trend2.ID), json=update_trend_dict)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    error = response.json()
+    assert error['code'] == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert error['message'] == 'ScaledMin must be smaller than ScaledMax'
+
+
+def test_update_trend_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
     update_trend_dict = {'TrendDefID': 'ID_1', 'RawMin': 100, 'RawMax': 1500,
                          'ScaledMin': 1.3, 'ScaledMax': 9.99}
     response = test_client.put("/trend/" + str(trend2.ID), json=update_trend_dict)
