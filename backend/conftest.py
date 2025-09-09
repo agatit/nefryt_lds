@@ -97,6 +97,7 @@ def setup_test_database(request):
     test_db_name = TestSettings.test_model.db_name
     server_url = TestSettings.test_model.server_url.format(db_password=TestSettings.password_settings.password_test)
     Settings.db_uri = test_db_uri
+    TrendsWriterSettings.db_uri = test_db_uri
     if db_type == 'temp':
         engine = create_engine(server_url)
         with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:

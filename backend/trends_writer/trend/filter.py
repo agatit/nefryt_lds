@@ -21,14 +21,15 @@ class TrendFilter(TrendBase):
         self.storage = np.array([], dtype=np.uint16)
 
     def update(self, data: List[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int = None):
+        if timestamp > self.storage_timestamp + 1:
+            logger.warning(f"{self.__class__.__name__} ({self.id}): "
+                            f"Data in storage not valid (timestamp={timestamp}, storage timestamp={self.storage_timestamp})")
+            self.initiate_buffer(self.window_size, timestamp, parent_id)
+
         if timestamp == self.storage_timestamp + 1 and len(self.storage) < self.block_size * (self.window_size * 2 + 1):
             self.storage = np.append(self.storage[:], data)
         elif timestamp == self.storage_timestamp + 1:
             self.storage = np.append(self.storage[100:], data)
-        elif timestamp > self.storage_timestamp + 1:
-            logger.warning(f"{self.__class__.__name__} ({self.id}): "
-                            f"Data in storage not valid (timestamp={timestamp}, storage timestamp={self.storage_timestamp})")
-            self.initiate_buffer(self.window_size, timestamp, parent_id)
         else:
             logger.warning(f"{self.__class__.__name__} ({self.id}): "
                             f"Data in storage already exists (timestamp={timestamp}, storage timestamp={self.storage_timestamp})")
@@ -86,4 +87,5 @@ class TrendFilter(TrendBase):
                     logger.debug(f"{self.__class__.__name__} ({self.id}): Buffer init no data (timestamp={curr_data})")
                 self.storage = np.append(curr_data, self.storage)
 
+        self.storage_timestamp = timestamp - 1
         logger.info(f"{self.__class__.__name__} ({self.id}): Buffer init read {len(self.storage)} values from parent trend")

@@ -155,38 +155,38 @@ class Profiler:
         time_used_percent = (time_used / 1.0) * 100
         if log_profiler:
             with (open(TrendsWriterSettings.profiler_filename, "a") as f):
-                for k, v in Profiler.updates[timestamp].items():
-                    if k == 'total' or v[1][1] is None or v[0][0] != 0:
+                for trend_id, saved_trend_data in Profiler.updates[timestamp].items():
+                    if trend_id == 'total' or saved_trend_data[1][1] is None or saved_trend_data[0][0] != 0:
                         continue
-                    f.write(f"{timestamp}: Trends writer for trend id={k} used {100 * (v[1][1] / 1.0):.2f}% of time\n")
+                    f.write(f"{timestamp}: Trends writer for trend id={trend_id} used {100 * (saved_trend_data[1][1] / 1.0):.2f}% of time\n")
                     with Session(get_engine()) as session:
-                        profiler_data = session.get(lds.ProfilerData, k)
+                        profiler_data = session.get(lds.ProfilerData, trend_id)
                         if profiler_data:
-                            profiler_data.Time10 = float(profiler_data.Time10) * 0.9 + v[1][1] * 0.1 \
-                                if profiler_data.Time10 else v[1][1]
-                            profiler_data.Time100 = float(profiler_data.Time100) * 0.99 + v[1][1] * 0.01 \
-                                if profiler_data.Time100 else v[1][1]
-                            profiler_data.Time1000 = float(profiler_data.Time1000) * 0.999 + v[1][1] * 0.001 \
-                                if profiler_data.Time1000 else v[1][1]
-                            if v[1][2] is not None:
-                                profiler_data.QueueSize = v[1][2]
+                            profiler_data.Time10 = float(profiler_data.Time10) * 0.9 + saved_trend_data[1][1] * 0.1 \
+                                if profiler_data.Time10 else saved_trend_data[1][1]
+                            profiler_data.Time100 = float(profiler_data.Time100) * 0.99 + saved_trend_data[1][1] * 0.01 \
+                                if profiler_data.Time100 else saved_trend_data[1][1]
+                            profiler_data.Time1000 = float(profiler_data.Time1000) * 0.999 + saved_trend_data[1][1] * 0.001 \
+                                if profiler_data.Time1000 else saved_trend_data[1][1]
+                            if saved_trend_data[1][2] is not None:
+                                profiler_data.QueueSize = saved_trend_data[1][2]
                             session.commit()
                 f.write(f"{timestamp}: Trends writer used {time_used_percent:.2f}% of time\n")
         else:
-            for k, v in Profiler.updates[timestamp].items():
-                if k == 'total' or v[1][1] is None or v[0][0] != 0:
+            for trend_id, saved_trend_data in Profiler.updates[timestamp].items():
+                if trend_id == 'total' or saved_trend_data[1][1] is None or saved_trend_data[0][0] != 0:
                     continue
                 with Session(get_engine()) as session:
-                    profiler_data = session.get(lds.ProfilerData, k)
+                    profiler_data = session.get(lds.ProfilerData, trend_id)
                     if profiler_data:
-                        profiler_data.Time10 = float(profiler_data.Time10) * 0.9 + v[1][1] * 0.1 \
-                            if profiler_data.Time10 else v[1][1]
-                        profiler_data.Time100 = float(profiler_data.Time100) * 0.99 + v[1][1] * 0.01 \
-                            if profiler_data.Time100 else v[1][1]
-                        profiler_data.Time1000 = float(profiler_data.Time1000) * 0.999 + v[1][1] * 0.001 \
-                            if profiler_data.Time1000 else v[1][1]
-                        if v[1][2] is not None:
-                            profiler_data.QueueSize = v[1][2]
+                        profiler_data.Time10 = float(profiler_data.Time10) * 0.9 + saved_trend_data[1][1] * 0.1 \
+                            if profiler_data.Time10 else saved_trend_data[1][1]
+                        profiler_data.Time100 = float(profiler_data.Time100) * 0.99 + saved_trend_data[1][1] * 0.01 \
+                            if profiler_data.Time100 else saved_trend_data[1][1]
+                        profiler_data.Time1000 = float(profiler_data.Time1000) * 0.999 + saved_trend_data[1][1] * 0.001 \
+                            if profiler_data.Time1000 else saved_trend_data[1][1]
+                        if saved_trend_data[1][2] is not None:
+                            profiler_data.QueueSize = saved_trend_data[1][2]
                         session.commit()
         Profiler.updates.pop(timestamp)
 
