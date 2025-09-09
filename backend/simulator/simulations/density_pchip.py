@@ -16,8 +16,9 @@ class SimulationDensityPCHIPBase(SimulationDensityBase):
             timestamps = np.linspace(t0, t1, 11)
             flows = self.flow_interp(timestamps)
             flow_in_step = np.trapezoid(flows, timestamps)
-            # TODO: prepare density_data
-            velocity = self.calculate_velocity(flow_in_step, None)
+            densities = self.density_interp(timestamps)
+            density_in_step = np.mean(densities)
+            velocity = self.calculate_velocity(flow_in_step, density_in_step)
             dists_in_cells = velocity / dx
             d0 = float(self.density_interp(0.5 * (t0 + t1)))
 

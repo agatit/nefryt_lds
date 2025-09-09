@@ -22,7 +22,6 @@ class SimulationDensityBase(SimulationBase):
         except ValueError:
             raise ValueError(f'\'WIDTH\' param for simulation {self.lds_simulation.ID} must be a float')
         self.pipeline_area = np.ones_like(self.simulation_data) * (pipeline_width/2)**2 * math.pi
-        self.pipeline_area[len(self.simulation_data)//2:] *= 10
         self.previous_correct_density_time = 0
         self.window_size = 5
         self.max_flow_gap_in_seconds = 3
@@ -54,10 +53,7 @@ class SimulationDensityBase(SimulationBase):
                     flows = flows[:len(densities)]
                     first_calculated_timestamp = last_timestamp - new_buffer_size - 1
                     break
-                for i, (one_sec_flow_interp, one_sec_density) in enumerate(zip(flows[-buffer_size+1:], densities[-buffer_size+1:])):
-                    timestamps = np.arange(last_timestamp - buffer_size + i + 1, last_timestamp - buffer_size + i + 2, 100)
-                    one_sec_flow = one_sec_flow_interp(timestamps)
-                    volume_covered += np.mean(one_sec_flow)
+                volume_covered += self._calculate_volume_covered(flows[-buffer_size+1:], densities[-buffer_size+1:], last_timestamp, buffer_size)
 
             last_timestamp -= buffer_size - 1
 
@@ -210,6 +206,9 @@ class SimulationDensityBase(SimulationBase):
                 i += 1
 
         return densities, buffer_size
+
+    def _calculate_volume_covered(self, flows: list, densities: list, last_timestamp: int, buffer_size: int) -> float:
+        raise NotImplementedError
 
     def calculate_simulation_data(self):
         density_data = self._get_current_density_data()

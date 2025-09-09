@@ -44,5 +44,5 @@ trends_writer:
         propagate: False
 simulator:
   displayer_ports:
-    1: 11111
-    2: 22222
+    4: 11111
+    5: 22222

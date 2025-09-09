@@ -6,13 +6,14 @@ from sqlalchemy.orm import Session
 from config import Settings
 from database import lds
 from db import get_engine
-from .simulations.density_mass import SimulationDensityMass
+from .simulations.density_mass import SimulationDensityRKMass, SimulationDensityPCHIPMass
 from .simulations.density_volume import SimulationDensityRKVolume, SimulationDensityPCHIPVolume
 
 SIMULATION_CLASSES = {
     'DENSITY_VOLUME_RK': SimulationDensityRKVolume,
     'DENSITY_VOLUME_PCHIP': SimulationDensityPCHIPVolume,
-    'DENSITY_MASS': SimulationDensityMass,
+    'DENSITY_MASS_RK': SimulationDensityRKMass,
+    'DENSITY_MASS_PCHIP': SimulationDensityPCHIPMass
 }
 
 
