@@ -38,78 +38,20 @@ import { useTranslation } from "react-i18next";
 import { arrowRightIcon } from "@progress/kendo-svg-icons";
 import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
 import { AppContext } from "../../../../contexts/appContext";
+import {
+  AxisType,
+  ChartSeriesTrendData,
+  ChartTrendData,
+  generateValue,
+} from "./utils";
 
-const mainChartSampleSize = 500;
-const navigationChartSampleSize = 50;
+const mainChartSampleSize = 750;
+const navigationChartSampleSize = 200;
 
 type TrendLoadStatus = {
-  defsLoaded: boolean;
-  trendsLoaded: boolean;
+  mainDataLoaded: boolean;
+  navDataLoaded: boolean;
 };
-
-export type AxisType = {
-  Name: string;
-  Unit: string;
-  TrendIDs: number[];
-  ScaleMax: number;
-  ScaleMin: number;
-};
-
-export interface ChartTrendData {
-  timestamp: Date;
-  value: number | null;
-}
-
-export interface ChartSeriesTrendData {
-  data: ChartTrendData[];
-  id: number;
-  color: string;
-}
-
-export interface TreeViewDataItem {
-  id?: number | string;
-  text: string;
-  expanded?: boolean;
-  checked?: boolean;
-  selected?: boolean;
-  items?: TreeViewDataItem[];
-}
-
-function generateValue(date: Date, chart: number): number {
-  switch (chart) {
-    case 0:
-      return (
-        Math.sin((date.getTime() / Math.pow(10, 8)) * 2) +
-        date.getMonth() +
-        Math.sin(date.getHours() / 2) +
-        Math.random() * (1.5 - 0.5) +
-        0.5
-      );
-    case 1:
-      return (
-        Math.cos((date.getTime() / Math.pow(10, 8)) * 2) +
-        date.getDate() / 2 +
-        Math.cos(date.getHours() / 2) +
-        Math.random() * (1.5 - 0.5) -
-        5
-      );
-    case 2:
-      return (
-        Math.sin(date.getTime() / Math.pow(10, 7)) +
-        date.getMonth() +
-        Math.cos(date.getMinutes() / 25) +
-        Math.random() * (1.5 - 0.5) +
-        0.5
-      );
-  }
-  return (
-    Math.sin((date.getTime() / Math.pow(10, 8)) * 2) +
-    date.getMonth() +
-    Math.sin(date.getHours() / 2) +
-    Math.random() * (2 - 1) +
-    1
-  );
-}
 
 export default function TrendsPage() {
   const auth = React.useContext(AuthContext);
@@ -196,10 +138,8 @@ export default function TrendsPage() {
     useMockup ? mockupTemplates : []
   );
 
-  const isLoadingTemplates = React.useMemo(
-    () => templates.length == 0,
-    [templates]
-  );
+  const [isLoadingTemplates, setIsLoadingTemplates] =
+    React.useState<boolean>(false);
 
   const handleTemplateStateChange = React.useCallback((value: Template[]) => {
     if (value) setTemplates(value);
@@ -241,6 +181,7 @@ export default function TrendsPage() {
   }, [axesState]);
 
   const loadTemplates = React.useCallback(async () => {
+    setIsLoadingTemplates(true);
     try {
       const response = await handleApiResponse(
         templateApi.listTemplatesTemplateGet.bind(templateApi)
@@ -250,6 +191,7 @@ export default function TrendsPage() {
     } catch (error) {
       console.log(error);
     }
+    setIsLoadingTemplates(false);
   }, []);
 
   React.useEffect(() => {
@@ -302,16 +244,67 @@ export default function TrendsPage() {
   const [navigatorData, setNavigatorData] = React.useState<
     ChartSeriesTrendData[]
   >([]);
-  const [isLoadingTrendsDataState, setLoadingTrendsDataState] = React.useState({
+  const isLoadingTrendsDataRef = React.useRef<TrendLoadStatus>({
     mainDataLoaded: false,
     navDataLoaded: false,
   });
   const isLoadingTrendsData = React.useMemo(() => {
     return (
-      !isLoadingTrendsDataState.mainDataLoaded &&
-      !isLoadingTrendsDataState.navDataLoaded
+      !isLoadingTrendsDataRef.current.mainDataLoaded &&
+      !isLoadingTrendsDataRef.current.navDataLoaded
     );
-  }, [isLoadingTrendsDataState]);
+  }, [isLoadingTrendsDataRef.current]);
+
+  const loadNavTrendsdata = React.useCallback(
+    async (trendIdList: string, trendIdArr: number[]) => {
+      try {
+        const response = await handleApiResponse(
+          trendDataApi.current.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
+            trendDataApi.current
+          ),
+          trendIdList,
+          Math.floor(navigationStartDate.getTime() / 1000),
+          Math.floor(navigationEndDate.getTime() / 1000),
+          navigationChartSampleSize,
+          1,
+          navigationChartSampleSize
+        );
+        console.log(response);
+
+        const newNavTrendsData: ChartSeriesTrendData[] = trendIdArr.map(
+          (id) => {
+            return {
+              data: [],
+              id: id,
+              color: ldsContex!.trends.find((trend) => trend.ID == id)?.Color!,
+            };
+          }
+        );
+
+        response?.data.items.forEach((item: TrendDataMultiple) => {
+          const timestamp = new Date(item.Timestamp * 1000);
+          item.Data?.forEach((dataitem) => {
+            const index = newNavTrendsData.findIndex(
+              (td) => td.id == dataitem.ID
+            );
+            newNavTrendsData[index].data.push({
+              timestamp: timestamp,
+              value: dataitem.Value ? dataitem.Value : null,
+            });
+          });
+        });
+
+        setNavigatorData(newNavTrendsData);
+        isLoadingTrendsDataRef.current = {
+          mainDataLoaded: isLoadingTrendsDataRef.current.mainDataLoaded,
+          navDataLoaded: true,
+        };
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [trendDataApi.current, ldsContex, navigationStartDate, navigationEndDate]
+  );
 
   const loadTrendsData = React.useCallback(async () => {
     var trendIdList: string = "";
@@ -327,9 +320,14 @@ export default function TrendsPage() {
 
     if (trendIdList.length == 0) {
       // if no axes just leave
-      setLoadingTrendsDataState({ mainDataLoaded: true, navDataLoaded: true });
+      isLoadingTrendsDataRef.current = {
+        mainDataLoaded: true,
+        navDataLoaded: true,
+      };
       return;
     }
+
+    loadNavTrendsdata(trendIdList, trendIdArr);
 
     try {
       const response = await handleApiResponse(
@@ -341,15 +339,16 @@ export default function TrendsPage() {
         Math.floor(endDate.getTime() / 1000),
         mainChartSampleSize,
         1,
-        1000
+        mainChartSampleSize
       );
       console.log(response);
 
       if (response.status == 404) {
-        setLoadingTrendsDataState({
+        isLoadingTrendsDataRef.current = {
           mainDataLoaded: true,
           navDataLoaded: true,
-        });
+        };
+
         return;
       }
 
@@ -373,7 +372,10 @@ export default function TrendsPage() {
       });
 
       setTrendsData(newTrendsData);
-      setLoadingTrendsDataState({ mainDataLoaded: true, navDataLoaded: true });
+      isLoadingTrendsDataRef.current = {
+        mainDataLoaded: true,
+        navDataLoaded: isLoadingTrendsDataRef.current.navDataLoaded,
+      };
     } catch (error) {
       console.log(error);
     }
@@ -452,7 +454,10 @@ export default function TrendsPage() {
 
     setTrendsData(newTrendsData);
     setNavigatorData(newNavData);
-    setLoadingTrendsDataState({ mainDataLoaded: true, navDataLoaded: true });
+    isLoadingTrendsDataRef.current = {
+      mainDataLoaded: true,
+      navDataLoaded: true,
+    };
   }, [startDate, endDate, ldsContex?.trends, axesState]);
 
   React.useEffect(() => {
@@ -461,7 +466,10 @@ export default function TrendsPage() {
   }, [useMockup]);
 
   React.useEffect(() => {
-    setLoadingTrendsDataState({ mainDataLoaded: false, navDataLoaded: false });
+    isLoadingTrendsDataRef.current = {
+      mainDataLoaded: false,
+      navDataLoaded: false,
+    };
     useMockup ? generateTestData() : loadTrendsData();
   }, [useMockup, startDate, endDate, axesState, generateTestData]);
 
@@ -480,6 +488,7 @@ export default function TrendsPage() {
             isLoadingTrendsData={isLoadingTrendsData}
             startDate={startDate}
             endDate={endDate}
+            navigationChart={true}
             navigationStartDate={navigationStartDate}
             navigationEndDate={navigationEndDate}
             trendData={trendsData}
@@ -498,6 +507,7 @@ export default function TrendsPage() {
           axesState={axesState}
           onAxesStateChange={handleAxesStateChange}
           onChartEditButtonClick={openChartEdit}
+          dateManipulation={true}
           startDate={startDate}
           endDate={endDate}
           onStartDateChange={handleStartDateChange}
@@ -513,9 +523,8 @@ export default function TrendsPage() {
           useMockup={useMockup}
           closeDialog={closeChartEdit}
           trendDefs={ldsContex!.trendDefs}
-          trendGroups={mockupTrendGroupFromDB}
+          trendGroups={ldsContex!.trendGroups}
           units={ldsContex!.units}
-          mockupTrendTreeData={mockupTrendTreeData}
           trendsState={ldsContex!.trends}
           axesState={axesState}
           onAxesStateChange={handleAxesStateChange}

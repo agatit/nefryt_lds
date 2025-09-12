@@ -22,7 +22,6 @@ import {
 import { DetailPanel } from "onyks_shared_kendo";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { AxisType, TreeViewDataItem } from "./TrendsPage";
 import {
   cancelIcon,
   checkIcon,
@@ -34,6 +33,7 @@ import { Template, Trend } from "../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
+import { AxisType, TreeViewDataItem } from "./utils";
 
 export interface TrendDetailPanelProps {
   isLoading: boolean;
@@ -41,10 +41,11 @@ export interface TrendDetailPanelProps {
   axesState: AxisType[];
   onAxesStateChange: (value: AxisType[]) => void;
   onChartEditButtonClick: React.MouseEventHandler<HTMLButtonElement>;
-  startDate: Date;
-  endDate: Date;
-  onStartDateChange: (event: DateTimePickerChangeEvent) => void;
-  onEndDateChange: (event: DateTimePickerChangeEvent) => void;
+  dateManipulation: boolean;
+  startDate?: Date;
+  endDate?: Date;
+  onStartDateChange?: (event: DateTimePickerChangeEvent) => void;
+  onEndDateChange?: (event: DateTimePickerChangeEvent) => void;
   templates: Template[];
   onSelectedTemplateChange: (value: Template) => void;
   handleCreateNewTemplate: (name: string) => void;
@@ -57,6 +58,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
   axesState,
   onAxesStateChange,
   onChartEditButtonClick,
+  dateManipulation = false,
   startDate,
   endDate,
   onStartDateChange,
@@ -254,9 +256,6 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
               ) : (
                 <React.Fragment>
                   <div className="item">
-                    {/* <Typography.p fontSize="large" margin={0}>
-                  {t("trends-page:chart_legend")}
-                </Typography.p> */}
                     <div className="legend-container">
                       <TreeView
                         ref={axisTreeRef}
@@ -270,30 +269,31 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
                       />
                     </div>
                   </div>
-                  <div className="separator" />
-                  <div className="item">
-                    {/* <Typography.p fontSize="large" margin={0}>
-                  {t("trends-page:time_interval")}
-                </Typography.p> */}
-                    <div className="item-column">
-                      <div>
-                        <Label>{t("common:from")}</Label>
-                        <DateTimePicker
-                          format={"dd/MM/yy HH:mm:ss"}
-                          value={startDate}
-                          onChange={onStartDateChange}
-                        />
+                  {dateManipulation && (
+                    <React.Fragment>
+                      <div className="separator" />
+                      <div className="item">
+                        <div className="item-column">
+                          <div>
+                            <Label>{t("common:from")}</Label>
+                            <DateTimePicker
+                              format={"dd/MM/yy HH:mm:ss"}
+                              value={startDate}
+                              onChange={onStartDateChange}
+                            />
+                          </div>
+                          <div>
+                            <Label>{t("common:to")}</Label>
+                            <DateTimePicker
+                              format={"dd/MM/yy HH:mm:ss"}
+                              value={endDate}
+                              onChange={onEndDateChange}
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <Label>{t("common:to")}</Label>
-                        <DateTimePicker
-                          format={"dd/MM/yy HH:mm:ss"}
-                          value={endDate}
-                          onChange={onEndDateChange}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                    </React.Fragment>
+                  )}
                 </React.Fragment>
               )}
               <div className="separator" />

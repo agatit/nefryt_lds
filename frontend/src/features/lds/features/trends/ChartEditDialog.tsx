@@ -16,7 +16,6 @@ import {
 } from "@progress/kendo-react-treeview";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { AxisType, TreeViewDataItem } from "./TrendsPage";
 import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
 import {
   cancelIcon,
@@ -25,6 +24,8 @@ import {
   xIcon,
 } from "@progress/kendo-svg-icons";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
+import { AxisType, TreeViewDataItem } from "./utils";
+import { mockupTrendTreeData } from "../../../../data/mockup-data";
 
 export interface ChartEditDialogProps {
   useMockup: boolean;
@@ -32,7 +33,6 @@ export interface ChartEditDialogProps {
   trendDefs: TrendDef[];
   trendGroups: TrendGroup[];
   units: Unit[];
-  mockupTrendTreeData: TreeViewDataItem[];
   trendsState: Trend[];
   axesState: AxisType[];
   onAxesStateChange: (value: AxisType[]) => void;
@@ -46,7 +46,6 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   trendDefs,
   trendGroups,
   units,
-  mockupTrendTreeData,
   trendsState,
   axesState,
   onAxesStateChange,
@@ -75,12 +74,12 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
       const trendDef = trendDefs.find((item) => item.ID == trend.TrendDefID);
 
       const indexTrendDef = trendsTree[index].items?.findIndex(
-        (item) => item.id == trend.TrendDefID
+        (item) => item.id == trend.TrendDefID + trend.TrendGroupID
       );
 
       if (indexTrendDef == -1) {
         trendsTree[index].items?.push({
-          id: trend.TrendDefID,
+          id: trend.TrendDefID + trend.TrendGroupID,
           text: trendDef?.Name!,
           items: [
             {
