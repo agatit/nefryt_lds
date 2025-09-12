@@ -19,7 +19,6 @@ TREND_CLASSES = {
     'DIFF': 'TrendDiff'
 }
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,10 +36,10 @@ class PipePlant:
         stmt = (select(lds.Trend, lds.TrendDef)
                 .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) # noqa
                 .where(lds.Trend.Enabled == 1))
+        logger.info("PipePlant: Started reading trends")
         with Session(get_engine()) as session:
             result = session.execute(stmt).all()
 
-        logger.info("PipePlant: Started reading trends")
         trend_ids = []
         for trend, trend_def in result:
             try:

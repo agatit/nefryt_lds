@@ -10,6 +10,8 @@ from database.models import lds
 from db import get_engine
 from simulator.simulations.base import SimulationBase
 
+logger = logging.getLogger(__name__)
+
 
 class SimulationDensityBase(SimulationBase):
     def __init__(self, simulation: lds.Simulation, db_uri: str = None):
@@ -18,9 +20,9 @@ class SimulationDensityBase(SimulationBase):
         try:
             pipeline_width = float(self.params['WIDTH'])
         except KeyError:
-            raise ValueError(f'No \'WIDTH\' param for simulation {self.lds_simulation.ID}')
+            raise ValueError(f'No \'WIDTH\' param for simulation with id={self.id}')
         except ValueError:
-            raise ValueError(f'\'WIDTH\' param for simulation {self.lds_simulation.ID} must be a float')
+            raise ValueError(f'\'WIDTH\' param for simulation with id={self.id} has to be a float')
         self.pipeline_area = np.ones_like(self.simulation_data) * (pipeline_width/2)**2 * math.pi
         self.previous_correct_density_time = 0
         self.window_size = 5
@@ -29,6 +31,7 @@ class SimulationDensityBase(SimulationBase):
         self.flow_interp = None
 
     def calculate_simulation_data_on_start(self):
+        logger.debug(f'{self.__class__.__name__} ({self.id}): Start simulation data calculation started')
         volume_covered = 0
         default_buffer_size = 100
         last_timestamp = self.simulation_timestamp
@@ -52,17 +55,23 @@ class SimulationDensityBase(SimulationBase):
                 if new_buffer_size != buffer_size:
                     flows = flows[:len(densities)]
                     first_calculated_timestamp = last_timestamp - new_buffer_size - 1
+                    logger.debug(f'{self.__class__.__name__} ({self.id}): Start simulation data calculation stopped in '
+                                 f'timestamp {first_calculated_timestamp} because of no density trend data')
                     break
                 volume_covered += self._calculate_volume_covered(flows[-buffer_size+1:], densities[-buffer_size+1:], last_timestamp, buffer_size)
 
             last_timestamp -= buffer_size - 1
 
         first_calculated_timestamp = last_timestamp if not first_calculated_timestamp else first_calculated_timestamp
+        logger.debug(f'{self.__class__.__name__} ({self.id}): Start simulation data calculation used '
+                     f'{self.simulation_data - first_calculated_timestamp} last seconds')
         for i, (flow, density) in enumerate(zip(reversed(flows), reversed(densities))):
             density_timestamps = np.linspace(first_calculated_timestamp + i, first_calculated_timestamp + i + 1, len(density))
             self.density_interp = interp1d(density_timestamps, density, kind='linear', fill_value='extrapolate')
             self.flow_interp = flow
             self._refresh_simulation_data(first_calculated_timestamp + i)
+
+        logger.debug(f'{self.__class__.__name__} ({self.id}): Start simulation data calculation finished')
 
     def _read_start_flow_data(self, last_timestamp: int, buffer_size: int) -> (dict, int, int | None):
         first_calculated_timestamp = None
@@ -87,6 +96,8 @@ class SimulationDensityBase(SimulationBase):
                 if t_next - t_prev > self.max_flow_gap_in_seconds + 1:
                     buffer_size = len(new_flows) + 1 if len(new_flows) != 0 else 0
                     first_calculated_timestamp = last_timestamp - len(new_flows)
+                    logger.debug(f'{self.__class__.__name__} ({self.id}): Start simulation data calculation stopped in '
+                                 f'timestamp {t_next} because of gap in flow trend data')
                     break
                 else:
                     if self.flow_trend.RawMin >= 0:
@@ -166,6 +177,8 @@ class SimulationDensityBase(SimulationBase):
                 curr_t = self.simulation_timestamp - len(densities)
                 densities[-1] = [prev_data + ((curr_t + diff * (1 / (100 // self.window_size)) - prev_t) / diff_t)
                                  * (next_data - prev_data) for diff in range(100 // self.window_size)]
+                logger.debug(f'{self.__class__.__name__} ({self.id}): Start simulation data calculation density filled '
+                             f'in timestamp {last_timestamp - buffer_size + 1}')
             else:
                 last_not_none_idx = next((len(densities) - i for i, j in enumerate(reversed(densities), 1) if j is not None), None)
                 if last_not_none_idx is None:
@@ -182,6 +195,9 @@ class SimulationDensityBase(SimulationBase):
                 if densities[i]:
                     break
                 else:
+                    logger.debug(
+                        f'{self.__class__.__name__} ({self.id}): Start simulation data calculation density filled '
+                        f'in timestamp {self.simulation_timestamp - 1 - i}')
                     densities[i] = [first_density[-1]] * (100 // self.window_size)
 
         i = len(densities) - buffer_size + 1
@@ -200,6 +216,9 @@ class SimulationDensityBase(SimulationBase):
                 for curr_t in range(i, j):
                     densities[curr_t] = [prev_data + ((curr_t + diff * (1 / (100 // self.window_size)) - prev_t) / diff_t)
                                          * (next_data - prev_data) for diff in range(100 // self.window_size)]
+                    logger.debug(
+                        f'{self.__class__.__name__} ({self.id}): Start simulation data calculation density filled '
+                        f'in timestamp {self.simulation_timestamp - 1 - i}')
 
                 i = j
             else:
@@ -216,9 +235,13 @@ class SimulationDensityBase(SimulationBase):
             self.flow_interp = self._get_current_flow_data()
 
             if self.flow_interp:
+                logger.debug(f'{self.__class__.__name__} ({self.id}): Calculated density data and flow data '
+                             f'(timestamp={self.simulation_timestamp})')
                 density_timestamps = np.linspace(self.simulation_timestamp, self.simulation_timestamp + 1, len(density_data))
                 self.density_interp = interp1d(density_timestamps, density_data, kind='linear', fill_value='extrapolate')
                 self._refresh_simulation_data(self.simulation_timestamp)
+                logger.debug(f'{self.__class__.__name__} ({self.id}): Calculated simulation data: {self.simulation_data} '
+                             f'in timestamp={self.simulation_timestamp}')
 
     def _get_current_density_data(self) -> list | None:
         window_size = 5
@@ -237,7 +260,7 @@ class SimulationDensityBase(SimulationBase):
             else:
                 density_data = struct.unpack("h" * 100, density_trend_data.Data)
             if density_trend_data.Time != self.simulation_timestamp:
-                logging.warning(f'Simulation {self.lds_simulation.ID} density data read incorrect timestamp '
+                logger.warning(f'{self.__class__.__name__} ({self.id}): Density data read incorrect timestamp '
                                 f'(expected: {self.simulation_timestamp}, real: {density_trend_data.Time})')
                 last_density = -1
                 window = 0
@@ -252,21 +275,21 @@ class SimulationDensityBase(SimulationBase):
             density_data = [(sum(density_data[i*window_size:(i+1)*window_size])/window_size)
                             * float(self.simulation_unit.Multiplier) for i in range(100//window_size)]
             if min(density_data) <= 0:
-                logging.warning(f'Simulation {self.lds_simulation.ID} density data have incorrect values'
-                                f'(should not be <= 0, replacing those values with last values)')
+                logger.warning(f'{self.__class__.__name__} ({self.id}): Density data have incorrect values'
+                                f'(should be greater than zero, replacing incorrect values with last)')
                 last_density = float(self.density_interp(self.previous_correct_density_time)) if self.density_interp is not None else 1
                 density_data = [data if data > 0 else last_density for data in density_data]
 
             self.previous_correct_density_time = self.simulation_timestamp
             return density_data
         elif self.density_interp is not None:
-            logging.warning(f'No density trend data in database for simulation with id = {self.lds_simulation.ID}, '
-                            f'timestamp {self.simulation_timestamp}, using saved density data')
+            logger.warning(f'{self.__class__.__name__} ({self.id}): No density trend data in database '
+                            f'in timestamp={self.simulation_timestamp}, using saved density data to calculate new simulation data')
             last_density = float(self.density_interp(self.previous_correct_density_time))
             return [last_density] * (100//window_size)
         else:
-            logging.warning(f'No density trend data in database for simulation with id = {self.lds_simulation.ID}, '
-                            f'timestamp {self.simulation_timestamp}, no new simulation data will be saved')
+            logger.warning(f'{self.__class__.__name__} ({self.id}): No density trend data in database '
+                            f'in timestamp={self.simulation_timestamp}, no new simulation data will be saved')
             return None
 
     def _get_current_flow_data(self) -> Callable | None:
@@ -286,23 +309,23 @@ class SimulationDensityBase(SimulationBase):
             data_next = session.execute(statement_next).scalars().first()
 
         if data_prev is None:
-            logging.warning(f'No previous flow trend data for simulation with id={self.lds_simulation.ID},'
-                            f'timestamp {self.simulation_timestamp}, no new simulation data will be saved')
+            logger.warning(f'{self.__class__.__name__} ({self.id}): No previous flow trend data'
+                            f' (timestamp={self.simulation_timestamp}), no new simulation data will be saved')
             return None
         elif (self.simulation_timestamp - data_prev.Time - 1) > self.max_flow_gap_in_seconds:
             if self.simulation_timestamp - data_prev.Time - 1 == self.previous_timestamp_diff:
-                logging.warning(f'Timestamp difference between Trends Writer and Simulation modules, '
-                                f'no new simulation data will be saved until timestamps are within maximum time gap'
-                                f'(current gap: {self.simulation_timestamp - data_prev.Time - 1} seconds)')
+                logger.warning(f'{self.__class__.__name__} ({self.id}): Timestamp gap between Trends Writer and Simulation modules'
+                               f'(current gap: {self.simulation_timestamp - data_prev.Time - 1} seconds), '
+                               f'no new simulation data will be saved until timestamps are within maximum time gap')
             else:
                 self.previous_timestamp_diff = self.simulation_timestamp - data_prev.Time - 1
-            logging.warning(f'Previous flow trend data not in maximum time gap, '
+            logger.warning(f'{self.__class__.__name__} ({self.id}): Previous flow trend data not in maximum time gap, '
                             f'(expected: {self.simulation_timestamp-1}, real: {data_prev.Time}),'
                             f' no new simulation data will be saved')
             return None
         elif data_next is None:
-            logging.warning(f'No next flow trend data for simulation with id={self.lds_simulation.ID} '
-                            f'timestamp {self.simulation_timestamp}, using only previous data')
+            logger.warning(f'{self.__class__.__name__} ({self.id}): No next flow trend data '
+                            f'(timestamp={self.simulation_timestamp}), using only previous data')
             if self.flow_trend.RawMin >= 0:
                 data_prev = struct.unpack("H" * 100, data_prev.Data)
             else:
@@ -321,13 +344,13 @@ class SimulationDensityBase(SimulationBase):
 
             mean_data_prev = (sum(data_prev[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
             if mean_data_prev < 0:
-                logging.warning(f'Simulation {self.lds_simulation.ID} flow previous data have incorrect values'
-                                f'(should not be < 0, replacing this value with zero flow)')
+                logger.warning(f'{self.__class__.__name__} ({self.id}): Flow previous data have incorrect values'
+                                f'(should be greater equal zero, replacing incorrect values with zeros)')
                 mean_data_prev = 0
             mean_data_next = (sum(data_next[:mean_data_count]) / mean_data_count) * float(self.flow_unit.Multiplier)
             if mean_data_next < 0:
-                logging.warning(f'Simulation {self.lds_simulation.ID} flow next data have incorrect values'
-                                f'(should not be < 0, replacing this value with zero flow)')
+                logger.warning(f'{self.__class__.__name__} ({self.id}): Flow next data have incorrect values'
+                                f'(should be greater equal zero, replacing incorrect values with zeros)')
                 mean_data_next = 0
             diff_t = t_next - t_prev - 1
             diff_data = mean_data_next - mean_data_prev

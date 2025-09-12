@@ -16,6 +16,8 @@ SIMULATION_CLASSES = {
     'DENSITY_MASS_PCHIP': SimulationDensityPCHIPMass
 }
 
+logger = logging.getLogger(__name__)
+
 
 class SimulationManager:
     def __init__(self):
@@ -25,6 +27,7 @@ class SimulationManager:
     async def start_simulations(self):
         statement = (select(lds.Simulation)
                      .where(lds.Simulation.Enabled == 1)) # noqa
+        logger.info("SimulationManager: Started reading simulations")
         with Session(get_engine()) as session:
             simulations = session.scalars(statement).all()
 
@@ -34,10 +37,11 @@ class SimulationManager:
                 new_simulation = simulation_class(simulation, Settings.db_uri)
                 self.simulations.append(new_simulation)
             except Exception as e:
-                logging.warning(f"Simulation with id = {simulation.ID} init error: {e}", exc_info=True)
+                logger.warning(f"SimulationManager: Simulation with id = {simulation.ID} init error: {e}", exc_info=True)
 
         for simulation in self.simulations:
             simulation.run_process()
+        logger.info("SimulationManager: Finished reading simulations")
 
         if Settings.tests:
             return self.simulations
@@ -46,7 +50,7 @@ class SimulationManager:
                 while True:
                     time.sleep(1)
             except KeyboardInterrupt:
-                logging.info("Simulator module shutdown")
+                logger.info("SimulationManager: Simulator module shutdown")
             return None
 
     def shutdown_processes(self):

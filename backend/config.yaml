@@ -43,6 +43,35 @@ trends_writer:
         handlers: [console]
         propagate: False
 simulator:
+  logging:
+    version: 1
+
+    handlers:
+      console:
+        class: logging.StreamHandler
+        level: DEBUG
+        stream: ext://sys.stdout
+
+      manager:
+        class: logging.FileHandler
+        filename: default_log.log
+        level: INFO
+
+    loggers:
+      simulator:
+        level: INFO
+        handlers: [ console ]
+
+      simulator.simulations:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
+      simulator.simulation_manager:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
   displayer_ports:
     4: 11111
     5: 22222
