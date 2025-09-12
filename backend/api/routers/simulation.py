@@ -52,7 +52,7 @@ async def create_simulation(simulation: Annotated[api.SimulationCreate, Body()],
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.delete('/{simulation_id}', response_model=api.Information | api.Error)
+@router.delete('/{simulation_id}', response_model=None | api.Error)
 async def delete_simulation_by_id(simulation_id: Annotated[int, Path()],
                                   engine: Annotated[Engine, Depends(get_engine)]):
     try:
@@ -109,4 +109,21 @@ async def update_simulation(simulation_id: Annotated[int, Path()],
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in update_simulation(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.put('/{simulation_id}/enable', response_model=None | api.Error)
+async def enable_simulation(simulation_id: Annotated[int, Path()], engine: Annotated[Engine, Depends(get_engine)]):
+    try:
+        with Session(engine) as session:
+            simulation = session.get(lds.Simulation, simulation_id)
+            if not simulation:
+                error = api.Error(code=status.HTTP_404_NOT_FOUND,  message='No simulation with id = ' + str(simulation_id))
+                return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
+            simulation.Enabled = not simulation.Enabled
+            session.commit()
+            session.refresh(simulation)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in enable_simulation(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

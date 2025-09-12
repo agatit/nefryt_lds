@@ -33,7 +33,6 @@ class Trend(SQLModel):
                                    Integer,
                                    ForeignKey("lds.Node.ID", ondelete='SET NULL'),
                                    nullable=True))
-    TimeDelta: int = Field(0)
 
     @model_validator(mode='after')
     def check_is_min_smaller_than_max(self) -> Self:

@@ -35,7 +35,8 @@ class PipePlant:
 
     def read_trends(self):
         stmt = (select(lds.Trend, lds.TrendDef)
-                .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID)) # noqa
+                .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) # noqa
+                .where(lds.Trend.Enabled == 1))
         with Session(get_engine()) as session:
             result = session.execute(stmt).all()
 

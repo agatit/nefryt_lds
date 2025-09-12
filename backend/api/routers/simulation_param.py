@@ -218,7 +218,7 @@ async def create_simulation_param(simulation_id: Annotated[int, Path()],
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.delete('/{simulation_id}/param/{simulation_param_def_id}', response_model=api.Information | api.Error)
+@router.delete('/{simulation_id}/param/{simulation_param_def_id}', response_model=None | api.Error)
 async def delete_simulation_param_by_id(simulation_id: Annotated[int, Path()],
                                   simulation_param_def_id: Annotated[str, Path()],
                                   engine: Annotated[Engine, Depends(get_engine)]):

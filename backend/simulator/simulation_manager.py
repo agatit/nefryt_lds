@@ -23,7 +23,8 @@ class SimulationManager:
         atexit.register(self.shutdown_processes)
 
     async def start_simulations(self):
-        statement = select(lds.Simulation)
+        statement = (select(lds.Simulation)
+                     .where(lds.Simulation.Enabled == 1)) # noqa
         with Session(get_engine()) as session:
             simulations = session.scalars(statement).all()
 
