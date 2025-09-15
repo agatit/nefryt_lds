@@ -6,3 +6,7 @@ packages
 backend/.env
 backend/*.lock
 .idea
+__pycache__
+backend/**/*.log
+backend/**/*.csv
+*.egg-info/

@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import signal
-from . import TrendFilter
+from .filter import TrendFilter
 
 
 class TrendMean(TrendFilter):

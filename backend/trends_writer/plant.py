@@ -1,6 +1,5 @@
 import atexit
 import logging
-import sys
 import time
 from multiprocessing import Queue
 from sqlalchemy import select
@@ -10,13 +9,13 @@ from database import lds
 from db import get_engine
 from .profiler import Profiler
 import trends_writer.trend # noqa
-from .trend import TrendManager, TrendBase
+from .trend import TrendManager, TrendBase, TrendQuick, TrendMean, TrendDeriv, TrendDiff
 
 TREND_CLASSES = {
-    'QUICK': 'TrendQuick',
-    'MEAN': 'TrendMean',
-    'DERIV': 'TrendDeriv',
-    'DIFF': 'TrendDiff'
+    'QUICK': TrendQuick,
+    'MEAN': TrendMean,
+    'DERIV': TrendDeriv,
+    'DIFF': TrendDiff
 }
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,7 @@ class PipePlant:
         trend_ids = []
         for trend, trend_def in result:
             try:
-                trend_class = getattr(sys.modules["trends_writer.trend"], TREND_CLASSES[trend_def.ID.strip()])
+                trend_class = TREND_CLASSES[trend_def.ID.strip()]
                 new_trend = trend_class(trend.ID, Queue(), Settings.db_uri, Profiler.queue)
                 trend_ids.append(trend.ID)
                 TrendManager.add(new_trend)
