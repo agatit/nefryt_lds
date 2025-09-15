@@ -5,20 +5,22 @@ import {
   TrendDef,
   TrendGroup,
   TrendGroupApi,
+  TrendParamApi,
+  TrendParamDef,
   Unit,
   UnitApi,
 } from "../../../services/api";
-import { MockupTrendParamDefType } from "../../../data/mockup-data";
 
 export type LDSContextType = {
   trendDefs: TrendDef[];
   trendApi: TrendApi;
   trends: Trend[];
   setTrends: (value: Trend[]) => void;
-  addTrend: (value: Trend) => Promise<void>;
+  addTrend: (value: Trend) => Promise<Trend>;
   updateTrend: (value: Trend) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
-  trendParamDefs: MockupTrendParamDefType[];
+  trendParamApi: TrendParamApi;
+  trendParamDefs: TrendParamDef[];
   trendGroupApi: TrendGroupApi;
   trendGroups: TrendGroup[];
   setTrendGroups: (value: TrendGroup[]) => void;
@@ -40,11 +42,11 @@ interface LDSContextProviderProps extends PropsWithChildren {
   trendApi: TrendApi;
   trends: Trend[];
   setTrends: (value: Trend[]) => void;
-  addTrend: (value: Trend) => Promise<void>;
+  addTrend: (value: Trend) => Promise<Trend>;
   updateTrend: (value: Trend) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
-  trendParamDefs: MockupTrendParamDefType[];
-
+  trendParamApi: TrendParamApi;
+  trendParamDefs: TrendParamDef[];
   trendGroupApi: TrendGroupApi;
   trendGroups: TrendGroup[];
   setTrendGroups: (value: TrendGroup[]) => void;
@@ -68,6 +70,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
   addTrend,
   updateTrend,
   deleteTrend,
+  trendParamApi,
   trendParamDefs,
   trendGroupApi,
   trendGroups,
@@ -91,6 +94,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addTrend,
       updateTrend,
       deleteTrend,
+      trendParamApi,
       trendParamDefs,
       trendGroupApi,
       trendGroups,
@@ -112,6 +116,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addTrend,
       updateTrend,
       deleteTrend,
+      trendParamApi,
       trendParamDefs,
       trendGroupApi,
       trendGroups,

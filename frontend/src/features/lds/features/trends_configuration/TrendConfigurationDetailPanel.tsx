@@ -6,6 +6,7 @@ import {
 import {
   FlatColorPicker,
   FlatColorPickerChangeEvent,
+  NumericTextBox,
   TextBox,
   TextBoxChangeEvent,
 } from "@progress/kendo-react-inputs";
@@ -19,14 +20,26 @@ import {
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
+import {
+  Trend,
+  TrendDef,
+  TrendGroup,
+  TrendParam,
+  TrendParamApi,
+  TrendParamDef,
+  Unit,
+} from "../../../../services/api";
 import { ParsedTrendType } from "./TrendConfigurationPage";
 import { rgbaToHex } from "../../../../lib/utilis";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
+import { LDSContext } from "../../contexts/ldsContext";
+import { Loader } from "@progress/kendo-react-indicators";
 
 export interface TrendConfigurationDetailPanelProps {
   trendDefs: TrendDef[];
   trendGroups: TrendGroup[];
+  trendParamDefs: TrendParamDef[];
   units: Unit[];
   editTrend: (value: Trend) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
@@ -38,6 +51,7 @@ const TrendConfigurationDetailPanel = React.memo(
   function TrendConfigurationDetailPanel({
     trendDefs,
     trendGroups,
+    trendParamDefs,
     units,
     editTrend,
     deleteTrend,
@@ -45,6 +59,8 @@ const TrendConfigurationDetailPanel = React.memo(
     enterAddNewTrend,
   }: TrendConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
+    const handleApiResponse = useHandleApiResponse();
+    const ldsContext = React.useContext(LDSContext);
 
     const setSelectedData = React.useCallback(
       (selectedTrend: ParsedTrendType) => {
@@ -72,6 +88,11 @@ const TrendConfigurationDetailPanel = React.memo(
       if (selected !== null) setSelectedData(selected);
     }, [selected, setSelectedData]);
 
+    const [isLoadingParams, setIsLoadingParams] =
+      React.useState<boolean>(false);
+
+    // DATA
+
     const [trendID, setTrendID] = React.useState<number | undefined>(
       selected?.ID
     );
@@ -90,6 +111,41 @@ const TrendConfigurationDetailPanel = React.memo(
     const [trendColor, setTrendColor] = React.useState<string | undefined>(
       selected?.Color!
     );
+    const [trendParams, setTrendParams] = React.useState<number[]>([]);
+
+    const loadParams = React.useCallback(async () => {
+      if (!selected) return;
+      try {
+        const response = await handleApiResponse(
+          ldsContext!.trendParamApi.listTrendParamsByTrendIdTrendTrendIdParamGet.bind(
+            ldsContext!.trendParamApi
+          ),
+          selected?.ID
+        );
+        if (response.data)
+          setTrendParams(
+            response.data.items.map((el: TrendParam) => {
+              return Number(el.Value);
+            })
+          );
+        setIsLoadingParams(false);
+      } catch (error) {
+        console.log(error);
+      }
+    }, [selected]);
+
+    React.useEffect(() => {
+      setIsLoadingParams(true);
+      loadParams();
+    }, [selected]);
+
+    const requiredTrendParams = React.useMemo(() => {
+      return trendParamDefs.filter((def) => def.TrendDefID == trendType?.ID);
+    }, [trendParamDefs, trendType]);
+
+    React.useEffect(() => {
+      setTrendParams(Array(requiredTrendParams.length).fill(0));
+    }, [requiredTrendParams]);
 
     React.useEffect(() => {
       if (selected !== null) setSelectedData(selected);
@@ -140,6 +196,20 @@ const TrendConfigurationDetailPanel = React.memo(
         ScaledMax: 10000,
       };
       await editTrend(newTrend);
+      for (let i = 0; i < trendParams.length; i++) {
+        try {
+          const response = await handleApiResponse(
+            ldsContext!.trendParamApi.updateTrendParamTrendTrendIdParamTrendParamDefIdPut.bind(
+              ldsContext!.trendParamApi
+            ),
+            trendID!,
+            requiredTrendParams[i].ID,
+            JSON.stringify(String(trendParams[i])) // WHY WE USE STRINGS AS NUMBERS IN THE API ITS STUPID
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      }
       setInEdit(false);
     }, [
       editTrend,
@@ -149,6 +219,7 @@ const TrendConfigurationDetailPanel = React.memo(
       trendGroup,
       trendUnit,
       trendColor,
+      trendParams,
     ]);
 
     // Deletion dialog
@@ -163,6 +234,7 @@ const TrendConfigurationDetailPanel = React.memo(
     const confirmDeletion = React.useCallback(async () => {
       const { trendType, trendGroup, ...selectedTrend } = selected!;
       await deleteTrend(selectedTrend);
+
       setInEdit(false);
     }, [selected, deleteTrend]);
 
@@ -226,6 +298,34 @@ const TrendConfigurationDetailPanel = React.memo(
                 disabled={!inEdit}
               />
             </div>
+            {isLoadingParams ? (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {" "}
+                <Loader size="medium" type={"infinite-spinner"} />{" "}
+              </div>
+            ) : (
+              requiredTrendParams.map((trendParam, index) => {
+                return (
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <Label editorId={"trendParam-" + trendParam.ID}>
+                      {trendParam.Name}
+                    </Label>
+                    <NumericTextBox
+                      key={"trendParam " + index}
+                      id={"trendParam-" + trendParam.ID}
+                      value={trendParams[index]}
+                      onChange={(event) => {
+                        let params = [...trendParams];
+                        params.splice(index, 1, event.value ?? 0);
+                        console.log(trendParams);
+                        setTrendParams(params);
+                      }}
+                      disabled={!inEdit}
+                    />
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
         <div className="separator" />

@@ -43,6 +43,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     setAuth(response.data);
     setConfig(new Configuration({ accessToken: response.data.token }));
     setCookie("auth", JSON.stringify(response.data));
+    location.reload();
   }
 
   return (

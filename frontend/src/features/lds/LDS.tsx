@@ -1,17 +1,10 @@
-import {
-  DrawerItem,
-  DrawerItemProps,
-  DrawerSelectEvent,
-} from "@progress/kendo-react-layout";
+import { DrawerSelectEvent } from "@progress/kendo-react-layout";
 import {
   chartLineIcon,
   chartLineStackedMarkersIcon,
-  chevronDownIcon,
-  chevronRightIcon,
   dropletIcon,
   graphIcon,
   homeIcon,
-  kpiStatusOpenIcon,
   lockIcon,
   planIcon,
   unlockIcon,
@@ -20,7 +13,7 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { AuthContext, AuthContextProvider } from "../../contexts/authContext";
+import { AuthContext } from "../../contexts/authContext";
 import {
   DrawerRouterContainer,
   DrawerRouterItemProps,
@@ -33,7 +26,6 @@ import EventsPage from "./features/EventsPage";
 import HomePage from "./features/HomePage";
 import { Button } from "@progress/kendo-react-buttons";
 import "../../styles/features/lds/lds.scss";
-import { SwitchChangeEvent } from "@progress/kendo-react-inputs";
 import { NavbarContext } from "../../contexts/navbarContext";
 import { LDSContextProvider } from "./contexts/ldsContext";
 import {
@@ -45,13 +37,14 @@ import {
   TrendGroupApi,
   Unit,
   UnitApi,
+  TrendParamApi,
+  TrendParamDef,
 } from "../../services/api";
 import { axiosInstance, host } from "../../lib/apiUtilities";
 import {
   mockupTrendDefs,
   mockupTrendGroups,
   mockupTrendParamDefs,
-  MockupTrendParamDefType,
   mockupTrends,
   mockupUnits,
 } from "../../data/mockup-data";
@@ -180,6 +173,11 @@ export default function LDS() {
     [auth]
   );
 
+  const trendParamApi = React.useMemo(
+    () => new TrendParamApi(auth?.config, host, axiosInstance),
+    [auth]
+  );
+
   const [trendDefs, setTrendDefs] = React.useState<TrendDef[]>(
     nav.useMockup ? mockupTrendDefs : []
   );
@@ -192,15 +190,16 @@ export default function LDS() {
   const [trends, setTrends] = React.useState<Trend[]>(
     nav.useMockup ? mockupTrends : []
   );
-  const [trendParamDefs, setTrendParamDefs] =
-    React.useState<MockupTrendParamDefType[]>(mockupTrendParamDefs);
+  const [trendParamDefs, setTrendParamDefs] = React.useState<TrendParamDef[]>(
+    nav.useMockup ? mockupTrendParamDefs : []
+  );
 
   React.useEffect(() => {
     setTrendDefs(nav.useMockup ? mockupTrendDefs : []);
     setTrendGroups(nav.useMockup ? mockupTrendGroups : []);
     setUnits(nav.useMockup ? mockupUnits : []);
     setTrends(nav.useMockup ? mockupTrends : []);
-    setTrendParamDefs(mockupTrendParamDefs);
+    setTrendParamDefs(nav.useMockup ? mockupTrendParamDefs : []);
   }, [nav.useMockup]);
 
   const addTrend = React.useCallback(
@@ -215,8 +214,11 @@ export default function LDS() {
           trendApi.createTrendTrendPost.bind(trendApi),
           value
         );
-        console.log(response);
-        if (response?.data) setTrends([...trends, response.data]);
+
+        if (response?.data) {
+          setTrends([...trends, response.data]);
+          return response.data;
+        }
       } catch (error) {
         console.log(error);
       }
@@ -243,7 +245,7 @@ export default function LDS() {
           ID,
           updateTrend
         );
-        console.log(response);
+
         if (response?.data)
           setTrends(
             trends.map((trend) => {
@@ -270,7 +272,7 @@ export default function LDS() {
           trendApi.deleteTrendByIdTrendTrendIdDelete.bind(trendApi),
           value.ID
         );
-        console.log(response);
+
         setTrends(trends.filter((trend) => trend.ID !== value.ID));
       } catch (error) {
         console.log(error);
@@ -291,7 +293,7 @@ export default function LDS() {
           trendGroupApi.createTrendGroupTrendGroupPost.bind(trendGroupApi),
           value
         );
-        console.log(response);
+
         if (response?.data) setTrendGroups([...trendGroups, response.data]);
       } catch (error) {
         console.log(error);
@@ -321,7 +323,7 @@ export default function LDS() {
           ID,
           updateTrendGroup
         );
-        console.log(response);
+
         if (response?.data)
           setTrendGroups(
             trendGroups.map((trendGroup) => {
@@ -352,7 +354,7 @@ export default function LDS() {
           ),
           value.ID
         );
-        console.log(response);
+
         setTrendGroups(
           trendGroups.filter((trendGroup) => trendGroup.ID !== value.ID)
         );
@@ -375,7 +377,7 @@ export default function LDS() {
           unitApi.createUnitUnitPost.bind(unitApi),
           value
         );
-        console.log(response);
+
         if (response?.data) setUnits([...units, response.data]);
       } catch (error) {
         console.log(error);
@@ -403,7 +405,7 @@ export default function LDS() {
           ID,
           updateUnit
         );
-        console.log(response);
+
         if (response?.data)
           setUnits(
             units.map((unit) => {
@@ -430,7 +432,7 @@ export default function LDS() {
           unitApi.deleteUnitByIdUnitUnitIdDelete.bind(unitApi),
           value.ID
         );
-        console.log(response);
+
         setUnits(units.filter((unit) => unit.ID !== value.ID));
       } catch (error) {
         console.log(error);
@@ -443,7 +445,6 @@ export default function LDS() {
     //maybe split into separate function to avoid .then() mess
     handleApiResponse(trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi))
       .then((response) => {
-        console.log(response);
         if (response?.data) setTrendDefs(response?.data.items);
       })
       .catch((error) => {
@@ -454,7 +455,6 @@ export default function LDS() {
       trendGroupApi.listTrendGroupsTrendGroupGet.bind(trendGroupApi)
     )
       .then((response) => {
-        console.log(response);
         if (response?.data) setTrendGroups(response?.data.items);
       })
       .catch((error) => {
@@ -463,7 +463,6 @@ export default function LDS() {
 
     handleApiResponse(unitApi.listUnitsUnitGet.bind(unitApi))
       .then((response) => {
-        console.log(response);
         if (response?.data) setUnits(response?.data.items);
       })
       .catch((error) => {
@@ -472,13 +471,18 @@ export default function LDS() {
 
     handleApiResponse(trendApi.listTrendsTrendGet.bind(trendApi))
       .then((response) => {
-        console.log(response);
         if (response?.data) setTrends(response?.data.items);
       })
       .catch((error) => {
         console.log(error);
       });
-  }, [trendDefApi, trendGroupApi, unitApi, trendApi]);
+
+    handleApiResponse(
+      trendParamApi.listTrendParamDefsTrendParamDefGet.bind(trendParamApi)
+    ).then((resposne) => {
+      if (resposne.data) setTrendParamDefs(resposne.data.items);
+    });
+  }, [trendDefApi, trendGroupApi, unitApi, trendApi, trendParamApi]);
   React.useEffect(() => {
     if (!nav.useMockup) LoadData();
   }, [nav.useMockup]);
@@ -515,6 +519,7 @@ export default function LDS() {
               addTrendGroup={addTrendGroup}
               updateTrendGroup={updateTrendGroup}
               deleteTrendGroup={deleteTrendGroup}
+              trendParamApi={trendParamApi}
               trendParamDefs={trendParamDefs}
               unitApi={unitApi}
               units={units}

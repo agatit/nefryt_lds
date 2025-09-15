@@ -7,13 +7,13 @@ import {
   GridToolbar,
 } from "@progress/kendo-react-grid";
 import { DetailPanel } from "onyks_shared_kendo";
-import { EventOut } from "../../../services/api";
 import { AuthContext } from "../../../contexts/authContext";
 import { useRefreshableRequest } from "../../../hooks/useRefreshableRequest";
 import { useTranslation } from "react-i18next";
 import { Typography } from "@progress/kendo-react-common";
+import { Event } from "../../../services/api";
 
-export interface ParsedEventType extends EventOut {}
+export interface ParsedEventType extends Event {}
 
 const EventsPage = React.memo(function EventsPage() {
   const auth = React.useContext(AuthContext);

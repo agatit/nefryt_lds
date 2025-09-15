@@ -16,7 +16,7 @@ export function useResizeObserver<T extends HTMLElement>(
     observer.observe(ref.current);
 
     return () => observer.disconnect();
-  }, [callback]);
+  }, [ref.current]);
 
   return ref;
 }

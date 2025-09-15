@@ -1,8 +1,15 @@
 import {
   AxisType,
   TreeViewDataItem,
-} from "../features/lds/features/trends/TrendsPage";
-import { Template, Trend, TrendDef, TrendGroup, Unit } from "../services/api";
+} from "../features/lds/features/trends/utils";
+import {
+  Template,
+  Trend,
+  TrendDef,
+  TrendGroup,
+  TrendParamDef,
+  Unit,
+} from "../services/api";
 
 // export type MockupTrendType = {
 //   ID: number;
@@ -328,14 +335,7 @@ export const mockupTrendGroupFromDB: MockupTrendGroupType[] = [
   },
 ];
 
-export interface MockupTrendParamDefType {
-  ID: string;
-  TrendDefID: string;
-  Name: string;
-  DataType: string;
-}
-
-export const mockupTrendParamDefs: MockupTrendParamDefType[] = [
+export const mockupTrendParamDefs: TrendParamDef[] = [
   {
     ID: "FILTER_WINDOW",
     TrendDefID: "DERIV",

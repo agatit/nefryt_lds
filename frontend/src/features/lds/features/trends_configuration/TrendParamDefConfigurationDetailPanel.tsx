@@ -2,10 +2,10 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
-import { MockupTrendParamDefType } from "../../../../data/mockup-data";
+import { TrendParamDef } from "../../../../services/api";
 
 export interface TrendParamDefConfigurationDetailPanelProps {
-  selected: MockupTrendParamDefType | null;
+  selected: TrendParamDef | null;
 }
 
 const TrendParamDefConfigurationDetailPanel = React.memo(
@@ -15,7 +15,7 @@ const TrendParamDefConfigurationDetailPanel = React.memo(
     const { t } = useTranslation(["common", "config-page"]);
 
     const setSelectedData = React.useCallback(
-      (selectedTrendParamDef: MockupTrendParamDefType) => {
+      (selectedTrendParamDef: TrendParamDef) => {
         setTrendParamDefName(selectedTrendParamDef.Name ?? "");
       },
       []

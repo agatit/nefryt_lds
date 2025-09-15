@@ -8,12 +8,12 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
-import { MockupTrendParamDefType } from "../../../../data/mockup-data";
+import { TrendParamDef } from "../../../../services/api";
 
 export interface TrendParamDefConfigurationProps {
-  trendParamDefs: MockupTrendParamDefType[];
-  selected: MockupTrendParamDefType | null;
-  setSelected: (value: MockupTrendParamDefType) => void;
+  trendParamDefs: TrendParamDef[];
+  selected: TrendParamDef | null;
+  setSelected: (value: TrendParamDef) => void;
 }
 
 const TrendParamDefConfiguration = React.memo(
@@ -31,7 +31,7 @@ const TrendParamDefConfiguration = React.memo(
 
     const handleSelectionChange = React.useCallback(
       (event: GridSelectionChangeEvent) => {
-        const item: MockupTrendParamDefType = event.endDataItem;
+        const item: TrendParamDef = event.endDataItem;
         setSelected(item);
         setSelect(event.select);
       },
