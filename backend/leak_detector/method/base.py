@@ -2,10 +2,11 @@ import logging
 from math import ceil
 from typing import List
 
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, literal
+from sqlalchemy.orm import Session
 
-from ..db import global_session
 from database import lds
+from db import get_engine
 from ..plant import Event, Pipeline
 from ..trend import Trend
 
@@ -40,7 +41,7 @@ class Segment:
 class MethodBase:
     def __init__(self, pipeline: Pipeline, id: int, name: str):
         self._pipeline = pipeline
-        self._id = id
+        self.id = id
         self._name = name
 
         self._params = {}
@@ -48,19 +49,19 @@ class MethodBase:
 
         logging.debug(f"Method {id}: {name} created.")
 
-
     def _read_params(self):
-        stmt = select([lds.MethodParam]) \
-            .select_from(lds.Method) \
-            .join(lds.MethodDef, lds.Method.MethodDefID == lds.MethodDef.ID) \
-            .join(lds.MethodParamDef, lds.MethodDef.ID == lds.MethodParamDef.MethodDefID) \
-            .join(lds.MethodParam, and_(lds.MethodParamDef.ID == lds.MethodParam.MethodParamDefID, lds.Method.ID == lds.MethodParam.MethodID)) \
-            .where(lds.Method.ID == self._id)
-        logging.debug(stmt)
+        statement = (select(lds.MethodParam)
+                     .select_from(lds.Method)
+                     .join(lds.MethodDef, lds.Method.MethodDefID == lds.MethodDef.ID)  # noqa
+                     .join(lds.MethodParamDef, lds.MethodDef.ID == lds.MethodParamDef.MethodDefID)
+                     .join(lds.MethodParam, and_(lds.MethodParamDef.ID == lds.MethodParam.MethodParamDefID,
+                                                 lds.Method.ID == lds.MethodParam.MethodID))
+                     .where(lds.Method.ID == literal(self.id)))
 
-        self._params = {}
-        for param, in global_session.execute(stmt):
-            self._params[param.MethodParamDefID.strip()] = param.Value   
+        with Session(get_engine()) as session:
+            method_params = session.scalars(statement).all()
+        for mp in method_params:
+            self._params[mp.MethodParamDefID.strip()] = mp.Value
                      
 
     def get_probability(self, segment: Segment, begin: int, end: int) -> List[List[float]]:

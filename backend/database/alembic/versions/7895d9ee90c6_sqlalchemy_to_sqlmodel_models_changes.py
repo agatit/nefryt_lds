@@ -74,6 +74,62 @@ def upgrade() -> None:
             END
             """)
     op.create_index(op.f('ix_lds_TrendParamDef_TrendDefID'), 'TrendParamDef', ['TrendDefID'], unique=False, schema='lds')
+    op.execute("""
+    IF NOT EXISTS (
+        SELECT 1
+        FROM sys.columns columns
+        JOIN sys.objects objects ON columns.object_id = objects.object_id
+        JOIN sys.schemas schemas ON objects.schema_id = schemas.schema_id
+        WHERE objects.name = 'Trend'
+          AND schemas.name = 'lds'
+          AND columns.name = 'RawMin'
+    )
+    BEGIN
+        ALTER TABLE lds.[Trend] ADD [RawMin] INTEGER NOT NULL DEFAULT 0;
+    END
+    """)
+    op.execute("""
+    IF NOT EXISTS (
+        SELECT 1
+        FROM sys.columns columns
+        JOIN sys.objects objects ON columns.object_id = objects.object_id
+        JOIN sys.schemas schemas ON objects.schema_id = schemas.schema_id
+        WHERE objects.name = 'Trend'
+          AND schemas.name = 'lds'
+          AND columns.name = 'RawMax'
+    )
+    BEGIN
+        ALTER TABLE lds.[Trend] ADD [RawMax] INTEGER NOT NULL DEFAULT 1;
+    END
+    """)
+    op.execute("""
+    IF NOT EXISTS (
+        SELECT 1
+        FROM sys.columns columns
+        JOIN sys.objects objects ON columns.object_id = objects.object_id
+        JOIN sys.schemas schemas ON objects.schema_id = schemas.schema_id
+        WHERE objects.name = 'Trend'
+          AND schemas.name = 'lds'
+          AND columns.name = 'ScaledMin'
+    )
+    BEGIN
+        ALTER TABLE lds.[Trend] ADD [ScaledMin] FLOAT(53) NOT NULL DEFAULT 0.0;
+    END
+    """)
+    op.execute("""
+    IF NOT EXISTS (
+        SELECT 1
+        FROM sys.columns columns
+        JOIN sys.objects objects ON columns.object_id = objects.object_id
+        JOIN sys.schemas schemas ON objects.schema_id = schemas.schema_id
+        WHERE objects.name = 'Trend'
+          AND schemas.name = 'lds'
+          AND columns.name = 'ScaledMax'
+    )
+    BEGIN
+        ALTER TABLE lds.[Trend] ADD [ScaledMax] FLOAT(53) NOT NULL DEFAULT 1.0;
+    END
+    """)
     # ### end Alembic commands ###
 
 
@@ -97,11 +153,11 @@ def downgrade() -> None:
             IF EXISTS (
                 SELECT 1 
                 FROM sys.foreign_keys 
-                WHERE name = 'MethodParam_Method_fk' 
+                WHERE name = 'MethodParamMethod_fk' 
                   AND parent_object_id = OBJECT_ID('lds.MethodParam')
             )
             BEGIN
-                ALTER TABLE lds.[MethodParam] DROP CONSTRAINT [MethodParam_Method_fk];
+                ALTER TABLE lds.[MethodParam] DROP CONSTRAINT [MethodParamMethod_fk];
             END
             """)
     op.create_foreign_key('MethodParamMethod_fk', 'MethodParam', 'Method', ['MethodID'], ['ID'], source_schema='lds', referent_schema='lds')

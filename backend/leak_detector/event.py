@@ -1,10 +1,12 @@
 from datetime import datetime
 import logging
-from .db import Session
 
 from sqlalchemy import insert
+from sqlalchemy.orm import Session
 
 from database import lds
+from db import get_engine
+
 
 class Event:
     def __init__(self, method_id: int, time: int, position: float) -> None:
@@ -16,16 +18,16 @@ class Event:
     # TODO:
     # - Zapisywanie event'ów.
     def save(self) -> None:
-        session = Session()
         stmt = insert(lds.Event).values(
             EventDefID='LEAK',
             MethodID=self.method_id,
             BeginDate=self.datetime,
             Position=self.position
         )
-        logging.debug(stmt)
-        session.execute(stmt)
-        session.commit()
+        with Session(get_engine()) as session:
+            logging.debug(stmt)
+            session.execute(stmt)
+            session.commit()
         return
 
     @property

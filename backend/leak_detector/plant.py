@@ -3,16 +3,15 @@ import sys
 import copy
 from typing import TYPE_CHECKING, Dict, List
 
-from sqlalchemy import Float, select, and_
+from sqlalchemy import Float, select, and_, literal
+from sqlalchemy.orm import Session
 
-from .db import global_session
+from db import get_engine
 from .trend import Trend
 from .event import Event
 from database import lds
 
 # Do importu type'ów:
-if TYPE_CHECKING:
-    from .method import MethodBase
 
 # from . import method
 # from .method import MethodBalance, MethodWave, MethodMask, MethodCombine
@@ -21,7 +20,7 @@ METHOD_CLASSES = {
     'WAVE': 'MethodWave',
     'BALANCE': 'MethodBalance',
     'MASK': 'MethodMask',
-    'COMBINE': 'MethodCombine'    
+    'COMBINE': 'MethodCombine'
 }
 
 class Node:
@@ -66,29 +65,32 @@ class Pipeline:
 
     def _build(self) -> None:        
         stmt = select(lds.PipelineNode).where(lds.PipelineNode.PipelineID == self.id)
-        for node, in global_session.execute(stmt):
+        with Session(get_engine()) as session:
+            nodes = session.scalars(stmt).all()
+        for node in nodes:
             self._nodes[node.NodeID] = self._plant.nodes[node.NodeID]
             if node.First:
                 self._first_node = self._nodes[node.NodeID]
         logging.debug(stmt)
 
         stmt = select(lds.Method).where(lds.Method.PipelineID == self.id)
-        for method, in global_session.execute(stmt):            
+        with Session(get_engine()) as session:
+            methods = session.scalars(stmt).all()
+        for method in methods:
             method_class = getattr(sys.modules["leak_detector.method"], METHOD_CLASSES[method.MethodDefID.strip()])
             self._methods[method.ID] = method_class(self, method.ID, method.Name)
         logging.debug(stmt)
 
     def _read_params(self) -> None:
-        stmt = select([lds.PipelineParam, lds.PipelineParamDef]) \
-            .select_from(lds.PipelineParamDef) \
-            .outerjoin(lds.PipelineParam, \
-                    and_(lds.PipelineParamDef.ID == lds.PipelineParam.PipelineParamDefID, lds.PipelineParam.PipelineID == self.id) \
-                )
-        for param, param_def in global_session.execute(stmt):
-            if param is not None:
-                self._params[param_def.ID.strip()] = param.Value
-        logging.debug(stmt)
-
+        statement = (select(lds.PipelineParam)
+                     .select_from(lds.Pipeline)
+                     .join(lds.PipelineParam, lds.Pipeline.ID == lds.PipelineParam.PipelineID)
+                     .join(lds.PipelineParamDef, lds.PipelineParam.PipelineParamDefID == lds.PipelineParamDef.ID)
+                     .where(lds.Pipeline.ID == literal(self.id)))
+        with Session(get_engine()) as session:
+            results = session.scalars(statement).all()
+        for pp in results:
+            self._params[pp.PipelineParamDefID.strip()] = pp.Value
 
     def _get_params(self) -> None:
         self.begin_pos = float(self._params.get('BEGIN_POS', 0))
@@ -156,26 +158,30 @@ class Plant:
 
     def _build_mesh(self) -> None:
         stmt = select(lds.Node)
-        for node, in  global_session.execute(stmt):
+        with Session(get_engine()) as session:
+            results = session.scalars(stmt).all()
+        for node in results:
             self._nodes[int(node.ID)] = Node(node.ID, node.Type.strip(), str(node.Name or ""))
-        logging.debug(stmt)
 
         stmt = select(lds.Link)
-        for link, in global_session.execute(stmt):
+        with Session(get_engine()) as session:
+            links = session.scalars(stmt).all()
+        for link in links:
             self._links[int(link.ID)] = Link(link.ID, float(link.Length), self.nodes[link.BeginNodeID], self.nodes[link.EndNodeID])
-        logging.debug(stmt)
 
         stmt = select(lds.Trend)
-        for trend, in global_session.execute(stmt):
-            self._trends[int(trend.ID)] = Trend(trend.ID, trend.NodeID)            
-        logging.debug(stmt)
+        with Session(get_engine()) as session:
+            trends = session.scalars(stmt).all()
+        for trend in trends:
+            self._trends[int(trend.ID)] = Trend(trend)
 
     def _build_pipelines(self) -> None:
         stmt = select(lds.Pipeline)
-        for pipeline, in global_session.execute(stmt):
+        with Session(get_engine()) as session:
+            pipelines = session.scalars(stmt).all()
+        for pipeline in pipelines:
             self._pipelines[int(pipeline.ID)] = Pipeline(self, pipeline.ID, pipeline.Name)
-        logging.debug(stmt)
-    
+
     def get_distances(self, node1: Node, node2: Node, visited=None) -> List[float]:
         if (visited is None):
             visited = set()

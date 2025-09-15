@@ -1,11 +1,11 @@
 import logging
 from typing import List
 import numpy as np
-# from ..tests.plots import global_plot
 from scipy.ndimage import label
-
 from .base import MethodBase, Segment
 from ..plant import Event, Pipeline, Trend
+import time
+
 
 # Obecna wersja zakłada, że segmenty mają stały wave speed.
 class MethodWave(MethodBase):
@@ -28,14 +28,14 @@ class MethodWave(MethodBase):
 
             self._normal_range = float(self._params['NORMAL_RANGE'])
         except KeyError as error:
-            logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
+            logging.exception(f'Param {error.args[0]} does not exist in method {self.id}', exc_info=False)
             raise
         try:
             self._pressure_deriv_trends : List[Trend] = []
             for trend_id in self._pressure_derivs_string.split(','):
                 self._pressure_deriv_trends.append(self._pipeline.plant.trends[int(trend_id)])
         except KeyError as error:
-            logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self._id}, trend {error.args[0]} does not exist', exc_info=False)
+            logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self.id}, trend {error.args[0]} does not exist', exc_info=False)
             raise
 
     def _create_segments(self) -> None:
@@ -53,42 +53,70 @@ class MethodWave(MethodBase):
     
     def get_probability(self, segment: Segment, begin: int, end: int):
         wave_speed = self._wave_speed
+        # print(f'Wave speed: {wave_speed}')
 
         window_begin = begin - segment.max_window_size
-        window_end = end + segment.max_window_size
+        # print(f'Window begin: {window_begin}')
 
+        window_end = end + segment.max_window_size
+        # print(f'Window end: {window_end}')
+
+        # print(f'Diff: {window_end - window_begin}')
         data_start = segment._start.get_trend_data(window_begin, window_end)
+        # print(f'Data start: {len(data_start)} {min(data_start)} {max(data_start)}')
         data_end = segment._end.get_trend_data(window_begin, window_end)
-       
-        time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
-        position = np.arange(0, segment._length, self._pipeline.length_resolution)
+        # print(f'Data end: {len(data_end)} {min(data_end)} {max(data_end)}')
+
+        times = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
+        # print(f'Times: {times}')
+        positions = np.arange(0, segment._length, self._pipeline.length_resolution)
+        # print(f'Positions: {positions}')
         
-        times, positions = np.meshgrid(time, position)
+        times, positions = np.meshgrid(times, positions)
+        # print(f'Times: {times}')
+        # print(f'Positions: {positions}')
 
         offset_left = positions / wave_speed * 1000
+        # print(f'Offset left: {offset_left}')
         offset_right = (segment._length - positions) / wave_speed * 1000
+        # print(f'Offset right: {offset_right}')
         
         wave_fading = (1 - self._wave_coeff * positions / segment._length) \
                     * (1 - self._wave_coeff * (1 - positions / segment._length))
 
+        # print(f'Wave fading: {wave_fading}')
+        # print(f'Minus: {((times - offset_right) / 10).astype(int)}')
+        # print(f'Plus: {((times + offset_right) / 10).astype(int)}')
         dp1 = np.array(data_start)[((times - offset_left) / 10).astype(int)] / self._normal_range
         dp2 = np.array(data_end)[((times - offset_right) / 10).astype(int)] / self._normal_range
         dp3 = np.array(data_start)[((times + offset_left) / 10).astype(int)] / self._normal_range
         dp4 = np.array(data_end)[((times + offset_right) / 10).astype(int)] / self._normal_range
 
+        # print(f'dp1: {dp1}')
+        # print(f'dp2: {dp2}')
+        # print(f'dp3: {dp3}')
+        # print(f'dp4: {dp4}')
+
         probability = dp3 * dp4 - dp1 * dp2
+        print(np.min(probability))
+        print(np.max(probability))
 
         probability = np.maximum(probability, 0)
+        # print(probability)
 
         probability = np.where(wave_fading > 0, np.sqrt(probability / wave_fading), 0)
+        print(np.min(probability))
+        print(np.max(probability))
+
+        print('===========================')
 
         probability = np.minimum(probability, 1)
+        # print(probability)
 
         return probability
 
     def find_leaks_in_range(self, begin: int, end: int) -> List[Event]:
         events = []
-
         for segment in self._segments:
             probability = self.get_probability(segment, begin, end)
 
