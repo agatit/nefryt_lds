@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, CHAR, Float, String, SmallInteger
+from sqlalchemy import Column, Integer, ForeignKey, CHAR, Float, String
 from sqlmodel import Field
 from ...schemas import base
 

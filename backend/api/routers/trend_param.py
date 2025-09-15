@@ -131,7 +131,7 @@ async def create_trend_param(trend_id: Annotated[int, Path()], trend_param: Anno
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.delete('/{trend_id}/param/{trend_param_def_id}', response_model=api.Information | api.Error)
+@router.delete('/{trend_id}/param/{trend_param_def_id}', response_model=None | api.Error)
 async def delete_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_def_id: Annotated[str, Path()],
                              engine: Annotated[Engine, Depends(get_engine)]):
     try:

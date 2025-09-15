@@ -21,68 +21,103 @@ trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Valu
 trend_param2 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=2, Value='2')
 trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
 trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
-trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+trend_group = lds.TrendGroup(ID=1, Name='Group1')
+unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                   Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                   Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow')
+trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                   Name='Trend3', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Orange')
 
 def add_two_objects():
-    global trend_param1, trend1, trend_def1, trend3
+    global trend_param1, trend1, trend_def1, trend3, trend_group, unit
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
-    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-    trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+    trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend3', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Orange')
     trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
     trend_param3 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=3, Value='2000')
     trend_param_def = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
-    objs = [[trend_def1], [trend1, trend3], [trend_param1, trend_param3], [trend_param_def]]
+    objs = [[trend_def1], [trend_group], [unit], [trend1, trend3], [trend_param1, trend_param3], [trend_param_def]]
 
     return objs
 
 
 def add_objects():
-    global trend_param1, trend1, trend_def1
+    global trend_param1, trend1, trend_def1, trend_group, unit
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
-    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
     trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
     trend_param_def = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
-    objs = [[trend_def1], [trend1], [trend_param1], [trend_param_def]]
+    objs = [[trend_def1], [trend_group], [unit], [trend1], [trend_param1], [trend_param_def]]
+
+    return objs
+
+
+def add_disabled_objects():
+    global trend_param1, trend1, trend_def1, trend_group, unit
+    trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black', Enabled=False)
+    trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
+    trend_param_def = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
+    objs = [[trend_def1], [trend_group], [unit], [trend1], [trend_param1], [trend_param_def]]
 
     return objs
 
 
 def add_objects_with_children():
-    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2
+    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2, trend_group, unit
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
-    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-    trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+    trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow')
     trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
     trend_param2 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=2, Value='2')
     trend_param3 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=2, Value='1')
     trend_param_def1 = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
     trend_param_def2 = lds.TrendParamDef(ID='FILTER_WINDOW', TrendDefID='DERIV', Name='name', DataType='INT')
     trend_param_def3 = lds.TrendParamDef(ID='TREND_ID', TrendDefID='DERIV', Name='name', DataType='TREND')
-    objs = [[trend_def1, trend_def2], [trend1, trend2],
+    objs = [[trend_def1, trend_def2], [trend_group], [unit], [trend1, trend2],
             [trend_param1, trend_param2, trend_param3], [trend_param_def1, trend_param_def2, trend_param_def3]]
 
     return objs
 
 
 def add_objects_with_children_two_layers():
-    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2
+    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2, trend_group, unit
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
-    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-    trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
-    trend4 = lds.Trend(ID=3, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5)
+    trend_group = lds.TrendGroup(ID=1, Name='Group1')
+    unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
+    trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black')
+    trend2 = lds.Trend(ID=2, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow')
+    trend4 = lds.Trend(ID=4, TrendDefID=trend_def2.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend4', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Purple')
     trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
     trend_param2 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=2, Value='2')
     trend_param3 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=2, Value='1')
-    trend_param4 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=3, Value='7')
-    trend_param5 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=3, Value='2')
+    trend_param4 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=4, Value='7')
+    trend_param5 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=4, Value='2')
     trend_param_def1 = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
     trend_param_def2 = lds.TrendParamDef(ID='FILTER_WINDOW', TrendDefID='DERIV', Name='name', DataType='INT')
     trend_param_def3 = lds.TrendParamDef(ID='TREND_ID', TrendDefID='DERIV', Name='name', DataType='TREND')
-    objs = [[trend_def1, trend_def2], [trend1, trend2, trend4],
+    objs = [[trend_def1, trend_def2], [trend_group], [unit], [trend1, trend2, trend4],
             [trend_param1, trend_param2, trend_param3, trend_param4, trend_param5],
             [trend_param_def1, trend_param_def2, trend_param_def3]]
 
@@ -154,6 +189,7 @@ async def test_trend_data_should_write_only_when_correct_address(add_lds_objects
 
     await asyncio.gather(*tasks_list)
     server_task.cancel()
+    await asyncio.sleep(3)
 
     assert _get_trend_data_records_count() == calls
 
@@ -253,7 +289,6 @@ async def test_profiler_should_write_data_to_database(add_lds_objects):
         t += 1
 
     server_task.cancel()
-
     assert _get_profiler_data_active_trends_count() == 1
 
 
@@ -283,3 +318,23 @@ async def test_trends_writer_should_update_trend_time_delta_in_database(add_lds_
     expected_deltas = [0, 2, 9]
     for trend, expected_delta in zip(trends, expected_deltas):
         assert trend[0].TimeDelta == expected_delta
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_disabled_objects], indirect=True)
+async def test_trend_data_should_not_be_written_to_db_when_trend_is_disabled(add_lds_objects):
+    port = 5029
+    Profiler.init()
+    server_task = asyncio.create_task(run_server(PipePlant(), port))
+    await asyncio.sleep(5)
+    calls = 5
+
+    t = math.floor(time.time()) + 0.5
+    for i in range(calls):
+        await _send_data(port, int(trend_param1.Value),  [randint(0, 255) for _ in range(100)])
+        await asyncio.sleep(t - time.time() + 1)
+        t += 1
+
+    server_task.cancel()
+
+    assert _get_trend_data_records_count() == 0

@@ -193,6 +193,8 @@ class Trend(base.Trend, table=True):
     )
 
     ID: int = Field(sa_column=Column(Integer, Identity(start=1000, increment=1), nullable=False, primary_key=True))
+    TimeDelta: int = Field(0, nullable=False)
+    Enabled: bool = Field(True, nullable=False)
 
 
 class TrendParamDef(SQLModel, table=True):
@@ -317,6 +319,7 @@ class Simulation(base.Simulation, table=True):
     )
 
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))
+    Enabled: bool = Field(True, nullable=False)
 
 
 class SimulationParamDef(SQLModel, table=True):

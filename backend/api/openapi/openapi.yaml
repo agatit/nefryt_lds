@@ -1249,7 +1249,7 @@ paths:
           name: period
           required: true
           schema:
-            type: integer
+            type: number
           style: simple
         - description: number of data samples to take (resolution)
           explode: false
@@ -1312,7 +1312,7 @@ paths:
           name: begin
           required: true
           schema:
-            type: integer
+            type: number
           style: simple
         - description: end of date to take from data (timestamp UTC)
           explode: false
@@ -1320,7 +1320,7 @@ paths:
           name: end
           required: true
           schema:
-            type: integer
+            type: number
           style: simple
         - description: number of data samples to take (resolution)
           explode: false
@@ -1385,7 +1385,7 @@ paths:
           name: begin
           required: true
           schema:
-            type: integer
+            type: number
           style: simple
         - description: end of date to take from data (timestamp UTC)
           explode: false
@@ -1393,7 +1393,7 @@ paths:
           name: end
           required: true
           schema:
-            type: integer
+            type: number
           style: simple
         - description: number of data samples to take (resolution)
           explode: false

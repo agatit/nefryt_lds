@@ -25,9 +25,9 @@ trend2 = lds.Trend(ID=2, TrendDefID=trend_def.ID, RawMin=2, RawMax=20, ScaledMin
 simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
                              ResolutionMeters=500)
 simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
-                             ResolutionMeters=500)
+                             ResolutionMeters=500, Enabled=False)
 simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
-                             ResolutionMeters=10)
+                             ResolutionMeters=10, Enabled=False)
 simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
                              ResolutionMeters=100)
 simulation_list = [simulation1, simulation2, simulation3, simulation4]
@@ -69,9 +69,9 @@ def reset_simulation_objects():
     simulation1 = lds.Simulation(ID=1, SimulationDefID='DENSITY', TrendID=trend1.ID, Name='Sim1', RefreshTimeSeconds=2,
                                  ResolutionMeters=500)
     simulation2 = lds.Simulation(ID=2, SimulationDefID='WAVE', TrendID=trend1.ID, Name='Sim2', RefreshTimeSeconds=10,
-                                 ResolutionMeters=500)
+                                 ResolutionMeters=500, Enabled=False)
     simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID, Name='Sim3', RefreshTimeSeconds=5,
-                                 ResolutionMeters=10)
+                                 ResolutionMeters=10, Enabled=False)
     simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
                                  ResolutionMeters=100)
     simulation_list = [simulation1, simulation2, simulation3, simulation4]
@@ -102,6 +102,7 @@ def test_list_simulations_should_return_ok_response_code_and_correct_simulations
         assert returned_simulation['Name'] == expected_simulation.Name
         assert returned_simulation['RefreshTimeSeconds'] == expected_simulation.RefreshTimeSeconds
         assert returned_simulation['ResolutionMeters'] == expected_simulation.ResolutionMeters
+        assert returned_simulation['Enabled'] == expected_simulation.Enabled
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
@@ -146,6 +147,7 @@ def test_list_simulations_should_return_ok_response_code_and_data_filtered_by_od
         assert returned_simulation['Name'] == expected_simulation.Name
         assert returned_simulation['RefreshTimeSeconds'] == expected_simulation.RefreshTimeSeconds
         assert returned_simulation['ResolutionMeters'] == expected_simulation.ResolutionMeters
+        assert returned_simulation['Enabled'] == expected_simulation.Enabled
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
@@ -161,6 +163,7 @@ def test_create_simulation_should_return_created_response_code_and_created_simul
     assert returned_simulation['Name'] == simulation_dict['Name']
     assert returned_simulation['RefreshTimeSeconds'] == simulation_dict['RefreshTimeSeconds']
     assert returned_simulation['ResolutionMeters'] == simulation_dict['ResolutionMeters']
+    assert returned_simulation['Enabled'] == simulation4.Enabled
     with Session(get_engine()) as session:
         simulations_count = session.execute(select(func.count()).select_from(lds.Simulation)).fetchall()[0][0]
     assert simulations_count == len(simulation_list)+1
@@ -216,6 +219,7 @@ def test_get_simulation_by_id_should_return_ok_response_code_and_simulation_of_g
     assert returned_simulation['Name'] == simulation3.Name
     assert returned_simulation['RefreshTimeSeconds'] == simulation3.RefreshTimeSeconds
     assert returned_simulation['ResolutionMeters'] == simulation3.ResolutionMeters
+    assert returned_simulation['Enabled'] == simulation3.Enabled
 
 
 def test_get_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
@@ -238,6 +242,7 @@ def test_update_simulation_by_id_should_return_ok_response_code_and_simulation_o
     assert returned_simulation['Name'] == simulation2.Name
     assert returned_simulation['RefreshTimeSeconds'] == update_simulation_dict['RefreshTimeSeconds']
     assert returned_simulation['ResolutionMeters'] == update_simulation_dict['ResolutionMeters']
+    assert returned_simulation['Enabled'] == simulation2.Enabled
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
@@ -263,6 +268,29 @@ def test_update_simulation_by_id_should_return_conflict_response_code_and_error_
 def test_update_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
     update_simulation_dict = {'SimulationDefID': 'WAVE', 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation3.ID), json=update_simulation_dict)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    error = response.json()
+    assert error['code'] == status.HTTP_404_NOT_FOUND
+    assert error['message'] == 'No simulation with id = ' + str(simulation3.ID)
+
+
+@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
+def test_enable_simulation_should_return_no_content_response_code_and_change_simulation_enabled_flag(add_lds_objects):
+    response = test_client.put("/simulation/" + str(simulation1.ID) + "/enable")
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    with Session(get_engine()) as session:
+        simulation = session.execute(select(lds.Simulation).where(lds.Simulation.ID == simulation1.ID)).fetchall()[0][0] # noqa
+    assert simulation.Enabled is not simulation1.Enabled
+
+    response = test_client.put("/simulation/" + str(simulation1.ID) + "/enable")
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    with Session(get_engine()) as session:
+        simulation = session.execute(select(lds.Simulation).where(lds.Simulation.ID == simulation1.ID)).fetchall()[0][0]  # noqa
+    assert simulation.Enabled is simulation1.Enabled
+
+
+def test_enable_trend_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+    response = test_client.put("/simulation/" + str(simulation3.ID) + "/enable")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
     assert error['code'] == status.HTTP_404_NOT_FOUND

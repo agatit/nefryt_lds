@@ -1,9 +1,10 @@
 import asyncio
 import math
+import platform
 import time
 from pymodbus.client import AsyncModbusTcpClient
 
-GENERATION_TIME_SECONDS = 1000
+GENERATION_TIME_SECONDS = 10000
 REGISTERS = [1000, 2000]
 
 
@@ -17,6 +18,7 @@ def sinus(amp, freq, offset, t):
 
 def sawtooth(amp, freq, offset, t):
     return amp * (((t % (1/freq)) * freq) % 1) + offset
+
 
 def const_change(start, change, t):
     return start + change * t
@@ -60,4 +62,6 @@ async def main():
 
 
 if __name__ == '__main__':
+    if platform.system() == 'Windows':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(main())

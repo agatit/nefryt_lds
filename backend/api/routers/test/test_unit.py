@@ -49,7 +49,7 @@ def test_list_units_should_return_ok_response_code_and_correct_units(add_lds_obj
         assert returned_unit['Name'] == expected_unit.Name
         assert returned_unit['Symbol'] == expected_unit.Symbol
         assert returned_unit['BaseID'] == expected_unit.BaseID.strip()
-        assert returned_unit['Multiplier'] == (str(expected_unit.Multiplier) if expected_unit.Multiplier else None)
+        assert returned_unit['Multiplier'] == str(expected_unit.Multiplier)
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_unit_objects], indirect=True)
@@ -91,7 +91,7 @@ def test_list_units_should_return_ok_response_code_and_data_filtered_by_odata_qu
         assert returned_unit['Name'] == expected_unit.Name
         assert returned_unit['Symbol'] == expected_unit.Symbol
         assert returned_unit['BaseID'] == expected_unit.BaseID.strip()
-        assert returned_unit['Multiplier'] == (str(expected_unit.Multiplier) if expected_unit.Multiplier else None)
+        assert returned_unit['Multiplier'] == str(expected_unit.Multiplier)
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_unit_objects], indirect=True)
@@ -136,7 +136,7 @@ def test_get_unit_by_id_should_return_ok_response_code_and_unit_of_given_id(add_
     assert returned_unit['Name'] == unit3.Name
     assert returned_unit['Symbol'] == unit3.Symbol
     assert returned_unit['BaseID'] == unit3.BaseID.strip()
-    assert returned_unit['Multiplier'] == unit3.Multiplier
+    assert returned_unit['Multiplier'] == str(unit3.Multiplier)
 
 
 def test_get_unit_by_id_should_return_not_found_response_code_and_error_when_no_unit_with_given_id():

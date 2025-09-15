@@ -6,13 +6,17 @@ from sqlalchemy.orm import Session
 from config import Settings
 from database import lds
 from db import get_engine
-from .simulations.density_mass import SimulationDensityMass
-from .simulations.density_volume import SimulationDensityVolume
+from .simulations.density_mass import SimulationDensityRKMass, SimulationDensityPCHIPMass
+from .simulations.density_volume import SimulationDensityRKVolume, SimulationDensityPCHIPVolume
 
 SIMULATION_CLASSES = {
-    'DENSITY_VOLUME': SimulationDensityVolume,
-    'DENSITY_MASS': SimulationDensityMass,
+    'DENSITY_VOLUME_RK': SimulationDensityRKVolume,
+    'DENSITY_VOLUME_PCHIP': SimulationDensityPCHIPVolume,
+    'DENSITY_MASS_RK': SimulationDensityRKMass,
+    'DENSITY_MASS_PCHIP': SimulationDensityPCHIPMass
 }
+
+logger = logging.getLogger(__name__)
 
 
 class SimulationManager:
@@ -21,9 +25,11 @@ class SimulationManager:
         atexit.register(self.shutdown_processes)
 
     async def start_simulations(self):
-        statement = select(lds.Simulation)
+        statement = (select(lds.Simulation)
+                     .where(lds.Simulation.Enabled == 1)) # noqa
+        logger.info("SimulationManager: Started reading simulations")
         with Session(get_engine()) as session:
-            simulations = session.execute(statement).all()[:][0]
+            simulations = session.scalars(statement).all()
 
         for simulation in simulations:
             try:
@@ -31,10 +37,11 @@ class SimulationManager:
                 new_simulation = simulation_class(simulation, Settings.db_uri)
                 self.simulations.append(new_simulation)
             except Exception as e:
-                logging.warning(f"Simulation with id = {simulation.ID} init error: {e}", exc_info=True)
+                logger.warning(f"SimulationManager: Simulation with id = {simulation.ID} init error: {e}", exc_info=True)
 
         for simulation in self.simulations:
             simulation.run_process()
+        logger.info("SimulationManager: Finished reading simulations")
 
         if Settings.tests:
             return self.simulations
@@ -43,7 +50,7 @@ class SimulationManager:
                 while True:
                     time.sleep(1)
             except KeyboardInterrupt:
-                logging.info("Simulator module shutdown")
+                logger.info("SimulationManager: Simulator module shutdown")
             return None
 
     def shutdown_processes(self):
