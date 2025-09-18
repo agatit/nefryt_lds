@@ -33,12 +33,12 @@ async def get_general_profiler_data(engine: Annotated[Engine, Depends(get_engine
     try:
         statement = select(lds.ProfilerData).order_by(lds.ProfilerData.ID)
         with Session(engine) as session:
-            profiler_datas = session.execute(statement).all()
+            profiler_data_list = session.execute(statement).all()
         general_data = api.ProfilerGeneralData()
-        if len(profiler_datas) == 0:
+        if len(profiler_data_list) == 0:
             error = api.Error(code=status.HTTP_400_BAD_REQUEST, message='No stored profiler data to calculate general data')
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_400_BAD_REQUEST)
-        for profiler_data in profiler_datas:
+        for profiler_data in profiler_data_list:
             profiler_data = profiler_data[0]
             if (profiler_data.Time10 is not None and profiler_data.Time100 is not None
                     and profiler_data.Time1000 is not None):

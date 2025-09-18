@@ -74,7 +74,7 @@ def reset_all_trend_objects():
 
 
 def reset_trend_objects_with_full_child_data():
-    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend3, trend_list, trend_group, unit
+    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend3, trend_list, trend_group, unit, trend_data_list
     trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
     trend_def_list = [trend_def1, trend_def2]
@@ -87,15 +87,15 @@ def reset_trend_objects_with_full_child_data():
     trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
                        Name='Trend4', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow', TimeDelta=4)
     trend_list = [trend1, trend2, trend3]
-    trend_datas = [lds.TrendData(TrendID=1, Time=t+40, Data=binary_data) for t in range(1, 11)]
-    trend_datas += [lds.TrendData(TrendID=2, Time=t+40, Data=binary_data) for t in range(1, 9)]
-    trend_datas += [lds.TrendData(TrendID=3, Time=t+40, Data=binary_data) for t in range(1, 7)]
+    trend_data_list = [lds.TrendData(TrendID=1, Time=t+40, Data=binary_data) for t in range(1, 11)]
+    trend_data_list += [lds.TrendData(TrendID=2, Time=t+40, Data=binary_data) for t in range(1, 9)]
+    trend_data_list += [lds.TrendData(TrendID=3, Time=t+40, Data=binary_data) for t in range(1, 7)]
 
-    return [trend_def_list, [trend_group], [unit], trend_list, trend_datas]
+    return [trend_def_list, [trend_group], [unit], trend_list, trend_data_list]
 
 
 def reset_trend_objects_with_partial_child_data():
-    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend3, trend_list, trend_group, unit
+    global trend_def1, trend_def2, trend_def_list, trend1, trend2, trend3, trend_list, trend_group, unit, trend_data_list
     trend_def1 = lds.TrendDef(ID='ID_1', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='ID_2', Name='TrendDef2')
     trend_def_list = [trend_def1, trend_def2]
@@ -108,11 +108,11 @@ def reset_trend_objects_with_partial_child_data():
     trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=3, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
                        Name='Trend4', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow', TimeDelta=4)
     trend_list = [trend1, trend2, trend3]
-    trend_datas = [lds.TrendData(TrendID=1, Time=t+40, Data=binary_data) for t in range(1, 11)]
-    trend_datas += [lds.TrendData(TrendID=2, Time=t+40, Data=binary_data) for t in range(1, 9)]
-    trend_datas += [lds.TrendData(TrendID=3, Time=t+40, Data=binary_data) for t in range(1, 3)]
+    trend_data_list = [lds.TrendData(TrendID=1, Time=t+40, Data=binary_data) for t in range(1, 11)]
+    trend_data_list += [lds.TrendData(TrendID=2, Time=t+40, Data=binary_data) for t in range(1, 9)]
+    trend_data_list += [lds.TrendData(TrendID=3, Time=t+40, Data=binary_data) for t in range(1, 3)]
 
-    return [trend_def_list, [trend_group], [unit], trend_list, trend_datas]
+    return [trend_def_list, [trend_group], [unit], trend_list, trend_data_list]
 
 
 app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
@@ -125,8 +125,8 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for returned_trend_data, expected_trend_data in zip(returned_trend_datas, trend_data_list[:3]):
+    returned_trend_data_list = response.json()['items']
+    for returned_trend_data, expected_trend_data in zip(returned_trend_data_list, trend_data_list[:3]):
         assert returned_trend_data['Timestamp'] == expected_trend_data.Time
         assert returned_trend_data['TimestampMs'] == 0
         assert returned_trend_data['Data'][0]['ID'] == expected_trend_data.TrendID
@@ -139,8 +139,8 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
         assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -155,8 +155,8 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
         assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -171,8 +171,8 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time+0.5) +
                                "/" + str(trend_data3.Time+0.5) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time+0.5, trend_data3.Time+0.5, samples)
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time+0.5, trend_data3.Time+0.5, samples)
         assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -187,13 +187,13 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time + 1) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time + 1, samples)
         assert returned_trend_data['Timestamp'] == count + 1
         assert returned_trend_data['TimestampMs'] == timestamp_ms
         assert returned_trend_data['Data'][0]['ID'] == trend1.ID
-        if count == len(returned_trend_datas) - 1:
+        if count == len(returned_trend_data_list) - 1:
             assert returned_trend_data['Data'][0]['Value'] is None
         else:
             assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
@@ -205,8 +205,8 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
     response = test_client.get("/trend/" + str(trend2.ID) + ",10/data/" + str(trend_data4.Time) +
                                "/" + str(trend_data4.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data4.Time, trend_data4.Time, samples)
         assert returned_trend_data['Timestamp'] == 2
         assert returned_trend_data['TimestampMs'] == timestamp_ms
@@ -252,8 +252,8 @@ def test_get_trend_data_should_return_ok_response_code_and_only_null_values_when
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time + samples) + "/" + str(samples) + f'?size={size}&page={page}')
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
         for data in returned_trend_data['Data']:
             assert data['ID'] == trend_data_list[trend_data_num].TrendID
@@ -285,8 +285,8 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
                                    str(trend_data3.Time - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()['items'][0]['Data']
-        for returned_trend_data, expected_trend_data in zip(returned_trend_datas, trend_data_list[:3]):
+        returned_trend_data_list = response.json()['items'][0]['Data']
+        for returned_trend_data, expected_trend_data in zip(returned_trend_data_list, trend_data_list[:3]):
             assert returned_trend_data['Timestamp'] == expected_trend_data.Time
             assert returned_trend_data['TimestampMs'] == 0
             assert returned_trend_data['Data'][0]['ID'] == expected_trend_data.TrendID
@@ -301,8 +301,8 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
                                    str(trend_data3.Time - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()['items'][0]['Data']
-        for count, returned_trend_data in enumerate(returned_trend_datas):
+        returned_trend_data_list = response.json()['items'][0]['Data']
+        for count, returned_trend_data in enumerate(returned_trend_data_list):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
             trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
             assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -319,8 +319,8 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
                                    str(trend_data3.Time - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()['items'][0]['Data']
-        for count, returned_trend_data in enumerate(returned_trend_datas):
+        returned_trend_data_list = response.json()['items'][0]['Data']
+        for count, returned_trend_data in enumerate(returned_trend_data_list):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
             trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
             assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -337,8 +337,8 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
                                    str(trend_data3.Time - trend_data1.Time - 0.5) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()['items'][0]['Data']
-        for count, returned_trend_data in enumerate(returned_trend_datas):
+        returned_trend_data_list = response.json()['items'][0]['Data']
+        for count, returned_trend_data in enumerate(returned_trend_data_list):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time + 0.5, trend_data3.Time, samples)
             trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time + 0.5, trend_data3.Time, samples)
             assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -355,13 +355,13 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
         response = test_client.get("/trend/" + str(trend1.ID) + "/current_data/" +
                                    str(trend_data3.Time + 1 - trend_data1.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()['items'][0]['Data']
-        for count, returned_trend_data in enumerate(returned_trend_datas):
+        returned_trend_data_list = response.json()['items'][0]['Data']
+        for count, returned_trend_data in enumerate(returned_trend_data_list):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time + 1, samples)
             assert returned_trend_data['Timestamp'] == count + 1
             assert returned_trend_data['TimestampMs'] == timestamp_ms
             assert returned_trend_data['Data'][0]['ID'] == trend1.ID
-            if count == len(returned_trend_datas) - 1:
+            if count == len(returned_trend_data_list) - 1:
                 assert returned_trend_data['Data'][0]['Value'] is None
             else:
                 assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
@@ -375,8 +375,8 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
         response = test_client.get("/trend/" + str(trend2.ID) + ",10/current_data/" +
                                    str(trend_data4.Time - trend_data4.Time) + "/" + str(samples))
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()['items'][0]['Data']
-        for count, returned_trend_data in enumerate(returned_trend_datas):
+        returned_trend_data_list = response.json()['items'][0]['Data']
+        for count, returned_trend_data in enumerate(returned_trend_data_list):
             timestamp_ms = calculate_expected_timestamp_ms(count, trend_data4.Time, trend_data4.Time, samples)
             assert returned_trend_data['Timestamp'] == 2
             assert returned_trend_data['TimestampMs'] == timestamp_ms
@@ -447,8 +447,8 @@ def test_get_trend_current_data_should_return_correct_last_timestamp_value_when_
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=50, tzinfo=timezone.utc)
         response = test_client.get("/trend/1,2,3/current_data/5/1")
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()['items'][0]['Data']
-        assert len(returned_trend_datas) == 1
+        returned_trend_data_list = response.json()['items'][0]['Data']
+        assert len(returned_trend_data_list) == 1
         assert response.json()['items'][0]['LastTimestamp'] == 46
 
 
@@ -458,8 +458,8 @@ def test_get_trend_current_data_should_return_correct_last_timestamp_value_when_
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=50, tzinfo=timezone.utc)
         response = test_client.get("/trend/1,2,3/current_data/5/3")
         assert response.status_code == status.HTTP_200_OK
-        returned_trend_datas = response.json()['items'][0]['Data']
-        assert len(returned_trend_datas) == 3
+        returned_trend_data_list = response.json()['items'][0]['Data']
+        assert len(returned_trend_data_list) == 3
         assert response.json()['items'][0]['LastTimestamp'] == 48
 
 
@@ -469,8 +469,8 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for returned_trend_data, expected_trend_data in zip(returned_trend_datas, trend_data_list[:3]):
+    returned_trend_data_list = response.json()['items']
+    for returned_trend_data, expected_trend_data in zip(returned_trend_data_list, trend_data_list[:3]):
         assert returned_trend_data['Timestamp'] == expected_trend_data.Time
         assert returned_trend_data['TimestampMs'] == 0
         assert returned_trend_data['Value'] == calculate_expected_value(trend1, 0)
@@ -482,8 +482,8 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
         assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -497,8 +497,8 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time, samples)
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time, trend_data3.Time, samples)
         assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -512,8 +512,8 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time+0.5) +
                                "/" + str(trend_data3.Time+0.5) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time+0.5, trend_data3.Time+0.5, samples)
         trend_data_num = calculate_expected_trend_data_number(count, trend_data1.Time+0.5, trend_data3.Time+0.5, samples)
         assert returned_trend_data['Timestamp'] == trend_data_list[trend_data_num].Time
@@ -527,9 +527,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time + 1) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    assert len(returned_trend_datas) == 3
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    assert len(returned_trend_data_list) == 3
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time + 1, samples)
         assert returned_trend_data['Timestamp'] == count + 1
         assert returned_trend_data['TimestampMs'] == timestamp_ms
@@ -542,9 +542,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time + 1) + "/" + str(samples))
     assert response.status_code == status.HTTP_200_OK
-    returned_trend_datas = response.json()['items']
-    assert len(returned_trend_datas) == 3
-    for count, returned_trend_data in enumerate(returned_trend_datas):
+    returned_trend_data_list = response.json()['items']
+    assert len(returned_trend_data_list) == 3
+    for count, returned_trend_data in enumerate(returned_trend_data_list):
         timestamp_ms = calculate_expected_timestamp_ms(count, trend_data1.Time, trend_data3.Time + 1, samples)
         assert returned_trend_data['Timestamp'] == count + 1
         assert returned_trend_data['TimestampMs'] == timestamp_ms

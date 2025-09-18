@@ -119,9 +119,9 @@ def test_get_simulation_data_should_return_full_data_for_simulation(add_lds_obje
     returned_simulation_data = items[0]
     assert returned_simulation_data['SimulationID'] == simulation1.ID
     assert returned_simulation_data['Time'] == simulation_data1.Time
-    returned_sim_datas = returned_simulation_data['Data']
-    expected_sim_datas = [simulation_data1, simulation_data2, simulation_data3]
-    for expected_sim_data, returned_sim_data in zip(expected_sim_datas, returned_sim_datas):
+    returned_sim_data_list = returned_simulation_data['Data']
+    expected_sim_data_list = [simulation_data1, simulation_data2, simulation_data3]
+    for expected_sim_data, returned_sim_data in zip(expected_sim_data_list, returned_sim_data_list):
         assert returned_sim_data['Distance'] == expected_sim_data.Distance
         assert returned_sim_data['Data'] == expected_sim_data.Data
 
@@ -135,9 +135,9 @@ def test_get_simulation_data_should_return_completed_data_for_simulation(add_lds
     returned_simulation_data = items[0]
     assert returned_simulation_data['SimulationID'] == simulation2.ID
     assert returned_simulation_data['Time'] == simulation_data4.Time
-    returned_sim_datas = returned_simulation_data['Data']
-    expected_sim_datas = [simulation_data4, simulation_data5, base.SimulationData(Distance=1000, Data=None)]
-    for expected_sim_data, returned_sim_data in zip(expected_sim_datas, returned_sim_datas):
+    returned_sim_data_list = returned_simulation_data['Data']
+    expected_sim_data_list = [simulation_data4, simulation_data5, base.SimulationData(Distance=1000, Data=None)]
+    for expected_sim_data, returned_sim_data in zip(expected_sim_data_list, returned_sim_data_list):
         assert returned_sim_data['Distance'] == expected_sim_data.Distance
         assert returned_sim_data['Data'] == expected_sim_data.Data
 

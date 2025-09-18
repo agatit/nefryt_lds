@@ -1,13 +1,7 @@
-from datetime import datetime
 import logging
-from typing import List
 import struct
-
-from alembic.command import current
 from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import current_timestamp
-
 from database import lds
 from db import get_engine
 
@@ -19,29 +13,24 @@ class Trend:
         self.node_id = trend.NodeID
         logging.debug(f"Trend {self.id} {self.node_id} created")
 
-    def get_trend_data(self, begin: int, end: int) -> List[float]:
+    def get_trend_data(self, begin: int, end: int) -> list[float]:
         begin = begin // 1000
         end = end // 1000
-        # logging.info(f"Get data from {begin} to {end} in trend {self.id}")
         current_timestamp = begin
-        # reading trends definitions neccessary for scaling
-
-        last_valid = 0 # ostatnia prawidłowa wartość - do wypełniania pól z wartościami nieprawidływmi
-    
+        last_valid_value = 0
         data_list = []
 
-        # for every chunk
         statement = select(lds.TrendData) \
-                .where(and_(lds.TrendData.Time >= begin,
-                            lds.TrendData.Time < end,
-                            lds.TrendData.TrendID == self.id)) \
-                .order_by(lds.TrendData.Time)
+            .where(and_(lds.TrendData.Time >= begin,
+                        lds.TrendData.Time < end,
+                        lds.TrendData.TrendID == self.id)) \
+            .order_by(lds.TrendData.Time)
         with Session(get_engine()) as session:
-            trend_datas = session.scalars(statement).all()
+            db_data_list = session.scalars(statement).all()
 
-        for db_data in trend_datas:
+        for db_data in db_data_list:
             while current_timestamp < db_data.Time:
-                data_list += [last_valid] * 100
+                data_list += [last_valid_value] * 100
                 current_timestamp += 1
 
             if self.lds_trend.RawMin >= 0:
@@ -59,6 +48,6 @@ class Trend:
             current_timestamp += 1
 
         if len(data_list) < (end-begin)*1000:
-            data_list.extend([last_valid] * ((end-begin)*1000 - len(data_list)))
+            data_list.extend([last_valid_value] * ((end-begin)*1000 - len(data_list)))
         logging.debug(f"Got data successfully.")
         return data_list

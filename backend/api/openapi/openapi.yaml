@@ -2292,7 +2292,7 @@ paths:
         - trends
   /trend_writer:
     get:
-      description: List all profiler datas
+      description: List all profiler data
       operationId: list_profiler_data
       parameters:
         - description: Page number
@@ -2320,14 +2320,14 @@ paths:
                 items:
                   $ref: '#/components/schemas/ProfilerData'
                 type: array
-          description: A array of profiler datas
+          description: An array of profiler data
         default:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: List trend writer profiler datas
+      summary: List trend writer profiler data
       tags:
         - trend_writer
   /trend_writer/{TrendId}:

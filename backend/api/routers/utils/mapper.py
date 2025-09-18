@@ -29,7 +29,7 @@ def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: 
 
 
 def map_dicts_to_trend_data_multiple(timestamps: zip, trend_values_dict: dict) -> list[api.TrendDataMultiple]:
-    trend_datas = []
+    trend_data_list = []
     for counter, timestamp in enumerate(timestamps):
         trend_values = [
             api.TrendValue(ID=trend_id, Value=trend_values_dict[trend_id][counter][0])
@@ -40,9 +40,9 @@ def map_dicts_to_trend_data_multiple(timestamps: zip, trend_values_dict: dict) -
             TimestampMs=timestamp[1],
             Data=trend_values
         )
-        trend_datas.append(trend_data)
+        trend_data_list.append(trend_data)
 
-    return trend_datas
+    return trend_data_list
 
 
 def map_tuple_to_trend_data_single(values: tuple) -> api.TrendDataSingle:

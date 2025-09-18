@@ -1,53 +1,22 @@
 import logging
-from math import ceil
-from typing import List
-
-from sqlalchemy import select, and_, literal
+from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
-
 from database import lds
 from db import get_engine
 from ..plant import Event, Pipeline
-from ..trend import Trend
-
-class Segment:
-    def __init__(self, pipeline: Pipeline, begin: Trend, end: Trend, begin_pos: int, wave_speed: float) -> None:
-        distances = pipeline.plant.get_distances(pipeline.plant.nodes[begin.node_id], pipeline.plant.nodes[end.node_id])
-        if (len(distances) != 1):
-            logging.exception(f"There isn't exactly one path between {begin.id} and {end.id}.")
-            raise
-        self._length = distances[0]
-        self._start = begin
-        self._end = end
-        self._begin_pos = begin_pos
-        self._end_pos = self._begin_pos + self._length
-        self._wave_speed = wave_speed
-        self._max_window_size = ceil(self._length / self._wave_speed) * 1000
-
-        logging.debug(f"Segment {begin.id} <--> {end.id} created.")
-
-    # TODO:
-    # - Liczenie wave_speed dla danego punktu na segmencie pipeline'u.
-    def calc_wave_speed(self) -> float:
-        return self._wave_speed
-
-    @property
-    def max_window_size(self) -> int:
-        return self._max_window_size
+from ..segment import Segment
 
 
-# Zakładamy, że:
-# Jeden wspólny pipeline dla metody, bo składanie metod się nie uda ze względu na możliwe różnice wielkości step'ów.
 class MethodBase:
-    def __init__(self, pipeline: Pipeline, id: int, name: str):
+    def __init__(self, pipeline: Pipeline, id_: int, name: str):
         self._pipeline = pipeline
-        self.id = id
+        self._id = id_
         self._name = name
 
         self._params = {}
         self._read_params()
 
-        logging.debug(f"Method {id}: {name} created.")
+        logging.debug(f"Method {id_}: {name} created.")
 
     def _read_params(self):
         statement = (select(lds.MethodParam)
@@ -56,7 +25,7 @@ class MethodBase:
                      .join(lds.MethodParamDef, lds.MethodDef.ID == lds.MethodParamDef.MethodDefID)
                      .join(lds.MethodParam, and_(lds.MethodParamDef.ID == lds.MethodParam.MethodParamDefID,
                                                  lds.Method.ID == lds.MethodParam.MethodID))
-                     .where(lds.Method.ID == literal(self.id)))
+                     .where(lds.Method.ID == self._id))
 
         with Session(get_engine()) as session:
             method_params = session.scalars(statement).all()
@@ -64,27 +33,13 @@ class MethodBase:
             self._params[mp.MethodParamDefID.strip()] = mp.Value
                      
 
-    def get_probability(self, segment: Segment, begin: int, end: int) -> List[List[float]]:
+    def get_probability(self, segment: Segment, begin: int, end: int) -> list[list[float]]:
         pass
 
 
-    def find_leaks_in_range(self, begin: int, end: int) -> List[Event]:
-        """ Po przemyśleniu wydaje mi się, że cały mechanizm powinien być zaimplementowany
-            na poziomie metody, gdyż lokalizacja zdarzenia będzie nieco inna dla róznych metod.
-            Implementacja na poziomie pipelinu powinna tylko skaładać wyniki z metod w jeden
-        """
+    def find_leaks_in_range(self, begin: int, end: int) -> list[Event]:
         pass
 
 
-    def find_leaks_to(self, end: int) -> List[Event]:
-        """ j.w.
-        """
-        pass  
-
-    @property
-    def calc_time(self) -> int:
-        return self._calc_time
-
-    @property
-    def probability(self) -> List[float]:
-        return self._probability
+    def find_leaks_to(self, end: int) -> list[Event]:
+        pass

@@ -3,30 +3,13 @@ from config import setup_engine
 from .plant import Plant
 from datetime import datetime
 
-# Wykresy do sprawdzania wycieku:
-# from .tests.plots import global_plot
-
-# Wszystkie funkcje, które dostają parametr,
-# który reprezentuje przedział czasu, dostają wartość w milisekundach.
-
 # TO DO:
 # - Metoda find_leaks_to().
 # - Zapisywanie event'ów.
 # - Obsługa błędów parametrów i ustalenie domyślnych wartości.
 # - Zmienna prędkość rozchodzenia się fali na segmencie.
- 
 
-# Zasymulowano wycieki, odległość od początku rurociągu:
-# 1. ok. 12:57:40, 1428.06m
-# 2. ok. 13:00:40, 1208.81m
-# 3. ok. 13:03:40, 805.01m
-# 4. ok. 13:06:40, 597.51m
-# 5. ok. 13:09:40, 186.91m
-# 6. ok. 13:12:40, 3.71m
-# Wycieki są od największego od najmniejszego.
-
-# Na pewno nie da sie wyznaczyć idelanie miejsca i czasu wycieku bo prędkość fali
-# jest szacowany.
+# Na pewno nie da sie wyznaczyć idelanie miejsca i czasu wycieku bo prędkość fali jest szacowana.
 if __name__ == '__main__':
     setup_engine()
     detection_time = 60 * 1000  # ms
@@ -40,14 +23,12 @@ if __name__ == '__main__':
 
         while begin_detection_time < datetime(2022, 10, 5, 11, 30).timestamp() * 1000:
             for pipeline in plant.pipelines.values():
-                begin_detection_date = datetime.fromtimestamp(begin_detection_time / 1000)
-            
                 end_detection_time = begin_detection_time + detection_time
-                end_detection_date = datetime.fromtimestamp(end_detection_time / 1000)
+                logging.info(f'Detecting leaks from {datetime.fromtimestamp(begin_detection_time / 1000)} '
+                             f'to {datetime.fromtimestamp(end_detection_time / 1000)}.')
 
-                logging.info(f'Detecting leaks from {begin_detection_date} to {end_detection_date}.')
                 leaks = pipeline.find_leaks_in_range(begin_detection_time, end_detection_time)
-
+                print(leaks)
                 for method, leak_events in leaks.items():
                     leak_events = sorted(leak_events, key=lambda leak_event: leak_event.datetime)
                     for event in leak_events:
@@ -55,6 +36,5 @@ if __name__ == '__main__':
 
             begin_detection_time += time_between_detections
 
-            # global_plot.show()
-    except Exception as error:    
+    except Exception as error:
         logging.error(error, exc_info=True)

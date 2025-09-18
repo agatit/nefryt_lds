@@ -2,7 +2,6 @@ import logging
 import struct
 import time
 from multiprocessing import Process
-from typing import List
 import numpy as np
 from sqlalchemy import select, and_, literal, text
 from sqlalchemy.orm import Session
@@ -16,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class TrendBase:
-    def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue):
-        self.id = _id
-        self.children: List[TrendBase] = []
+    def __init__(self, id_: int, queue: Queue, db_uri: str, profiler_queue: Queue):
+        self.id = id_
+        self.children: list[TrendBase] = []
         self.params = {}
         self.block_size = 100
         self.profiler_queue = profiler_queue

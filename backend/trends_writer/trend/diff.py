@@ -1,5 +1,4 @@
 from multiprocessing.queues import Queue
-from typing import List
 import logging
 import numpy as np
 from . import TrendBase
@@ -9,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class TrendDiff(TrendBase):
-    def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue | None):
-        super().__init__(_id, queue, db_uri, profiler_queue)
+    def __init__(self, id_: int, queue: Queue, db_uri: str, profiler_queue: Queue | None):
+        super().__init__(id_, queue, db_uri, profiler_queue)
         if self.params['TREND_A'] == self.params['TREND_B']:
             raise BaseException('Trend A has to be different then Trend B')
 
@@ -25,7 +24,7 @@ class TrendDiff(TrendBase):
             }
         }
 
-    def update(self, data: List[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int | None = None):
+    def update(self, data: list[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int | None = None):
         calculated_data = self.calculate(data, timestamp, parent_id)
 
         if calculated_data is not None:
@@ -34,7 +33,7 @@ class TrendDiff(TrendBase):
         else:
             logger.debug(f"{self.__class__.__name__} ({self.id}): Empty calculation results (timestamp={timestamp})")
 
-    def calculate(self, data: List[int], timestamp: int, parent_id: int | None = None) -> np.ndarray:
+    def calculate(self, data: list[int], timestamp: int, parent_id: int | None = None) -> np.ndarray:
         result = None
 
         if parent_id in self.parent_data.keys():

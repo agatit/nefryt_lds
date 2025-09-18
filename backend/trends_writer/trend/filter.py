@@ -1,6 +1,5 @@
 import struct
 from multiprocessing.queues import Queue
-from typing import List
 import numpy as np
 import logging
 from sqlalchemy import select, and_
@@ -14,13 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class TrendFilter(TrendBase):
-    def __init__(self, _id: int, queue: Queue, db_uri: str, profiler_queue: Queue):
-        super().__init__(_id, queue, db_uri, profiler_queue)
+    def __init__(self, id_: int, queue: Queue, db_uri: str, profiler_queue: Queue):
+        super().__init__(id_, queue, db_uri, profiler_queue)
         self.window_size = int(float(self.params['FILTER_WINDOW']))
         self.storage_timestamp = 0
         self.storage = np.array([], dtype=np.uint16)
 
-    def update(self, data: List[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int = None):
+    def update(self, data: list[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int = None):
         if timestamp > self.storage_timestamp + 1:
             logger.warning(f"{self.__class__.__name__} ({self.id}): "
                             f"Data in storage not valid (timestamp={timestamp}, storage timestamp={self.storage_timestamp})")

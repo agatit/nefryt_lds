@@ -1,15 +1,11 @@
-import logging
-from typing import List
-
 from .base import MethodBase
+from ..plant import Pipeline
+from ..segment import Segment
 
 
 class MethodBalance(MethodBase):
+    def __init__(self, pipeline: Pipeline, id_: int, name: str):
+        super().__init__(pipeline, id_, name)
 
-    def __init__(self, pipeline, id, name):
-        super().__init__(pipeline, id, name)
-        # skopiowanie specyficznych parametrów metody:
-        
-
-    def get_probability(self, begin, end) -> List[List[float]]:
-        pass    
+    def get_probability(self, segment: Segment, begin: int, end: int) -> list[list[float]]:
+        pass
