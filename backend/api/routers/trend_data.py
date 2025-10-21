@@ -13,6 +13,7 @@ from db import get_engine
 from ..schemas import api
 from database import lds
 
+# TODO: check direction of data (in writer and in all getter methods)
 router = APIRouter(prefix="/trend", tags=['trend_data'], dependencies=[Depends(get_user_token)])
 
 
@@ -119,7 +120,7 @@ async def get_trend_data(trend_id_list: Annotated[str, Path()], begin: Annotated
                 for trend_id in one_second_data.keys():
                     result_lists[str(trend_id)].append((((lds_trends_scales[trend_id]["ScaledMax"]
                                                           - lds_trends_scales[trend_id]["ScaledMin"])
-                                                         * (one_second_data[trend_id][time_data[1] // 10]
+                                                         * (one_second_data[trend_id][-1 - time_data[1] // 10]
                                                             - lds_trends_scales[trend_id]["RawMin"])
                                                          / (lds_trends_scales[trend_id]["RawMax"]
                                                             - lds_trends_scales[trend_id]["RawMin"])

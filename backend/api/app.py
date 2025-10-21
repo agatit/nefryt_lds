@@ -1,3 +1,5 @@
+import os
+import sys
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi_pagination import add_pagination
@@ -5,6 +7,7 @@ from starlette import status
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_engine
 from db import get_engine
 from .schemas import api
