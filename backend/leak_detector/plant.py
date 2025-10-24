@@ -1,6 +1,6 @@
 from __future__ import annotations
+import importlib
 import logging
-import sys
 import copy
 from typing import TYPE_CHECKING
 from sqlalchemy import Float, select
@@ -13,13 +13,9 @@ from database import lds
 if TYPE_CHECKING:
     from method import MethodBase
 
-# Do importu type'ów:
-
-# from . import method
-# from .method import MethodBalance, MethodWave, MethodMask, MethodCombine
-# klasy zapisane stringiem, aby uniknąć cyklicznych importów - jak nie będzie to potrzebne to zmienić na klasy
 METHOD_CLASSES = {
-    'WAVE': 'MethodWave',
+    'WAVE': 'MethodWaveSigned',
+    'WAVE_2': 'MethodWaveUnsigned',
     'BALANCE': 'MethodBalance',
     'MASK': 'MethodMask',
     'COMBINE': 'MethodCombine'
@@ -44,17 +40,13 @@ class Link:
         logging.debug(f"Link {self.id}: {self.begin_node.id} {self.end_node.id} {self.length} created.")
 
 
-# TODO: Pipeline params
-# Np. która metoda/metody są aktywne, jakie są interwały, zdarzenia generowane dla poszczególnych metod, etc.
-# może też progi, które są wymagane do wygenerowania zdarzenia
-# Można to tez zapisać w configu, ale chyba będzie trudniej dla wielu pipelinów
 class Pipeline:
     def __init__(self, plant: Plant, id_: int, name: str):
         self._plant = plant
         self._nodes = {}
         self._first_node = None
         self._methods = {}
-        self._active_methods = {}
+        self._active_methods: dict[int, MethodBase] = {}
         self.id = id_
         self.name = name
 
@@ -80,7 +72,7 @@ class Pipeline:
         with Session(get_engine()) as session:
             methods = session.scalars(stmt).all()
         for method in methods:
-            method_class = getattr(sys.modules["leak_detector.method"], METHOD_CLASSES[method.MethodDefID.strip()])
+            method_class = getattr(importlib.import_module("leak_detector.method"), METHOD_CLASSES[method.MethodDefID.strip()])
             self._methods[method.ID] = method_class(self, method.ID, method.Name)
 
     def _read_params(self) -> None:
@@ -92,12 +84,12 @@ class Pipeline:
             params = session.scalars(statement).all()
         for param in params:
             self._params[param.PipelineParamDefID.strip()] = param.Value
+        self.begin_pos = float(self._params.get('BEGIN_POS', 0))
 
     def _get_params(self) -> None:
-        self.begin_pos = float(self._params.get('BEGIN_POS', 0))
-        self.length_resolution = int(self._params.get('LENGTH_RESOLUTION', 1))
-        self.time_resolution = int(self._params.get('TIME_RESOLUTION', 1))
-        
+        self.length_resolution = int(self._params.get('LENGTH_RESOLUTION', 10))
+        self.time_resolution = int(self._params.get('TIME_RESOLUTION', 10))
+
         for method_id in self._params.get('ACTIVE_METHODS', '').split(','):
             self._active_methods[int(method_id)] = self._methods[int(method_id)]
 
@@ -158,7 +150,6 @@ class Plant:
         self._build_pipelines()
 
         logging.debug(f"Plant created.")
-
 
     def _build_mesh(self) -> None:
         statement = select(lds.Node)

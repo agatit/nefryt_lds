@@ -1,5 +1,6 @@
 import logging
 import struct
+import numpy as np
 from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 from database import lds
@@ -13,24 +14,28 @@ class Trend:
         self.node_id = trend.NodeID
         logging.debug(f"Trend {self.id} {self.node_id} created")
 
-    def get_trend_data(self, begin: int, end: int) -> list[float]:
-        begin = begin // 1000
-        end = end // 1000
+    def get_trend_data(self, begin: int, end: int, data_per_second: int = 100) -> np.ndarray:
+        begin_ts = begin // 1000
+        end_ts = end // 1000
+        expected_data_length = (end_ts-begin_ts)*data_per_second
+        if data_per_second != 100:
+            expected_data_length += 1
         current_timestamp = begin
         last_valid_value = 0
         data_list = []
 
         statement = select(lds.TrendData) \
-            .where(and_(lds.TrendData.Time >= begin,
-                        lds.TrendData.Time < end,
+            .where(and_(lds.TrendData.Time >= begin_ts,
+                        lds.TrendData.Time <= end_ts,
                         lds.TrendData.TrendID == self.id)) \
             .order_by(lds.TrendData.Time)
         with Session(get_engine()) as session:
             db_data_list = session.scalars(statement).all()
 
+        next_idx = (begin//10)%100
         for db_data in db_data_list:
             while current_timestamp < db_data.Time:
-                data_list += [last_valid_value] * 100
+                data_list += [last_valid_value] * data_per_second
                 current_timestamp += 1
 
             if self.lds_trend.RawMin >= 0:
@@ -38,16 +43,19 @@ class Trend:
             else:
                 one_second_data = struct.unpack("h" * 100, db_data.Data)
 
-            for raw_value in one_second_data:
+            for raw_value in one_second_data[next_idx::100//data_per_second]:
                 last_valid = (self.lds_trend.ScaledMax - self.lds_trend.ScaledMin) \
                              * (raw_value - self.lds_trend.RawMin) \
                              / (self.lds_trend.RawMax - self.lds_trend.RawMin) \
                              + self.lds_trend.ScaledMin
-                data_list.append(last_valid)
+                if len(data_list) < expected_data_length:
+                    data_list.append(last_valid)
+                else:
+                    break
+            next_idx = (begin//10)%10
 
             current_timestamp += 1
-
-        if len(data_list) < (end-begin)*1000:
-            data_list.extend([last_valid_value] * ((end-begin)*1000 - len(data_list)))
+        if len(data_list) < expected_data_length:
+            data_list.extend([last_valid_value] * ((end-begin)*data_per_second - len(data_list)))
         logging.debug(f"Got data successfully.")
-        return data_list
+        return np.array(data_list)

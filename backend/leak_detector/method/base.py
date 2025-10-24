@@ -2,10 +2,12 @@ import logging
 from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 from database import lds
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from db import get_engine
 from ..plant import Event, Pipeline
 from ..segment import Segment
-
 
 class MethodBase:
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
@@ -31,15 +33,12 @@ class MethodBase:
             method_params = session.scalars(statement).all()
         for mp in method_params:
             self._params[mp.MethodParamDefID.strip()] = mp.Value
-                     
 
     def get_probability(self, segment: Segment, begin: int, end: int) -> list[list[float]]:
         pass
 
-
     def find_leaks_in_range(self, begin: int, end: int) -> list[Event]:
         pass
-
 
     def find_leaks_to(self, end: int) -> list[Event]:
         pass

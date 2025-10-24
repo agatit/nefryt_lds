@@ -20,6 +20,7 @@ dependencies = [
     "pyodbc>=4.0.22",
     "python-dateutil>=2.6.0",
     "scipy>=1.8.1",
+    "seaborn==0.13.2",
     "setuptools>=21.0.0",
     "sqlalchemy==2.0.40",
     "sqlmodel==0.0.24",
@@ -48,5 +49,6 @@ packages = [
     "database",
     "leak_detector",
     "trends_writer",
-    "model_data_generator"
+    "model_data_generator",
+    "simulator"
 ]
