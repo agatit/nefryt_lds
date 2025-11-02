@@ -16,7 +16,7 @@ from datetime import datetime
 if __name__ == '__main__':
     setup_engine()
     plant = Plant()
-    detection_time = 5000
+    detection_time = 10000
     datection_periods = [
         (datetime(2025, 6, 4, 13, 24, 40),
          datetime(2025, 6, 4, 13, 25, 10)),

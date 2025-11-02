@@ -17,6 +17,9 @@ class Segment:
         self._end_pos = self._begin_pos + self._length
         self._wave_speed = wave_speed
         self._max_window_size = ceil(self._length / self._wave_speed) * 1000
+        self.current_leakage = None
+        self.current_detection_end_time = None
+        self.no_detection_time = None
 
         logging.debug(f"Segment {begin.id} <--> {end.id} created.")
 
