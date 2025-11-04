@@ -107,13 +107,13 @@ class SimulationDensityBase(SimulationBase):
                         data_prev = struct.unpack("h" * 100, prev_flow_data.Data)
                         data_next = struct.unpack("h" * 100, next_flow_data.Data)
 
-                    mean_data_prev = (sum(data_prev[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
-                    mean_data_next = (sum(data_next[:mean_data_count]) / mean_data_count) * float(self.flow_unit.Multiplier)
+                    mean_data_prev = (sum(data_prev[:mean_data_count]) / mean_data_count) * float(self.flow_unit.Multiplier)
+                    mean_data_next = (sum(data_next[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
                     diff_t = t_next - t_prev - 1
                     diff_data = mean_data_next - mean_data_prev
                     for ts in range(t_prev + 1, t_next):
-                        flow = lambda t, m=mean_data_prev, tp=t_prev, dt=diff_t, dd=diff_data: (
-                                m + ((t - tp - 1) / dt) * dd)
+                        flow = lambda t, mdp=mean_data_prev, tp=t_prev, dt=diff_t, dd=diff_data: (
+                                mdp + ((t - tp - 1) / dt) * dd)
                         new_flows[ts] = flow
 
         return new_flows, buffer_size, first_calculated_timestamp
@@ -137,8 +137,8 @@ class SimulationDensityBase(SimulationBase):
                     data = struct.unpack("H" * 100, density_data.Data)
                 else:
                     data = struct.unpack("h" * 100, density_data.Data)
-                data = [(sum(data[i * self.window_size:(i + 1) * self.window_size]) / self.window_size)
-                        * float(self.simulation_unit.Multiplier) for i in range(100 // self.window_size)]
+                data = [(sum(data[(i-1) * self.window_size:i * self.window_size]) / self.window_size)
+                        * float(self.simulation_unit.Multiplier) for i in range(100 // self.window_size, 0, -1)]
                 densities.append(data)
                 density_data = next(density_data_iter, None)
             else:
@@ -163,8 +163,8 @@ class SimulationDensityBase(SimulationBase):
                 else:
                     prev_data = struct.unpack("h" * 100, prev_density_trend_data.Data)
 
-                prev_data = [(sum(prev_data[i * self.window_size:(i + 1) * self.window_size]) / self.window_size)
-                             * float(self.simulation_unit.Multiplier) for i in range(100 // self.window_size)][-1]
+                prev_data = [(sum(prev_data[(i-1) * self.window_size:i * self.window_size]) / self.window_size)
+                             * float(self.simulation_unit.Multiplier) for i in range(100 // self.window_size, 0, -1)][-1]
                 prev_t = prev_density_trend_data.Time + 1 - (1 / (100 // self.window_size))
                 last_not_none_idx = next((len(densities) - i for i, j in enumerate(reversed(densities), 1) if j is not None), None)
                 if last_not_none_idx is None:
@@ -265,15 +265,15 @@ class SimulationDensityBase(SimulationBase):
                 last_density = -1
                 window = 0
                 while last_density < 0 and (window + 1)*window_size <= 100:
-                    last_density = ((sum(density_data[-(window+1)*window_size:-(window*window_size+1)])/window_size)
+                    last_density = ((sum(density_data[window*window_size:(window + 1)*window_size])/window_size)
                                     * float(self.simulation_unit.Multiplier))
 
                 last_density = last_density if last_density > 0 else \
                     (float(self.density_interp(self.simulation_timestamp)) if self.density_interp is not None else 1)
                 return [last_density] * (100 // window_size)
 
-            density_data = [(sum(density_data[i*window_size:(i+1)*window_size])/window_size)
-                            * float(self.simulation_unit.Multiplier) for i in range(100//window_size)]
+            density_data = [(sum(density_data[(i-1)*window_size:i*window_size])/window_size)
+                            * float(self.simulation_unit.Multiplier) for i in range(100//window_size, 0, -1)]
             if min(density_data) <= 0:
                 logger.warning(f'{self.__class__.__name__} ({self.id}): Density data have incorrect values'
                                 f'(should be greater than zero, replacing incorrect values with last)')
@@ -330,7 +330,7 @@ class SimulationDensityBase(SimulationBase):
                 data_prev = struct.unpack("H" * 100, data_prev.Data)
             else:
                 data_prev = struct.unpack("h" * 100, data_prev.Data)
-            mean_data_prev = (sum(data_prev[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
+            mean_data_prev = (sum(data_prev[:mean_data_count]) / mean_data_count) * float(self.flow_unit.Multiplier)
             return lambda t: np.ones_like(t) * (mean_data_prev if mean_data_prev > 0 else 0)
         else:
             t_prev = data_prev.Time
@@ -342,12 +342,12 @@ class SimulationDensityBase(SimulationBase):
                 data_prev = struct.unpack("h" * 100, data_prev.Data)
                 data_next = struct.unpack("h" * 100, data_next.Data)
 
-            mean_data_prev = (sum(data_prev[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
+            mean_data_prev = (sum(data_prev[:mean_data_count]) / mean_data_count) * float(self.flow_unit.Multiplier)
             if mean_data_prev < 0:
                 logger.warning(f'{self.__class__.__name__} ({self.id}): Flow previous data have incorrect values'
                                 f'(should be greater equal zero, replacing incorrect values with zeros)')
                 mean_data_prev = 0
-            mean_data_next = (sum(data_next[:mean_data_count]) / mean_data_count) * float(self.flow_unit.Multiplier)
+            mean_data_next = (sum(data_next[-mean_data_count:]) / mean_data_count) * float(self.flow_unit.Multiplier)
             if mean_data_next < 0:
                 logger.warning(f'{self.__class__.__name__} ({self.id}): Flow next data have incorrect values'
                                 f'(should be greater equal zero, replacing incorrect values with zeros)')

@@ -20,6 +20,7 @@ class TrendFilter(TrendBase):
         self.storage = np.array([], dtype=np.uint16)
 
     def update(self, data: list[int], timestamp: int, profiler_timestamp_diff: int = 0, parent_id: int = None):
+        data = np.flip(data)
         if timestamp > self.storage_timestamp + 1:
             logger.warning(f"{self.__class__.__name__} ({self.id}): "
                             f"Data in storage not valid (timestamp={timestamp}, storage timestamp={self.storage_timestamp})")
@@ -69,7 +70,7 @@ class TrendFilter(TrendBase):
             for curr_timestamp in range(timestamp - window_size * 2 - 1, timestamp):
                 if trend_data is not None and trend_data[0].Time == curr_timestamp:
                     curr_data = struct.unpack('<100h', trend_data[0].Data)
-                    curr_data = np.array(curr_data)
+                    curr_data = np.flip(curr_data)
 
                     for i in range(len(curr_data)):
                         if curr_data[i] != 0xFFFF:

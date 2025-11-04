@@ -207,7 +207,7 @@ async def get_single_trend_data(trend_id: Annotated[str, Path()], begin: Annotat
             while time_data and time_data[0] == current_second:
                 if len(one_second_data) != 0:
                     result_list.append((((lds_trend_scales["ScaledMax"] - lds_trend_scales["ScaledMin"])
-                                         * (one_second_data[time_data[1] // 10] - lds_trend_scales["RawMin"])
+                                         * (one_second_data[-1 - time_data[1] // 10] - lds_trend_scales["RawMin"])
                                          / (lds_trend_scales["RawMax"] - lds_trend_scales["RawMin"])
                                          + lds_trend_scales["ScaledMin"]),
                                         time_data[0], time_data[1]))

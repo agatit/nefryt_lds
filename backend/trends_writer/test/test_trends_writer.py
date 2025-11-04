@@ -1,9 +1,11 @@
 import asyncio
 import math
+import multiprocessing
 import struct
 import time
 from random import randint
 from unittest.mock import patch
+
 import pytest
 from pymodbus.client import AsyncModbusTcpClient
 import sys
@@ -62,15 +64,18 @@ def add_objects():
 
 
 def add_disabled_objects():
-    global trend_param1, trend1, trend_def1, trend_group, unit
+    global trend_param1, trend1, trend_def1, trend_group, unit, trend2, trend_param2
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
     trend_group = lds.TrendGroup(ID=1, Name='Group1')
     unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
     trend1 = lds.Trend(ID=1, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
                        Name='Trend1', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Black', Enabled=False)
+    trend2 = lds.Trend(ID=2, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
+                       Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow')
     trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
+    trend_param2 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=2, Value='2000')
     trend_param_def = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
-    objs = [[trend_def1], [trend_group], [unit], [trend1], [trend_param1], [trend_param_def]]
+    objs = [[trend_def1], [trend_group], [unit], [trend1, trend2], [trend_param1, trend_param2], [trend_param_def]]
 
     return objs
 
@@ -146,6 +151,14 @@ async def _send_data(port: int, addr: int, data: list[int]):
     res = await client.write_registers(addr, data)
     assert res.isError() is False
     client.close()
+
+
+@pytest.fixture(autouse=True)
+def cleanup_multiprocessing():
+    yield
+    for process in multiprocessing.active_children():
+        process.terminate()
+        process.join()
 
 
 @pytest.mark.asyncio
@@ -293,6 +306,26 @@ async def test_profiler_should_write_data_to_database(add_lds_objects):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize('reset_lds_objects', [add_disabled_objects], indirect=True)
+async def test_trend_data_should_not_be_written_to_db_when_trend_is_disabled(add_lds_objects):
+    port = 5029
+    Profiler.init()
+    server_task = asyncio.create_task(run_server(PipePlant(), port))
+    await asyncio.sleep(5)
+    calls = 5
+
+    t = math.floor(time.time()) + 0.5
+    for i in range(calls):
+        await _send_data(port, int(trend_param1.Value),  [randint(0, 255) for _ in range(100)])
+        await asyncio.sleep(t - time.time() + 1)
+        t += 1
+
+    server_task.cancel()
+
+    assert _get_trend_data_records_count() == 0
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize('reset_lds_objects', [add_objects_with_children_two_layers], indirect=True)
 async def test_trends_writer_should_update_trend_time_delta_in_database(add_lds_objects):
     port = 5028
@@ -318,23 +351,3 @@ async def test_trends_writer_should_update_trend_time_delta_in_database(add_lds_
     expected_deltas = [0, 2, 9]
     for trend, expected_delta in zip(trends, expected_deltas):
         assert trend[0].TimeDelta == expected_delta
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize('reset_lds_objects', [add_disabled_objects], indirect=True)
-async def test_trend_data_should_not_be_written_to_db_when_trend_is_disabled(add_lds_objects):
-    port = 5029
-    Profiler.init()
-    server_task = asyncio.create_task(run_server(PipePlant(), port))
-    await asyncio.sleep(5)
-    calls = 5
-
-    t = math.floor(time.time()) + 0.5
-    for i in range(calls):
-        await _send_data(port, int(trend_param1.Value),  [randint(0, 255) for _ in range(100)])
-        await asyncio.sleep(t - time.time() + 1)
-        t += 1
-
-    server_task.cancel()
-
-    assert _get_trend_data_records_count() == 0

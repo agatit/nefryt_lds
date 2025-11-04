@@ -25,33 +25,33 @@ class SimulationBase:
         try:
             self.pipeline_length = int(self.params['LENGTH'])
         except KeyError:
-            raise ValueError(f'No \'LENGTH\' param in simulation with id={self.id}')
+            raise ValueError(f'No \'LENGTH\' param in simulation with id = {self.id}')
         except ValueError:
-            raise ValueError(f'\'LENGTH\' param in simulation with id={self.id} has to be an integer')
+            raise ValueError(f'\'LENGTH\' param in simulation with id = {self.id} has to be an integer')
 
         self.simulation_trend = self._read_trend(self.lds_simulation.TrendID)
         if self.simulation_trend is None:
-            raise ValueError(f'No trend with id={self.lds_simulation.TrendID} in simulation with id={self.id}')
+            raise ValueError(f'No trend with id = {self.lds_simulation.TrendID} in simulation with id = {self.id}')
 
         self.simulation_unit = self._read_unit(self.simulation_trend.UnitID)
         if self.simulation_unit is None:
-            raise ValueError(f'No unit with id={self.simulation_trend.UnitID} for trend with id={self.lds_simulation.TrendID} '
-                                 f'in simulation with id={self.id}')
+            raise ValueError(f'No unit with id = {self.simulation_trend.UnitID} for trend with id = {self.lds_simulation.TrendID} '
+                                 f'in simulation with id = {self.id}')
 
         try:
            flow_trend_id = self.params['FLOW_TREND_ID']
         except KeyError:
-            raise ValueError(f'No param \'FLOW_TREND_ID\' for simulation with id={self.id}')
+            raise ValueError(f'No param \'FLOW_TREND_ID\' in simulation with id = {self.id}')
 
         self.flow_trend = self._read_trend(flow_trend_id)
         if self.flow_trend is None:
-            raise ValueError(f'No flow trend with id={flow_trend_id} for simulation with id={self.id}')
+            raise ValueError(f'No flow trend with id = {flow_trend_id} in simulation with id = {self.id}')
 
         self.flow_unit = self._read_unit(self.flow_trend.UnitID)
         if self.flow_unit is None:
             raise ValueError(
-                f'No unit with id={self.flow_trend.UnitIDD} for flow trend with id={flow_trend_id} '
-                f'for simulation with id={self.id}')
+                f'No unit with id = {self.flow_trend.UnitIDD} for flow trend with id = {flow_trend_id} '
+                f'in simulation with id = {self.id}')
 
         self.time_buffer = self.calculate_time_buffer()
         self.simulation_timestamp = int(time.time()) - self.time_buffer
@@ -171,6 +171,7 @@ class SimulationBase:
             logger.warning(f'{self.__class__.__name__} ({self.id}): Timestamp gap between Trends Writer and Simulation modules'
                             f'(current gap: {data.Time - int(time.time())} seconds). '
                             f'Simulator may not calculate and save most recent data')
+
     def _run_simulation_loop(self):
         simulation_duration = 1
         try:

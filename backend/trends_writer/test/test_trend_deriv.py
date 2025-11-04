@@ -33,7 +33,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_constant_increasing_tre
         self.params = {'FILTER_WINDOW': filter_window_value}
 
     def mock_initiate_buffer(self, _, __, ___):
-        self.storage = np.arange(0, 300, a)
+        self.storage = np.flip(np.arange(0, 300, a))
 
     with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
         with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
@@ -43,7 +43,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_constant_increasing_tre
                 trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                 for i in range(5):
-                    x = list(np.arange(i * 100, (i + 1) * 100, a))
+                    x = list(np.flip(np.arange(i * 100, (i + 1) * 100, a)))
                     trend.update(x, i + timestamp_offset, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
@@ -61,7 +61,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_trend()
 
     def mock_initiate_buffer(self, _, __, ___):
         storage = [500 + (-2 + random.randint(0, 5)) for _ in range(100)]
-        self.storage = np.array(storage)
+        self.storage = np.flip(storage)
 
     with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
         with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
@@ -71,7 +71,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_trend()
                 trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                 for i in range(7):
-                    x = [500 + (-2 + random.randint(0, 5)) for _ in range(100)]
+                    x = list(np.flip([500 + (-2 + random.randint(0, 5)) for _ in range(100)]))
                     trend.update(x, i + timestamp_offset, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
@@ -91,7 +91,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_decreas
 
     def mock_initiate_buffer(self, _, __, ___):
         storage = [start_value - ii * 5 + (-5 + random.randint(0, 11)) for ii in range(100)]
-        self.storage = np.array(storage)
+        self.storage = np.flip(storage)
 
     with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
         with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
@@ -101,7 +101,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_decreas
                 trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                 for i in range(5):
-                    x = [start_value - i * 100 * a - ii * 5 + (-5 + random.randint(0, 11)) for ii in range(100)]
+                    x = list(np.flip([start_value - i * 100 * a - ii * 5 + (-5 + random.randint(0, 11)) for ii in range(100)]))
                     trend.update(x, i + 10, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
@@ -118,7 +118,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_changing_monotonic_tren
         self.params = {'FILTER_WINDOW': filter_window_value}
 
     def mock_initiate_buffer(self, _, __, ___):
-        self.storage = np.arange(0, 100, 1)
+        self.storage = np.flip(np.arange(0, 100, 1))
 
     with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
         with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
@@ -136,7 +136,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_changing_monotonic_tren
                         start = (6 - i) * 100 - 1
                         end = (5 - i) * 100 - 1
                         step = -1
-                    x = list(np.arange(start, end, step))
+                    x = list(np.flip(np.arange(start, end, step)))
                     trend.update(x, i + 10, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
@@ -155,7 +155,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_plateau_trend():
         self.params = {'FILTER_WINDOW': filter_window_value}
 
     def mock_initiate_buffer(self, _, __, ___):
-        self.storage = np.arange(0, 100 * a, a)
+        self.storage = np.flip(np.arange(0, 100 * a, a))
 
     with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
         with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
@@ -171,7 +171,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_plateau_trend():
                         x = np.arange(99 * a, -a, -a)
                     else:
                         value = 0 if i % 8 in (5, 6, 7) else 100 * a
-                        x = list(np.full(100, value))
+                        x = list(np.flip(np.full(100, value)))
                     trend.update(x, i + 10, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
@@ -192,7 +192,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_step_tr
 
     def mock_initiate_buffer(self, _, __, ___):
         storage = [(-5 + random.randint(0, 11)) for _ in range(100)]
-        self.storage = np.array(storage)
+        self.storage = np.flip(storage)
 
     with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
         with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
@@ -202,7 +202,7 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_step_tr
                 trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
 
                 for i in range(7):
-                    x = [(i + -5 + random.randint(0, 11)) for _ in range(100)]
+                    x = list(np.flip([(i + -5 + random.randint(0, 11)) for _ in range(100)]))
                     trend.update(x, i + timestamp_offset, 0, None)
 
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):

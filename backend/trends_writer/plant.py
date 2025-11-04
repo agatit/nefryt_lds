@@ -112,7 +112,8 @@ class PipePlant:
     @staticmethod
     def shutdown_processes():
         Profiler.queue.put((-1, None, None))
-        for trend in TrendManager.get_all():
-            trend.queue.put(None)
-            trend.process.terminate()
-            trend.process.join(1)
+        if not Settings.tests:
+            for trend in TrendManager.get_all():
+                trend.queue.put(None)
+                trend.process.terminate()
+                trend.process.join(1)

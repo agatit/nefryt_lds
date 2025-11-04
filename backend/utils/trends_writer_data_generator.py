@@ -9,6 +9,7 @@ REGISTERS = [1000, 2000]
 
 
 async def _send_data(client: AsyncModbusTcpClient, addr: int, data: list[int]):
+    data.reverse()
     await client.write_registers(addr, data)
 
 

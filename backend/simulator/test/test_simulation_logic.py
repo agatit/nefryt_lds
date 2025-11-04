@@ -73,7 +73,7 @@ def add_objects_with_time_delta():
 
 
 def add_flow_data(t, timestamp):
-    data = np.array([t+1] * 100)
+    data = np.flip([t+1] * 100)
     data = data.astype(np.uint16)
     packed_data = struct.pack('<100H', *data)
 
@@ -84,7 +84,7 @@ def add_flow_data(t, timestamp):
 
 
 def add_const_trend_data(timestamp):
-    data = 1000 * np.ones(100)
+    data = np.flip(1000 * np.ones(100))
     data = data.astype(np.uint16)
     packed_data = struct.pack('<100H', *data)
 
@@ -95,7 +95,7 @@ def add_const_trend_data(timestamp):
 
 
 def add_trend_data(t, timestamp):
-    data = np.array([1000+t*100+i for i in range(100)])
+    data = np.flip([1000+t*100+i for i in range(100)])
     data = data.astype(np.uint16)
     packed_data = struct.pack('<100H', *data)
 
@@ -117,7 +117,7 @@ def add_incorrect_trend_data(timestamp):
 
 
 def add_incorrect_flow_data(timestamp):
-    data = np.array([-i for i in range(100)])
+    data = np.flip([-i for i in range(100)])
     data = data.astype(np.int16)
     packed_data = struct.pack('<100h', *data)
 

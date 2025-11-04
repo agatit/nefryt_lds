@@ -13,7 +13,7 @@ class TrendDeriv(TrendFilter):
             norm = 1 / (factor * size * (size + 1) / 2)
             result: np.ndarray = signal.convolve(self.storage, kernel, mode='valid') * -norm
 
-            result = np.clip(result, np.iinfo(np.int16).min + 1, np.iinfo(np.int16).max)
+            result = np.clip(result, np.iinfo(np.int16).min, np.iinfo(np.int16).max-1)
             result = result.astype(np.int16)
-            return result
+            return np.flip(result)
         return None
