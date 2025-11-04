@@ -81,6 +81,19 @@ class TrendData(SQLModel, table=True):
     Data: bytes = Field(sa_column=Column(BINARY(200), nullable=False))
 
 
+class PastTrendData(SQLModel, table=True):
+    __tablename__ = 'PastTrendData'
+    __table_args__ = (
+        PrimaryKeyConstraint('Time', 'TrendID', name='PastTrendData_pk'),
+        Index("past_idx_time_trendid", "TrendID", "Time", unique=True),
+        {'schema': 'lds'}
+    )
+
+    TrendID: int = Field(sa_column=Column(Integer, nullable=False))
+    Time: int = Field(sa_column=Column(BigInteger, nullable=False))
+    Data: bytes = Field(sa_column=Column(BINARY(200), nullable=False))
+
+
 class TrendDef(base.TrendDef, table=True):
     __tablename__ = 'TrendDef'
     __table_args__ = (
