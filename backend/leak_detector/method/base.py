@@ -42,3 +42,11 @@ class MethodBase:
 
     def find_leaks_to(self, end: int) -> list[Event]:
         pass
+
+    @property
+    def pipeline(self) -> Pipeline:
+        return self._pipeline
+
+    @property
+    def id(self) -> int:
+        return self._id

@@ -3,7 +3,7 @@ import importlib
 import logging
 import copy
 from typing import TYPE_CHECKING
-from sqlalchemy import Float, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from db import get_engine
 from .trend import Trend
@@ -93,21 +93,12 @@ class Pipeline:
         for method_id in self._params.get('ACTIVE_METHODS', '').split(','):
             self._active_methods[int(method_id)] = self._methods[int(method_id)]
 
-        self.method_events = self._params.get('METHOD_EVENTS', '').split(',') 
-
-    def get_probability(self, begin, end) -> dict[int, list[list[Float]]]:
-        result = {}
-        for method_id, method in self._active_methods.items():
-            result[method_id] = method.get_probability(begin, end)
-        logging.info(f"Pipeline {self.id}: probabilities calculated.")
-
-        return result
+        self.method_events = self._params.get('METHOD_EVENTS', '').split(',')
 
     def find_leaks_in_range(self, begin: int, end: int) -> dict[int, list[Event]]:
         events = {}
         for method_id, method in self._active_methods.items():
             events[method_id] = method.find_leaks_in_range(begin, end)
-        logging.info(f"Pipeline {self.id}: leaks detected.")
 
         return events
 

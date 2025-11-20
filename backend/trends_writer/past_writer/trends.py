@@ -3,7 +3,7 @@ import struct
 from multiprocessing import Process
 import numpy as np
 from scipy import signal
-from sqlalchemy import select, and_, literal, insert
+from sqlalchemy import select, and_, literal, text
 from sqlalchemy.orm import Session
 from config import setup_engine
 from database import lds
@@ -109,13 +109,9 @@ class TrendBase:
             data = np.minimum(data, [np.iinfo(np.uint16).max - 1] * len(data))  # FFFF reserved for error
             packed_data = struct.pack('<100H', *data)
 
-            insert_stmt = insert(lds.PastTrendData).values(
-                TrendID=self.id,
-                Time=timestamp,
-                Data=packed_data
-            )
+            insert_stmt = text(f"EXEC Update_Insert_PastTrendData {self.id}, {timestamp}, :data")
             with Session(get_engine()) as session:
-                session.execute(insert_stmt)
+                session.execute(insert_stmt, {"data": packed_data})
                 session.commit()
 
             logger.debug(f"{self.__class__.__name__} ({self.id}): Saved data (timestamp={timestamp})")
@@ -209,7 +205,8 @@ class TrendDeriv(TrendFilter):
             dt = 1 / self.block_size
             factor = dt * (4 * size + 2) / 3
             norm = 1 / (factor * size * (size + 1) / 2)
-            result: np.ndarray = signal.convolve(self.storage, kernel, mode='valid') * -norm
+            # TODO: change multiplication to params manipulation
+            result: np.ndarray = signal.convolve(self.storage, kernel, mode='valid') * -norm * 10
 
             result = np.clip(result, np.iinfo(np.int16).min-1, np.iinfo(np.int16).max)
             result = result.astype(np.int16)

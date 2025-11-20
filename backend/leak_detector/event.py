@@ -6,10 +6,11 @@ from db import get_engine
 
 
 class Event:
-    def __init__(self, method_id: int, time: int, position: float) -> None:
+    def __init__(self, method_id: int, time: int, position: float, level: float) -> None:
         self.method_id = method_id
         self._datetime = datetime.fromtimestamp(time / 1000)
         self._position = position
+        self._level = level
         logging.debug(f"Event {method_id}: {self._datetime} {position}m created.")
 
     def save(self) -> None:
@@ -29,3 +30,7 @@ class Event:
     @property
     def position(self) -> float:
         return self._position
+
+    @property
+    def level(self) -> float:
+        return self._level
