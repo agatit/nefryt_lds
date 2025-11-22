@@ -45,12 +45,15 @@ class TrendBase:
             logger.debug(f"{self.__class__.__name__} ({self.id}): Got data: {data}")
             timestamp = item[1]
             parent_id = item[2] if len(item) > 2 else None
-            self.update(data, timestamp, parent_id)
+            result = self.update(data, timestamp, parent_id)
             if parent_id is not None:
-                plant_queue.put(self.id)
+                if result:
+                    plant_queue.put((timestamp, self.id))
+                else:
+                    for _ in range(self.expected_calls):
+                        plant_queue.put((timestamp, self.id))
 
-    def update(self, data: np.ndarray, timestamp: int, parent_id: int | None = None):
-        # if parent_id is not None:
+    def update(self, data: np.ndarray, timestamp: int, parent_id: int | None = None) -> bool:
         self._save(data, timestamp)
         logger.debug(f"{self.__class__.__name__} ({self.id}): Started updating children (timestamp={timestamp})")
 
@@ -63,7 +66,7 @@ class TrendBase:
                                  exc_info=True)
 
         logger.debug(f"{self.__class__.__name__} ({self.id}): Finished updating children (timestamp={timestamp})")
-        return timestamp
+        return True
 
     def _read_params(self):
         stmt = (select(lds.TrendParamDef, lds.TrendParam)
@@ -152,8 +155,10 @@ class TrendFilter(TrendBase):
         if calculated_data is not None:
             super().update(calculated_data, timestamp - self.window_size, parent_id)
             logger.debug(f"{self.__class__.__name__} ({self.id}): Calculated results (timestamp={timestamp})")
+            return True
         else:
             logger.debug(f"{self.__class__.__name__} ({self.id}): Empty calculation results (timestamp={timestamp})")
+            return False
 
     def calculate(self) -> np.ndarray:
         raise NotImplementedError
@@ -198,15 +203,18 @@ class TrendFilter(TrendBase):
 
 
 class TrendDeriv(TrendFilter):
+    def __init__(self, id_: int, queue: Queue, db_uri: str):
+        super().__init__(id_, queue, db_uri)
+        self.expected_to_raw_coef = float(self.params['EXPECTED_TO_RAW_COEF'])
+
     def calculate(self) -> np.ndarray | None:
         if len(self.storage) >= (2 * self.window_size + 1) * self.block_size:
             size = int(self.window_size * self.block_size)
             kernel = np.arange(-size, size + 1)
             dt = 1 / self.block_size
             factor = dt * (4 * size + 2) / 3
-            norm = 1 / (factor * size * (size + 1) / 2)
-            # TODO: change multiplication to params manipulation
-            result: np.ndarray = signal.convolve(self.storage, kernel, mode='valid') * -norm * 10
+            norm = self.expected_to_raw_coef / (factor * size * (size + 1) / 2)
+            result: np.ndarray = signal.convolve(self.storage, kernel, mode='valid') * -norm
 
             result = np.clip(result, np.iinfo(np.int16).min-1, np.iinfo(np.int16).max)
             result = result.astype(np.int16)
@@ -244,16 +252,18 @@ class TrendDiff(TrendBase):
                 "timestamp": 0
             }
         }
-        self.expected_calls = 2
+        self.expected_calls = 1
 
-    def update(self, data: list[int], timestamp: int, parent_id: int | None = None):
+    def update(self, data: list[int], timestamp: int, parent_id: int | None = None) -> bool:
         calculated_data = self.calculate(data, timestamp, parent_id)
 
         if calculated_data is not None:
             super().update(calculated_data, timestamp, parent_id)
             logger.debug(f"{self.__class__.__name__} ({self.id}): Calculated results (timestamp={timestamp})")
+            return True
         else:
             logger.debug(f"{self.__class__.__name__} ({self.id}): Empty calculation results (timestamp={timestamp})")
+            return False
 
     def calculate(self, data: list[int], timestamp: int, parent_id: int | None = None) -> np.ndarray:
         result = None

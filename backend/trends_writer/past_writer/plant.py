@@ -74,7 +74,7 @@ class PipePlant:
             recursive_calls += self.read_trend_expected_calls(child)
 
         trend.expected_calls = recursive_calls
-        return None
+        return trend.expected_calls
 
     def update(self, quick_trend_data: dict, timestamp: int):
         expected_responses = 0

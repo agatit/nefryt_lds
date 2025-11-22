@@ -28,9 +28,10 @@ def mock_save(_, data, timestamp):
 def test_trend_deriv_calculates_derivative_correctly_for_constant_increasing_trend():
     filter_window_value = 1
     a = 3
+    expected_to_raw_coef_value = 1
 
     def mock_read_params(self):
-        self.params = {'FILTER_WINDOW': filter_window_value}
+        self.params = {'FILTER_WINDOW': filter_window_value, 'EXPECTED_TO_RAW_COEF': expected_to_raw_coef_value}
 
     def mock_initiate_buffer(self, _, __, ___):
         self.storage = np.flip(np.arange(0, 300, a))
@@ -55,9 +56,10 @@ def test_trend_deriv_calculates_derivative_correctly_for_constant_increasing_tre
 
 def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_trend():
     filter_window_value = 2
+    expected_to_raw_coef_value = 1
 
     def mock_read_params(self):
-        self.params = {'FILTER_WINDOW': filter_window_value}
+        self.params = {'FILTER_WINDOW': filter_window_value, 'EXPECTED_TO_RAW_COEF': expected_to_raw_coef_value}
 
     def mock_initiate_buffer(self, _, __, ___):
         storage = [500 + (-2 + random.randint(0, 5)) for _ in range(100)]
@@ -83,11 +85,12 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_trend()
 
 def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_decreasing_trend():
     filter_window_value = 1
+    expected_to_raw_coef_value = 1
     start_value = 3000
     a = 5
 
     def mock_read_params(self):
-        self.params = {'FILTER_WINDOW': filter_window_value}
+        self.params = {'FILTER_WINDOW': filter_window_value, 'EXPECTED_TO_RAW_COEF': expected_to_raw_coef_value}
 
     def mock_initiate_buffer(self, _, __, ___):
         storage = [start_value - ii * 5 + (-5 + random.randint(0, 11)) for ii in range(100)]
@@ -113,9 +116,10 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_decreas
 
 def test_trend_deriv_calculates_derivative_correctly_for_changing_monotonic_trend():
     filter_window_value = 1
+    expected_to_raw_coef_value = 1
 
     def mock_read_params(self):
-        self.params = {'FILTER_WINDOW': filter_window_value}
+        self.params = {'FILTER_WINDOW': filter_window_value, 'EXPECTED_TO_RAW_COEF': expected_to_raw_coef_value}
 
     def mock_initiate_buffer(self, _, __, ___):
         self.storage = np.flip(np.arange(0, 100, 1))
@@ -149,10 +153,11 @@ def test_trend_deriv_calculates_derivative_correctly_for_changing_monotonic_tren
 
 def test_trend_deriv_calculates_derivative_correctly_for_plateau_trend():
     filter_window_value = 1
+    expected_to_raw_coef_value = 1
     a = 3
 
     def mock_read_params(self):
-        self.params = {'FILTER_WINDOW': filter_window_value}
+        self.params = {'FILTER_WINDOW': filter_window_value, 'EXPECTED_TO_RAW_COEF': expected_to_raw_coef_value}
 
     def mock_initiate_buffer(self, _, __, ___):
         self.storage = np.flip(np.arange(0, 100 * a, a))
@@ -186,9 +191,10 @@ def test_trend_deriv_calculates_derivative_correctly_for_plateau_trend():
 
 def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_step_trend():
     filter_window_value = 2
+    expected_to_raw_coef_value = 1
 
     def mock_read_params(self):
-        self.params = {'FILTER_WINDOW': filter_window_value}
+        self.params = {'FILTER_WINDOW': filter_window_value, 'EXPECTED_TO_RAW_COEF': expected_to_raw_coef_value}
 
     def mock_initiate_buffer(self, _, __, ___):
         storage = [(-5 + random.randint(0, 11)) for _ in range(100)]
@@ -208,4 +214,33 @@ def test_trend_deriv_calculates_derivative_correctly_for_almost_constant_step_tr
     for i, (saved_data, saved_timestamp) in enumerate(saved_results):
         values = np.unique(saved_data)
         assert np.all(np.isin(values, (0, 1)))
+        assert saved_timestamp == i + filter_window_value + timestamp_offset
+
+
+def test_trend_deriv_calculates_derivative_correctly_with_coefficient():
+    filter_window_value = 1
+    a = 3
+    expected_to_raw_coef_value = 100
+
+    def mock_read_params(self):
+        self.params = {'FILTER_WINDOW': filter_window_value, 'EXPECTED_TO_RAW_COEF': expected_to_raw_coef_value}
+
+    def mock_initiate_buffer(self, _, __, ___):
+        self.storage = np.flip(np.arange(0, 300, a))
+
+    with patch.object(TrendDeriv, '_read_params', new=mock_read_params):
+        with patch.object(TrendDeriv, 'initiate_buffer', new=mock_initiate_buffer):
+            with patch.object(TrendDeriv, '_save', new=mock_save):
+                mocked_queue = Mock()
+                mocked_queue2 = Mock()
+                trend = TrendDeriv(1, mocked_queue, '', mocked_queue2)
+
+                for i in range(5):
+                    x = list(np.flip(np.arange(i * 100, (i + 1) * 100, a)))
+                    trend.update(x, i + timestamp_offset, 0, None)
+
+    for i, (saved_data, saved_timestamp) in enumerate(saved_results):
+        values = np.unique(saved_data)
+        assert len(values) == 1
+        assert values[0] == expected_to_raw_coef_value * a * 100
         assert saved_timestamp == i + filter_window_value + timestamp_offset

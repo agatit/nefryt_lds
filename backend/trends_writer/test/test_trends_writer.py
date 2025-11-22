@@ -5,7 +5,6 @@ import struct
 import time
 from random import randint
 from unittest.mock import patch
-
 import pytest
 from pymodbus.client import AsyncModbusTcpClient
 import sys
@@ -21,6 +20,7 @@ from trends_writer.modbus import run_server
 
 trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
 trend_param2 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=2, Value='2')
+trend_param3 = lds.TrendParam(TrendParamDefID='EXPECTED_TO_RAW_COEF', TrendID=2, Value='1')
 trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
 trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
 trend_group = lds.TrendGroup(ID=1, Name='Group1')
@@ -33,7 +33,7 @@ trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMi
                    Name='Trend3', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Orange')
 
 def add_two_objects():
-    global trend_param1, trend1, trend_def1, trend3, trend_group, unit
+    global trend_param1, trend1, trend_def1, trend3, trend_group, unit, trend_param2
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
     trend_group = lds.TrendGroup(ID=1, Name='Group1')
     unit = lds.Unit(ID='Unit1', Name='Unit1', Symbol='U')
@@ -42,9 +42,9 @@ def add_two_objects():
     trend3 = lds.Trend(ID=3, TrendDefID=trend_def1.ID, RawMin=1, RawMax=10, ScaledMin=0.5, ScaledMax=1.5,
                        Name='Trend3', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Orange')
     trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
-    trend_param3 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=3, Value='2000')
+    trend_param2 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=3, Value='2000')
     trend_param_def = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
-    objs = [[trend_def1], [trend_group], [unit], [trend1, trend3], [trend_param1, trend_param3], [trend_param_def]]
+    objs = [[trend_def1], [trend_group], [unit], [trend1, trend3], [trend_param1, trend_param2], [trend_param_def]]
 
     return objs
 
@@ -81,7 +81,7 @@ def add_disabled_objects():
 
 
 def add_objects_with_children():
-    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2, trend_group, unit
+    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2, trend_group, unit, trend_param3
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
     trend_group = lds.TrendGroup(ID=1, Name='Group1')
@@ -92,18 +92,21 @@ def add_objects_with_children():
                        Name='Trend2', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Yellow')
     trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
     trend_param2 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=2, Value='2')
-    trend_param3 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=2, Value='1')
+    trend_param3 = lds.TrendParam(TrendParamDefID='EXPECTED_TO_RAW_COEF', TrendID=2, Value='1')
+    trend_param4 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=2, Value='1')
     trend_param_def1 = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
     trend_param_def2 = lds.TrendParamDef(ID='FILTER_WINDOW', TrendDefID='DERIV', Name='name', DataType='INT')
     trend_param_def3 = lds.TrendParamDef(ID='TREND_ID', TrendDefID='DERIV', Name='name', DataType='TREND')
+    trend_param_def4 = lds.TrendParamDef(ID='EXPECTED_TO_RAW_COEF', TrendDefID='DERIV', Name='name', DataType='REAL')
     objs = [[trend_def1, trend_def2], [trend_group], [unit], [trend1, trend2],
-            [trend_param1, trend_param2, trend_param3], [trend_param_def1, trend_param_def2, trend_param_def3]]
+            [trend_param1, trend_param2, trend_param3, trend_param4],
+            [trend_param_def1, trend_param_def2, trend_param_def3, trend_param_def4]]
 
     return objs
 
 
 def add_objects_with_children_two_layers():
-    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2, trend_group, unit
+    global trend_param1, trend_param2, trend_def1, trend_def2, trend1, trend2, trend_group, unit, trend_param3
     trend_def1 = lds.TrendDef(ID='QUICK', Name='TrendDef1')
     trend_def2 = lds.TrendDef(ID='DERIV', Name='TrendDef2')
     trend_group = lds.TrendGroup(ID=1, Name='Group1')
@@ -116,15 +119,17 @@ def add_objects_with_children_two_layers():
                        Name='Trend4', TrendGroupID=trend_group.ID, UnitID=unit.ID, Color='Purple')
     trend_param1 = lds.TrendParam(TrendParamDefID='MODBUS_REGISTER', TrendID=1, Value='1000')
     trend_param2 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=2, Value='2')
-    trend_param3 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=2, Value='1')
-    trend_param4 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=4, Value='7')
-    trend_param5 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=4, Value='2')
+    trend_param3 = lds.TrendParam(TrendParamDefID='EXPECTED_TO_RAW_COEF', TrendID=2, Value='1')
+    trend_param4 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=2, Value='1')
+    trend_param5 = lds.TrendParam(TrendParamDefID='FILTER_WINDOW', TrendID=4, Value='7')
+    trend_param6 = lds.TrendParam(TrendParamDefID='TREND_ID', TrendID=4, Value='2')
     trend_param_def1 = lds.TrendParamDef(ID='MODBUS_REGISTER', TrendDefID='QUICK', Name='name', DataType='INT')
     trend_param_def2 = lds.TrendParamDef(ID='FILTER_WINDOW', TrendDefID='DERIV', Name='name', DataType='INT')
     trend_param_def3 = lds.TrendParamDef(ID='TREND_ID', TrendDefID='DERIV', Name='name', DataType='TREND')
+    trend_param_def4 = lds.TrendParamDef(ID='EXPECTED_TO_RAW_COEF', TrendDefID='DERIV', Name='name', DataType='REAL')
     objs = [[trend_def1, trend_def2], [trend_group], [unit], [trend1, trend2, trend4],
-            [trend_param1, trend_param2, trend_param3, trend_param4, trend_param5],
-            [trend_param_def1, trend_param_def2, trend_param_def3]]
+            [trend_param1, trend_param2, trend_param3, trend_param4, trend_param5, trend_param6],
+            [trend_param_def1, trend_param_def2, trend_param_def3, trend_param_def4]]
 
     return objs
 
