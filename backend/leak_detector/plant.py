@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
 METHOD_CLASSES = {
     'WAVE': 'MethodWaveSigned',
-    'WAVE_2': 'MethodWaveUnsigned',
     'BALANCE': 'MethodBalance',
     'MASK': 'MethodMask',
     'COMBINE': 'MethodCombine'
@@ -52,8 +51,9 @@ class Pipeline:
 
         self._params = {}
         self._read_params()
-        self._build()
         self._get_params()
+        self._build()
+        self._get_methods()
 
         logging.debug(f"Pipeline {self.id}: {self.name} created.")
 
@@ -90,6 +90,7 @@ class Pipeline:
         self.length_resolution = int(self._params.get('LENGTH_RESOLUTION', 10))
         self.time_resolution = int(self._params.get('TIME_RESOLUTION', 10))
 
+    def _get_methods(self) -> None:
         for method_id in self._params.get('ACTIVE_METHODS', '').split(','):
             self._active_methods[int(method_id)] = self._methods[int(method_id)]
 
@@ -129,6 +130,9 @@ class Pipeline:
     @property
     def first_node(self) -> Node:
         return self._first_node
+
+    def get_leakage_alarm_delta(self) -> int:
+        return max([method.get_leakage_alarm_delta() for method in self._active_methods.values()])
 
 
 class Plant:
@@ -201,3 +205,6 @@ class Plant:
     @property
     def trends(self) -> dict[int, Trend]:
         return self._trends
+
+    def get_leakage_alarm_delta(self) -> int:
+        return max([pipeline.get_leakage_alarm_delta() for pipeline in self._pipelines.values()])

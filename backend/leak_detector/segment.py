@@ -17,13 +17,10 @@ class Segment:
         self._end_pos = self._begin_pos + self._length
         self._wave_speed = wave_speed
         self._max_window_size = ceil(self._length / self._wave_speed) * 1000
-        self.current_leakage = None
-        self.current_detection_end_time = None
-        self.no_detection_time = None
+        self.no_detection_time = 0
 
         logging.debug(f"Segment {begin.id} <--> {end.id} created.")
 
-    # TODO: Calculate wave speed in one position in pipeline segment
     def calc_wave_speed(self) -> float:
         return self._wave_speed
 

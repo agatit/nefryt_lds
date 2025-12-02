@@ -15,7 +15,7 @@ class Trend:
         self.block_size = 100
         logging.debug(f"Trend {self.id} {self.node_id} created")
 
-    def get_trend_data(self, begin: int, end: int, data_per_second: int = 100) -> np.ndarray:
+    def get_trend_data(self, begin: int, end: int, min_wave_value: float, data_per_second: int = 100) -> np.ndarray:
         begin_ts = begin // 1000
         end_ts = end // 1000
         expected_data_length = (end_ts-begin_ts)*data_per_second
@@ -49,6 +49,7 @@ class Trend:
                              * (raw_value - self.lds_trend.RawMin) \
                              / (self.lds_trend.RawMax - self.lds_trend.RawMin) \
                              + self.lds_trend.ScaledMin
+                last_valid = last_valid if abs(last_valid) > min_wave_value else 0
                 if len(data_list) < expected_data_length:
                     data_list.append(last_valid)
                 else:

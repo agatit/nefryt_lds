@@ -19,25 +19,27 @@ if __name__ == '__main__':
     detection_time = 10000
     detection_periods = [
         (datetime(2025, 6, 4, 13, 24, 40),
-         datetime(2025, 6, 4, 13, 25, 10)),
+         datetime(2025, 6, 4, 13, 25, 50)),
         (datetime(2025, 6, 4, 13, 25, 30),
-         datetime(2025, 6, 4, 13, 26, 0)),
+         datetime(2025, 6, 4, 13, 27, 40)),
         (datetime(2025, 6, 4, 13, 26, 50),
-         datetime(2025, 6, 4, 13, 27, 20)),
+         datetime(2025, 6, 4, 13, 27, 0)),
         (datetime(2025, 6, 4, 13, 28, 20),
-         datetime(2025, 6, 4, 13, 28, 50)),
+         datetime(2025, 6, 4, 13, 28, 30)),
     ]
 
     try:
         logging.info('Leak detector started...')
         for detection_period in detection_periods:
             begin_detection_date = detection_period[0]
-            begin_detection_time = int(begin_detection_date.timestamp() * 1000)
+            end_detection_date = detection_period[1]
+            begin_detection_time = int(begin_detection_date.timestamp() * 1000) - plant.get_leakage_alarm_delta()
 
-            logging.debug(f'Leak detector check time period from {detection_period[0]} to {detection_period[1]}')
-            while begin_detection_time < detection_period[1].timestamp() * 1000:
+            logging.debug(f'Leak detector check time period from {begin_detection_date} to {end_detection_date}')
+            while begin_detection_time < detection_period[1].timestamp() * 1000 - plant.get_leakage_alarm_delta():
+                end_detection_time = begin_detection_time + plant.get_leakage_alarm_delta() + detection_time
+                end_detection_time = end_detection_time if end_detection_time <= (end_detection_date.timestamp() * 1000) else (end_detection_date.timestamp() * 1000)
                 for pipeline in plant.pipelines.values():
-                    end_detection_time = begin_detection_time + detection_time
                     logging.debug(f'Detecting leaks from {datetime.fromtimestamp(begin_detection_time / 1000)} '
                                  f'to {datetime.fromtimestamp(end_detection_time / 1000)}.')
 
@@ -47,7 +49,7 @@ if __name__ == '__main__':
                         for event in leak_events:
                             logging.info(f'Leakage detected by method with id = {event.method_id} '
                                          f'in position = {round(pipeline.begin_pos + event.position, 2)}m, date = '
-                                         f'{event.datetime} and level = {round(event.level, 8)}')
+                                         f'{event.datetime}')
 
                 begin_detection_time += detection_time
     except Exception as error:

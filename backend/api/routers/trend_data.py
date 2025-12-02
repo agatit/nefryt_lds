@@ -13,7 +13,6 @@ from db import get_engine
 from ..schemas import api
 from database import lds
 
-# TODO: check direction of data (in writer and in all getter methods)
 router = APIRouter(prefix="/trend", tags=['trend_data'], dependencies=[Depends(get_user_token)])
 
 

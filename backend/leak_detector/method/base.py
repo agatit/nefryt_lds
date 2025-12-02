@@ -50,3 +50,6 @@ class MethodBase:
     @property
     def id(self) -> int:
         return self._id
+
+    def get_leakage_alarm_delta(self) -> int:
+        return 0
