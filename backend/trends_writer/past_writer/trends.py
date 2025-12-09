@@ -10,6 +10,7 @@ from database import lds
 from db import get_engine
 from multiprocessing.queues import Queue
 from trend_manager import TrendManager
+from trends_writer.config import TrendsWriterSettings
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +113,10 @@ class TrendBase:
             data = np.minimum(data, [np.iinfo(np.uint16).max - 1] * len(data))  # FFFF reserved for error
             packed_data = struct.pack('<100H', *data)
 
-            insert_stmt = text(f"EXEC Update_Insert_PastTrendData {self.id}, {timestamp}, :data")
+            if TrendsWriterSettings.use_past_trend_data:
+                insert_stmt = text(f"EXEC Update_Insert_PastTrendData {self.id}, {timestamp}, :data")
+            else:
+                insert_stmt = text(f"EXEC Update_Insert_TrendData {self.id}, {timestamp}, :data")
             with Session(get_engine()) as session:
                 session.execute(insert_stmt, {"data": packed_data})
                 session.commit()

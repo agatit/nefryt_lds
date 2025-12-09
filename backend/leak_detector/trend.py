@@ -15,7 +15,7 @@ class Trend:
         self.block_size = 100
         logging.debug(f"Trend {self.id} {self.node_id} created")
 
-    def get_trend_data(self, begin: int, end: int, min_wave_value: float, data_per_second: int = 100) -> np.ndarray:
+    def get_trend_data(self, begin: int, end: int, min_wave_value: float = 0.0, data_per_second: int = 100) -> np.ndarray:
         begin_ts = begin // 1000
         end_ts = end // 1000
         expected_data_length = (end_ts-begin_ts)*data_per_second

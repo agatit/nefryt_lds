@@ -21,7 +21,7 @@ if __name__ == '__main__':
         (datetime(2025, 6, 4, 13, 24, 40),
          datetime(2025, 6, 4, 13, 25, 50)),
         (datetime(2025, 6, 4, 13, 25, 30),
-         datetime(2025, 6, 4, 13, 27, 40)),
+         datetime(2025, 6, 4, 13, 25, 40)),
         (datetime(2025, 6, 4, 13, 26, 50),
          datetime(2025, 6, 4, 13, 27, 0)),
         (datetime(2025, 6, 4, 13, 28, 20),
@@ -40,7 +40,7 @@ if __name__ == '__main__':
                 end_detection_time = begin_detection_time + plant.get_leakage_alarm_delta() + detection_time
                 end_detection_time = end_detection_time if end_detection_time <= (end_detection_date.timestamp() * 1000) else (end_detection_date.timestamp() * 1000)
                 for pipeline in plant.pipelines.values():
-                    logging.debug(f'Detecting leaks from {datetime.fromtimestamp(begin_detection_time / 1000)} '
+                    logging.info(f'Detecting leaks from {datetime.fromtimestamp(begin_detection_time / 1000)} '
                                  f'to {datetime.fromtimestamp(end_detection_time / 1000)}.')
 
                     leaks = pipeline.find_leaks_in_range(begin_detection_time, end_detection_time)

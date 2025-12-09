@@ -40,6 +40,7 @@ class AppConfig(BaseModel):
     db_uri: str
     modbus_port: int = 502
     log_profiler: bool = False
+    use_past_trend_data: bool = True
     profiler_filename: str = 'profiler.log'
 
 

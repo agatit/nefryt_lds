@@ -12,8 +12,7 @@ class MethodWave(MethodBase):
         super().__init__(pipeline, id_, name)
         self._get_params()
         self._create_segments()
-        self._begin_pos = pipeline.plant.get_distances(pipeline.first_node,
-                                                       self._pipeline.plant.nodes[self._pressure_deriv_trends[0].node_id])[0]
+        self._begin_pos = pipeline.plant.get_distances(pipeline.first_node, self._pipeline.plant.nodes[self._trends[0].node_id])[0]
         self.displayer = DetectorDisplay()
         self._calculate_params()
         self._stored_events = []
@@ -33,9 +32,9 @@ class MethodWave(MethodBase):
             raise
 
         try:
-            self._pressure_deriv_trends : list[Trend] = []
+            self._trends : list[Trend] = []
             for trend_id in self._pressure_deriv_trend_ids:
-                self._pressure_deriv_trends.append(self._pipeline.plant.trends[int(trend_id)])
+                self._trends.append(self._pipeline.plant.trends[int(trend_id)])
         except KeyError as error:
             logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self._id}, '
                               f'trend {error.args[0]} does not exist', exc_info=False)
@@ -45,7 +44,7 @@ class MethodWave(MethodBase):
         self._segments: list[Segment] = []
         self._pipeline_length = self._pipeline.begin_pos
         previous_trend = None
-        for current_trend in self._pressure_deriv_trends:
+        for current_trend in self._trends:
             if previous_trend is not None:
                 segment = Segment(self._pipeline, previous_trend, current_trend,
                                      self._pipeline_length, self._wave_speed)
@@ -54,8 +53,8 @@ class MethodWave(MethodBase):
             previous_trend = current_trend
 
     def _calculate_params(self):
-        self._position_delta = int(((self._wave_speed * (self._pipeline.time_resolution / 1000)) * 1.5)
-                                   // self.pipeline.length_resolution + 1)
+        self._backtrace_position_delta = int(((self._wave_speed * (self._pipeline.time_resolution / 1000)) * 1.5)
+                                             // self.pipeline.length_resolution + 1)
         max_segment_length = max([segment.length for segment in self._segments])
         self._leakage_alarm_delta = int(max_segment_length // self._wave_speed + 1) * 1000
         self._pipeline_flow_time = int((2*(self._pipeline_length / self._wave_speed)+1) * 1000)
@@ -91,8 +90,8 @@ class MethodWave(MethodBase):
 
                     while alarm_start_time+current_time > leakage_start_time:
                         current_time -= 1
-                        position_min = max(0, current_position - self._position_delta)
-                        position_max = min(probability.shape[1], current_position + self._position_delta + 1)
+                        position_min = max(0, current_position - self._backtrace_position_delta)
+                        position_max = min(probability.shape[1], current_position + self._backtrace_position_delta + 1)
                         window = probability[alarm_start_time+current_time, position_min:position_max]
 
                         if np.all(window <= self._leakage_level):
@@ -107,7 +106,7 @@ class MethodWave(MethodBase):
     def find_leaks_in_range(self, begin: int, end: int) -> list[Event]:
         events = []
         traces_by_segment = []
-        self.displayer.reset()
+        self.displayer = DetectorDisplay()
         for segment in self._segments:
             alarm_start_time = self._pipeline.plant.get_leakage_alarm_delta() // self._pipeline.time_resolution
             leakage_start_time = 0
@@ -143,7 +142,7 @@ class MethodWave(MethodBase):
 
         events, traces_by_segment = self.choose_events(events, traces_by_segment, begin)
         for segment_number in range(len(self._segments)):
-            self.displayer.display(segment_number, True, traces_by_segment[segment_number])
+            self.displayer.display(segment_number, True, 0.15, traces_by_segment[segment_number])
         return events
 
     def choose_events(self, events: list, traces_by_segment: list, begin: int):
@@ -166,8 +165,8 @@ class MethodWave(MethodBase):
 
 class MethodWaveSigned(MethodWave):
     def get_probability(self, segment: Segment, begin: int, end: int) -> np.ndarray:
-        window_begin = begin - segment.max_window_size
-        window_end = end + segment.max_window_size
+        window_begin = begin - segment.max_window_size[0]
+        window_end = end + segment.max_window_size[1]
 
         data_start = segment.start.get_trend_data(window_begin, window_end, self._min_wave_value)
         data_end = segment.end.get_trend_data(window_begin, window_end, self._min_wave_value)
@@ -222,6 +221,6 @@ class MethodWaveSigned(MethodWave):
         probability = np.sqrt(np.maximum(probability, 0))
         probability = np.minimum(probability, 1)
         self.displayer.set_params(data_start, data_end, [dp1_indexes, dp2_indexes, dp3_indexes, dp4_indexes],
-                                  self, segment, begin, end, probability)
+                                  self, segment, begin, end, probability, None)
 
         return probability

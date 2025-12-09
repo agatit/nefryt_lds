@@ -5,7 +5,7 @@ from leak_detector.trend import Trend
 
 
 class Segment:
-    def __init__(self, pipeline: Pipeline, begin: Trend, end: Trend, begin_pos: int, wave_speed: float):
+    def __init__(self, pipeline: Pipeline, begin: Trend, end: Trend, begin_pos: int, wave_speed: float, calc_window: tuple = (True, True)):
         distances = pipeline.plant.get_distances(pipeline.plant.nodes[begin.node_id], pipeline.plant.nodes[end.node_id])
         if len(distances) != 1:
             logging.exception(f"There isn't exactly one path between {begin.id} and {end.id}.")
@@ -16,8 +16,10 @@ class Segment:
         self._begin_pos = begin_pos
         self._end_pos = self._begin_pos + self._length
         self._wave_speed = wave_speed
-        self._max_window_size = ceil(self._length / self._wave_speed) * 1000
+        self._max_window_size_begin = ceil(self._length / self._wave_speed) * 1000 if calc_window[0] else 0
+        self._max_window_size_end = ceil(self._length / self._wave_speed) * 1000 if calc_window[1] else 0
         self.no_detection_time = 0
+        self.flow_time = (self._length / self._wave_speed) * 1000
 
         logging.debug(f"Segment {begin.id} <--> {end.id} created.")
 
@@ -25,8 +27,8 @@ class Segment:
         return self._wave_speed
 
     @property
-    def max_window_size(self) -> int:
-        return self._max_window_size
+    def max_window_size(self) -> tuple[int, int]:
+        return self._max_window_size_begin, self._max_window_size_end
 
     @property
     def begin_pos(self) -> int:

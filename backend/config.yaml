@@ -4,6 +4,7 @@ trends_writer:
   modbus_port: 502
   log_profiler: False
   profiler_filename: profiler.log
+  use_past_trend_data: False
   logging:
     version: 1
 

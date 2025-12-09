@@ -17,7 +17,8 @@ METHOD_CLASSES = {
     'WAVE': 'MethodWaveSigned',
     'BALANCE': 'MethodBalance',
     'MASK': 'MethodMask',
-    'COMBINE': 'MethodCombine'
+    'COMBINE': 'MethodCombine',
+    'TOF': 'MethodTOF'
 }
 
 class Node:
