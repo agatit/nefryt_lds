@@ -11,7 +11,6 @@ class MethodWave(MethodBase):
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
         super().__init__(pipeline, id_, name)
         self._get_params()
-        self._create_segments()
         self._begin_pos = pipeline.plant.get_distances(pipeline.first_node, self._pipeline.plant.nodes[self._trends[0].node_id])[0]
         self.displayer = DetectorDisplay()
         self._calculate_params()
@@ -39,6 +38,8 @@ class MethodWave(MethodBase):
             logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self._id}, '
                               f'trend {error.args[0]} does not exist', exc_info=False)
             raise
+
+        self._create_segments()
 
     def _create_segments(self) -> None:
         self._segments: list[Segment] = []
@@ -142,7 +143,7 @@ class MethodWave(MethodBase):
 
         events, traces_by_segment = self.choose_events(events, traces_by_segment, begin)
         for segment_number in range(len(self._segments)):
-            self.displayer.display(segment_number, True, 0.15, traces_by_segment[segment_number])
+            self.displayer.display(segment_number, 0.15, traces_by_segment[segment_number])
         return events
 
     def choose_events(self, events: list, traces_by_segment: list, begin: int):

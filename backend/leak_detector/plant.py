@@ -5,6 +5,7 @@ import copy
 from typing import TYPE_CHECKING
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from config import Settings
 from db import get_engine
 from .trend import Trend
 from .event import Event
@@ -92,7 +93,7 @@ class Pipeline:
         self.time_resolution = int(self._params.get('TIME_RESOLUTION', 10))
 
     def _get_methods(self) -> None:
-        for method_id in self._params.get('ACTIVE_METHODS', '').split(','):
+        for method_id in self._params.get('ACTIVE_METHODS', '').split(',') if not Settings.optimizer_method_id else [Settings.optimizer_method_id]:
             self._active_methods[int(method_id)] = self._methods[int(method_id)]
 
         self.method_events = self._params.get('METHOD_EVENTS', '').split(',')
@@ -171,7 +172,8 @@ class Plant:
         with Session(get_engine()) as session:
             pipelines = session.scalars(statement).all()
         for pipeline in pipelines:
-            self._pipelines[int(pipeline.ID)] = Pipeline(self, pipeline.ID, pipeline.Name)
+            if not Settings.optimizer_pipeline_id or pipeline.ID == Settings.optimizer_pipeline_id:
+                self._pipelines[int(pipeline.ID)] = Pipeline(self, pipeline.ID, pipeline.Name)
 
     def get_distances(self, node1: Node, node2: Node, visited=None) -> list[float]:
         if visited is None:

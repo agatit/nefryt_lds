@@ -25,11 +25,11 @@ class Trend:
         last_valid = 0
         data_list = []
 
-        statement = select(lds.PastTrendData) \
-            .where(and_(lds.PastTrendData.Time >= begin_ts,
-                        lds.PastTrendData.Time <= end_ts,
-                        lds.PastTrendData.TrendID == self.id)) \
-            .order_by(lds.PastTrendData.Time)
+        statement = select(lds.TrendData) \
+            .where(and_(lds.TrendData.Time >= begin_ts,
+                        lds.TrendData.Time <= end_ts,
+                        lds.TrendData.TrendID == self.id)) \
+            .order_by(lds.TrendData.Time)
         with Session(get_engine()) as session:
             db_data_list = session.scalars(statement).all()
 

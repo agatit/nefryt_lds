@@ -34,6 +34,12 @@ class MethodBase:
         for mp in method_params:
             self._params[mp.MethodParamDefID.strip()] = mp.Value
 
+    def _get_params(self):
+        pass
+
+    def _calculate_params(self):
+        pass
+
     def get_probability(self, segment: Segment, begin: int, end: int) -> list[list[float]]:
         pass
 
@@ -53,3 +59,8 @@ class MethodBase:
 
     def get_leakage_alarm_delta(self) -> int:
         return 0
+
+    def update_params(self, new_method_params: dict):
+        self._params.update(new_method_params)
+        self._get_params()
+        self._calculate_params()

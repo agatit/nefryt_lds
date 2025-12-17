@@ -7,10 +7,31 @@ from .plant import Plant
 from datetime import datetime
 
 # Leaks during tested time periods:
-# - 13:24:45-13:24:49 = XV17 (between PT-03 and PT-04 = trends 103 and 104) = 0,4m
-# - 13:25:33-13:25:34 = XV13 (between PT-01 and PT-02 = trends 101 and 102) = 1205,5m
-# - 13:26:55-13:26:59 = XV15 (between PT-02 and PT-03 = trends 102 and 103) = 594,1m
-# - 13:28:26-13:28:30 = XV17 (between PT-03 and PT-04 = trends 103 and 104) = 0,4m
+#  - 13:31:00-13:31:03 = XV13 (between PT-01 and PT-02 = trends 101 and 102) = 1205.5m
+#  - 13:32:19-13:32:22 = XV16 (between PT-03 and PT-04 = trends 103 and 104) = 183.6m
+#  - 13:32:54-13:32:58 = XV12 (between PT-01 and PT-02 = trends 101 and 102) = 1424.7m
+#  - 13:33:56-13:34:00 = XV13 (between PT-01 and PT-02 = trends 101 and 102) = 1205.5m
+#  - 13:34:35-13:34:36 = XV14 (between PT-02 and PT-03 = trends 102 and 103) = 801.7m
+#  - 13:37:12-13:37:15 = XV15 (between PT-02 and PT-03 = trends 102 and 103) = 594.1m
+#  - 13:37:48-13:37:53 = XV15 (between PT-02 and PT-03 = trends 102 and 103) = 594.1m
+#  - 13:39:23-13:39:25 = XV17 (between PT-03 and PT-04 = trends 103 and 104) = 0.4m
+#  - 13:40:15-13:40:18 = XV14 (between PT-02 and PT-03 = trends 102 and 103) = 801.7m
+#  - 13:41:19-13:41:24 = XV17 (between PT-03 and PT-04 = trends 103 and 104) = 0.4m
+#  - 13:43:55-13:43:59 = XV14 (between PT-02 and PT-03 = trends 102 and 103) = 801.7m
+#  - 13:45:15-13:45:20 = XV12 (between PT-01 and PT-02 = trends 101 and 102) = 1424.7m
+#  - 13:46:24-13:46:29 = XV12 (between PT-01 and PT-02 = trends 101 and 102) = 1424.7m
+#  - 13:47:55-13:47:59 = XV12 (between PT-01 and PT-02 = trends 101 and 102) = 1424.7m
+#  - 13:49:10-13:49:11 = XV14 (between PT-02 and PT-03 = trends 102 and 103) = 801.7m
+#  - 13:51:03-13:51:05 = XV14 (between PT-02 and PT-03 = trends 102 and 103) = 801.7m
+#  - 13:52:33-13:52:34 = XV14 (between PT-02 and PT-03 = trends 102 and 103) = 801.7m
+#  - 13:53:55-13:53:58 = XV13 (between PT-01 and PT-02 = trends 101 and 102) = 1205.5m
+#  - 13:54:45-13:54:51 = XV12 (between PT-01 and PT-02 = trends 101 and 102) = 1424.7m
+#  - 13:55:34-13:55:36 = XV15 (between PT-02 and PT-03 = trends 102 and 103) = 594.1m
+#  - 13:58:27-13:58:30 = XV13 (between PT-01 and PT-02 = trends 101 and 102) = 1205.5m
+#  - 13:59:17-13:59:19 = XV12 (between PT-01 and PT-02 = trends 101 and 102) = 1424.7m
+#  - 14:00:02-14:00:06 = XV13 (between PT-01 and PT-02 = trends 101 and 102) = 1205.5m
+#  - 14:00:52-14:00:53 = XV16 (between PT-03 and PT-04 = trends 103 and 104) = 183.6m
+#  - 14:01:45-14:01:46 = XV17 (between PT-03 and PT-04 = trends 103 and 104) = 0.4m
 
 
 if __name__ == '__main__':
@@ -18,14 +39,12 @@ if __name__ == '__main__':
     plant = Plant()
     detection_time = 10000
     detection_periods = [
-        (datetime(2025, 6, 4, 13, 24, 40),
-         datetime(2025, 6, 4, 13, 25, 50)),
-        (datetime(2025, 6, 4, 13, 25, 30),
-         datetime(2025, 6, 4, 13, 25, 40)),
-        (datetime(2025, 6, 4, 13, 26, 50),
-         datetime(2025, 6, 4, 13, 27, 0)),
-        (datetime(2025, 6, 4, 13, 28, 20),
-         datetime(2025, 6, 4, 13, 28, 30)),
+        (datetime(2025, 6, 4, 13, 30, 52),
+         datetime(2025, 6, 4, 13, 31, 2)),
+        (datetime(2025, 6, 4, 13, 39, 20),
+         datetime(2025, 6, 4, 13, 39, 30)),
+        # (datetime(2025, 6, 4, 13, 30, 52),
+        #  datetime(2025, 6, 4, 14, 0, 0)),
     ]
 
     try:

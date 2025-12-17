@@ -9,9 +9,21 @@ from db import set_new_engine
 path = pathlib.Path(__file__).parent.resolve()
 
 
+def setup_logging():
+    logging.basicConfig(stream=sys.stdout, level=Settings.verbosity, force=True)
+
+
+def setup_engine(db_uri: str | None = None):
+    db_url = db_uri if db_uri else Settings.db_uri
+    set_new_engine(create_engine(url=db_url, echo=False))
+
+# TODO: config for leak detector module
 class AppConfig(BaseModel):
     db_uri: str
     verbosity: str = 'INFO'
+    leak_detector_plot: bool = True
+    optimizer_method_id: int | None = None
+    optimizer_pipeline_id: int | None = None
     tests: bool = False
     trends_writer: dict
     simulator: dict
@@ -19,9 +31,4 @@ class AppConfig(BaseModel):
 
 app_config = load_yaml(path, "config.yaml")
 Settings = AppConfig(**app_config)
-logging.basicConfig(stream=sys.stdout, level=Settings.verbosity, force=True)
-
-
-def setup_engine(db_uri: str | None = None):
-    db_url = db_uri if db_uri else Settings.db_uri
-    set_new_engine(create_engine(url=db_url, echo=False))
+setup_logging()

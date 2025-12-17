@@ -5,6 +5,7 @@ import matplotlib.backend_bases
 import seaborn as sns
 import numpy as np
 from matplotlib import pyplot as plt, patheffects
+from config import Settings
 from leak_detector.method import MethodBase
 from leak_detector.segment import Segment
 
@@ -38,7 +39,7 @@ class DetectorDisplay:
         self.past_data_starts.append(past_data_start)
         self.past_data_ends.append(past_data_end)
 
-    def display(self, segment_number: int, plot: bool, vmax: float, traces: list | None = None) -> None:
+    def display(self, segment_number: int, vmax: float, traces: list | None = None) -> None:
         step_xtick_ms = 1000
         step_ytick_m = 50
 
@@ -64,9 +65,9 @@ class DetectorDisplay:
         logging.info(f'Method ID={method.id}: '
                      f'Segment [{segment.start.id}-{segment.end.id}]: '
                      f'Max({float(yticks_labels[max_y])}, '
-                     f'{xticks_labels[segment.max_window_size[0] // 10 + int(max_x)]}.{((int(max_y)) % 100) * 10:03d}) '
+                     f'{xticks_labels[segment.max_window_size[0] // 10 + int(max_x)]}.{((int(max_x)) % 100) * 10:03d}) '
                      f'= {probability[max_x, max_y]}')
-        if plot:
+        if Settings.leak_detector_plot:
             fig, ax = plt.subplots(figsize=(16, 8), constrained_layout=True)
             ax.set_frame_on(False)
             ax.set_xticks([])
