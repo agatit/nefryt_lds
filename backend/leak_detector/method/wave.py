@@ -1,6 +1,5 @@
 import logging
 import numpy as np
-from scipy.interpolate import interp1d
 from .base import MethodBase, Segment
 from ..detector_display import DetectorDisplay
 from ..event import Event
@@ -26,6 +25,7 @@ class MethodWave(MethodBase):
             self._normal_range = float(self._params['NORMAL_RANGE'])
             self._no_detection_window = float(self._params['NO_DETECTION_WINDOW_SECONDS']) * 1000
             self._min_wave_value = float(self._params['MIN_WAVE_VALUE'])
+            self._read_past_data = bool(self._params.get('READ_PAST_DATA', '1'))
         except KeyError as error:
             logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
             raise
@@ -169,34 +169,16 @@ class MethodWaveSigned(MethodWave):
         window_begin = begin - segment.max_window_size[0]
         window_end = end + segment.max_window_size[1]
 
+        # To remove multiple detections of the same wave & find where leakages overlap:
+        # - find previous high / low peak in around ~2*pipeline.flow_time
+        # - check whether shape of the peak is identical as current peak
+        # - if yes: discard, if not: detect
         data_start = segment.start.get_trend_data(window_begin, window_end, self._min_wave_value)
         data_end = segment.end.get_trend_data(window_begin, window_end, self._min_wave_value)
 
         time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
         position = np.arange(0, segment.length, self._pipeline.length_resolution)
         positions, times = np.meshgrid(position, time)
-
-        # past_delay = 2 * int(1000*self._pipeline_length / self._wave_speed)
-        # past_window_begin = window_begin - past_delay
-        # past_window_end = window_end - past_delay
-        #
-        # past_data_start = segment.start.get_trend_data(past_window_begin, past_window_end, 10)
-        # past_data_end = segment.end.get_trend_data(past_window_begin, past_window_end, 10)
-        # interp_func_start = interp1d(np.arange(0, len(data_start)+1, 10), past_data_start,
-        #                              kind='linear', bounds_error=False, fill_value=0)
-        # interp_func_end = interp1d(np.arange(0, len(data_end)+1, 10), past_data_end,
-        #                            kind='linear', bounds_error=False, fill_value=0)
-        #
-        # past_data_start = interp_func_start(np.arange(len(data_start)))
-        # past_data_end = interp_func_end(np.arange(len(data_end)))
-        # past_data_wave_fading = np.exp(self._wave_coeff * self._pipeline_length)
-        # data_start_subtracted = data_start - past_data_start / past_data_wave_fading
-        # data_end_subtracted = data_end - past_data_end / past_data_wave_fading
-
-        # dp1 = np.array(data_start_subtracted)[dp1_indexes] / (self._normal_range * wave_fading_left)
-        # dp2 = np.array(data_end_subtracted)[dp2_indexes] / (self._normal_range * wave_fading_right)
-        # dp3 = np.array(data_start_subtracted)[dp3_indexes] / (self._normal_range * wave_fading_left)
-        # dp4 = np.array(data_end_subtracted)[dp4_indexes] / (self._normal_range * wave_fading_right)
 
         offset_left_dist = position
         offset_right_dist = segment.length - position
@@ -222,6 +204,6 @@ class MethodWaveSigned(MethodWave):
         probability = np.sqrt(np.maximum(probability, 0))
         probability = np.minimum(probability, 1)
         self.displayer.set_params(data_start, data_end, [dp1_indexes, dp2_indexes, dp3_indexes, dp4_indexes],
-                                  self, segment, begin, end, probability, None)
+                                  self, segment, begin, end, probability, None, None, None)
 
         return probability

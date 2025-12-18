@@ -143,7 +143,8 @@ params_spaces = {
     1001: {
         'BASE_WAVE_SPEED': np.arange(400, 451, 25),
         'DROP_LEVEL': np.arange(25, 201, 50),
-        'NO_DETECTION_WINDOW_SECONDS': np.arange(10, 50, 13)
+        'NO_DETECTION_WINDOW_SECONDS': np.arange(10, 50, 13),
+        'READ_PAST_DATA': [0, 1]
     },
     20: {
         'BASE_WAVE_SPEED': np.arange(400, 451, 50),

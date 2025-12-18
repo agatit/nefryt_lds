@@ -25,6 +25,7 @@ class MethodTOF(MethodBase):
             self._wave_speed_sigma = float(self._params['WAVE_SPEED_RANGE'])
             self._time_sigma = float(self._params['TIME_RANGE'])
             self._no_detection_window = float(self._params['NO_DETECTION_WINDOW_SECONDS']) * 1000
+            self._read_past_data = bool(self._params.get('READ_PAST_DATA', '1'))
         except KeyError as error:
             logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
             raise
@@ -62,7 +63,8 @@ class MethodTOF(MethodBase):
                 self._pipeline_length += segment.length
                 self._segments.append(segment)
             previous_trend = current_trend
-        self._pipeline_flow_time = int((2 * (self._pipeline_length / self._wave_speed) + 1) * 1000)
+        self._max_pipeline_flow_time = int(2 * (self._pipeline_length / (self._wave_speed-self._wave_speed_sigma)) * 1000)
+        self._pipeline_flow_time = int(2 * (self._pipeline_length / self._wave_speed) * 1000)
 
     def simulate_probability(self, positions, peaks, segment: Segment):
         probability = np.zeros_like(positions)
@@ -99,8 +101,24 @@ class MethodTOF(MethodBase):
         window_begin = begin - segment.max_window_size[0]
         window_end = end + segment.max_window_size[1]
 
-        data_start = segment.start.get_trend_data(window_begin, window_end)
-        data_end = segment.end.get_trend_data(window_begin, window_end)
+        raw_data_start = segment.start.get_trend_data(window_begin, window_end)
+        raw_data_end = segment.end.get_trend_data(window_begin, window_end)
+
+        if self._read_past_data:
+            past_window_begin = window_begin - self._pipeline_flow_time
+            past_window_end = window_end - self._pipeline_flow_time
+            past_data_start = segment.start.get_trend_data(past_window_begin, past_window_end)
+            past_data_end = segment.end.get_trend_data(past_window_begin, past_window_end)
+            past_data_start[past_data_start > 0] = 0
+            past_data_end[past_data_end > 0] = 0
+
+            data_start = raw_data_start - past_data_start
+            data_end = raw_data_end - past_data_end
+        else:
+            data_start = raw_data_start
+            data_end = raw_data_end
+            past_data_start = None
+            past_data_end = None
 
         data_start_wave_idxs = np.nonzero(-data_start >= self._drop_level)[0]
         data_start_wave_idxs = np.insert(data_start_wave_idxs, 0, -1, axis=0)
@@ -121,6 +139,8 @@ class MethodTOF(MethodBase):
             diff_dist_from_edge = (diff_t_from_edge / 1000) * self._wave_speed
             leakage_position = segment.length - diff_dist_from_edge if peak_start > peak_end else diff_dist_from_edge
             leakage_time = (peak_start * self._pipeline.time_resolution) - segment.flow_time * (leakage_position / segment.length)
+            if leakage_time > end-begin:
+                continue
             leakage_position_idx = int(leakage_position / self._pipeline.length_resolution)
             leakage_time_idx = int(leakage_time / self._pipeline.time_resolution)
             filtered_peaks.append((peak_start, peak_end, diff_dist_from_edge))
@@ -133,7 +153,8 @@ class MethodTOF(MethodBase):
         probability = self.simulate_probability(positions, filtered_peaks, segment)
         self.displayer.set_params(data_start, data_end, None, self, segment, begin, end, probability,
                                   [self._wave_speed, segment.length,
-                                   self.pipeline.length_resolution, self.pipeline.time_resolution])
+                                   self.pipeline.length_resolution, self.pipeline.time_resolution],
+                                  past_data_start, past_data_end)
         return np.array(leakages)
 
     def find_leaks_in_range(self, begin: int, end: int) -> list[Event]:
@@ -163,9 +184,9 @@ class MethodTOF(MethodBase):
 
     def choose_events(self, events: list,  begin: int):
         for event in sorted(events, key=lambda ev: ev.time):
-            if len(self._stored_events) == 0 or event.time - self._stored_events[-1].time > self._pipeline_flow_time:
+            if len(self._stored_events) == 0 or event.time - self._stored_events[-1].time > self._max_pipeline_flow_time:
                 self._stored_events.append(event)
-        self._stored_events = [event for event in self._stored_events if begin - event.time < self._pipeline_flow_time]
+        self._stored_events = [event for event in self._stored_events if begin - event.time < self._max_pipeline_flow_time]
         return [event for event in self._stored_events if event.time >= begin]
 
     def find_leaks_to(self, end: int) -> list[Event]:

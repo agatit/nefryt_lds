@@ -37,18 +37,21 @@ from datetime import datetime
 if __name__ == '__main__':
     setup_engine()
     plant = Plant()
-    detection_time = 10000
+    detection_time = 30000
     detection_periods = [
-        (datetime(2025, 6, 4, 13, 30, 52),
-         datetime(2025, 6, 4, 13, 31, 2)),
-        (datetime(2025, 6, 4, 13, 39, 20),
-         datetime(2025, 6, 4, 13, 39, 30)),
         # (datetime(2025, 6, 4, 13, 30, 52),
-        #  datetime(2025, 6, 4, 14, 0, 0)),
+        #  datetime(2025, 6, 4, 13, 31, 2)),
+        # (datetime(2025, 6, 4, 13, 39, 20),
+        #  datetime(2025, 6, 4, 13, 39, 30)),
+        # (datetime(2025, 6, 4, 14, 0, 42),
+        #  datetime(2025, 6, 4, 14, 1, 12)),
+        (datetime(2025, 6, 4, 13, 30, 52),
+         datetime(2025, 6, 4, 14, 2, 0)),
     ]
 
     try:
         logging.info('Leak detector started...')
+        all_events = []
         for detection_period in detection_periods:
             begin_detection_date = detection_period[0]
             end_detection_date = detection_period[1]
@@ -66,10 +69,13 @@ if __name__ == '__main__':
                     for method, leak_events in leaks.items():
                         leak_events = sorted(leak_events, key=lambda leak_event: leak_event.datetime)
                         for event in leak_events:
+                            all_events.append(event)
                             logging.info(f'Leakage detected by method with id = {event.method_id} '
                                          f'in position = {round(pipeline.begin_pos + event.position, 2)}m, date = '
                                          f'{event.datetime}')
 
                 begin_detection_time += detection_time
+        for event in all_events:
+            print(f'position = {round(event.position, 2)}m, date = {event.datetime}')
     except Exception as error:
         logging.error(error, exc_info=True)

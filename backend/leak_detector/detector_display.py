@@ -83,6 +83,7 @@ class DetectorDisplay:
             ax2.set_xmargin(0)
             ax_cbar = fig.add_axes((0.5 + heatmap_width / 2 + 0.05, 0.06, 0.02, 0.6))
 
+            ax1.plot([0, (sum(segment.max_window_size) + end - begin) // 10], [0, 0], '--', color='black', linewidth=0.5)
             ax1.plot(np.arange(0, (sum(segment.max_window_size) + end - begin) // 10),
                      data_start, label=f'Start PT (TrendID={segment.start.id}) data')
             ax1.plot(np.arange(0, (sum(segment.max_window_size) + end - begin) // 10),
