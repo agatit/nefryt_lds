@@ -5,6 +5,8 @@ from ..detector_display import DetectorDisplay
 from ..event import Event
 from ..plant import Pipeline, Trend
 
+logger = logging.getLogger(__name__)
+
 
 class MethodWave(MethodBase):
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
@@ -27,21 +29,19 @@ class MethodWave(MethodBase):
             self._min_wave_value = float(self._params['MIN_WAVE_VALUE'])
             self._read_past_data = bool(self._params.get('READ_PAST_DATA', '1'))
         except KeyError as error:
-            logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
-            raise
+            raise ValueError(f'{self.__class__.__name__} ({self.id}): No {error.args[0]} param')
 
         try:
             self._trends : list[Trend] = []
             for trend_id in self._pressure_deriv_trend_ids:
                 self._trends.append(self._pipeline.plant.trends[int(trend_id)])
         except KeyError as error:
-            logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self._id}, '
-                              f'trend {error.args[0]} does not exist', exc_info=False)
-            raise
-
+            raise ValueError(f'{self.__class__.__name__} ({self.id}): Wrong PRESSURE_DERIV_TRENDS value, '
+                             f'trend {error.args[0]} does not exist')
         self._create_segments()
 
     def _create_segments(self) -> None:
+        logger.debug(f'{self.__class__.__name__} ({self.id}): Started creating segments')
         self._segments: list[Segment] = []
         self._pipeline_length = self._pipeline.begin_pos
         previous_trend = None
@@ -52,16 +52,21 @@ class MethodWave(MethodBase):
                 self._pipeline_length += segment.length
                 self._segments.append(segment)
             previous_trend = current_trend
+        logger.debug(f'{self.__class__.__name__} ({self.id}): Finished creating segments')
 
     def _calculate_params(self):
         self._backtrace_position_delta = int(((self._wave_speed * (self._pipeline.time_resolution / 1000)) * 1.5)
                                              // self.pipeline.length_resolution + 1)
         max_segment_length = max([segment.length for segment in self._segments])
         self._leakage_alarm_delta = int(max_segment_length // self._wave_speed + 1) * 1000
+        self._max_trend_time_delta = max(self._trends, key=lambda trend: trend.lds_trend.TimeDelta).lds_trend.TimeDelta
         self._pipeline_flow_time = int((2*(self._pipeline_length / self._wave_speed)+1) * 1000)
 
     def get_leakage_alarm_delta(self) -> int:
         return self._leakage_alarm_delta
+
+    def get_max_trend_time_delta(self) -> int:
+        return self._max_trend_time_delta
 
     def get_probability(self, segment: Segment, begin: int, end: int) -> np.ndarray:
         pass
@@ -105,11 +110,12 @@ class MethodWave(MethodBase):
         return None
 
     def find_leaks_in_range(self, begin: int, end: int) -> list[Event]:
+        begin += (self.pipeline.plant.max_leakage_alarm_delta - self._leakage_alarm_delta)
         events = []
         traces_by_segment = []
         self.displayer = DetectorDisplay()
         for segment in self._segments:
-            alarm_start_time = self._pipeline.plant.get_leakage_alarm_delta() // self._pipeline.time_resolution
+            alarm_start_time = (self.pipeline.plant.max_leakage_alarm_delta - self._leakage_alarm_delta) // self._pipeline.time_resolution
             leakage_start_time = 0
             traces = []
             if segment.no_detection_time - begin > alarm_start_time:
@@ -124,11 +130,10 @@ class MethodWave(MethodBase):
                     leakage_time = trace[-1][0] * self._pipeline.time_resolution
                     leakage_position = trace[-1][1]
                     events.append(Event(self._id, begin + leakage_time,
-                                        segment.begin_pos - self._pipeline.begin_pos + leakage_position * self._pipeline.length_resolution))
+                                        segment.begin_pos + leakage_position * self._pipeline.length_resolution))
                     alarm_probability = np.where(probability > self._alarm_level, 1, 0)
                     alarm_possibilities_per_time = np.sum(alarm_probability, axis=1)[alarm_time:]
                     no_alarm_times = np.where(alarm_possibilities_per_time == 0)[0]
-                    segment.no_detection_time = begin + alarm_time * self._pipeline.time_resolution + self._no_detection_window
                     if len(no_alarm_times) == 0:
                         break
                     no_detection_time = no_alarm_times[0] \
@@ -143,7 +148,10 @@ class MethodWave(MethodBase):
 
         events, traces_by_segment = self.choose_events(events, traces_by_segment, begin)
         for segment_number in range(len(self._segments)):
-            self.displayer.display(segment_number, 0.15, traces_by_segment[segment_number])
+            self.displayer.display(segment_number, 0.4, traces_by_segment[segment_number])
+        if len(events) > 0:
+            for segment in self._segments:
+                segment.no_detection_time = events[-1].time + self._no_detection_window
         return events
 
     def choose_events(self, events: list, traces_by_segment: list, begin: int):

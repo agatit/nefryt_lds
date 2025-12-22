@@ -5,8 +5,8 @@ import copy
 from typing import TYPE_CHECKING
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from config import Settings
 from db import get_engine
+from .config import LeakDetectorSettings
 from .trend import Trend
 from .event import Event
 from database import lds
@@ -16,11 +16,10 @@ if TYPE_CHECKING:
 
 METHOD_CLASSES = {
     'WAVE': 'MethodWaveSigned',
-    'BALANCE': 'MethodBalance',
-    'MASK': 'MethodMask',
-    'COMBINE': 'MethodCombine',
     'TOF': 'MethodTOF'
 }
+
+logger = logging.getLogger(__name__)
 
 class Node:
     def __init__(self, id_: int, type_: str, name: str):
@@ -28,7 +27,7 @@ class Node:
         self.type = type_
         self.name = name
 
-        logging.debug(f"Node {self.id}: {self.type} {self.name} created.")
+        logger.debug(f"Node: Created with id = {self.id}")
 
 
 class Link:
@@ -38,7 +37,7 @@ class Link:
         self.end_node = end_node
         self.length = length
 
-        logging.debug(f"Link {self.id}: {self.begin_node.id} {self.end_node.id} {self.length} created.")
+        logger.debug(f"Link: Created with id = {self.id}")
 
 
 class Pipeline:
@@ -57,9 +56,10 @@ class Pipeline:
         self._build()
         self._get_methods()
 
-        logging.debug(f"Pipeline {self.id}: {self.name} created.")
+        logger.debug(f"Pipeline: Created with id = {self.id}")
 
-    def _build(self) -> None:        
+    def _build(self) -> None:
+        logger.debug(f"Pipeline: Started building pipeline with id = {self.id}")
         stmt = (select(lds.PipelineNode)
                 .where(lds.PipelineNode.PipelineID == self.id)) # noqa
         with Session(get_engine()) as session:
@@ -76,6 +76,7 @@ class Pipeline:
         for method in methods:
             method_class = getattr(importlib.import_module("leak_detector.method"), METHOD_CLASSES[method.MethodDefID.strip()])
             self._methods[method.ID] = method_class(self, method.ID, method.Name)
+        logger.debug(f"Pipeline: Finished building pipeline with id = {self.id}")
 
     def _read_params(self) -> None:
         statement = (select(lds.PipelineParam)
@@ -87,31 +88,27 @@ class Pipeline:
         for param in params:
             self._params[param.PipelineParamDefID.strip()] = param.Value
         self.begin_pos = float(self._params.get('BEGIN_POS', 0))
+        logger.info(f"Pipeline with id = {self.id} initialized (params={self._params})")
 
     def _get_params(self) -> None:
         self.length_resolution = int(self._params.get('LENGTH_RESOLUTION', 10))
         self.time_resolution = int(self._params.get('TIME_RESOLUTION', 10))
 
     def _get_methods(self) -> None:
-        for method_id in self._params.get('ACTIVE_METHODS', '').split(',') if not Settings.optimizer_method_id else [Settings.optimizer_method_id]:
+        for method_id in self._params.get('ACTIVE_METHODS', '').split(',') if not LeakDetectorSettings.optimizer_method_id else [LeakDetectorSettings.optimizer_method_id]:
             self._active_methods[int(method_id)] = self._methods[int(method_id)]
 
         self.method_events = self._params.get('METHOD_EVENTS', '').split(',')
+        self._max_trend_time_delta = max(([method.get_max_trend_time_delta() for method in self._active_methods.values()]))
+        self._max_leakage_alarm_delta = max([method.get_leakage_alarm_delta() for method in self._active_methods.values()])
 
     def find_leaks_in_range(self, begin: int, end: int) -> dict[int, list[Event]]:
+        logger.debug(f'Pipeline with id = {self.id} detect leaks in range {begin}-{end}')
         events = {}
         for method_id, method in self._active_methods.items():
             events[method_id] = method.find_leaks_in_range(begin, end)
 
         return events
-
-    # TODO: find_leaks_to().
-    def find_leaks_to(self, to: int) -> list[Event]:
-        """ Wersja stanowa, wykrywająca wycieki na podstawie danych zebranych wcześniej
-            składa zapamiętane prawdopodobieństwa z nowymi obliczonymi metodą find_leaks_in_range()
-            nie zwraca alarmów, które już zwróciła wcześniej
-        """
-        pass
 
     @property
     def plant(self) -> Plant:
@@ -133,8 +130,13 @@ class Pipeline:
     def first_node(self) -> Node:
         return self._first_node
 
-    def get_leakage_alarm_delta(self) -> int:
-        return max([method.get_leakage_alarm_delta() for method in self._active_methods.values()])
+    @property
+    def max_leakage_alarm_delta(self) -> int:
+        return self._max_leakage_alarm_delta
+
+    @property
+    def max_trend_time_delta(self) -> int:
+        return self._max_trend_time_delta
 
 
 class Plant:
@@ -146,9 +148,10 @@ class Plant:
         self._build_mesh()
         self._build_pipelines()
 
-        logging.debug(f"Plant created.")
+        logger.debug(f"Plant: Created")
 
     def _build_mesh(self) -> None:
+        logger.debug(f"Plant: Started building mesh")
         statement = select(lds.Node)
         with Session(get_engine()) as session:
             results = session.scalars(statement).all()
@@ -166,14 +169,20 @@ class Plant:
             trends = session.scalars(statement).all()
         for trend in trends:
             self._trends[int(trend.ID)] = Trend(trend)
+        logger.debug(f"Plant: Finished building mesh")
 
     def _build_pipelines(self) -> None:
+        logger.debug(f"Plant: Started building pipelines")
         statement = select(lds.Pipeline)
         with Session(get_engine()) as session:
             pipelines = session.scalars(statement).all()
         for pipeline in pipelines:
-            if not Settings.optimizer_pipeline_id or pipeline.ID == Settings.optimizer_pipeline_id:
+            if not LeakDetectorSettings.optimizer_pipeline_id or pipeline.ID == LeakDetectorSettings.optimizer_pipeline_id:
                 self._pipelines[int(pipeline.ID)] = Pipeline(self, pipeline.ID, pipeline.Name)
+
+        self._max_leakage_alarm_delta = max([pipeline.max_leakage_alarm_delta for pipeline in self._pipelines.values()])
+        self._max_trend_time_delta = max(([pipeline.max_trend_time_delta for pipeline in self._pipelines.values()]))
+        logger.debug(f"Plant: Finished building pipelines")
 
     def get_distances(self, node1: Node, node2: Node, visited=None) -> list[float]:
         if visited is None:
@@ -209,5 +218,10 @@ class Plant:
     def trends(self) -> dict[int, Trend]:
         return self._trends
 
-    def get_leakage_alarm_delta(self) -> int:
-        return max([pipeline.get_leakage_alarm_delta() for pipeline in self._pipelines.values()])
+    @property
+    def max_leakage_alarm_delta(self) -> int:
+        return self._max_leakage_alarm_delta
+
+    @property
+    def max_trend_time_delta(self) -> int:
+        return self._max_trend_time_delta

@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from database import lds
 from db import get_engine
 
+logger = logging.getLogger(__name__)
+
 
 class Trend:
     def __init__(self, trend: lds.Trend):
@@ -13,7 +15,7 @@ class Trend:
         self.lds_trend = trend
         self.node_id = trend.NodeID
         self.block_size = 100
-        logging.debug(f"Trend {self.id} {self.node_id} created")
+        logger.debug(f"Trend: Created with id = {self.id}")
 
     def get_trend_data(self, begin: int, end: int, min_wave_value: float = 0.0, data_per_second: int = 100) -> np.ndarray:
         begin_ts = begin // 1000
@@ -36,6 +38,7 @@ class Trend:
         next_idx = self.block_size - 1 - (begin//10)%self.block_size
         for db_data in db_data_list:
             while current_timestamp < db_data.Time:
+                logger.debug(f'Trend: No data for trend with id = {self.id} in timestamp = {current_timestamp}')
                 data_list += [last_valid] * data_per_second
                 current_timestamp += 1
 
@@ -59,6 +62,6 @@ class Trend:
             next_idx = self.block_size - (self.block_size//data_per_second) + last_idx
             current_timestamp += 1
         if len(data_list) < expected_data_length:
+            logger.debug(f'Trend: Extend trend data for trend with id = {self.id} by {(end_ts-begin_ts)*data_per_second - len(data_list)} elements')
             data_list.extend([last_valid] * ((end_ts-begin_ts)*data_per_second - len(data_list)))
-        logging.debug(f"Got data successfully.")
         return np.array(data_list)

@@ -5,9 +5,11 @@ import matplotlib.backend_bases
 import seaborn as sns
 import numpy as np
 from matplotlib import pyplot as plt, patheffects
-from config import Settings
+from leak_detector.config import LeakDetectorSettings
 from leak_detector.method import MethodBase
 from leak_detector.segment import Segment
+
+logger = logging.getLogger(__name__)
 
 
 class DetectorDisplay:
@@ -58,16 +60,16 @@ class DetectorDisplay:
         xticks_labels = [str(datetime.datetime.fromtimestamp(t // 1000).strftime('%H:%M:%S'))
                          for t in
                          np.arange(begin - segment.max_window_size[0], end + segment.max_window_size[1] + 1, 10).tolist()]
-        yticks_labels = np.arange(segment.begin_pos, segment.begin_pos + segment.length,
-                                  method.pipeline.length_resolution).astype(int)
+        yticks_labels = np.arange(segment.begin_pos, segment.begin_pos + segment.length, 1).astype(int)
 
         max_x, max_y = np.unravel_index(np.argmax(probability), probability.shape)
-        logging.info(f'Method ID={method.id}: '
-                     f'Segment [{segment.start.id}-{segment.end.id}]: '
-                     f'Max({float(yticks_labels[max_y])}, '
-                     f'{xticks_labels[segment.max_window_size[0] // 10 + int(max_x)]}.{((int(max_x)) % 100) * 10:03d}) '
+        logger.debug(f'DetectorDisplay: Method ID={method.id}: '
+                     f'Segment {segment_number+1}: '
+                     f'Max({float(yticks_labels[max_y * method.pipeline.length_resolution])}, '
+                     f'{xticks_labels[segment.max_window_size[0] // 10 + int(max_x) * (method.pipeline.time_resolution // 10)]}'
+                     f'.{((int(max_x)) % (1000 // method.pipeline.time_resolution)) * 10:03d}) '
                      f'= {probability[max_x, max_y]}')
-        if Settings.leak_detector_plot:
+        if LeakDetectorSettings.plot_heatmap:
             fig, ax = plt.subplots(figsize=(16, 8), constrained_layout=True)
             ax.set_frame_on(False)
             ax.set_xticks([])
@@ -108,7 +110,7 @@ class DetectorDisplay:
 
             ax2.set_yticks(np.arange(0, segment.length // method.pipeline.length_resolution, 1)[
                            ::step_ytick_m // method.pipeline.length_resolution])
-            ax2.set_yticklabels(yticks_labels[::step_ytick_m // method.pipeline.length_resolution])
+            ax2.set_yticklabels(yticks_labels[::step_ytick_m])
             ax2.set(xlabel="Time [s]", ylabel="Distance [m]")
             if traces:
                 for trace in traces:
@@ -136,7 +138,7 @@ class DetectorDisplay:
                     x = int(x)
                     y = int(y)
                     point = ax2.plot(x, y, 'ro', markersize=8)[0]
-                    label_x = x - 8 if x > probability.shape[0] // 2 else x + 8
+                    label_x = x - 8*(10/method.pipeline.time_resolution) if x > probability.shape[0] // 2 else x + 8*(10/method.pipeline.time_resolution)
                     ha = 'right' if x > probability.shape[0] // 2 else 'left'
                     if dp_indexes_list:
                         dp1_value = round(float(data_start[dp_indexes_list[0][x,y]]), 2)
@@ -145,15 +147,17 @@ class DetectorDisplay:
                         dp4_value = round(float(data_end[dp_indexes_list[3][x,y]]), 2)
                         proba_start = round((dp1_value - dp4_value), 2) if (dp1_value - dp4_value) > 0 else 0
                         proba_end = round((dp2_value - dp3_value), 2) if (dp2_value - dp3_value) > 0 else 0
-                        label = ax2.text(label_x, y + 8,
-                                         f"P({yticks_labels[y]}m, "
-                                         f"{xticks_labels[segment.max_window_size[0] // 10:-segment.max_window_size[1] // 10][x]}.{(x * 10) % 1000:03d})"
+                        label = ax2.text(label_x, y + 8*(1/method.pipeline.length_resolution),
+                                         f"P({yticks_labels[y*method.pipeline.length_resolution]}m, "
+                                         f"{xticks_labels[segment.max_window_size[0] // 10:-segment.max_window_size[1] // 10][x*(method.pipeline.time_resolution//10)]}"
+                                         f".{(x * method.pipeline.time_resolution) % 1000:03d})"
                                          f" = {proba_start} * {proba_end} = {probability[x, y]}",
                                          color='white', fontsize=12, ha=ha, va='bottom')
                     else:
-                        label = ax2.text(label_x, y + 8,
-                                         f"P({yticks_labels[y]}m, "
-                                         f"{xticks_labels[segment.max_window_size[0] // 10:-segment.max_window_size[1] // 10][x]}.{(x * 10) % 1000:03d})"
+                        label = ax2.text(label_x, y + 8*(1/method.pipeline.length_resolution),
+                                         f"P({yticks_labels[y*method.pipeline.length_resolution]}m, "
+                                         f"{xticks_labels[segment.max_window_size[0] // 10:-segment.max_window_size[1] // 10][x*(method.pipeline.time_resolution//10)]}"
+                                         f".{(x * method.pipeline.time_resolution) % 1000:03d})"
                                          f" = {probability[x, y]}",
                                          color='white', fontsize=12, ha=ha, va='bottom')
                     label.set_path_effects([patheffects.withStroke(linewidth=2, foreground='black')])
@@ -172,12 +176,11 @@ class DetectorDisplay:
                         ax1.legend(handles, labels)
                     if peak_data_list:
                         colors = ['green', 'gold']
-                        (wave_speed, segment_length, length_resolution, time_resolution) = peak_data_list
-                        y *= length_resolution
-                        delta_x_start = int((y / wave_speed) *(1000/time_resolution))
-                        delta_x_end = int(((segment_length - y) / wave_speed) *(1000/time_resolution))
-                        x_start = x + delta_x_start
-                        x_end = x + delta_x_end
+                        wave_speed, segment_length = peak_data_list
+                        delta_x_start = int((y*method.pipeline.length_resolution / wave_speed) * 100)
+                        delta_x_end = int(((segment_length - y*method.pipeline.length_resolution) / wave_speed) * 100)
+                        x_start = x*(method.pipeline.time_resolution // 10) + delta_x_start
+                        x_end = x*(method.pipeline.time_resolution // 10) + delta_x_end
                         y_start = data_start[x_start]
                         y_end = data_end[x_end]
                         line_start = ax1.axvline(x=x_start, color=colors[0], lw=1.5, label=f'peak start={x_start}, {round(y_start, 1)}')

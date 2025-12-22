@@ -6,11 +6,11 @@ from datetime import datetime
 import sys
 import os
 from itertools import product
-
 import numpy as np
 import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_engine, Settings, setup_logging
+from leak_detector.config import LeakDetectorSettings
 from leak_detector.plant import Plant
 
 seconds_tolerance = 2
@@ -67,10 +67,10 @@ def leak_detector(leakages_dataset: list[Leakage], method_params_dict: dict) -> 
     for detection_period in detection_periods:
         begin_detection_date = detection_period[0]
         end_detection_date = detection_period[1]
-        begin_detection_time = int(begin_detection_date.timestamp() * 1000) - plant.get_leakage_alarm_delta()
+        begin_detection_time = int(begin_detection_date.timestamp() * 1000) - plant.max_leakage_alarm_delta
 
-        while begin_detection_time < detection_period[1].timestamp() * 1000 - plant.get_leakage_alarm_delta():
-            end_detection_time = begin_detection_time + plant.get_leakage_alarm_delta() + detection_time
+        while begin_detection_time < detection_period[1].timestamp() * 1000 - plant.max_leakage_alarm_delta:
+            end_detection_time = begin_detection_time + plant.max_leakage_alarm_delta + detection_time
             end_detection_time = end_detection_time if end_detection_time <= (
                         end_detection_date.timestamp() * 1000) else (end_detection_date.timestamp() * 1000)
             for pipeline in plant.pipelines.values():
@@ -86,9 +86,6 @@ def leak_detector(leakages_dataset: list[Leakage], method_params_dict: dict) -> 
 
 
 def validate_results(leakage_dataset: list[Leakage], detected_leakages: list[Leakage], print_summary: bool = True) -> dict:
-    tp = 0
-    fp = 0
-    fn = len(leakage_dataset)
     real_not_matched = copy.deepcopy(leakage_dataset)
     predicted_not_matched = []
     matched = []
@@ -101,11 +98,9 @@ def validate_results(leakage_dataset: list[Leakage], detected_leakages: list[Lea
             diff_t = abs(predicted.time - real.time)
             diff_pos = abs(predicted.position - real.position)
             if diff_t <= seconds_tolerance:
-                tp += 1
-                fn -= 1
-                last_used += i
-                match = True
                 if real in real_not_matched:
+                    last_used += i
+                    match = True
                     matched.append((real, predicted))
                     real_not_matched.remove(real)
                     sum_diff_pos += diff_pos
@@ -114,7 +109,6 @@ def validate_results(leakage_dataset: list[Leakage], detected_leakages: list[Lea
                     print('two matches for one real leakage: ', str(real))
         if not match:
             predicted_not_matched.append(predicted)
-            fp += 1
 
     if print_summary:
         print('=====SUMMARY=====')
@@ -158,10 +152,10 @@ params_spaces = {
 
 if __name__ == '__main__':
     Settings.verbosity = 'ERROR'
-    Settings.leak_detector_plot = False
-    Settings.optimizer_method_id = tested_method_id
-    Settings.optimizer_pipeline_id = tested_pipeline_id
     setup_logging()
+    LeakDetectorSettings.plot_heatmap = False
+    LeakDetectorSettings.optimizer_method_id = tested_method_id
+    LeakDetectorSettings.optimizer_pipeline_id = tested_pipeline_id
 
     real_leakages = load_leakages_from_json(dataset_filename)
 
@@ -189,11 +183,9 @@ if __name__ == '__main__':
             combined_data[key].append(value)
 
         test_no += 1
-        if test_no > 2:
-            break
 
     new_combined_data = {}
-    for i, (key, value) in enumerate(combined_data.items()):
+    for key, value in combined_data.items():
         new_combined_data[' '.join([part.lower() for part in key.split('_')])] = value
     combined_data_df = pd.DataFrame.from_dict(new_combined_data)
     combined_data_df.to_csv(experiment_results_filename, index=False)

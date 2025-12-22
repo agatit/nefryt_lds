@@ -54,7 +54,7 @@ try:
     logging.config.dictConfig(_logging_config)
 except Exception as e:
     if multiprocessing.current_process().name == 'MainProcess':
-        logging.warning(f'Config: Cannot configurate logger with given parameters: {e}', exc_info=True)
+        logging.warning(f'TrendsWriter config: Cannot configurate logger with given parameters: {e}', exc_info=True)
     _logging_config['handlers']['manager'] = reset_manager_handler(_logging_config['handlers']['manager'])
     logging.config.dictConfig(_logging_config)
 

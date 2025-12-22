@@ -76,3 +76,61 @@ simulator:
   displayer_ports:
     4: 11111
     5: 22222
+leak_detector:
+  plot_heatmap: False
+  logging:
+    version: 1
+    disable_existing_loggers: True
+
+    handlers:
+      console:
+        class: logging.StreamHandler
+        level: DEBUG
+        stream: ext://sys.stdout
+
+      manager:
+        class: logging.FileHandler
+        filename: default_log.log
+        level: INFO
+
+    loggers:
+      leak_detector:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
+      leak_detector.detector_display:
+        level: DEBUG
+        handlers: [ console ]
+        propagate: False
+
+      leak_detector.event:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
+      leak_detector.plant:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
+      leak_detector.segment:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
+      leak_detector.trend:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
+      leak_detector.past_detector:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
+      leak_detector.method:
+        level: DEBUG
+        handlers: [ console ]
+        propagate: False
+

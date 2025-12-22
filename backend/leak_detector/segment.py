@@ -3,13 +3,14 @@ from math import ceil
 from leak_detector.plant import Pipeline
 from leak_detector.trend import Trend
 
+logger = logging.getLogger(__name__)
+
 
 class Segment:
     def __init__(self, pipeline: Pipeline, begin: Trend, end: Trend, begin_pos: int, wave_speed: float, calc_window: tuple = (True, True)):
         distances = pipeline.plant.get_distances(pipeline.plant.nodes[begin.node_id], pipeline.plant.nodes[end.node_id])
         if len(distances) != 1:
-            logging.exception(f"There isn't exactly one path between {begin.id} and {end.id}.")
-            raise
+            raise ValueError(f"There isn't exactly one path between {begin.id} and {end.id} in segment")
         self._length = distances[0]
         self._start = begin
         self._end = end
@@ -21,7 +22,7 @@ class Segment:
         self.no_detection_time = 0
         self.flow_time = (self._length / self._wave_speed) * 1000
 
-        logging.debug(f"Segment {begin.id} <--> {end.id} created.")
+        logger.debug(f"Segment: Created linking begin trend with id = {begin.id} with end trend with id = {end.id}")
 
     def calc_wave_speed(self) -> float:
         return self._wave_speed

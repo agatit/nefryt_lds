@@ -6,12 +6,13 @@ from ..event import Event
 from ..plant import Pipeline
 from ..trend import Trend
 
+logger = logging.getLogger(__name__)
+
 
 class MethodTOF(MethodBase):
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
         super().__init__(pipeline, id_, name)
         self._get_params()
-        self._create_segments()
         self._begin_pos = pipeline.plant.get_distances(pipeline.first_node, self._pipeline.plant.nodes[self._trends[0].node_id])[0]
         self.displayer = DetectorDisplay()
         self._stored_events = []
@@ -26,22 +27,23 @@ class MethodTOF(MethodBase):
             self._time_sigma = float(self._params['TIME_RANGE'])
             self._no_detection_window = float(self._params['NO_DETECTION_WINDOW_SECONDS']) * 1000
             self._read_past_data = bool(self._params.get('READ_PAST_DATA', '1'))
+            self._time_between_peaks_ms = int(self._params.get('TIME_BETWEEN_PEAKS', 100))
         except KeyError as error:
-            logging.exception(f'Param {error.args[0]} does not exist in method {self._id}', exc_info=False)
-            raise
+            raise ValueError(f'{self.__class__.__name__} ({self.id}): No {error.args[0]} param')
 
         try:
             self._trends : list[Trend] = []
             for trend_id in self._pressure_deriv_trend_ids:
                 self._trends.append(self._pipeline.plant.trends[int(trend_id)])
         except KeyError as error:
-            logging.exception(f'Wrong PRESSURE_DERIV_TRENDS value in method {self._id}, '
-                              f'trend {error.args[0]} does not exist', exc_info=False)
-            raise
+            raise ValueError(f'{self.__class__.__name__} ({self.id}): Wrong PRESSURE_DERIV_TRENDS value, '
+                             f'trend {error.args[0]} does not exist')
+        self._create_segments()
 
     def _calculate_params(self):
         self._time_sigma = (self._time_sigma / self._pipeline.time_resolution) * 1/3
         self._wave_speed_sigma = self._wave_speed_sigma * 1/3
+        self._max_trend_time_delta = max(self._trends, key=lambda trend: trend.lds_trend.TimeDelta).lds_trend.TimeDelta
 
         self._diff_dist_on_segment_edge = {}
         wave_speed = np.random.normal(self._wave_speed, self._wave_speed_sigma, 100000)
@@ -53,6 +55,7 @@ class MethodTOF(MethodBase):
             self._diff_dist_on_segment_edge[segment.length] = (abs(np.max(diff_dist_from_edge_m) - np.min(diff_dist_from_edge_m)))
 
     def _create_segments(self) -> None:
+        logger.debug(f'{self.__class__.__name__} ({self.id}): Started creating segments')
         self._segments: list[Segment] = []
         self._pipeline_length = self._pipeline.begin_pos
         previous_trend = None
@@ -65,13 +68,17 @@ class MethodTOF(MethodBase):
             previous_trend = current_trend
         self._max_pipeline_flow_time = int(2 * (self._pipeline_length / (self._wave_speed-self._wave_speed_sigma)) * 1000)
         self._pipeline_flow_time = int(2 * (self._pipeline_length / self._wave_speed) * 1000)
+        logger.debug(f'{self.__class__.__name__} ({self.id}): Finished creating segments')
+
+    def get_max_trend_time_delta(self) -> int:
+        return self._max_trend_time_delta
 
     def simulate_probability(self, positions, peaks, segment: Segment):
         probability = np.zeros_like(positions)
         n_samples = 100000
         start_time = 0
         for (peak_start, peak_end, leakage_dist_from_edge) in peaks:
-            peaks_diff_t = abs(peak_end - peak_start) * self._pipeline.time_resolution
+            peaks_diff_t = abs(peak_end - peak_start) * 10
             peaks_diff_t = segment.flow_time if peaks_diff_t > segment.flow_time else peaks_diff_t
             wave_speed = np.random.normal(self._wave_speed, self._wave_speed_sigma, n_samples)
             peak_start_noise = peak_start + np.random.normal(0,  self._time_sigma, n_samples)
@@ -85,7 +92,7 @@ class MethodTOF(MethodBase):
             diff_t_from_edge = (segment_flow_time - peaks_diff_t) / 2
             diff_dist_from_edge = (diff_t_from_edge / 1000) * wave_speed
             leakage_position = leakage_position_noise_m + segment.length - diff_dist_from_edge if peak_start > peak_end else leakage_position_noise_m + diff_dist_from_edge
-            leakage_time = (peak_start_noise * self._pipeline.time_resolution) - segment_flow_time * (leakage_position / segment.length)
+            leakage_time = (peak_start_noise * 10) - segment_flow_time * (leakage_position / segment.length)
             leakage_position_idxs = (leakage_position / self._pipeline.length_resolution).astype(int)
             leakage_time_idxs = (leakage_time / self._pipeline.time_resolution).astype(int)
             for (leakage_time_idx, leakage_position_idx) in zip(leakage_time_idxs.tolist(), leakage_position_idxs.tolist()):
@@ -122,7 +129,7 @@ class MethodTOF(MethodBase):
 
         data_start_wave_idxs = np.nonzero(-data_start >= self._drop_level)[0]
         data_start_wave_idxs = np.insert(data_start_wave_idxs, 0, -1, axis=0)
-        data_start_peaks_idxs = data_start_wave_idxs[np.nonzero(np.diff(data_start_wave_idxs) > 1)[0] + 1] # TODO: change 1 to some parametrized value
+        data_start_peaks_idxs = data_start_wave_idxs[np.nonzero(np.diff(data_start_wave_idxs) > self._time_between_peaks_ms // self.pipeline.time_resolution)[0] + 1]
 
         data_end_wave_idxs = np.nonzero(-data_end >= self._drop_level)[0]
         data_end_wave_idxs = np.insert(data_end_wave_idxs, 0, -1, axis=0)
@@ -131,14 +138,13 @@ class MethodTOF(MethodBase):
         leakages = []
         filtered_peaks = []
         for peak_start, peak_end in zip(data_start_peaks_idxs.tolist(), data_end_peaks_idxs.tolist()):
-            peaks_diff_t_ms = abs(peak_end - peak_start) * self._pipeline.time_resolution
+            peaks_diff_t_ms = abs(peak_end - peak_start) * 10
             if peaks_diff_t_ms > 1.2*segment.flow_time:
                 continue
-            # TODO: experiment with resolutions
             diff_t_from_edge = (segment.flow_time - peaks_diff_t_ms) / 2 if (segment.flow_time - peaks_diff_t_ms) / 2 > 0 else 0
             diff_dist_from_edge = (diff_t_from_edge / 1000) * self._wave_speed
             leakage_position = segment.length - diff_dist_from_edge if peak_start > peak_end else diff_dist_from_edge
-            leakage_time = (peak_start * self._pipeline.time_resolution) - segment.flow_time * (leakage_position / segment.length)
+            leakage_time = (peak_start * 10) - segment.flow_time * (leakage_position / segment.length)
             if leakage_time > end-begin:
                 continue
             leakage_position_idx = int(leakage_position / self._pipeline.length_resolution)
@@ -152,16 +158,16 @@ class MethodTOF(MethodBase):
 
         probability = self.simulate_probability(positions, filtered_peaks, segment)
         self.displayer.set_params(data_start, data_end, None, self, segment, begin, end, probability,
-                                  [self._wave_speed, segment.length,
-                                   self.pipeline.length_resolution, self.pipeline.time_resolution],
+                                  [self._wave_speed, segment.length],
                                   past_data_start, past_data_end)
         return np.array(leakages)
 
     def find_leaks_in_range(self, begin: int, end: int) -> list[Event]:
+        begin += self.pipeline.plant.max_leakage_alarm_delta
         events = []
         self.displayer = DetectorDisplay()
         for segment in self._segments:
-            alarm_start_time = self._pipeline.plant.get_leakage_alarm_delta() // self._pipeline.time_resolution
+            alarm_start_time = self._pipeline.plant.max_leakage_alarm_delta // self._pipeline.time_resolution
             if segment.no_detection_time - begin > alarm_start_time:
                 alarm_start_time = int((segment.no_detection_time - begin) // self._pipeline.time_resolution)
             leakages = self.get_probability(segment, begin, end)
@@ -171,7 +177,7 @@ class MethodTOF(MethodBase):
                     if len(leakage_idxs) == 0:
                         break
                     leakage_position, leakage_time = leakages[leakage_idxs[0]]
-                    events.append(Event(self._id, begin + leakage_time*self._pipeline.time_resolution, segment.begin_pos - self._pipeline.begin_pos + leakage_position * self._pipeline.length_resolution))
+                    events.append(Event(self._id, begin + leakage_time*self._pipeline.time_resolution, segment.begin_pos + leakage_position * self._pipeline.length_resolution))
                     segment.no_detection_time = begin + leakage_time * self._pipeline.time_resolution + self._no_detection_window
                     alarm_start_time = int(self._no_detection_window // self._pipeline.time_resolution + leakage_time)
 

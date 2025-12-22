@@ -9,6 +9,8 @@ from db import get_engine
 from ..plant import Event, Pipeline
 from ..segment import Segment
 
+logger = logging.getLogger(__name__)
+
 class MethodBase:
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
         self._pipeline = pipeline
@@ -18,7 +20,7 @@ class MethodBase:
         self._params = {}
         self._read_params()
 
-        logging.debug(f"Method {id_}: {name} created.")
+        logger.info(f"{self.__class__.__name__} ({self.id}): Method initialized (params={self._params})")
 
     def _read_params(self):
         statement = (select(lds.MethodParam)
@@ -60,7 +62,11 @@ class MethodBase:
     def get_leakage_alarm_delta(self) -> int:
         return 0
 
+    def get_max_trend_time_delta(self) -> int:
+        return 0
+
     def update_params(self, new_method_params: dict):
         self._params.update(new_method_params)
         self._get_params()
         self._calculate_params()
+        logger.debug(f"{self.__class__.__name__} ({self.id}): Method params updated (updated params={new_method_params})")
