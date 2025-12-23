@@ -1,12 +1,19 @@
+import argparse
 import logging
 import sys
 import os
+from argparse import ArgumentParser
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from config import setup_engine
 from ..plant import Plant
 from datetime import datetime
 
 logger = logging.getLogger('leak_detector.past_detector')
+
+class ParseToDetectionPeriods(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        namespace.detection_periods = [(datetime.fromtimestamp(timestamp_start), datetime.fromtimestamp(timestamp_end))
+                                       for timestamp_start, timestamp_end in zip(values[::2], values[1::2])]
 
 
 # Leaks during tested time periods:
@@ -36,16 +43,20 @@ logger = logging.getLogger('leak_detector.past_detector')
 #  - 14:00:52-14:00:53 = XV16 (between PT-03 and PT-04 = trends 103 and 104) = 183.6m
 #  - 14:01:45-14:01:46 = XV17 (between PT-03 and PT-04 = trends 103 and 104) = 0.4m
 
+detection_time = 60 * 1000
+detection_periods = [
+    (datetime(2025, 6, 4, 13, 30, 52),
+     datetime(2025, 6, 4, 14, 2, 0)),
+]
 
 if __name__ == '__main__':
+    argparser = ArgumentParser()
+    argparser.add_argument("--detection_periods", type=int, required=False, default=detection_periods, nargs='+', action=ParseToDetectionPeriods)
+    args = argparser.parse_args()
+    detection_periods = args.detection_periods
+
     setup_engine()
     plant = Plant()
-    detection_time = 60 * 1000
-    detection_periods = [
-        (datetime(2025, 6, 4, 13, 30, 52),
-         datetime(2025, 6, 4, 14, 2, 0)),
-    ]
-
     try:
         logger.info(f'PastDetector: Module started with detection time param = {detection_time}ms')
         all_events = []
@@ -56,7 +67,7 @@ if __name__ == '__main__':
             logger.info(f'PastDetector: Detection from {begin_detection_date} to {end_detection_date}')
             while begin_detection_time < detection_period[1].timestamp() * 1000 - plant.max_leakage_alarm_delta:
                 end_detection_time = begin_detection_time + plant.max_leakage_alarm_delta + detection_time
-                end_detection_time = end_detection_time if end_detection_time <= (end_detection_date.timestamp() * 1000) else (end_detection_date.timestamp() * 1000)
+                end_detection_time = end_detection_time if end_detection_time <= (end_detection_date.timestamp() * 1000) else (int(end_detection_date.timestamp()) * 1000)
                 for pipeline in plant.pipelines.values():
                     leaks = pipeline.find_leaks_in_range(begin_detection_time, end_detection_time)
                     for method, leak_events in leaks.items():
@@ -70,3 +81,5 @@ if __name__ == '__main__':
                          f'in position = {round(event.position, 2)}m, date = {event.datetime}')
     except Exception as error:
         logger.error(error, exc_info=True)
+
+    logger.info(f'PastDetector: Module finished')

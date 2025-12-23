@@ -16,3 +16,5 @@ from .trend import *
 from .simulation import *
 from .simulation_data import *
 from .simulation_param import *
+from .past_writer_config import *
+from .past_detector_config import *

@@ -8,8 +8,8 @@ from config import Settings
 from database import lds
 from db import get_engine
 import trends_writer.trend # noqa
-from trends import TrendBase, TrendMean, TrendDeriv, TrendDiff
-from trend_manager import TrendManager
+from .trends import TrendBase, TrendMean, TrendDeriv, TrendDiff
+from .trend_manager import TrendManager
 
 TREND_CLASSES = {
     'QUICK': TrendBase,

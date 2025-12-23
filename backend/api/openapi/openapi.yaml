@@ -2379,6 +2379,27 @@ paths:
       summary: Gets profiler data in general details
       tags:
         - trend_writer
+  /trend_writer/run_past_writer:
+    post:
+      description: Run subprocess with Past Writer module
+      operationId: run_past_writer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PastWriterConfig'
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Starts Past Writer
+      tags:
+        - trend_writer
   /simulation:
     get:
       description: List all simulations
@@ -2866,6 +2887,27 @@ paths:
       summary: Gets simulation data
       tags:
         - simulations
+  /leak_detector/run_past_detector:
+    post:
+      description: Run subprocess with Past Detector module
+      operationId: run_past_detector
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PastDetectorConfig'
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Starts Past Detector
+      tags:
+        - leak_detector
 components:
   parameters:
     eventId:
@@ -3912,6 +3954,34 @@ components:
         - SimulationID
         - Data
       title: SimulationDataOut
+      type: object
+    PastWriterConfig:
+      example:
+        FromTimestamp: 12345678
+        ToTimestamp: 87654321
+        QuickTrendIds: [ ]
+      properties:
+        FromTimestamp:
+          title: FromTimestamp
+          type: integer
+        ToTimestamp:
+          title: ToTimestamp
+          type: integer
+        QuickTrendIds:
+          items:
+            type: integer
+          type: array
+      title: PastWriterConfig
+      type: object
+    PastDetectorConfig:
+      example:
+        DetectionPeriods: [1, 100, 5000, 25000]
+      properties:
+        DetectionPeriods:
+          items:
+            type: integer
+          type: array
+      title: PastDetectorConfig
       type: object
     EditorPipeline:
       example:

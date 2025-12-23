@@ -1,14 +1,19 @@
+import logging
 import struct
 import sys
 import os
+from argparse import ArgumentParser
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from database.models import lds
 from db import get_engine
-import plant
+from . import plant
 from config import setup_engine
+
+logger = logging.getLogger('trends_writer.past_writer')
+
 
 period_start = datetime(2025, 6, 4, 12, 00, 00)
 period_end = datetime(2025, 6, 4, 15, 00, 00)
@@ -29,13 +34,22 @@ def read_quick_trend_data(timestamp: int):
 
 
 if __name__ == '__main__':
+    argparser = ArgumentParser()
+    argparser.add_argument("--quick_trend_ids", type=int, required=False, default=quick_trend_ids, nargs='+')
+    argparser.add_argument("--from_timestamp", type=int, required=False, default=int(period_start.timestamp()))
+    argparser.add_argument("--to_timestamp", type=int, required=False, default=int(period_end.timestamp()))
+    args = argparser.parse_args()
+
     setup_engine()
     plant = plant.PipePlant(quick_trend_ids)
 
-    ts = int(period_start.timestamp())
-    end_ts = int(period_end.timestamp())
+    ts = args.from_timestamp
+    end_ts = args.to_timestamp
+    quick_trend_ids = args.quick_trend_ids
 
+    logger.info(f'PastWriter: Module started in period {ts}-{end_ts} for trends = {quick_trend_ids}')
     while ts <= end_ts:
         quick_trend_data = read_quick_trend_data(ts)
         plant.update(quick_trend_data, ts)
         ts += 1
+    logger.info(f'PastWriter: Module finished')

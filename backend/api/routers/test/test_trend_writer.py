@@ -1,5 +1,6 @@
 import os
 import sys
+from unittest.mock import patch
 from starlette import status
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
@@ -144,3 +145,11 @@ def test_get_profiler_data_by_id_should_return_not_found_response_code_and_error
     error = response.json()
     assert error['code'] == status.HTTP_404_NOT_FOUND
     assert error['message'] == 'No profiler data for trend with id = ' + str(profiler_data2.ID)
+
+
+def test_run_past_writer_should_return_no_content_response_code():
+    module_params_dict = {'from_timestamp': 1000, 'to_timestamp': 2000, 'quick_trend_ids': [50,55]}
+    with patch("api.routers.trend_writer.subprocess.Popen") as popen_mock:
+        response = test_client.post("/trend_writer/run_past_writer", json=module_params_dict)
+        popen_mock.assert_called_once()
+        assert response.status_code == status.HTTP_204_NO_CONTENT

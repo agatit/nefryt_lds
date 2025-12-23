@@ -1,15 +1,19 @@
+import os
+import subprocess
+import sys
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Body
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, Engine
 from database import lds
 from sqlalchemy.orm import Session
 from starlette import status
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 from api.routers.utils import get_user_token
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
 from ..schemas import api
+from pathlib import Path as PathlibPath
 
 router = APIRouter(prefix="/trend_writer", tags=["trend_writer"], dependencies=[Depends(get_user_token)])
 
@@ -70,4 +74,22 @@ async def get_profiler_data_by_id(trend_id: Annotated[int, Path()], engine: Anno
         return profiler_data
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_profiler_data_by_id(): ' + str(e))
+        return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post('/run_past_writer', response_model=None | api.Error)
+async def run_past_writer(process_config: Annotated[api.PastWriterConfig, Body()]):
+    try:
+        filepath=str(PathlibPath(__file__).resolve().parents[2]) + '/trends_writer/past_writer/past_writer.log'
+        args = [sys.executable, "-m", "trends_writer.past_writer"]
+        for key, value in process_config.model_dump(exclude_none=True).items():
+            values = [v for v in ([str(value)] if type(value) == int else str(value)[1:-1].split(', '))]
+            args.extend([f'--{key}'] + values)
+        if os.name == "nt":
+            subprocess.Popen(args, stdout=open(filepath, "a", encoding='utf-8'), stderr=subprocess.STDOUT, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+        else:
+            subprocess.Popen(args, stdout=open(filepath, "a", encoding='utf-8'), stderr=subprocess.STDOUT, start_new_session=True)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Failed to start past writer process: ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

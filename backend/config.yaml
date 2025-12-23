@@ -43,6 +43,12 @@ trends_writer:
         level: WARNING
         handlers: [console]
         propagate: False
+
+      trends_writer.past_writer:
+        level: INFO
+        handlers: [ console ]
+        propagate: False
+
 simulator:
   logging:
     version: 1

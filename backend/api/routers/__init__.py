@@ -15,3 +15,4 @@ from .trend_data import router as trend_data_router
 from .simulation_def import router as simulation_defs_router
 from .simulation_data import router as simulation_data_router
 from .simulation_param import router as simulation_params_router
+from .leak_detector import router as leak_detector_router

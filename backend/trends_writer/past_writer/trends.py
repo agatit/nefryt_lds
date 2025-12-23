@@ -9,7 +9,7 @@ from config import setup_engine
 from database import lds
 from db import get_engine
 from multiprocessing.queues import Queue
-from trend_manager import TrendManager
+from .trend_manager import TrendManager
 from trends_writer.config import TrendsWriterSettings
 
 logger = logging.getLogger(__name__)
