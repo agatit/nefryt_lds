@@ -7,7 +7,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
-from api.routers.utils import map_lds_event_and_lds_event_def_to_event_out, get_user_permissions, get_user_token
+from api.routers.utils import map_lds_event_and_lds_event_def_to_api_event, get_user_permissions, get_user_token
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from ..schemas import api
 from db import get_engine
@@ -27,7 +27,7 @@ async def list_events(engine: Annotated[Engine, Depends(get_engine)], params: An
                      .order_by(lds.Event.ID))  # noqa
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
-        page.items = [map_lds_event_and_lds_event_def_to_event_out(lds_event, lds_event_def)
+        page.items = [map_lds_event_and_lds_event_def_to_api_event(lds_event, lds_event_def)
                       for lds_event, lds_event_def in page.items]
         return page
     except Exception as e:
@@ -47,7 +47,7 @@ async def get_event_by_id(event_id: int, engine: Annotated[Engine, Depends(get_e
             error = api.Error(code=status.HTTP_404_NOT_FOUND, message='No event with id = ' + str(event_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         lds_event, lds_event_def = results[0]
-        event_out = map_lds_event_and_lds_event_def_to_event_out(lds_event, lds_event_def)
+        event_out = map_lds_event_and_lds_event_def_to_api_event(lds_event, lds_event_def)
         return event_out
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR, message='Exception in get_event_by_id(): ' + str(e))

@@ -145,7 +145,6 @@ def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_s
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
     assert len(items) == len(simulation_param_def_list)
-    print(items)
     for expected_simulation_param_def, returned_simulation_param_def in zip(simulation_param_def_list, items):
         assert returned_simulation_param_def['ID'] == expected_simulation_param_def.ID.strip()
         assert returned_simulation_param_def['SimulationDefID'] == expected_simulation_param_def.SimulationDefID.strip()

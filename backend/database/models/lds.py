@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
-    Integer, Numeric, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
+    Integer, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
 from api.schemas import base
 
@@ -46,15 +46,13 @@ class Node(base.LdsNode, table=True):
     ID: int = Field(sa_column=Column(Integer, Identity(start=1000, increment=1), primary_key=True))
 
 
-class Pipeline(SQLModel, table=True):
+class Pipeline(base.Pipeline, table=True):
     __tablename__ = 'Pipeline'
     __table_args__ = (
         {'schema': 'lds'}
     )
 
     ID: int = Field(sa_column=Column(Integer, Identity(start=2, increment=1), primary_key=True))
-    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
-    BeginPos: float | None = Field(None, sa_column=Column(Numeric(10, 2), nullable=True))
 
 
 class PipelineParamDef(SQLModel, table=True):
@@ -172,18 +170,13 @@ class PipelineNode(SQLModel, table=True):
     First: bool = Field(False, nullable=False, sa_column_kwargs={"server_default": "0"})
 
 
-class PipelineParam(SQLModel, table=True):
+class PipelineParam(base.PipelineParam, table=True):
     __tablename__ = 'PipelineParam'
     __table_args__ = (
         PrimaryKeyConstraint('PipelineParamDefID', 'PipelineID', name='PipelineParam_pk'),
         {'schema': 'lds'}
     )
 
-    PipelineParamDefID: str = Field(
-        sa_column=Column(
-            CHAR(30, 'SQL_Polish_CP1250_CS_AS'),
-            ForeignKey("lds.PipelineParamDef.ID", ondelete="CASCADE", onupdate="CASCADE"),
-            nullable=False))
     PipelineID: int = Field(
         sa_column=Column(
             Integer,
@@ -191,7 +184,6 @@ class PipelineParam(SQLModel, table=True):
             nullable=False
         )
     )
-    Value: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
 class Trend(base.Trend, table=True):

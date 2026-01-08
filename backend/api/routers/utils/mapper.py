@@ -3,7 +3,7 @@ from ...schemas import api, base
 from database import lds, editor
 
 
-def map_lds_event_and_lds_event_def_to_event_out(lds_event: lds.Event, lds_event_def: lds.EventDef) -> api.Event:
+def map_lds_event_and_lds_event_def_to_api_event(lds_event: lds.Event, lds_event_def: lds.EventDef) -> api.Event:
     lds_event_dict = to_dict(lds_event)
     lds_event_def_dict = to_dict(lds_event_def)
     lds_event_def_dict.pop('ID')
@@ -12,7 +12,7 @@ def map_lds_event_and_lds_event_def_to_event_out(lds_event: lds.Event, lds_event
     return api.Event(**lds_event_dict)
 
 
-def map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param: lds.TrendParam | None, lds_trend_param_def: lds.TrendParamDef, trend_id: int) -> api.TrendParam:
+def map_lds_trend_param_and_lds_trend_param_def_to_api_trend_param(lds_trend_param: lds.TrendParam | None, lds_trend_param_def: lds.TrendParamDef, trend_id: int) -> api.TrendParam:
     if lds_trend_param is None:
         lds_trend_param_dict = {
             'TrendID': trend_id,
@@ -66,18 +66,18 @@ def map_node_to_editor_node(node_id: int, node: api.NodeCreate) -> editor.Node |
     return None
 
 
-def map_lds_node_and_editor_node_to_node_out(lds_node: lds.Node, editor_node: editor.Node) -> api.Node:
-    node_out_dict = to_dict(lds_node)
+def map_lds_node_and_editor_node_to_api_node(lds_node: lds.Node, editor_node: editor.Node) -> api.Node:
+    api_node_dict = to_dict(lds_node)
     editor_params = None
     if editor_node:
         editor_node_dict = to_dict(editor_node)
         editor_node_dict.pop('ID')
         editor_params = base.EditorNode(**editor_node_dict)
-    node_out_dict.update({'EditorParams': editor_params})
-    return api.Node(**strip_strings_in_dict(node_out_dict))
+    api_node_dict.update({'EditorParams': editor_params})
+    return api.Node(**strip_strings_in_dict(api_node_dict))
 
 
-def map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out\
+def map_lds_simulation_param_and_lds_simulation_param_def_to_api_simulation_param\
                 (lds_simulation_param: lds.SimulationParam | None, lds_simulation_param_def: lds.SimulationParamDef, simulation_id: int) -> api.SimulationParam:
     if lds_simulation_param is None:
         lds_simulation_param_dict = {
@@ -91,8 +91,8 @@ def map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_ou
     lds_simulation_param_def_dict = to_dict(lds_simulation_param_def)
     lds_simulation_param_def_dict.pop('SimulationDefID')
     lds_simulation_param_def_dict.pop('ID')
-    simulation_param_out_dict = lds_simulation_param_dict | lds_simulation_param_def_dict
-    return api.SimulationParam(**strip_strings_in_dict(simulation_param_out_dict))
+    api_simulation_param_dict = lds_simulation_param_dict | lds_simulation_param_def_dict
+    return api.SimulationParam(**strip_strings_in_dict(api_simulation_param_dict))
 
 
 def map_simulation_param_base_to_lds_simulation_param(simulation_param: api.SimulationParamCreate, lds_simulation: lds.Simulation) -> lds.SimulationParam:
@@ -100,27 +100,46 @@ def map_simulation_param_base_to_lds_simulation_param(simulation_param: api.Simu
                                      | {'SimulationDefID': lds_simulation.SimulationDefID, 'SimulationID': lds_simulation.ID})
 
 
-def map_lds_simulation_data_to_simulation_data_out(simulation_data_list: list[lds.SimulationData], distances: list[int]) -> api.SimulationData:
+def map_lds_simulation_data_to_api_simulation_data(simulation_data_list: list[lds.SimulationData], distances: list[int]) -> api.SimulationData:
     iter_lds_simulation_data = iter(simulation_data_list)
     lds_simulation_data = next(iter_lds_simulation_data, None)
-    simulation_data_out_dict = {
+    api_simulation_data_dict = {
         'SimulationID': lds_simulation_data.SimulationID,
         'Time': lds_simulation_data.Time,
         'Data': []
     }
     for distance in distances:
         if not lds_simulation_data:
-            simulation_data_out_dict['Data'].append(
+            api_simulation_data_dict['Data'].append(
                 base.SimulationData(Distance=distance, Data=None)
             )
         elif lds_simulation_data.Distance == distance:
-            simulation_data_out_dict['Data'].append(
+            api_simulation_data_dict['Data'].append(
                 base.SimulationData(Distance=distance, Data=lds_simulation_data.Data)
             )
             lds_simulation_data = next(iter_lds_simulation_data, None)
         else:
-            simulation_data_out_dict['Data'].append(
+            api_simulation_data_dict['Data'].append(
                 base.SimulationData(Distance=distance, Data=None)
             )
 
-    return api.SimulationData(**simulation_data_out_dict)
+    return api.SimulationData(**api_simulation_data_dict)
+
+def map_lds_pipeline_param_and_lds_pipeline_param_def_to_api_pipeline_param\
+                (lds_pipeline_param: lds.PipelineParam | None, lds_pipeline_param_def: lds.PipelineParamDef, pipeline_id: int) -> api.PipelineParam:
+    if lds_pipeline_param is None:
+        lds_pipeline_param_dict = {
+            'PipelineID': pipeline_id,
+            'PipelineParamDefID': lds_pipeline_param_def.ID,
+            'Value': None
+        }
+    else:
+        lds_pipeline_param_dict = to_dict(lds_pipeline_param)
+    lds_pipeline_param_def_dict = to_dict(lds_pipeline_param_def)
+    lds_pipeline_param_def_dict.pop('ID')
+    api_pipeline_param_dict = lds_pipeline_param_dict | lds_pipeline_param_def_dict
+    return api.PipelineParam(**strip_strings_in_dict(api_pipeline_param_dict))
+
+
+def map_pipeline_param_base_to_lds_pipeline_param(pipeline_param: api.PipelineParamCreate, lds_pipeline: lds.Pipeline) -> lds.PipelineParam:
+    return lds.PipelineParam(**pipeline_param.model_dump() | {'PipelineID': lds_pipeline.ID})

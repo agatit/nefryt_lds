@@ -14,7 +14,8 @@ from .schemas import api
 from .routers import (events_router, event_defs_router, trend_defs_router, trend_router, auth_router, link_router,
                       node_router, template_router, unit_router, trend_groups_router, trend_writer_router,
                       simulation_router, trend_params_router, trend_data_router, simulation_defs_router,
-                      simulation_data_router, simulation_params_router, leak_detector_router)
+                      simulation_data_router, simulation_params_router, leak_detector_router, pipeline_router,
+                      pipeline_params_router)
 
 setup_engine()
 app = FastAPI(title='Nefryt LDS API',
@@ -38,6 +39,8 @@ app.include_router(simulation_defs_router)
 app.include_router(simulation_data_router)
 app.include_router(simulation_params_router)
 app.include_router(leak_detector_router)
+app.include_router(pipeline_router)
+app.include_router(pipeline_params_router)
 
 origins = ['http://localhost:8080',
            'http://192.168.30.52:3000',

@@ -633,14 +633,14 @@ paths:
       description: List all pipelines
       operationId: list_pipelines
       parameters:
-      - description: Query filter in OData standard
-        explode: true
-        in: query
-        name: $filter
-        required: false
-        schema:
-          type: string
-        style: form
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         "200":
           content:
@@ -649,7 +649,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Pipeline'
                 type: array
-          description: A array of pipelines
+          description: An array of pipelines
         default:
           content:
             application/json:
@@ -658,8 +658,7 @@ paths:
           description: unexpected error
       summary: List pipelines
       tags:
-      - pipelines
-      x-openapi-router-controller: api.controllers.pipelines_controller
+        - pipelines
     post:
       description: Create a pipeline
       operationId: create_pipeline
@@ -683,21 +682,20 @@ paths:
           description: unexpected error
       summary: Create pipeline
       tags:
-      - pipelines
-      x-openapi-router-controller: api.controllers.pipelines_controller
+        - pipelines
   /pipeline/{pipelineId}:
     delete:
       description: Deletes specific pipeline
       operationId: delete_pipeline_by_id
       parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
+        - description: The id of the pipeline to delete
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: integer
+          style: simple
       responses:
         "204":
           description: No content
@@ -709,20 +707,19 @@ paths:
           description: unexpected error
       summary: Deletes pipeline
       tags:
-      - pipelines
-      x-openapi-router-controller: api.controllers.pipelines_controller
+        - pipelines
     get:
       description: Info for specific pipeline
       operationId: get_pipeline_by_id
       parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
+        - description: The id of the pipeline to retrieve
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: integer
+          style: simple
       responses:
         "200":
           content:
@@ -738,20 +735,19 @@ paths:
           description: unexpected error
       summary: Gets pipeline details
       tags:
-      - pipelines
-      x-openapi-router-controller: api.controllers.pipelines_controller
+        - pipelines
     put:
-      description: Updates pipeline
+      description: Updates a pipeline
       operationId: update_pipeline
       parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
+        - description: The id of the pipeline to update
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: integer
+          style: simple
       requestBody:
         content:
           application/json:
@@ -772,71 +768,125 @@ paths:
           description: unexpected error
       summary: Updates pipeline
       tags:
-      - pipelines
-      x-openapi-router-controller: api.controllers.pipelines_controller
-  /pipeline/{pipelineId}/method:
+        - pipelines
+  /pipeline/{pipelineId}/param/all:
     get:
-      description: List all methods
-      operationId: list_methods
+      description: List all required pipeline params
+      operationId: list_required_pipeline_params_by_pipeline_id
       parameters:
-      - description: Query filter in OData standard
-        explode: true
-        in: query
-        name: $filter
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: The id of the pipeline to retrieve
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: integer
+          style: simple
       responses:
         "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Method'
+                  $ref: '#/components/schemas/PipelineParam'
                 type: array
-          description: A array of  methods
+          description: An array of params
         default:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: List pipeline methods
+      summary: List pipeline params
       tags:
-      - methods
-      x-openapi-router-controller: api.controllers.methods_controller
-    post:
-      description: Creates a  method
-      operationId: create_method
+        - pipelines
+  /pipeline/{pipelineId}/param:
+    get:
+      description: List all pipeline params
+      operationId: list_pipeline_params_by_pipeline_id
       parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
+        - description: The id of the pipeline to retrieve
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PipelineParam'
+                type: array
+          description: An array of pipeline params
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List pipeline params
+      tags:
+        - pipelines
+    post:
+      description: Create new pipeline params
+      operationId: create_pipeline_param
+      parameters:
+        - description: The id of the pipeline to which create pipeline param
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: integer
+          style: simple
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Method'
+              $ref: '#/components/schemas/CreatePipelineParam'
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Method'
+                $ref: '#/components/schemas/PipelineParam'
           description: Expected response to a valid request
         default:
           content:
@@ -844,31 +894,107 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: Creates method
+      summary: Create new pipeline param
       tags:
-      - methods
-      x-openapi-router-controller: api.controllers.methods_controller
-  /pipeline/{pipelineId}/method/{methodId}:
-    delete:
-      description: Deletes specific  method
-      operationId: delete_method_by_id
+        - pipelines
+  /pipeline/{pipelineId}/param/{pipelineParamDefId}:
+    get:
+      description: Get pipeline param
+      operationId: get_pipeline_param_by_pipeline_param_def_id
       parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: The id of the pipeline method to retrieve
-        explode: false
-        in: path
-        name: methodId
-        required: true
-        schema:
-          type: integer
-        style: simple
+        - description: The id of the pipeline to retrieve
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: The id of the pipeline param to retrieve
+          explode: false
+          in: path
+          name: pipelineParamDefId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get pipeline param
+      tags:
+        - pipelines
+    put:
+      description: Update pipeline param
+      operationId: update_pipeline_param
+      parameters:
+        - description: The id of the pipeline to update
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: The id of the pipeline param to update
+          explode: false
+          in: path
+          name: pipelineParamDefId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update pipeline param
+      tags:
+        - pipelines
+    delete:
+      description: Deletes specific pipeline param
+      operationId: delete_pipeline_param_by_id
+      parameters:
+        - description: The id of the pipeline to delete
+          explode: false
+          in: path
+          name: pipelineId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: The id of the pipeline param to delete
+          explode: false
+          in: path
+          name: pipelineParamDefId
+          required: true
+          schema:
+            type: string
+          style: simple
       responses:
         "204":
           description: No content
@@ -878,267 +1004,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
-      summary: Deletes  method
+      summary: Deletes pipeline param
       tags:
-      - methods
-      x-openapi-router-controller: api.controllers.methods_controller
-    get:
-      description: Info for specific  method
-      operationId: get_method_by_id
-      parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: The id of the pipeline method to retrieve
-        explode: false
-        in: path
-        name: methodId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Method'
-          description: Expected response to a valid request
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: Gets  method details
-      tags:
-      - methods
-      x-openapi-router-controller: api.controllers.methods_controller
-    put:
-      description: Updates  method
-      operationId: update_method
-      parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: The id of the pipeline method to retrieve
-        explode: false
-        in: path
-        name: methodId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Method'
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Method'
-          description: Expected response to a valid request
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: Updates method
-      tags:
-      - methods
-      x-openapi-router-controller: api.controllers.methods_controller
-  /pipeline/{pipelineId}/method/{methodId}/param:
-    get:
-      description: List all  method params
-      operationId: list_method_params
-      parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: The id of the pipeline method to retrieve
-        explode: false
-        in: path
-        name: methodId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/MethodParam'
-                type: array
-          description: A array of  methods params
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: List pipeline method params
-      tags:
-      - methods
-      x-openapi-router-controller: api.controllers.methods_controller
-  /pipeline/{pipelineId}/method/{methodId}/param/{methodParamDefId}:
-    put:
-      description: Put  method params
-      operationId: update_method_param
-      parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: The id of the pipeline method to retrieve
-        explode: false
-        in: path
-        name: methodId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: The id of the param to retrieve
-        explode: false
-        in: path
-        name: methodParamDefId
-        required: true
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/MethodParam'
-              type: array
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Updated
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: Put pipeline method params
-      tags:
-      - methods
-      x-openapi-router-controller: api.controllers.methods_controller
-  /pipeline/{pipelineId}/param:
-    get:
-      description: List all  pipeline params
-      operationId: list_pipeline_params
-      parameters:
-      - description: Query filter in OData standard
-        explode: true
-        in: query
-        name: $filter
-        required: false
-        schema:
-          type: string
-        style: form
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/PipelineParam'
-                type: array
-          description: A array of  pipelines params
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: List pipeline pipeline params
-      tags:
-      - pipelines
-      x-openapi-router-controller: api.controllers.pipelines_controller
-  /pipeline/{pipelineId}/param/{pipelineParamDefId}:
-    put:
-      description: Put  pipeline params
-      operationId: update_pipeline_param
-      parameters:
-      - description: The id of the pipeline to retrieve
-        explode: false
-        in: path
-        name: pipelineId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: The id of the param to retrieve
-        explode: false
-        in: path
-        name: pipelineParamDefId
-        required: true
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/PipelineParam'
-              type: array
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Information'
-          description: Updated
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: Put pipeline pipeline params
-      tags:
-      - pipelines
-      x-openapi-router-controller: api.controllers.pipelines_controller
+        - pipelines
   /trend:
     get:
       description: List all trends
@@ -3235,7 +3103,6 @@ components:
           AreaWidth: 6
           AreaHeight: 1
         ID: 0
-        BeginPos: 0.8008281904610115
         Name: Name
       properties:
         ID:
@@ -3250,13 +3117,22 @@ components:
           pattern: ^.{0,30}
           title: Name
           type: string
-        BeginPos:
-          description: none
-          title: BeginPos
-          type: number
         EditorParams:
           $ref: '#/components/schemas/EditorPipeline'
       title: Pipeline
+      type: object
+    CreatePipelineParam:
+      example:
+        PipelineParamDefID: BEGIN_POS
+        Value: 100.0
+      properties:
+        PipelineParamDefID:
+          title: PipelineParamDefID
+          type: string
+        Value:
+          title: Value
+          type: string
+      title: CreatePipelineParam
       type: object
     PipelineParam:
       example:
@@ -3267,34 +3143,26 @@ components:
         Name: Name
       properties:
         PipelineID:
-          description: none
-          example: 0
-          nullable: false
           title: PipelineID
           type: integer
         PipelineParamDefID:
-          description: none
-          example: 0
-          nullable: false
           title: PipelineParamDefID
           type: integer
         DataType:
-          description: none
-          pattern: ^.{0,6}
           title: DataType
           type: string
         Name:
-          description: none
-          pattern: ^.{0,30}
           title: Name
           type: string
         Value:
-          description: none
-          pattern: ^.{0,30}
           title: Value
           type: string
       required:
-      - PipelineID
+        - PipelineID
+        - PipelineParamDefID
+        - Value
+        - DataType
+        - Name
       title: PipelineParam
       type: object
     PipelineParamDef:

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
 from api.routers.utils import get_user_token, \
-    map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out, \
+    map_lds_simulation_param_and_lds_simulation_param_def_to_api_simulation_param, \
     map_simulation_param_base_to_lds_simulation_param, strip_strings
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
@@ -65,7 +65,7 @@ async def list_simulation_params_by_simulation_id(simulation_id: Annotated[int, 
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [
-            map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param, lds_simulation_param_def, simulation_id)
+            map_lds_simulation_param_and_lds_simulation_param_def_to_api_simulation_param(lds_simulation_param, lds_simulation_param_def, simulation_id)
             for lds_simulation_param, lds_simulation_param_def in page.items
         ]
         return page
@@ -102,7 +102,7 @@ async def list_required_simulation_params_by_simulation_id(simulation_id: Annota
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [
-            map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param, lds_simulation_param_def, simulation_id)
+            map_lds_simulation_param_and_lds_simulation_param_def_to_api_simulation_param(lds_simulation_param, lds_simulation_param_def, simulation_id)
             for lds_simulation_param_def, lds_simulation_param, _ in page.items
         ]
         return page
@@ -141,7 +141,7 @@ async def get_simulation_param_by_id(simulation_id: Annotated[int, Path()],
                                   + ' and simulation param def with id = ' + simulation_param_def_id)
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         lds_simulation_param, lds_simulation_param_def = results[0]
-        return map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out(lds_simulation_param,
+        return map_lds_simulation_param_and_lds_simulation_param_def_to_api_simulation_param(lds_simulation_param,
                                                                                              lds_simulation_param_def, simulation_id)
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -205,7 +205,7 @@ async def create_simulation_param(simulation_id: Annotated[int, Path()],
             session.add(lds_simulation_param)
             session.commit()
             session.refresh(lds_simulation_param)
-        simulation_param_out = (map_lds_simulation_param_and_lds_simulation_param_def_to_simulation_param_out
+        simulation_param_out = (map_lds_simulation_param_and_lds_simulation_param_def_to_api_simulation_param
                    (lds_simulation_param, lds_simulation_param_def, simulation_id))
 
         return JSONResponse(content=simulation_param_out.model_dump(), status_code=status.HTTP_201_CREATED)

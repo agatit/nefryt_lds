@@ -5,7 +5,7 @@ from database import lds
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
-from api.routers.utils import get_user_token, map_lds_simulation_data_to_simulation_data_out
+from api.routers.utils import get_user_token, map_lds_simulation_data_to_api_simulation_data
 from ..custom_page import CustomParams, use_custom_page, CustomPage
 from db import get_engine
 from ..schemas import api
@@ -46,7 +46,7 @@ async def get_simulation_data(simulation_id: Annotated[int, Path()],
                           message='No simulation data for simulation with id = ' + str(simulation_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
 
-        simulation_data_out = map_lds_simulation_data_to_simulation_data_out(lds_simulation_data, distances)
+        simulation_data_out = map_lds_simulation_data_to_api_simulation_data(lds_simulation_data, distances)
         simulation_data_out.Data = simulation_data_out.Data[(params.page-1)*params.size: params.page*params.size]
         return CustomPage(items=[simulation_data_out], total=len(distances),
                           pages=len(distances)//params.size if len(distances)//params.size > 0 else 1,

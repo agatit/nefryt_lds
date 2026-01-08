@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse, Response
-from api.routers.utils import map_lds_trend_param_and_lds_trend_param_def_to_trend_param, get_user_token, strip_strings
+from api.routers.utils import map_lds_trend_param_and_lds_trend_param_def_to_api_trend_param, get_user_token, strip_strings
 from ..custom_page import CustomParams, CustomPage, use_custom_page
 from db import get_engine
 from ..schemas import api
@@ -57,7 +57,7 @@ async def list_trend_params_by_trend_id(trend_id: Annotated[int, Path()], engine
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [
-            map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
+            map_lds_trend_param_and_lds_trend_param_def_to_api_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
             for lds_trend_param, _, lds_trend_param_def in page.items
         ]
         return page
@@ -89,7 +89,7 @@ async def list_required_trend_params_by_trend_id(trend_id: Annotated[int, Path()
         with Session(engine) as session:
             page = paginate(session, statement, params=params)
         page.items = [
-            map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
+            map_lds_trend_param_and_lds_trend_param_def_to_api_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
             for lds_trend_param_def, lds_trend_param, _ in page.items
         ]
         return page
@@ -171,7 +171,7 @@ async def get_trend_param_by_id(trend_id: Annotated[int, Path()], trend_param_de
                                   + ' and trendParamDef with id = ' + trend_param_def_id.strip())
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
         lds_trend_param, _, lds_trend_param_def = results[0]
-        return map_lds_trend_param_and_lds_trend_param_def_to_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
+        return map_lds_trend_param_and_lds_trend_param_def_to_api_trend_param(lds_trend_param, lds_trend_param_def, trend_id)
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                       message='Exception in get_trend_param_by_id(): ' + str(e))
