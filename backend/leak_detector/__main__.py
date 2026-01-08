@@ -42,4 +42,4 @@ async def leak_detector(plant: Plant):
 
 if __name__ == '__main__':
     setup_engine()
-    asyncio.run(leak_detector(Plant()))
+    asyncio.run(leak_detector(Plant(past_leak_detector=False)))

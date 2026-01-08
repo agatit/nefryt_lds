@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
-    Integer, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
+    Integer, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index, Float
 from sqlmodel import SQLModel, Field
 from api.schemas import base
 
@@ -378,3 +378,20 @@ class SimulationData(base.SimulationData, table=True):
         nullable=False
     ))
     Time: int = Field(sa_column=Column(BigInteger, nullable=False))
+
+
+class MethodData(SQLModel, table=True):
+    __tablename__ = 'MethodData'
+    __table_args__ = (
+        PrimaryKeyConstraint('MethodID', 'Position', 'Time', name='MethodData_pk'),
+        {'schema': 'lds'}
+    )
+
+    MethodID: int = Field(sa_column=Column(
+        Integer,
+        ForeignKey("lds.Method.ID", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False
+    ))
+    Position: int = Field(sa_column=Column(Integer, nullable=False))
+    Time: int = Field(sa_column=Column(BigInteger, nullable=False))
+    Value: float = Field(0.0, sa_column=Column(Float, nullable=False))

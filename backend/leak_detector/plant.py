@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from method import MethodBase
 
 METHOD_CLASSES = {
-    'WAVE': 'MethodWaveSigned',
+    'WAVE': 'MethodWave',
     'TOF': 'MethodTOF'
 }
 
@@ -140,13 +140,14 @@ class Pipeline:
 
 
 class Plant:
-    def __init__(self):
+    def __init__(self, past_leak_detector: bool):
         self._nodes = {}
         self._links = {}
         self._pipelines = {}
         self._trends = {}
         self._build_mesh()
         self._build_pipelines()
+        self._past_leak_detector = past_leak_detector
 
         logger.debug(f"Plant: Created")
 
@@ -225,3 +226,7 @@ class Plant:
     @property
     def max_trend_time_delta(self) -> int:
         return self._max_trend_time_delta
+
+    @property
+    def past_leak_detector(self) -> bool:
+        return self._past_leak_detector

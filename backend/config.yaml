@@ -136,7 +136,7 @@ leak_detector:
         propagate: False
 
       leak_detector.method:
-        level: DEBUG
+        level: INFO
         handlers: [ console ]
         propagate: False
 

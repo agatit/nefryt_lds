@@ -104,7 +104,7 @@ class MethodTOF(MethodBase):
 
         return probability
 
-    def get_probability(self, segment: Segment, begin: int, end: int) -> list[list[float]] | np.ndarray:
+    def get_probability(self, segment: Segment, begin: int, end: int) -> (list[list[float]] | np.ndarray, np.ndarray):
         window_begin = begin - segment.max_window_size[0]
         window_end = end + segment.max_window_size[1]
 
@@ -160,17 +160,20 @@ class MethodTOF(MethodBase):
         self.displayer.set_params(data_start, data_end, None, self, segment, begin, end, probability,
                                   [self._wave_speed, segment.length],
                                   past_data_start, past_data_end)
-        return np.array(leakages)
+        return np.array(leakages), probability
 
     def find_leaks_in_range(self, begin: int, end: int) -> list[Event]:
+        self._delete_method_data_from_db()
         begin += self.pipeline.plant.max_leakage_alarm_delta
         events = []
         self.displayer = DetectorDisplay()
         for segment in self._segments:
             alarm_start_time = self._pipeline.plant.max_leakage_alarm_delta // self._pipeline.time_resolution
+            leakages, probability = self.get_probability(segment, begin, end)
+            self._save_method_data(probability, range(begin, end, self._pipeline.time_resolution),
+                                   range(int(segment.begin_pos), int(segment.end_pos), self._pipeline.length_resolution))
             if segment.no_detection_time - begin > alarm_start_time:
                 alarm_start_time = int((segment.no_detection_time - begin) // self._pipeline.time_resolution)
-            leakages = self.get_probability(segment, begin, end)
             if len(leakages) > 0:
                 while alarm_start_time < int((end-begin) // self._pipeline.time_resolution):
                     leakage_idxs = np.where(leakages[:,1] >= alarm_start_time)[0]

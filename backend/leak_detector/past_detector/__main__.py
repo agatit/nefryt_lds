@@ -56,7 +56,7 @@ if __name__ == '__main__':
     detection_periods = args.detection_periods
 
     setup_engine()
-    plant = Plant()
+    plant = Plant(past_leak_detector=True)
     try:
         logger.info(f'PastDetector: Module started with detection time param = {detection_time}ms')
         all_events = []

@@ -36,6 +36,10 @@ class Segment:
         return self._begin_pos
 
     @property
+    def end_pos(self) -> float:
+        return self._end_pos
+
+    @property
     def length(self) -> float:
         return self._length
 

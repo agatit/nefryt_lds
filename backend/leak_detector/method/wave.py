@@ -69,7 +69,47 @@ class MethodWave(MethodBase):
         return self._max_trend_time_delta
 
     def get_probability(self, segment: Segment, begin: int, end: int) -> np.ndarray:
-        pass
+        window_begin = begin - segment.max_window_size[0]
+        window_end = end + segment.max_window_size[1]
+
+        # To remove multiple detections of the same wave & find where leakages overlap:
+        # - find previous high / low peak in around ~2*pipeline.flow_time
+        # - check whether shape of the peak is identical as current peak
+        # - if yes: discard, if not: detect
+        data_start = segment.start.get_trend_data(window_begin, window_end, self._min_wave_value)
+        data_end = segment.end.get_trend_data(window_begin, window_end, self._min_wave_value)
+
+        time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
+        position = np.arange(0, segment.length, self._pipeline.length_resolution)
+        positions, times = np.meshgrid(position, time)
+
+        offset_left_dist = position
+        offset_right_dist = segment.length - position
+        wave_fading_left = np.exp(self._wave_coeff * offset_left_dist).reshape(1, -1)
+        wave_fading_right = np.exp(self._wave_coeff * offset_right_dist).reshape(1, -1)
+
+        offset_left = positions / self._wave_speed * 1000
+        offset_right = (segment.length - positions) / self._wave_speed * 1000
+
+        dp1_indexes = ((times - offset_left) / 10).astype(int)
+        dp2_indexes = ((times - offset_right) / 10).astype(int)
+        dp3_indexes = ((times + offset_left) / 10).astype(int)
+        dp4_indexes = ((times + offset_right) / 10).astype(int)
+
+        dp1 = np.array(data_start)[dp1_indexes] / (self._normal_range * wave_fading_left)
+        dp2 = np.array(data_end)[dp2_indexes] / (self._normal_range * wave_fading_right)
+        dp3 = np.array(data_start)[dp3_indexes] / (self._normal_range * wave_fading_left)
+        dp4 = np.array(data_end)[dp4_indexes] / (self._normal_range * wave_fading_right)
+
+        probability_start = np.maximum(dp1 - dp4, 0)
+        probability_end = np.maximum(dp2 - dp3, 0)
+        probability = probability_start * probability_end
+        probability = np.sqrt(np.maximum(probability, 0))
+        probability = np.minimum(probability, 1)
+        self.displayer.set_params(data_start, data_end, [dp1_indexes, dp2_indexes, dp3_indexes, dp4_indexes],
+                                  self, segment, begin, end, probability, None, None, None)
+
+        return probability
 
     def _generate_alarms(self, probability_part: np.ndarray) -> list:
         alarm_probability = np.where(probability_part > self._alarm_level, 1, 0)
@@ -110,6 +150,7 @@ class MethodWave(MethodBase):
         return None
 
     def find_leaks_in_range(self, begin: int, end: int) -> list[Event]:
+        self._delete_method_data_from_db()
         begin += (self.pipeline.plant.max_leakage_alarm_delta - self._leakage_alarm_delta)
         events = []
         traces_by_segment = []
@@ -117,11 +158,14 @@ class MethodWave(MethodBase):
         for segment in self._segments:
             alarm_start_time = (self.pipeline.plant.max_leakage_alarm_delta - self._leakage_alarm_delta) // self._pipeline.time_resolution
             leakage_start_time = 0
+            probability = self.get_probability(segment, begin, end)
+            self._save_method_data(probability[alarm_start_time + self._leakage_alarm_delta // self._pipeline.time_resolution:],
+                                   range(begin+self._leakage_alarm_delta, end, self._pipeline.time_resolution),
+                                   range(int(segment.begin_pos), int(segment.end_pos), self._pipeline.length_resolution))
             traces = []
             if segment.no_detection_time - begin > alarm_start_time:
                 alarm_start_time = int((segment.no_detection_time - begin) // self._pipeline.time_resolution)
                 leakage_start_time = alarm_start_time
-            probability = self.get_probability(segment, begin, end)
             while alarm_start_time < probability.shape[0]:
                 trace = self._generate_trace(probability, alarm_start_time, leakage_start_time)
                 if trace:
@@ -170,48 +214,3 @@ class MethodWave(MethodBase):
 
     def find_leaks_to(self, end: int) -> list[Event]:
         pass
-
-
-class MethodWaveSigned(MethodWave):
-    def get_probability(self, segment: Segment, begin: int, end: int) -> np.ndarray:
-        window_begin = begin - segment.max_window_size[0]
-        window_end = end + segment.max_window_size[1]
-
-        # To remove multiple detections of the same wave & find where leakages overlap:
-        # - find previous high / low peak in around ~2*pipeline.flow_time
-        # - check whether shape of the peak is identical as current peak
-        # - if yes: discard, if not: detect
-        data_start = segment.start.get_trend_data(window_begin, window_end, self._min_wave_value)
-        data_end = segment.end.get_trend_data(window_begin, window_end, self._min_wave_value)
-
-        time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
-        position = np.arange(0, segment.length, self._pipeline.length_resolution)
-        positions, times = np.meshgrid(position, time)
-
-        offset_left_dist = position
-        offset_right_dist = segment.length - position
-        wave_fading_left = np.exp(self._wave_coeff * offset_left_dist).reshape(1, -1)
-        wave_fading_right = np.exp(self._wave_coeff * offset_right_dist).reshape(1, -1)
-
-        offset_left = positions / self._wave_speed * 1000
-        offset_right = (segment.length - positions) / self._wave_speed * 1000
-
-        dp1_indexes = ((times - offset_left) / 10).astype(int)
-        dp2_indexes = ((times - offset_right) / 10).astype(int)
-        dp3_indexes = ((times + offset_left) / 10).astype(int)
-        dp4_indexes = ((times + offset_right) / 10).astype(int)
-
-        dp1 = np.array(data_start)[dp1_indexes] / (self._normal_range * wave_fading_left)
-        dp2 = np.array(data_end)[dp2_indexes] / (self._normal_range * wave_fading_right)
-        dp3 = np.array(data_start)[dp3_indexes] / (self._normal_range * wave_fading_left)
-        dp4 = np.array(data_end)[dp4_indexes] / (self._normal_range * wave_fading_right)
-
-        probability_start = np.maximum(dp1 - dp4, 0)
-        probability_end = np.maximum(dp2 - dp3, 0)
-        probability = probability_start * probability_end
-        probability = np.sqrt(np.maximum(probability, 0))
-        probability = np.minimum(probability, 1)
-        self.displayer.set_params(data_start, data_end, [dp1_indexes, dp2_indexes, dp3_indexes, dp4_indexes],
-                                  self, segment, begin, end, probability, None, None, None)
-
-        return probability

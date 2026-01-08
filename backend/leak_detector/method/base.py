@@ -1,5 +1,6 @@
 import logging
-from sqlalchemy import select, and_
+import numpy as np
+from sqlalchemy import select, and_, delete
 from sqlalchemy.orm import Session
 from database import lds
 import sys
@@ -70,3 +71,28 @@ class MethodBase:
         self._get_params()
         self._calculate_params()
         logger.debug(f"{self.__class__.__name__} ({self.id}): Method params updated (updated params={new_method_params})")
+
+    def _save_method_data(self, probability: np.ndarray, timestamps: range, positions: range):
+        if not self._pipeline.plant.past_leak_detector:
+            data_objects = []
+            for row, timestamp in enumerate(timestamps):
+                for column, position in enumerate(positions):
+                    value = probability[row, column]
+                    data_object = lds.MethodData(MethodID=self._id, Position=position, Time=timestamp, Value=value)
+                    data_objects.append(data_object)
+
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Started saving {len(data_objects)} method data to database")
+
+            with Session(get_engine()) as session:
+                session.add_all(data_objects)
+                session.commit()
+
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Finished saving {len(data_objects)} method data to database")
+
+    def _delete_method_data_from_db(self):
+        if not self._pipeline.plant.past_leak_detector:
+            with Session(get_engine()) as session:
+                session.execute(delete(lds.MethodData).where(lds.MethodData.MethodID == self.id)) # noqa
+                session.commit()
+
+            logger.debug(f"{self.__class__.__name__} ({self.id}): Removed method data from database")
