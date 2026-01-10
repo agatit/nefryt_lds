@@ -1,5 +1,7 @@
+import copy
 import logging
 import numpy as np
+from scipy.interpolate import interp1d
 from .base import MethodBase, Segment
 from ..detector_display import DetectorDisplay
 from ..event import Event
@@ -11,6 +13,7 @@ logger = logging.getLogger(__name__)
 class MethodWave(MethodBase):
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
         super().__init__(pipeline, id_, name)
+        self._previous_waveform = [(0, None), (0, None)]
         self._get_params()
         self._begin_pos = pipeline.plant.get_distances(pipeline.first_node, self._pipeline.plant.nodes[self._trends[0].node_id])[0]
         self.displayer = DetectorDisplay()
@@ -27,6 +30,7 @@ class MethodWave(MethodBase):
             self._normal_range = float(self._params['NORMAL_RANGE'])
             self._no_detection_window = float(self._params['NO_DETECTION_WINDOW_SECONDS']) * 1000
             self._min_wave_value = float(self._params['MIN_WAVE_VALUE'])
+            self._wave_similarity = float(self._params['WAVE_SIMILARITY'])
             self._read_past_data = bool(self._params.get('READ_PAST_DATA', '1'))
         except KeyError as error:
             raise ValueError(f'{self.__class__.__name__} ({self.id}): No {error.args[0]} param')
@@ -68,16 +72,62 @@ class MethodWave(MethodBase):
     def get_max_trend_time_delta(self) -> int:
         return self._max_trend_time_delta
 
+    def _find_waves(self, data: np.ndarray, begin: int, start_data: bool) -> np.ndarray:
+        data_idx = 0 if start_data is True else 1
+        diffs = np.diff(np.sign(data)) != 0
+        change_idxs = np.argwhere(diffs)[:, 0]
+        if np.sign(data[0]) == 0:
+            wave_idxs = [(idx1, idx2) for idx1, idx2 in zip(change_idxs[0::2], change_idxs[1::2]) if (idx2 - idx1) >= 50]
+        else:
+            wave_idxs = [(idx1, idx2) for idx1, idx2 in zip(change_idxs[1::2], change_idxs[2::2]) if (idx2 - idx1) >= 50]
+
+        result_waveforms = []
+        for wave_start_idx, wave_end_idx in wave_idxs:
+            if self._previous_waveform[data_idx][1] is None:
+                wave_start_timestamp = begin + wave_start_idx * 10
+                self._previous_waveform[data_idx] = (wave_start_timestamp, data[wave_start_idx:wave_end_idx])
+                result_waveforms.append(data[wave_start_idx:wave_end_idx])
+                continue
+
+            previous_wave_timestamp, previous_wave = self._previous_waveform[data_idx]
+            wave_start_timestamp = begin + wave_start_idx * 10
+            self._previous_waveform[data_idx] = (wave_start_timestamp, copy.deepcopy(data[wave_start_idx:wave_end_idx]))
+            current_wave = np.abs(data[wave_start_idx:wave_end_idx])
+            previous_wave = np.abs(previous_wave)
+
+            if previous_wave.shape[0] < current_wave.shape[0]:
+                interp = interp1d(np.linspace(0, 1, current_wave.shape[0]), current_wave, kind='linear')
+                current_wave = interp(np.linspace(0, 1, previous_wave.shape[0]))
+            elif current_wave.shape[0] < previous_wave.shape[0]:
+                interp = interp1d(np.linspace(0, 1, previous_wave.shape[0]), previous_wave, kind='linear')
+                previous_wave = interp(np.linspace(0, 1, current_wave.shape[0]))
+
+            w_current_wave = (current_wave - current_wave.mean()) / (current_wave.std() + 1e-8)
+            w_previous_wave = (previous_wave - previous_wave.mean()) / (previous_wave.std() + 1e-8)
+
+            waveforms_corrcoef = np.corrcoef(w_current_wave, w_previous_wave)[0, 1]
+            current_max = np.max(current_wave)
+            previous_max = np.max(previous_wave)
+
+            if waveforms_corrcoef < self._wave_similarity or current_max > 2 * previous_max:
+                result_waveforms.append(data[wave_start_idx:wave_end_idx])
+            else:
+                result_waveforms.append(np.zeros_like(data[wave_start_idx:wave_end_idx]))
+
+        for waveform, (wave_start_idx, wave_end_idx) in zip(result_waveforms, wave_idxs):
+            data[wave_start_idx:wave_end_idx] = waveform
+
+        return data
+
     def get_probability(self, segment: Segment, begin: int, end: int) -> np.ndarray:
         window_begin = begin - segment.max_window_size[0]
         window_end = end + segment.max_window_size[1]
 
-        # To remove multiple detections of the same wave & find where leakages overlap:
-        # - find previous high / low peak in around ~2*pipeline.flow_time
-        # - check whether shape of the peak is identical as current peak
-        # - if yes: discard, if not: detect
         data_start = segment.start.get_trend_data(window_begin, window_end, self._min_wave_value)
         data_end = segment.end.get_trend_data(window_begin, window_end, self._min_wave_value)
+
+        data_start = self._find_waves(data_start, window_begin, True)
+        data_end = self._find_waves(data_end, window_begin, True)
 
         time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
         position = np.arange(0, segment.length, self._pipeline.length_resolution)
@@ -169,6 +219,8 @@ class MethodWave(MethodBase):
             while alarm_start_time < probability.shape[0]:
                 trace = self._generate_trace(probability, alarm_start_time, leakage_start_time)
                 if trace:
+                    if trace[-1][0] > probability.shape[0] - self._leakage_alarm_delta // self._pipeline.time_resolution:
+                        break
                     traces.append(trace)
                     alarm_time = trace[0][0]
                     leakage_time = trace[-1][0] * self._pipeline.time_resolution

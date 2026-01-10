@@ -45,7 +45,15 @@ class ParseToDetectionPeriods(argparse.Action):
 
 detection_time = 60 * 1000
 detection_periods = [
-    (datetime(2025, 6, 4, 13, 30, 52),
+    (datetime(2025, 6, 4, 13, 30, 50),
+     datetime(2025, 6, 4, 13, 35, 0)),
+    (datetime(2025, 6, 4, 13, 37, 0),
+     datetime(2025, 6, 4, 13, 41, 40)),
+    (datetime(2025, 6, 4, 13, 43, 40),
+     datetime(2025, 6, 4, 13, 49, 30)),
+    (datetime(2025, 6, 4, 13, 50, 50),
+     datetime(2025, 6, 4, 13, 56, 0)),
+    (datetime(2025, 6, 4, 13, 58, 15),
      datetime(2025, 6, 4, 14, 2, 0)),
 ]
 

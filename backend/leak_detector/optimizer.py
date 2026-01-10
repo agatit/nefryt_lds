@@ -56,7 +56,7 @@ def create_detection_periods(leakages_dataset: list[Leakage]) -> list[tuple]:
 
 def leak_detector(leakages_dataset: list[Leakage], method_params_dict: dict) -> list[Leakage]:
     setup_engine()
-    plant = Plant()
+    plant = Plant(past_leak_detector=True)
     detection_time = 10000
     detection_periods = create_detection_periods(leakages_dataset)
     events = []
@@ -138,6 +138,7 @@ params_spaces = {
         'BASE_WAVE_SPEED': np.arange(400, 451, 25),
         'DROP_LEVEL': np.arange(25, 201, 50),
         'NO_DETECTION_WINDOW_SECONDS': np.arange(10, 50, 13),
+        'WAVE_SIMILARITY': np.arange(0.7, 0.96, 0.05),
         'READ_PAST_DATA': [0, 1]
     },
     20: {
@@ -146,7 +147,8 @@ params_spaces = {
         'ALARM_LEVEL': np.arange(0.05, 0.07, 0.1),
         'WAVE_COEFF': np.arange(0.0001, 0.001, 0.005),
         'NO_DETECTION_WINDOW_SECONDS': np.arange(10, 50, 250),
-        'MIN_WAVE_VALUE': np.arange(10, 100, 500)
+        'MIN_WAVE_VALUE': np.arange(10, 100, 500),
+        'WAVE_SIMILARITY': np.arange(0.7, 0.96, 0.05)
     }
 }
 

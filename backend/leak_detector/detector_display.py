@@ -83,7 +83,7 @@ class DetectorDisplay:
             heatmap_height = 0.6
             ax2 = fig.add_axes((heatmap_x0, heatmap_y0, heatmap_width, heatmap_height))
             ax2.set_xmargin(0)
-            ax_cbar = fig.add_axes((0.5 + heatmap_width / 2 + 0.05, 0.06, 0.02, 0.6))
+            ax_cbar = fig.add_axes((0.5 + heatmap_width / 2 + 0.01, 0.06, 0.02, 0.6))
 
             ax1.plot([0, (sum(segment.max_window_size) + end - begin) // 10], [0, 0], '--', color='black', linewidth=0.5)
             ax1.plot(np.arange(0, (sum(segment.max_window_size) + end - begin) // 10),
@@ -168,12 +168,11 @@ class DetectorDisplay:
                         x_positions = [dp_indexes[x, y] for dp_indexes in dp_indexes_list]
                         for i, (x_pos, color) in enumerate(zip(x_positions, colors)):
                             y_pos = data_start[x_pos] if i % 2 == 0 else data_end[x_pos]
-                            line = ax1.axvline(x=x_pos, color=color, lw=1.5,
-                                               label=f'dp{i + 1}({x_pos}, {round(y_pos, 2)})')
-                            point = ax1.plot(x_pos, y_pos, 'o', color=color)[0]
+                            line = ax1.axvline(x=x_pos, color=color, lw=1.5)
+                            point = ax1.plot(x_pos, y_pos, 'o', color=color, label=f'dp{i + 1}({x_pos}, {round(y_pos, 2)})')[0]
                             plot_objects.extend([line, point])
                         handles, labels = ax1.get_legend_handles_labels()
-                        ax1.legend(handles, labels)
+                        ax1.legend(handles, labels, loc=5 if x <= len(dp_indexes_list[0])//2 else 6)
                     if peak_data_list:
                         colors = ['green', 'gold']
                         wave_speed, segment_length = peak_data_list
@@ -183,13 +182,13 @@ class DetectorDisplay:
                         x_end = x*(method.pipeline.time_resolution // 10) + delta_x_end
                         y_start = data_start[x_start]
                         y_end = data_end[x_end]
-                        line_start = ax1.axvline(x=x_start, color=colors[0], lw=1.5, label=f'peak start={x_start}, {round(y_start, 1)}')
-                        point_start = ax1.plot(x_start, y_start, 'o', color=colors[0])[0]
-                        line_end = ax1.axvline(x=x_end, color=colors[1], lw=1.5, label=f'peak end={x_end}, {round(y_end, 1)}')
-                        point_end = ax1.plot(x_end, y_end, 'o', color=colors[1])[0]
+                        line_start = ax1.axvline(x=x_start, color=colors[0], lw=1.5)
+                        point_start = ax1.plot(x_start, y_start, 'o', color=colors[0], label=f'peak start={x_start}, {round(y_start, 1)}')[0]
+                        line_end = ax1.axvline(x=x_end, color=colors[1], lw=1.5)
+                        point_end = ax1.plot(x_end, y_end, 'o', color=colors[1], label=f'peak end={x_end}, {round(y_end, 1)}')[0]
                         plot_objects.extend([line_start, point_start, line_end, point_end])
                         handles, labels = ax1.get_legend_handles_labels()
-                        ax1.legend(handles, labels)
+                        ax1.legend(handles, labels, loc=5 if x <= len(dp_indexes_list[0])//2 else 6)
 
                     fig.canvas.draw_idle()
 
