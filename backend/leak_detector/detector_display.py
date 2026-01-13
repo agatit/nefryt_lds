@@ -60,7 +60,7 @@ class DetectorDisplay:
         xticks_labels = [str(datetime.datetime.fromtimestamp(t // 1000).strftime('%H:%M:%S'))
                          for t in
                          np.arange(begin - segment.max_window_size[0], end + segment.max_window_size[1] + 1, 10).tolist()]
-        yticks_labels = np.arange(segment.begin_pos, segment.begin_pos + segment.length, 1).astype(int)
+        yticks_labels = np.arange(int(segment.begin_pos), int(segment.begin_pos + segment.length)+1, 1)
 
         max_x, max_y = np.unravel_index(np.argmax(probability), probability.shape)
         logger.debug(f'DetectorDisplay: Method ID={method.id}: '
@@ -107,8 +107,7 @@ class DetectorDisplay:
             ax2.set_xticklabels(
                 xticks_labels[segment.max_window_size[0] // 10:-segment.max_window_size[1] // 10:step_xtick_ms // 10],
                 rotation=45, ha='right')
-
-            ax2.set_yticks(np.arange(0, segment.length // method.pipeline.length_resolution, 1)[
+            ax2.set_yticks(np.arange(0, (segment.length+1) // method.pipeline.length_resolution, 1)[
                            ::step_ytick_m // method.pipeline.length_resolution])
             ax2.set_yticklabels(yticks_labels[::step_ytick_m])
             ax2.set(xlabel="Time [s]", ylabel="Distance [m]")
@@ -176,8 +175,8 @@ class DetectorDisplay:
                     if peak_data_list:
                         colors = ['green', 'gold']
                         wave_speed, segment_length = peak_data_list
-                        delta_x_start = int((y*method.pipeline.length_resolution / wave_speed) * 100)
-                        delta_x_end = int(((segment_length - y*method.pipeline.length_resolution) / wave_speed) * 100)
+                        delta_x_start = int(((segment.dist_to_start + y*method.pipeline.length_resolution) / wave_speed) * 100)
+                        delta_x_end = int(((segment.dist_to_end + segment_length - y*method.pipeline.length_resolution) / wave_speed) * 100)
                         x_start = x*(method.pipeline.time_resolution // 10) + delta_x_start
                         x_end = x*(method.pipeline.time_resolution // 10) + delta_x_end
                         y_start = data_start[x_start]
@@ -188,7 +187,7 @@ class DetectorDisplay:
                         point_end = ax1.plot(x_end, y_end, 'o', color=colors[1], label=f'peak end={x_end}, {round(y_end, 1)}')[0]
                         plot_objects.extend([line_start, point_start, line_end, point_end])
                         handles, labels = ax1.get_legend_handles_labels()
-                        ax1.legend(handles, labels, loc=5 if x <= len(dp_indexes_list[0])//2 else 6)
+                        ax1.legend(handles, labels, loc=5 if x <= probability.shape[0]//2 else 6)
 
                     fig.canvas.draw_idle()
 

@@ -139,4 +139,3 @@ leak_detector:
         level: INFO
         handlers: [ console ]
         propagate: False
-

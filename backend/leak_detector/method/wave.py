@@ -1,19 +1,16 @@
-import copy
 import logging
 import numpy as np
-from scipy.interpolate import interp1d
-from .base import MethodBase, Segment
+from .base import MethodSegments, Segment
 from ..detector_display import DetectorDisplay
 from ..event import Event
-from ..plant import Pipeline, Trend
+from ..plant import Pipeline
 
 logger = logging.getLogger(__name__)
 
 
-class MethodWave(MethodBase):
+class MethodWave(MethodSegments):
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
         super().__init__(pipeline, id_, name)
-        self._previous_waveform = [(0, None), (0, None)]
         self._get_params()
         self._begin_pos = pipeline.plant.get_distances(pipeline.first_node, self._pipeline.plant.nodes[self._trends[0].node_id])[0]
         self.displayer = DetectorDisplay()
@@ -22,41 +19,18 @@ class MethodWave(MethodBase):
 
     def _get_params(self) -> None:
         try:
-            self._pressure_deriv_trend_ids  = str(self._params['PRESSURE_DERIV_TRENDS']).split(',')
+            super()._get_params()
             self._leakage_level = float(self._params['LEAKAGE_LEVEL'])
             self._alarm_level = float(self._params['ALARM_LEVEL'])
-            self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
             self._wave_coeff = float(self._params['WAVE_COEFF'])
             self._normal_range = float(self._params['NORMAL_RANGE'])
             self._no_detection_window = float(self._params['NO_DETECTION_WINDOW_SECONDS']) * 1000
             self._min_wave_value = float(self._params['MIN_WAVE_VALUE'])
-            self._wave_similarity = float(self._params['WAVE_SIMILARITY'])
             self._read_past_data = bool(self._params.get('READ_PAST_DATA', '1'))
         except KeyError as error:
             raise ValueError(f'{self.__class__.__name__} ({self.id}): No {error.args[0]} param')
+        self._create_segments(True)
 
-        try:
-            self._trends : list[Trend] = []
-            for trend_id in self._pressure_deriv_trend_ids:
-                self._trends.append(self._pipeline.plant.trends[int(trend_id)])
-        except KeyError as error:
-            raise ValueError(f'{self.__class__.__name__} ({self.id}): Wrong PRESSURE_DERIV_TRENDS value, '
-                             f'trend {error.args[0]} does not exist')
-        self._create_segments()
-
-    def _create_segments(self) -> None:
-        logger.debug(f'{self.__class__.__name__} ({self.id}): Started creating segments')
-        self._segments: list[Segment] = []
-        self._pipeline_length = self._pipeline.begin_pos
-        previous_trend = None
-        for current_trend in self._trends:
-            if previous_trend is not None:
-                segment = Segment(self._pipeline, previous_trend, current_trend,
-                                     self._pipeline_length, self._wave_speed)
-                self._pipeline_length += segment.length
-                self._segments.append(segment)
-            previous_trend = current_trend
-        logger.debug(f'{self.__class__.__name__} ({self.id}): Finished creating segments')
 
     def _calculate_params(self):
         self._backtrace_position_delta = int(((self._wave_speed * (self._pipeline.time_resolution / 1000)) * 1.5)
@@ -72,53 +46,6 @@ class MethodWave(MethodBase):
     def get_max_trend_time_delta(self) -> int:
         return self._max_trend_time_delta
 
-    def _find_waves(self, data: np.ndarray, begin: int, start_data: bool) -> np.ndarray:
-        data_idx = 0 if start_data is True else 1
-        diffs = np.diff(np.sign(data)) != 0
-        change_idxs = np.argwhere(diffs)[:, 0]
-        if np.sign(data[0]) == 0:
-            wave_idxs = [(idx1, idx2) for idx1, idx2 in zip(change_idxs[0::2], change_idxs[1::2]) if (idx2 - idx1) >= 50]
-        else:
-            wave_idxs = [(idx1, idx2) for idx1, idx2 in zip(change_idxs[1::2], change_idxs[2::2]) if (idx2 - idx1) >= 50]
-
-        result_waveforms = []
-        for wave_start_idx, wave_end_idx in wave_idxs:
-            if self._previous_waveform[data_idx][1] is None:
-                wave_start_timestamp = begin + wave_start_idx * 10
-                self._previous_waveform[data_idx] = (wave_start_timestamp, data[wave_start_idx:wave_end_idx])
-                result_waveforms.append(data[wave_start_idx:wave_end_idx])
-                continue
-
-            previous_wave_timestamp, previous_wave = self._previous_waveform[data_idx]
-            wave_start_timestamp = begin + wave_start_idx * 10
-            self._previous_waveform[data_idx] = (wave_start_timestamp, copy.deepcopy(data[wave_start_idx:wave_end_idx]))
-            current_wave = np.abs(data[wave_start_idx:wave_end_idx])
-            previous_wave = np.abs(previous_wave)
-
-            if previous_wave.shape[0] < current_wave.shape[0]:
-                interp = interp1d(np.linspace(0, 1, current_wave.shape[0]), current_wave, kind='linear')
-                current_wave = interp(np.linspace(0, 1, previous_wave.shape[0]))
-            elif current_wave.shape[0] < previous_wave.shape[0]:
-                interp = interp1d(np.linspace(0, 1, previous_wave.shape[0]), previous_wave, kind='linear')
-                previous_wave = interp(np.linspace(0, 1, current_wave.shape[0]))
-
-            w_current_wave = (current_wave - current_wave.mean()) / (current_wave.std() + 1e-8)
-            w_previous_wave = (previous_wave - previous_wave.mean()) / (previous_wave.std() + 1e-8)
-
-            waveforms_corrcoef = np.corrcoef(w_current_wave, w_previous_wave)[0, 1]
-            current_max = np.max(current_wave)
-            previous_max = np.max(previous_wave)
-
-            if waveforms_corrcoef < self._wave_similarity or current_max > 2 * previous_max:
-                result_waveforms.append(data[wave_start_idx:wave_end_idx])
-            else:
-                result_waveforms.append(np.zeros_like(data[wave_start_idx:wave_end_idx]))
-
-        for waveform, (wave_start_idx, wave_end_idx) in zip(result_waveforms, wave_idxs):
-            data[wave_start_idx:wave_end_idx] = waveform
-
-        return data
-
     def get_probability(self, segment: Segment, begin: int, end: int) -> np.ndarray:
         window_begin = begin - segment.max_window_size[0]
         window_end = end + segment.max_window_size[1]
@@ -133,13 +60,13 @@ class MethodWave(MethodBase):
         position = np.arange(0, segment.length, self._pipeline.length_resolution)
         positions, times = np.meshgrid(position, time)
 
-        offset_left_dist = position
-        offset_right_dist = segment.length - position
+        offset_left_dist = segment.dist_to_start + position
+        offset_right_dist = segment.dist_to_end + segment.length - position
         wave_fading_left = np.exp(self._wave_coeff * offset_left_dist).reshape(1, -1)
         wave_fading_right = np.exp(self._wave_coeff * offset_right_dist).reshape(1, -1)
 
-        offset_left = positions / self._wave_speed * 1000
-        offset_right = (segment.length - positions) / self._wave_speed * 1000
+        offset_left = (positions+segment.dist_to_start) / self._wave_speed * 1000
+        offset_right = (segment.dist_to_end + segment.length - positions) / self._wave_speed * 1000
 
         dp1_indexes = ((times - offset_left) / 10).astype(int)
         dp2_indexes = ((times - offset_right) / 10).astype(int)

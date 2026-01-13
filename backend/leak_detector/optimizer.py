@@ -10,13 +10,13 @@ import numpy as np
 import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_engine, Settings, setup_logging
-from leak_detector.config import LeakDetectorSettings
+from leak_detector.config import LeakDetectorSettings, setup_leak_detector_logging
 from leak_detector.plant import Plant
 
 seconds_tolerance = 2
 dataset_filename = 'backend/leak_detector/tests/leakage_dataset.json'
 tested_pipeline_id = 1
-tested_method_id = 20
+tested_method_id = 1001
 experiment_results_filename = f'backend/leak_detector/tests/experiment_results_{tested_method_id}.csv'
 
 class Leakage:
@@ -57,7 +57,7 @@ def create_detection_periods(leakages_dataset: list[Leakage]) -> list[tuple]:
 def leak_detector(leakages_dataset: list[Leakage], method_params_dict: dict) -> list[Leakage]:
     setup_engine()
     plant = Plant(past_leak_detector=True)
-    detection_time = 10000
+    detection_time = 600000
     detection_periods = create_detection_periods(leakages_dataset)
     events = []
     for pipeline_id, pipeline_method_params in method_params_dict.items():
@@ -72,7 +72,7 @@ def leak_detector(leakages_dataset: list[Leakage], method_params_dict: dict) -> 
         while begin_detection_time < detection_period[1].timestamp() * 1000 - plant.max_leakage_alarm_delta:
             end_detection_time = begin_detection_time + plant.max_leakage_alarm_delta + detection_time
             end_detection_time = end_detection_time if end_detection_time <= (
-                        end_detection_date.timestamp() * 1000) else (end_detection_date.timestamp() * 1000)
+                        end_detection_date.timestamp() * 1000) else (int(end_detection_date.timestamp()) * 1000)
             for pipeline in plant.pipelines.values():
                 leaks = pipeline.find_leaks_in_range(begin_detection_time, end_detection_time)
                 for _, leak_events in leaks.items():
@@ -135,26 +135,29 @@ def validate_results(leakage_dataset: list[Leakage], detected_leakages: list[Lea
 
 params_spaces = {
     1001: {
-        'BASE_WAVE_SPEED': np.arange(400, 451, 25),
-        'DROP_LEVEL': np.arange(25, 201, 50),
-        'NO_DETECTION_WINDOW_SECONDS': np.arange(10, 50, 13),
-        'WAVE_SIMILARITY': np.arange(0.7, 0.96, 0.05),
-        'READ_PAST_DATA': [0, 1]
+        'BASE_WAVE_SPEED': np.arange(425, 451, 100),
+        'DROP_LEVEL': np.arange(50, 151, 50),
+        'NO_DETECTION_WINDOW_SECONDS': np.arange(10, 50, 100),
+        'WAVE_SIMILARITY': np.arange(0.8, 0.91, 0.1),
+        'READ_PAST_DATA': [False],
+        'SEGMENTS_LIKE_SENSORS': [False, True]
     },
     20: {
         'BASE_WAVE_SPEED': np.arange(400, 451, 50),
-        'LEAKAGE_LEVEL': np.arange(0.02, 0.04, 0.01),
+        'LEAKAGE_LEVEL': np.arange(0.02, 0.04, 0.1),
         'ALARM_LEVEL': np.arange(0.05, 0.07, 0.1),
         'WAVE_COEFF': np.arange(0.0001, 0.001, 0.005),
         'NO_DETECTION_WINDOW_SECONDS': np.arange(10, 50, 250),
         'MIN_WAVE_VALUE': np.arange(10, 100, 500),
-        'WAVE_SIMILARITY': np.arange(0.7, 0.96, 0.05)
+        'WAVE_SIMILARITY': np.arange(0.7, 1.01, 0.3),
+        'SEGMENTS_LIKE_SENSORS': [False, True]
     }
 }
 
 if __name__ == '__main__':
     Settings.verbosity = 'ERROR'
     setup_logging()
+    setup_leak_detector_logging()
     LeakDetectorSettings.plot_heatmap = False
     LeakDetectorSettings.optimizer_method_id = tested_method_id
     LeakDetectorSettings.optimizer_pipeline_id = tested_pipeline_id
