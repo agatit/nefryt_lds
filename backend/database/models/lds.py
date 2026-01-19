@@ -15,14 +15,11 @@ class EventDef(base.EventDef, table=True):
 
 
 # TODO: test relations between method tables & how they react to cascade deleting
-class MethodDef(SQLModel, table=True):
+class MethodDef(base.MethodDef, table=True):
     __tablename__ = 'MethodDef'
     __table_args__ = (
         {'schema': 'lds'}
     )
-
-    ID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), primary_key=True))
-    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
 class MethodParamDef(SQLModel, table=True):
@@ -126,26 +123,13 @@ class Link(base.Link, table=True):
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))
 
 
-class Method(SQLModel, table=True):
+class Method(base.Method, table=True):
     __tablename__ = 'Method'
     __table_args__ = (
         {'schema': 'lds'}
     )
 
-    ID: int = Field(sa_column=Column(Integer, Identity(start=1000, increment=1), primary_key=True))
-    MethodDefID: str = Field(
-        sa_column=Column(
-            CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
-            ForeignKey("lds.MethodDef.ID", ondelete="CASCADE", onupdate="CASCADE"),
-            nullable=False
-        ))
-    PipelineID: int = Field(
-        sa_column=Column(
-            Integer,
-            ForeignKey("lds.Pipeline.ID", ondelete="CASCADE", onupdate="CASCADE"),
-            nullable=False
-        ))
-    Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
+    ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))
 
 
 class PipelineNode(SQLModel, table=True):

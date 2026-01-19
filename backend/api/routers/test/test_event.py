@@ -19,7 +19,7 @@ event_def_invisible = lds.EventDef(ID='INVISIBLE', Verbosity='verbosity', Captio
                                    Silent=False, Visible=False, Enabled=True)
 event_def_disabled = lds.EventDef(ID='DISABLED', Verbosity='verbosity', Caption='caption',
                                   Silent=False, Visible=True, Enabled=False)
-method_def = lds.MethodDef(ID='METHODDEF')
+method_def = lds.MethodDef(ID='METHODDEF', Name='MethodDef')
 pipeline = lds.Pipeline(ID=10, Name='Pipeline')
 method = lds.Method(ID=1, MethodDefID='METHODDEF', PipelineID=10)
 event_visible = lds.Event(ID=1, EventDefID='VISIBLE', MethodID=1, BeginDate=datetime.now())
@@ -41,7 +41,7 @@ def reset_event_objects():
                                        Silent=False, Visible=False, Enabled=True)
     event_def_disabled = lds.EventDef(ID='DISABLED', Verbosity='verbosity', Caption='caption',
                                       Silent=False, Visible=True, Enabled=False)
-    method_def = lds.MethodDef(ID='METHODDEF')
+    method_def = lds.MethodDef(ID='METHODDEF', Name='MethodDef')
     pipeline = lds.Pipeline(ID=10, Name='Pipeline')
     method = lds.Method(ID=1, MethodDefID='METHODDEF', PipelineID=10)
     event_visible = lds.Event(ID=1, EventDefID='VISIBLE', MethodID=1, BeginDate=datetime.now())

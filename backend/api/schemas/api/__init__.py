@@ -20,3 +20,4 @@ from .past_writer_config import *
 from .past_detector_config import *
 from .pipeline import *
 from .pipeline_param import *
+from .method import *

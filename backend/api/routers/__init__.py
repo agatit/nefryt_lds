@@ -18,3 +18,5 @@ from .simulation_param import router as simulation_params_router
 from .leak_detector import router as leak_detector_router
 from .pipeline import router as pipeline_router
 from .pipeline_param import router as pipeline_params_router
+from .method import router as method_router
+from .method_def import router as method_def_router

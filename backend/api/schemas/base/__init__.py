@@ -14,3 +14,5 @@ from .simulation_data import *
 from .simulation_param import *
 from .pipeline import *
 from .pipeline_param import *
+from .method import *
+from .method_def import *

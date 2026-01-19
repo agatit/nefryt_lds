@@ -31,25 +31,6 @@ simulation3 = lds.Simulation(ID=3, SimulationDefID='DENSITY', TrendID=trend2.ID,
 simulation4 = lds.Simulation(ID=4, SimulationDefID='WAVE', TrendID=trend2.ID, Name='Sim4', RefreshTimeSeconds=5,
                              ResolutionMeters=100)
 simulation_list = [simulation1, simulation2, simulation3, simulation4]
-simulation_param_def1 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='DENSITY', Name='Pipeline length', DataType='INT')
-simulation_param_def2 = lds.SimulationParamDef(ID='WIDTH', SimulationDefID='DENSITY', Name='Pipeline width', DataType='FLOAT')
-simulation_param_def3 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='WAVE', Name='Pipeline length', DataType='INT')
-simulation_param_def_list = [simulation_param_def1, simulation_param_def2, simulation_param_def3]
-simulation_param1 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='LENGTH', SimulationDefID=simulation1.SimulationDefID,
-                                        Value='1500')
-simulation_param2 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='WIDTH', SimulationDefID=simulation1.SimulationDefID,
-                                        Value='0.75')
-simulation_param3 = lds.SimulationParam(SimulationID=3, SimulationParamDefID='LENGTH', SimulationDefID=simulation3.SimulationDefID,
-                                        Value='6000')
-simulation_param4 = lds.SimulationParam(SimulationID=2, SimulationParamDefID='LENGTH', SimulationDefID=simulation1.SimulationDefID,
-                                        Value='1500')
-simulation_param_list = [simulation_param1, simulation_param2, simulation_param3, simulation_param4]
-simulation_data1 = lds.SimulationData(SimulationID=1, Time=20, Distance=0, Data=1)
-simulation_data2 = lds.SimulationData(SimulationID=1, Time=20, Distance=500, Data=2)
-simulation_data3 = lds.SimulationData(SimulationID=1, Time=20, Distance=1000, Data=3)
-simulation_data4 = lds.SimulationData(SimulationID=2, Time=25, Distance=0, Data=1)
-simulation_data5 = lds.SimulationData(SimulationID=2, Time=25, Distance=500, Data=2)
-simulation_data_list = [simulation_data1, simulation_data2, simulation_data3, simulation_data4, simulation_data5]
 
 
 def reset_simulation_objects():
@@ -256,7 +237,7 @@ def test_update_simulation_by_id_should_return_conflict_response_code_and_error_
 
 
 @pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_update_simulation_by_id_should_return_conflict_response_code_and_error_when_no_simulation_def_with_given_id(add_lds_objects):
+def test_update_simulation_by_id_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(add_lds_objects):
     update_simulation_dict = {'TrendID': trend2.ID+10, 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation3.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
