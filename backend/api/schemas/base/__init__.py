@@ -16,3 +16,5 @@ from .pipeline import *
 from .pipeline_param import *
 from .method import *
 from .method_def import *
+from .method_param import *
+from .method_data import *

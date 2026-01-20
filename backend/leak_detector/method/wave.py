@@ -56,8 +56,9 @@ class MethodWave(MethodSegments):
         data_start = self._find_waves(data_start, window_begin, True)
         data_end = self._find_waves(data_end, window_begin, True)
 
+        start_pos = round(self.pipeline.length_resolution - ((segment.begin_pos - self.pipeline.begin_pos) % self.pipeline.length_resolution), 0) % self.pipeline.length_resolution
         time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
-        position = np.arange(0, segment.length, self._pipeline.length_resolution)
+        position = np.arange(int(start_pos), segment.length, self._pipeline.length_resolution)
         positions, times = np.meshgrid(position, time)
 
         offset_left_dist = segment.dist_to_start + position
@@ -136,9 +137,12 @@ class MethodWave(MethodSegments):
             alarm_start_time = (self.pipeline.plant.max_leakage_alarm_delta - self._leakage_alarm_delta) // self._pipeline.time_resolution
             leakage_start_time = 0
             probability = self.get_probability(segment, begin, end)
+            start_pos = round(self.pipeline.length_resolution - (
+                        (segment.begin_pos - self.pipeline.begin_pos) % self.pipeline.length_resolution),
+                              0) % self.pipeline.length_resolution
             self._save_method_data(probability[alarm_start_time + self._leakage_alarm_delta // self._pipeline.time_resolution:],
                                    range(begin+self._leakage_alarm_delta, end, self._pipeline.time_resolution),
-                                   range(int(segment.begin_pos), int(segment.end_pos), self._pipeline.length_resolution))
+                                   range(int(round(segment.begin_pos + start_pos, 0)), int(segment.end_pos), self._pipeline.length_resolution))
             traces = []
             if segment.no_detection_time - begin > alarm_start_time:
                 alarm_start_time = int((segment.no_detection_time - begin) // self._pipeline.time_resolution)
@@ -153,7 +157,7 @@ class MethodWave(MethodSegments):
                     leakage_time = trace[-1][0] * self._pipeline.time_resolution
                     leakage_position = trace[-1][1]
                     events.append(Event(self._id, begin + leakage_time,
-                                        segment.begin_pos + leakage_position * self._pipeline.length_resolution))
+                                        segment.begin_pos + start_pos + leakage_position * self._pipeline.length_resolution))
                     alarm_probability = np.where(probability > self._alarm_level, 1, 0)
                     alarm_possibilities_per_time = np.sum(alarm_probability, axis=1)[alarm_time:]
                     no_alarm_times = np.where(alarm_possibilities_per_time == 0)[0]

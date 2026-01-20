@@ -1,10 +1,12 @@
 from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
-    Integer, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index, Float
+    Integer, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
 from api.schemas import base
 
-
+# TODO: check if you need ObjectID and ObjectDefID in ObjectParam table
+# TODO: openapi
+# TODO: alembic
 class EventDef(base.EventDef, table=True):
     __tablename__ = 'EventDef'
     __table_args__ = (
@@ -25,11 +27,15 @@ class MethodDef(base.MethodDef, table=True):
 class MethodParamDef(SQLModel, table=True):
     __tablename__ = 'MethodParamDef'
     __table_args__ = (
+        PrimaryKeyConstraint('ID', 'MethodDefID', name='MethodParamDef_pk'),
         {'schema': 'lds'}
     )
 
-    ID: str = Field(sa_column=Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False, primary_key=True))
-    MethodDefID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
+    ID: str = Field(sa_column=Column(CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
+    MethodDefID: str = Field(sa_column=Column(
+        CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
+        ForeignKey('lds.MethodDef.ID'),
+        nullable=False, index=True))
     Name: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
     DataType: str | None = Field(None, sa_column=Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
@@ -132,6 +138,7 @@ class Method(base.Method, table=True):
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))
 
 
+# TODO: pipelinenode is it required?
 class PipelineNode(SQLModel, table=True):
     __tablename__ = 'PipelineNode'
     __table_args__ = (
@@ -202,6 +209,7 @@ class TrendParamDef(SQLModel, table=True):
     DataType: str | None = Field(None, sa_column=Column(VARCHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
+# TODO: event to api & base
 class Event(SQLModel, table=True):
     __tablename__ = 'Event'
     __table_args__ = (
@@ -242,26 +250,19 @@ class Event(SQLModel, table=True):
     Position: int | None = Field(None)
 
 
-class MethodParam(SQLModel, table=True):
+class MethodParam(base.MethodParam, table=True):
     __tablename__ = 'MethodParam'
     __table_args__ = (
-        ForeignKeyConstraint(
-            ['MethodID'], ['lds.Method.ID'],
-            name='MethodParam_Method_fk',
-            onupdate='CASCADE',
-            ondelete='CASCADE'
-        ),
+        PrimaryKeyConstraint('MethodParamDefID', 'MethodID', name='MethodParam_pk'),
         {'schema': 'lds'}
     )
 
-    MethodParamDefID: str = Field(sa_column=Column(
-        CHAR(30, 'SQL_Polish_CP1250_CS_AS'), nullable=False, primary_key=True))
     MethodID: int = Field(
         sa_column=Column(
             Integer,
+            ForeignKey("lds.Method.ID", ondelete="CASCADE", onupdate="CASCADE"),
             nullable=False
         ))
-    Value: str | None = Field(None, sa_column=Column(String(30, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
 class TrendParam(base.TrendParam, table=True):
@@ -364,7 +365,7 @@ class SimulationData(base.SimulationData, table=True):
     Time: int = Field(sa_column=Column(BigInteger, nullable=False))
 
 
-class MethodData(SQLModel, table=True):
+class MethodData(base.MethodData, table=True):
     __tablename__ = 'MethodData'
     __table_args__ = (
         PrimaryKeyConstraint('MethodID', 'Position', 'Time', name='MethodData_pk'),
@@ -376,6 +377,3 @@ class MethodData(SQLModel, table=True):
         ForeignKey("lds.Method.ID", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False
     ))
-    Position: int = Field(sa_column=Column(Integer, nullable=False))
-    Time: int = Field(sa_column=Column(BigInteger, nullable=False))
-    Value: float = Field(0.0, sa_column=Column(Float, nullable=False))

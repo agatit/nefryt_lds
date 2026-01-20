@@ -135,8 +135,9 @@ class MethodTOF(MethodSegments):
             filtered_peaks.append((peak_start, peak_end, diff_dist_from_edge))
             leakages.append((leakage_position_idx, leakage_time_idx))
 
+        start_pos = round(self.pipeline.length_resolution - ((segment.begin_pos - self.pipeline.begin_pos) % self.pipeline.length_resolution), 0) % self.pipeline.length_resolution
         time = np.arange(begin, end, self._pipeline.time_resolution) - window_begin
-        position = np.arange(0, segment.length, self._pipeline.length_resolution)
+        position = np.arange(int(start_pos), segment.length, self._pipeline.length_resolution)
         positions, _ = np.meshgrid(position, time)
 
         probability = self.simulate_probability(positions, filtered_peaks, segment)
@@ -153,8 +154,11 @@ class MethodTOF(MethodSegments):
         for segment in self._segments:
             alarm_start_time = self._pipeline.plant.max_leakage_alarm_delta // self._pipeline.time_resolution
             leakages, probability = self.get_probability(segment, begin, end)
+            start_pos = round(self.pipeline.length_resolution - (
+                        (segment.begin_pos - self.pipeline.begin_pos) % self.pipeline.length_resolution),
+                              0) % self.pipeline.length_resolution
             self._save_method_data(probability, range(begin, end, self._pipeline.time_resolution),
-                                   range(int(segment.begin_pos), int(segment.end_pos), self._pipeline.length_resolution))
+                                   range(int(round(segment.begin_pos + start_pos, 0)), int(segment.end_pos), self._pipeline.length_resolution))
             if segment.no_detection_time - begin > alarm_start_time:
                 alarm_start_time = int((segment.no_detection_time - begin) // self._pipeline.time_resolution)
             if len(leakages) > 0:
@@ -163,7 +167,7 @@ class MethodTOF(MethodSegments):
                     if len(leakage_idxs) == 0:
                         break
                     leakage_position, leakage_time = leakages[leakage_idxs[0]]
-                    events.append(Event(self._id, begin + leakage_time*self._pipeline.time_resolution, segment.begin_pos + leakage_position * self._pipeline.length_resolution))
+                    events.append(Event(self._id, begin + leakage_time*self._pipeline.time_resolution, segment.begin_pos + start_pos + leakage_position * self._pipeline.length_resolution))
                     segment.no_detection_time = begin + leakage_time * self._pipeline.time_resolution + self._no_detection_window
                     alarm_start_time = int(self._no_detection_window // self._pipeline.time_resolution + leakage_time)
 

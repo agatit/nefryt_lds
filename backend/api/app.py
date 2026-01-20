@@ -11,11 +11,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_engine
 from db import get_engine
 from .schemas import api
-from .routers import (events_router, event_defs_router, trend_defs_router, trend_router, auth_router, link_router,
-                      node_router, template_router, unit_router, trend_groups_router, trend_writer_router,
-                      simulation_router, trend_params_router, trend_data_router, simulation_defs_router,
-                      simulation_data_router, simulation_params_router, leak_detector_router, pipeline_router,
-                      pipeline_params_router, method_router, method_def_router)
+from .routers import (event_router, event_def_router, trend_def_router, trend_router, auth_router, link_router,
+                      node_router, template_router, unit_router, trend_group_router, trend_writer_router,
+                      simulation_router, trend_param_router, trend_data_router, simulation_def_router,
+                      simulation_data_router, simulation_param_router, leak_detector_router, pipeline_router,
+                      pipeline_param_router, method_router, method_def_router, method_param_router, method_data_router)
 
 setup_engine()
 app = FastAPI(title='Nefryt LDS API',
@@ -23,26 +23,28 @@ app = FastAPI(title='Nefryt LDS API',
 add_pagination(app)
 app.include_router(auth_router)
 app.include_router(trend_router)
-app.include_router(trend_params_router)
+app.include_router(trend_param_router)
 app.include_router(trend_data_router)
 app.include_router(template_router)
-app.include_router(trend_defs_router)
-app.include_router(events_router)
-app.include_router(event_defs_router)
+app.include_router(trend_def_router)
+app.include_router(event_router)
+app.include_router(event_def_router)
 app.include_router(link_router)
 app.include_router(node_router)
 app.include_router(unit_router)
-app.include_router(trend_groups_router)
+app.include_router(trend_group_router)
 app.include_router(trend_writer_router)
 app.include_router(simulation_router)
-app.include_router(simulation_defs_router)
+app.include_router(simulation_def_router)
 app.include_router(simulation_data_router)
-app.include_router(simulation_params_router)
+app.include_router(simulation_param_router)
 app.include_router(leak_detector_router)
 app.include_router(pipeline_router)
-app.include_router(pipeline_params_router)
+app.include_router(pipeline_param_router)
 app.include_router(method_router)
 app.include_router(method_def_router)
+app.include_router(method_param_router)
+app.include_router(method_data_router)
 
 origins = ['http://localhost:8080',
            'http://192.168.30.52:3000',

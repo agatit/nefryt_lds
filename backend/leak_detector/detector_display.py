@@ -60,7 +60,8 @@ class DetectorDisplay:
         xticks_labels = [str(datetime.datetime.fromtimestamp(t // 1000).strftime('%H:%M:%S'))
                          for t in
                          np.arange(begin - segment.max_window_size[0], end + segment.max_window_size[1] + 1, 10).tolist()]
-        yticks_labels = np.arange(int(segment.begin_pos), int(segment.begin_pos + segment.length)+1, 1)
+        start_pos = round(method.pipeline.length_resolution - ((segment.begin_pos - method.pipeline.begin_pos) % method.pipeline.length_resolution), 0) % method.pipeline.length_resolution
+        yticks_labels = np.arange(int(round(segment.begin_pos + start_pos, 0)), int(segment.begin_pos + segment.length)+1, 1)
 
         max_x, max_y = np.unravel_index(np.argmax(probability), probability.shape)
         logger.debug(f'DetectorDisplay: Method ID={method.id}: '

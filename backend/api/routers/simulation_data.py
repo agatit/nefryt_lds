@@ -53,5 +53,5 @@ async def get_simulation_data(simulation_id: Annotated[int, Path()],
                           page=params.page, size=params.size)
     except Exception as e:
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                      message='Exception in list_simulation_params_by_simulation_id(): ' + str(e))
+                      message='Exception in get_simulation_data(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

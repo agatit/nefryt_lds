@@ -143,3 +143,23 @@ def map_lds_pipeline_param_and_lds_pipeline_param_def_to_api_pipeline_param\
 
 def map_pipeline_param_base_to_lds_pipeline_param(pipeline_param: api.PipelineParamCreate, lds_pipeline: lds.Pipeline) -> lds.PipelineParam:
     return lds.PipelineParam(**pipeline_param.model_dump() | {'PipelineID': lds_pipeline.ID})
+
+
+def map_lds_method_param_and_lds_method_param_def_to_api_method_param\
+                (lds_method_param: lds.MethodParam | None, lds_method_param_def: lds.MethodParamDef, method_id: int) -> api.MethodParam:
+    if lds_method_param is None:
+        lds_method_param_dict = {
+            'MethodID': method_id,
+            'MethodParamDefID': lds_method_param_def.ID,
+            'Value': None
+        }
+    else:
+        lds_method_param_dict = to_dict(lds_method_param)
+    lds_method_param_def_dict = to_dict(lds_method_param_def)
+    lds_method_param_def_dict.pop('ID')
+    api_method_param_dict = lds_method_param_dict | lds_method_param_def_dict
+    return api.MethodParam(**strip_strings_in_dict(api_method_param_dict))
+
+
+def map_method_param_base_to_lds_method_param(method_param: api.MethodParamCreate, lds_method: lds.Method) -> lds.MethodParam:
+    return lds.MethodParam(**method_param.model_dump() | {'MethodID': lds_method.ID})
