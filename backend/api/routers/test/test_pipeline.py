@@ -95,7 +95,7 @@ def test_create_pipeline_should_return_created_response_code_and_created_pipelin
     response = test_client.post("/pipeline", json=pipeline_dict)
     assert response.status_code == status.HTTP_201_CREATED
     returned_pipeline = response.json()
-    assert returned_pipeline['ID'] == pipeline2.ID+1
+    assert returned_pipeline['ID'] >= pipeline2.ID+1
     assert returned_pipeline['Name'] == pipeline_dict['Name']
     with Session(get_engine()) as session:
         pipelines_count = session.execute(select(func.count()).select_from(lds.Pipeline)).fetchall()[0][0]

@@ -12,9 +12,7 @@ class MethodTOF(MethodSegments):
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
         super().__init__(pipeline, id_, name)
         self._get_params()
-        self._begin_pos = pipeline.plant.get_distances(pipeline.first_node, self._pipeline.plant.nodes[self._trends[0].node_id])[0]
         self.displayer = DetectorDisplay()
-        self._stored_events = []
         self._calculate_params()
 
     def _get_params(self):

@@ -87,7 +87,6 @@ def map_lds_simulation_param_and_lds_simulation_param_def_to_api_simulation_para
         }
     else:
         lds_simulation_param_dict = to_dict(lds_simulation_param)
-        lds_simulation_param_dict.pop('SimulationDefID')
     lds_simulation_param_def_dict = to_dict(lds_simulation_param_def)
     lds_simulation_param_def_dict.pop('SimulationDefID')
     lds_simulation_param_def_dict.pop('ID')

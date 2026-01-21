@@ -44,7 +44,7 @@ class Pipeline:
     def __init__(self, plant: Plant, id_: int, name: str):
         self._plant = plant
         self._nodes = {}
-        self._first_node = None
+        self._first_node_id = None
         self._methods = {}
         self._active_methods: dict[int, MethodBase] = {}
         self.id = id_
@@ -60,15 +60,6 @@ class Pipeline:
 
     def _build(self) -> None:
         logger.debug(f"Pipeline: Started building pipeline with id = {self.id}")
-        stmt = (select(lds.PipelineNode)
-                .where(lds.PipelineNode.PipelineID == self.id)) # noqa
-        with Session(get_engine()) as session:
-            nodes = session.scalars(stmt).all()
-        for node in nodes:
-            self._nodes[node.NodeID] = self._plant.nodes[node.NodeID]
-            if node.First:
-                self._first_node = self._nodes[node.NodeID]
-
         stmt = (select(lds.Method)
                 .where(lds.Method.PipelineID == self.id)) # noqa
         with Session(get_engine()) as session:
@@ -88,6 +79,10 @@ class Pipeline:
         for param in params:
             self._params[param.PipelineParamDefID.strip()] = param.Value
         self.begin_pos = float(self._params.get('BEGIN_POS', 0))
+        try:
+            self._first_node_id = int(self._params['FIRST_NODE_ID'])
+        except KeyError:
+            raise ValueError(f'No param \'FIRST_NODE_ID\' in pipeline with id = {self.id}')
         logger.info(f"Pipeline with id = {self.id} initialized (params={self._params})")
 
     def _get_params(self) -> None:
@@ -127,8 +122,8 @@ class Pipeline:
         return self._active_methods
 
     @property
-    def first_node(self) -> Node:
-        return self._first_node
+    def first_node_id(self) -> int:
+        return self._first_node_id
 
     @property
     def max_leakage_alarm_delta(self) -> int:
@@ -185,21 +180,20 @@ class Plant:
         self._max_trend_time_delta = max(([pipeline.max_trend_time_delta for pipeline in self._pipelines.values()]))
         logger.debug(f"Plant: Finished building pipelines")
 
-    def get_distances(self, node1: Node, node2: Node, visited=None) -> list[float]:
+    def get_distances(self, node_id1: int, node_id2: int, visited=None) -> list[float]:
         if visited is None:
             visited = set()
-
-        if node1 == node2:
+        if node_id1 == node_id2:
             return [0]
 
         distances = []
-        visited.add(node1)
+        visited.add(node_id1)
         for link in self.links.values():
-            if link.begin_node == node1 and link.end_node not in visited:
-                distances.extend([link.length + dist for dist in self.get_distances(link.end_node, node2, copy.copy(visited))])
+            if link.begin_node.id == node_id1 and link.end_node.id not in visited:
+                distances.extend([link.length + dist for dist in self.get_distances(link.end_node.id, node_id2, copy.copy(visited))])
 
-            if link.end_node == node1 and link.begin_node not in visited:
-                distances.extend([link.length + dist for dist in self.get_distances(link.begin_node, node2, copy.copy(visited))])        
+            if link.end_node.id == node_id1 and link.begin_node.id not in visited:
+                distances.extend([link.length + dist for dist in self.get_distances(link.begin_node.id, node_id2, copy.copy(visited))])
 
         return distances
 

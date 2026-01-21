@@ -1,12 +1,8 @@
-from datetime import datetime
 from sqlalchemy import BINARY, BigInteger, CHAR, Column, Identity, \
     Integer, PrimaryKeyConstraint, String, ForeignKey, VARCHAR, ForeignKeyConstraint, Index
 from sqlmodel import SQLModel, Field
 from api.schemas import base
 
-# TODO: check if you need ObjectID and ObjectDefID in ObjectParam table
-# TODO: openapi
-# TODO: alembic
 class EventDef(base.EventDef, table=True):
     __tablename__ = 'EventDef'
     __table_args__ = (
@@ -16,7 +12,6 @@ class EventDef(base.EventDef, table=True):
     ID: str = Field(sa_column=Column(CHAR(10, 'SQL_Polish_CP1250_CS_AS'), primary_key=True))
 
 
-# TODO: test relations between method tables & how they react to cascade deleting
 class MethodDef(base.MethodDef, table=True):
     __tablename__ = 'MethodDef'
     __table_args__ = (
@@ -138,29 +133,6 @@ class Method(base.Method, table=True):
     ID: int = Field(sa_column=Column(Integer, Identity(start=1, increment=1), primary_key=True))
 
 
-# TODO: pipelinenode is it required?
-class PipelineNode(SQLModel, table=True):
-    __tablename__ = 'PipelineNode'
-    __table_args__ = (
-        PrimaryKeyConstraint('PipelineID', 'NodeID', name='PipelineNode_pk'),
-        {'schema': 'lds'}
-    )
-
-    PipelineID: int = Field(
-        sa_column=Column(
-            Integer,
-            ForeignKey("lds.Pipeline.ID", ondelete="CASCADE", onupdate="CASCADE"),
-            nullable=False
-        ))
-    NodeID: int = Field(
-        sa_column=Column(
-            Integer,
-            ForeignKey("lds.Node.ID", ondelete="CASCADE", onupdate="CASCADE"),
-            nullable=False
-        ))
-    First: bool = Field(False, nullable=False, sa_column_kwargs={"server_default": "0"})
-
-
 class PipelineParam(base.PipelineParam, table=True):
     __tablename__ = 'PipelineParam'
     __table_args__ = (
@@ -209,45 +181,11 @@ class TrendParamDef(SQLModel, table=True):
     DataType: str | None = Field(None, sa_column=Column(VARCHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-# TODO: event to api & base
-class Event(SQLModel, table=True):
+class Event(base.Event, table=True):
     __tablename__ = 'Event'
     __table_args__ = (
-        ForeignKeyConstraint(
-            ['EventDefID'], ['lds.EventDef.ID'],
-            name='Event_EventDef_fk',
-            onupdate='CASCADE',
-            ondelete='CASCADE'
-        ),
-        ForeignKeyConstraint(
-            ['MethodID'], ['lds.Method.ID'],
-            name='Event_Method_fk',
-            onupdate='CASCADE',
-            ondelete='CASCADE'
-        ),
         {'schema': 'lds'}
     )
-
-    ID: int | None = Field(
-        default=None,
-        primary_key=True,
-        sa_column_kwargs={"autoincrement": True},
-    )
-    EventDefID: str = (
-        Field(sa_column=Column(
-            CHAR(10, 'SQL_Polish_CP1250_CS_AS'),
-            nullable=False)
-        ))
-    MethodID: int = Field(
-        sa_column=Column(
-            Integer,
-            nullable=False
-        ))
-    BeginDate: datetime = Field(nullable=False)
-    AckDate: datetime | None = Field(None)
-    EndDate: datetime | None = Field(None)
-    Details: str | None = Field(None, sa_column=Column(String(100, 'SQL_Polish_CP1250_CS_AS')))
-    Position: int | None = Field(None)
 
 
 class MethodParam(base.MethodParam, table=True):
@@ -332,17 +270,9 @@ class SimulationParam(base.SimulationParam, table=True):
     __tablename__ = 'SimulationParam'
     __table_args__ = (
         PrimaryKeyConstraint('SimulationID', 'SimulationParamDefID', name='SimulationParam_pk'),
-        ForeignKeyConstraint(
-            ["SimulationParamDefID", "SimulationDefID"],
-            ["lds.SimulationParamDef.ID", "lds.SimulationParamDef.SimulationDefID"],
-            ondelete="NO ACTION", onupdate="NO ACTION"
-        ),
         {'schema': 'lds'}
     )
 
-    SimulationDefID: str = Field(sa_column=Column(
-        CHAR(20, 'SQL_Polish_CP1250_CS_AS'),
-        nullable=False))
     SimulationID: int = Field(sa_column=Column(
         Integer,
         ForeignKey("lds.Simulation.ID", ondelete="CASCADE", onupdate="CASCADE"),

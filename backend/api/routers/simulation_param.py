@@ -1,3 +1,4 @@
+import traceback
 from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Body, Path
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -51,14 +52,12 @@ async def list_simulation_params_by_simulation_id(simulation_id: Annotated[int, 
             error = api.Error(code=status.HTTP_404_NOT_FOUND, message='No simulation with id = ' + str(simulation_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
 
-        statement = (select(lds.SimulationParam, lds.SimulationParamDef)
+        statement = (select(lds.SimulationParam, lds.Simulation, lds.SimulationParamDef)
                      .select_from(lds.SimulationParam)
-                     .join(lds.SimulationParamDef,
-                           and_(lds.SimulationParam.SimulationParamDefID == lds.SimulationParamDef.ID,
-                                lds.SimulationParam.SimulationDefID == lds.SimulationParamDef.SimulationDefID))
-                     .join(lds.Simulation, and_(lds.Simulation.SimulationDefID == lds.SimulationParam.SimulationDefID,
-                                                lds.Simulation.ID == lds.SimulationParam.SimulationID))
-                     .where(lds.SimulationParam.SimulationID == literal(simulation_id)) # noqa
+                     .join(lds.Simulation, lds.Simulation.ID == lds.SimulationParam.SimulationID)  # noqa
+                     .join(lds.SimulationParamDef,and_(lds.SimulationParam.SimulationParamDefID == lds.SimulationParamDef.ID,
+                                                       lds.SimulationParamDef.SimulationDefID == lds.Simulation.SimulationDefID))  # noqa
+                     .where(lds.SimulationParam.SimulationID == simulation_id)  # noqa
                      .order_by(lds.SimulationParamDef.ID))
         if odata_filter is not None:
             statement = apply_odata_query(statement, odata_filter)
@@ -66,7 +65,7 @@ async def list_simulation_params_by_simulation_id(simulation_id: Annotated[int, 
             page = paginate(session, statement, params=params)
         page.items = [
             map_lds_simulation_param_and_lds_simulation_param_def_to_api_simulation_param(lds_simulation_param, lds_simulation_param_def, simulation_id)
-            for lds_simulation_param, lds_simulation_param_def in page.items
+            for lds_simulation_param, _, lds_simulation_param_def in page.items
         ]
         return page
     except Exception as e:
@@ -92,8 +91,8 @@ async def list_required_simulation_params_by_simulation_id(simulation_id: Annota
         statement = (
             select(lds.SimulationParamDef, lds.SimulationParam, lds.Simulation)
             .join(lds.SimulationParamDef, lds.Simulation.SimulationDefID == lds.SimulationParamDef.SimulationDefID) # noqa
-            .join(lds.SimulationParam,
-                  and_(lds.SimulationParamDef.ID == lds.SimulationParam.SimulationParamDefID, lds.Simulation.ID == lds.SimulationParam.SimulationID), isouter=True)
+            .join(lds.SimulationParam, and_(lds.SimulationParamDef.ID == lds.SimulationParam.SimulationParamDefID,
+                                            lds.Simulation.ID == lds.SimulationParam.SimulationID), isouter=True)
             .where(lds.Simulation.ID == literal(simulation_id))
             .order_by(lds.SimulationParamDef.ID))
 
@@ -126,11 +125,8 @@ async def get_simulation_param_by_id(simulation_id: Annotated[int, Path()],
 
         statement = (select(lds.SimulationParam, lds.SimulationParamDef)
                      .select_from(lds.SimulationParam)
-                     .join(lds.SimulationParamDef,
-                           and_(lds.SimulationParam.SimulationParamDefID == lds.SimulationParamDef.ID,
-                                lds.SimulationParam.SimulationDefID == lds.SimulationParamDef.SimulationDefID))
-                     .join(lds.Simulation, and_(lds.Simulation.SimulationDefID == lds.SimulationParam.SimulationDefID,
-                                                lds.Simulation.ID == lds.SimulationParam.SimulationID))
+                     .join(lds.SimulationParamDef, lds.SimulationParam.SimulationParamDefID == lds.SimulationParamDef.ID) # noqa
+                     .join(lds.Simulation, lds.Simulation.ID == lds.SimulationParam.SimulationID)
                      .where(lds.SimulationParam.SimulationID == literal(simulation_id)) # noqa
                      .where(lds.SimulationParamDef.ID == literal(simulation_param_def_id)))
         with Session(engine) as session:
@@ -180,6 +176,7 @@ async def update_simulation_param(simulation_id: Annotated[int, Path()],
         error = api.Error(code=status.HTTP_409_CONFLICT, message='Integrity error when updating simulation')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
+        traceback.print_exc()
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                       message='Exception in update_simulation_param(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -213,6 +210,7 @@ async def create_simulation_param(simulation_id: Annotated[int, Path()],
         error = api.Error(code=status.HTTP_409_CONFLICT, message='Integrity error when creating simulation param')
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_409_CONFLICT)
     except Exception as e:
+        traceback.print_exc()
         error = api.Error(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                       message='Exception in create_simulation_param(): ' + str(e))
         return JSONResponse(content=error.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

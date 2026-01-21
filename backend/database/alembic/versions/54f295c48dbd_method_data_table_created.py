@@ -36,7 +36,17 @@ def upgrade() -> None:
                existing_type=sa.VARCHAR(length=30, collation='SQL_Polish_CP1250_CS_AS'),
                nullable=False,
                schema='lds')
-    op.drop_constraint('PipelineParamPipelineParamDef_fk', 'PipelineParam', schema='lds', type_='foreignkey')
+    op.execute("""
+    IF EXISTS (
+        SELECT 1
+        FROM sys.foreign_keys
+        WHERE name = 'PipelineParamPipelineParamDef_fk'
+    )
+    BEGIN
+        ALTER TABLE lds.[PipelineParam]
+        DROP CONSTRAINT [PipelineParamPipelineParamDef_fk]
+    END
+    """)
     # ### end Alembic commands ###
 
 

@@ -2744,7 +2744,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimulationDataOut'
+                $ref: '#/components/schemas/FullSimulationData'
           description: Expected response to a valid request
         default:
           content:
@@ -2755,6 +2755,495 @@ paths:
       summary: Gets simulation data
       tags:
         - simulations
+  /method:
+    get:
+      description: List all methods
+      operationId: list_methods
+      parameters:
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Method'
+                type: array
+          description: An array of methods
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List methods
+      tags:
+        - methods
+    post:
+      description: Create a method
+      operationId: create_method
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Method'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Method'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create method
+      tags:
+        - methods
+  /method/{methodId}:
+    delete:
+      description: Deletes specific method
+      operationId: delete_method_by_id
+      parameters:
+        - description: The id of the method to delete
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes method
+      tags:
+        - methods
+    get:
+      description: Info for specific method
+      operationId: get_method_by_id
+      parameters:
+        - description: The id of the method to retrieve
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Method'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets method details
+      tags:
+        - methods
+    put:
+      description: Updates a method
+      operationId: update_method
+      parameters:
+        - description: The id of the method to update
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Method'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Method'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Updates method
+      tags:
+        - methods
+  /method_def:
+    get:
+      description: List all method defs
+      operationId: list_method_defs
+      parameters:
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MethodDef'
+                type: array
+          description: An array of method defs
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List method defs
+      tags:
+        - simulations
+  /method/param/def:
+    get:
+      description: List all method param defs
+      operationId: list_method_param_defs
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MethodParamDef'
+                type: array
+          description: An array of method param defs
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: List method param defs
+      tags:
+        - simulations
+  /method/{methodId}/param/all:
+    get:
+      description: List all required method params
+      operationId: list_required_method_params_by_method_id
+      parameters:
+        - description: Page number
+          in: query
+          name: $page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - description: Page size
+          in: query
+          name: $size
+          required: false
+          schema:
+            type: integer
+            maximum: 10000
+            minimum: 1
+            default: 50
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: The id of the method to retrieve
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MethodParam'
+                type: array
+          description: An array of params
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List method params
+      tags:
+        - methods
+  /method/{methodId}/param:
+    get:
+      description: List all method params
+      operationId: list_method_params_by_method_id
+      parameters:
+        - description: The id of the method to retrieve
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: Query filter in OData standard
+          explode: true
+          in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MethodParam'
+                type: array
+          description: An array of method params
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List method params
+      tags:
+        - methods
+    post:
+      description: Create new method params
+      operationId: create_method_param
+      parameters:
+        - description: The id of the method to which create method param
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMethodParam'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create new method param
+      tags:
+        - methods
+  /method/{methodId}/param/{methodParamDefId}:
+    get:
+      description: Get method param
+      operationId: get_method_param_by_method_param_def_id
+      parameters:
+        - description: The id of the method to retrieve
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: The id of the method param to retrieve
+          explode: false
+          in: path
+          name: methodParamDefId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get method param
+      tags:
+        - methods
+    put:
+      description: Update method param
+      operationId: update_method_param
+      parameters:
+        - description: The id of the method to update
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: The id of the method param to update
+          explode: false
+          in: path
+          name: methodParamDefId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodParam'
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update method param
+      tags:
+        - methods
+    delete:
+      description: Deletes specific method param
+      operationId: delete_method_param_by_id
+      parameters:
+        - description: The id of the method to delete
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+        - description: The id of the method param to delete
+          explode: false
+          in: path
+          name: methodParamDefId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        "204":
+          description: No content
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Deletes method param
+      tags:
+        - simulations
+  /method/{methodId}/data:
+    get:
+      description: Method data for specific method
+      operationId: get_method_data
+      parameters:
+        - description: The id of the method to retrieve
+          explode: false
+          in: path
+          name: methodId
+          required: true
+          schema:
+            type: integer
+          style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MethodData'
+                type: array
+          description: Expected response to a valid request
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Gets method data
+      tags:
+        - methods
   /leak_detector/run_past_detector:
     post:
       description: Run subprocess with Past Detector module
@@ -2945,117 +3434,136 @@ components:
           type: number
       title: Link
       type: object
-    Method:
+    MethodParamDef:
       example:
-        PipelineID: 0
-        MethodDefID: 0
-        ID: 0
-        Name: Arthur Dent
+        ID: WAVE_SPEED
+        MethodDefID: WAVE
+        Name: Wave speed
+        DataType: FLOAT
       properties:
         ID:
-          description: none
-          example: 0
-          readOnly: true
-          title: ID
+          nullable: false
           type: integer
         MethodDefID:
-          example: 0
           nullable: false
-          title: MethodDefID
-          type: integer
-        PipelineID:
-          example: 0
-          nullable: false
-          title: PipelineID
           type: integer
         Name:
-          example: Arthur Dent
-          pattern: ^.{0,30}
+          nullable: true
+          type: string
+        DataType:
+          nullable: true
+          type: string
+      required:
+        - ID
+        - MethodDefID
+      type: object
+    MethodDef:
+      example:
+        ID: WAVE
+        Name: Wave method
+      properties:
+        ID:
+          title: ID
+          type: string
+        Name:
           title: Name
           type: string
       required:
-      - MethodDefID
-      - PipelineID
-      title: Method
+        - ID
+        - Name
+      title: MethodDef
       type: object
-    MethodDef:
+    Method:
+      example:
+        ID: 1
+        MethodDefID: DENSITY
+        PipelineID: 10
+        Name: Method1
       properties:
         ID:
-          description: none
-          example: 0
-          nullable: false
-          readOnly: true
+          title: ID
           type: integer
         Name:
-          description: none
-          pattern: ^.{0,30}
+          title: Name
           type: string
+          nullable: True
+        MethodDefID:
+          title: MethodDefID
+          type: string
+        PipelineID:
+          title: PipelineID
+          type: integer
+      required:
+        - ID
+        - Name
+        - MethodDefID
+      title: Method
       type: object
     MethodParam:
       example:
-        MethodID: 0
-        Value: Value
-        PipelineID: 0
-        DataType: DataType
-        MethodParamDefID: 0
-        Name: Name
+        MethodID: 1
+        MethodParamDefID: WAVE_SPEED
+        Value: 100.0
+        DataType: FLOAT
+        Name: Wave speed
       properties:
-        PipelineID:
-          description: none
-          example: 0
-          nullable: false
-          title: PipelineID
-          type: integer
-        MethodID:
-          description: none
-          nullable: false
-          title: MethodID
-          type: integer
-        MethodParamDefID:
-          description: none
-          example: 0
-          nullable: false
-          title: MethodParamDefID
-          type: integer
-        DataType:
-          description: none
-          pattern: ^.{0,6}
-          title: DataType
-          type: string
         Name:
-          description: none
-          pattern: ^.{0,30}
           title: Name
           type: string
+        MethodParamDefID:
+          title: MethodParamDefID
+          type: string
+        MethodID:
+          title: MethodID
+          type: integer
+        DataType:
+          title: DataType
+          type: string
         Value:
-          description: none
-          pattern: ^.{0,30}
           title: Value
           type: string
       required:
-      - MethodID
-      - PipelineID
+        - MethodID
+        - MethodParamDefID
+        - Value
       title: MethodParam
       type: object
-    MethodParamDef:
+    CreateMethodParam:
+      example:
+        MethodParamDefID: WAVE_SPEED
+        Value: 100
       properties:
-        ID:
-          description: none
-          example: 0
-          nullable: false
-          readOnly: true
-          type: integer
-        MethodDefID:
-          description: none
-          type: integer
-        Name:
-          description: none
-          pattern: ^.{0,30}
+        MethodParamDefID:
+          title: MethodParamDefID
           type: string
-        DataType:
-          description: none
-          pattern: ^.{0,6}
+        Value:
+          title: Value
           type: string
+      required:
+        - MethodParamDefID
+        - Value
+      title: CreateMethodParam
+      type: object
+    MethodData:
+      example:
+        Position: 100
+        Time: 12345678
+        Data: 0.2
+      properties:
+        Position:
+          title: Distance
+          type: integer
+        Time:
+          title: Time
+          type: integer
+        Data:
+          title: Data
+          type: number
+      required:
+        - Distance
+        - Time
+        - Value
+      title: MethodData
       type: object
     Node:
       example:
@@ -3800,7 +4308,7 @@ components:
         - Distance
       title: SimulationData
       type: object
-    SimulationDataOut:
+    FullSimulationData:
       example:
         SimulationID: 1
         Time: 123456789
@@ -3821,7 +4329,7 @@ components:
         - Time
         - SimulationID
         - Data
-      title: SimulationDataOut
+      title: SimulationData
       type: object
     PastWriterConfig:
       example:

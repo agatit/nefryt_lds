@@ -51,11 +51,13 @@ async def list_method_params_by_method_id(method_id: Annotated[int, Path()],
             error = api.Error(code=status.HTTP_404_NOT_FOUND, message='No method with id = ' + str(method_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
 
-        statement = (select(lds.MethodParam, lds.MethodParamDef)
+        statement = (select(lds.MethodParam, lds.Method, lds.MethodParamDef)
                      .select_from(lds.MethodParam)
-                     .join(lds.MethodParamDef, lds.MethodParam.MethodParamDefID == lds.MethodParamDef.ID) # noqa
-                     .join(lds.Method, lds.Method.ID == lds.MethodParam.MethodID)
-                     .where(lds.MethodParam.MethodID == literal(method_id))  # noqa
+                     .join(lds.Method, lds.Method.ID == lds.MethodParam.MethodID)  # noqa
+                     .join(lds.MethodParamDef,
+                           and_(lds.MethodParam.MethodParamDefID == lds.MethodParamDef.ID,
+                                lds.MethodParamDef.MethodDefID == lds.Method.MethodDefID))  # noqa
+                     .where(lds.MethodParam.MethodID == method_id)  # noqa
                      .order_by(lds.MethodParamDef.ID))
         if odata_filter is not None:
             statement = apply_odata_query(statement, odata_filter)
@@ -63,7 +65,7 @@ async def list_method_params_by_method_id(method_id: Annotated[int, Path()],
             page = paginate(session, statement, params=params)
         page.items = [
             map_lds_method_param_and_lds_method_param_def_to_api_method_param(lds_method_param, lds_method_param_def, method_id)
-            for lds_method_param, lds_method_param_def in page.items
+            for lds_method_param, _, lds_method_param_def in page.items
         ]
         return page
     except Exception as e:

@@ -32,14 +32,10 @@ simulation_param_def1 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='DEN
 simulation_param_def2 = lds.SimulationParamDef(ID='WIDTH', SimulationDefID='DENSITY', Name='Pipeline width', DataType='FLOAT')
 simulation_param_def3 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='WAVE', Name='Pipeline length', DataType='INT')
 simulation_param_def_list = [simulation_param_def1, simulation_param_def2, simulation_param_def3]
-simulation_param1 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='LENGTH', SimulationDefID=simulation1.SimulationDefID,
-                                        Value='1500')
-simulation_param2 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='WIDTH', SimulationDefID=simulation1.SimulationDefID,
-                                        Value='0.75')
-simulation_param3 = lds.SimulationParam(SimulationID=3, SimulationParamDefID='LENGTH', SimulationDefID=simulation3.SimulationDefID,
-                                        Value='6000')
-simulation_param4 = lds.SimulationParam(SimulationID=2, SimulationParamDefID='LENGTH', SimulationDefID=simulation1.SimulationDefID,
-                                        Value='1500')
+simulation_param1 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='LENGTH', Value='1500')
+simulation_param2 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='WIDTH', Value='0.75')
+simulation_param3 = lds.SimulationParam(SimulationID=3, SimulationParamDefID='LENGTH', Value='6000')
+simulation_param4 = lds.SimulationParam(SimulationID=2, SimulationParamDefID='LENGTH', Value='1500')
 simulation_param_list = [simulation_param1, simulation_param2, simulation_param3, simulation_param4]
 simulation_data1 = lds.SimulationData(SimulationID=1, Time=20, Distance=0, Data=1)
 simulation_data2 = lds.SimulationData(SimulationID=1, Time=20, Distance=500, Data=2)
@@ -82,18 +78,10 @@ def reset_simulation_data_objects():
     simulation_param_def3 = lds.SimulationParamDef(ID='LENGTH', SimulationDefID='WAVE', Name='Pipeline length',
                                                    DataType='INT')
     simulation_param_def_list = [simulation_param_def1, simulation_param_def2, simulation_param_def3]
-    simulation_param1 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='LENGTH',
-                                            SimulationDefID=simulation1.SimulationDefID,
-                                            Value='1500')
-    simulation_param2 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='WIDTH',
-                                            SimulationDefID=simulation1.SimulationDefID,
-                                            Value='0.75')
-    simulation_param3 = lds.SimulationParam(SimulationID=3, SimulationParamDefID='LENGTH',
-                                            SimulationDefID=simulation1.SimulationDefID,
-                                            Value='6000')
-    simulation_param4 = lds.SimulationParam(SimulationID=2, SimulationParamDefID='LENGTH',
-                                            SimulationDefID=simulation1.SimulationDefID,
-                                            Value='1500')
+    simulation_param1 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='LENGTH', Value='1500')
+    simulation_param2 = lds.SimulationParam(SimulationID=1, SimulationParamDefID='WIDTH', Value='0.75')
+    simulation_param3 = lds.SimulationParam(SimulationID=3, SimulationParamDefID='LENGTH', Value='6000')
+    simulation_param4 = lds.SimulationParam(SimulationID=2, SimulationParamDefID='LENGTH', Value='1500')
     simulation_param_list = [simulation_param1, simulation_param2, simulation_param3, simulation_param4]
     simulation_data1 = lds.SimulationData(SimulationID=1, Time=20, Distance=0, Data=1)
     simulation_data2 = lds.SimulationData(SimulationID=1, Time=20, Distance=500, Data=2)

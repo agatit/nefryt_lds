@@ -104,6 +104,7 @@ class MethodBase:
 class MethodSegments(MethodBase):
     def __init__(self, pipeline: Pipeline, id_: int, name: str):
         super().__init__(pipeline, id_, name)
+        self._stored_events = []
         self._previous_waveform: list[tuple] = [(0, None), (0, None)]
 
     def _get_params(self):
@@ -122,6 +123,7 @@ class MethodSegments(MethodBase):
         except KeyError as error:
             raise ValueError(f'{self.__class__.__name__} ({self.id}): Wrong PRESSURE_DERIV_TRENDS value, '
                              f'trend {error.args[0]} does not exist')
+        self._begin_pos = self._pipeline.plant.get_distances(self._pipeline.first_node_id, self._trends[0].node_id)[0]
 
     def _create_segments(self, past_data_needed: bool) -> None:
         logger.debug(f'{self.__class__.__name__} ({self.id}): Started creating segments')
@@ -131,8 +133,7 @@ class MethodSegments(MethodBase):
             previous_trend = None
             for current_trend in self._trends:
                 if previous_trend is not None:
-                    distances = self.pipeline.plant.get_distances(self.pipeline.plant.nodes[previous_trend.node_id],
-                                                                  self.pipeline.plant.nodes[current_trend.node_id])
+                    distances = self.pipeline.plant.get_distances(previous_trend.node_id, current_trend.node_id)
                     if len(distances) != 1:
                         logger.error(f"{self.__class__.__name__} ({self.id}): Not exactly one path between start trend"
                                      f" with node id={previous_trend.node_id} and end trend with node id={current_trend.node_id}")
@@ -165,18 +166,15 @@ class MethodSegments(MethodBase):
                     position_diffs_to_end_node = [(0.75, (trend_no, trend_no+1)), (0.25, (trend_no, trend_no+1))]
                 for start_trend, end_trend, distance_part, (diff_to_start_node, start_node_trends), (diff_to_end_node, end_node_trends) \
                         in zip(start_trends, end_trends, distance_parts, position_diffs_to_start_node, position_diffs_to_end_node):
-                    distances = self.pipeline.plant.get_distances(self.pipeline.plant.nodes[start_trend.node_id],
-                                                                  self.pipeline.plant.nodes[end_trend.node_id])
+                    distances = self.pipeline.plant.get_distances(start_trend.node_id, end_trend.node_id)
                     if len(distances) != 1:
                         logger.error(f"{self.__class__.__name__} ({self.id}): Not exactly one path between start trend"
                                      f" with node id={start_trend.node_id} and end trend with node id={end_trend.node_id}")
 
                     segment_length = distances[0] * distance_part
 
-                    distance_start = self.pipeline.plant.get_distances(self.pipeline.plant.nodes[self._trends[start_node_trends[0]].node_id],
-                                                                  self.pipeline.plant.nodes[self._trends[start_node_trends[1]].node_id])[0]
-                    distance_end = self.pipeline.plant.get_distances(self.pipeline.plant.nodes[self._trends[end_node_trends[0]].node_id],
-                                                                      self.pipeline.plant.nodes[self._trends[end_node_trends[1]].node_id])[0]
+                    distance_start = self.pipeline.plant.get_distances(self._trends[start_node_trends[0]].node_id, self._trends[start_node_trends[1]].node_id)[0]
+                    distance_end = self.pipeline.plant.get_distances(self._trends[end_node_trends[0]].node_id, self._trends[end_node_trends[1]].node_id)[0]
                     segment = Segment(start_trend, end_trend, self._pipeline_length, segment_length,
                                       distance_start * diff_to_start_node, distance_end * diff_to_end_node,
                                       self._wave_speed, (True, True) if past_data_needed else (False, True))
