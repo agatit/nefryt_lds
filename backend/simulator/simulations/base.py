@@ -23,11 +23,11 @@ class SimulationBase:
         self.id = self.lds_simulation.ID
         self._read_params()
         try:
-            self.pipeline_length = int(self.params['LENGTH'])
+            self.pipeline_length = float(self.params['LENGTH'])
         except KeyError:
             raise ValueError(f'No \'LENGTH\' param in simulation with id = {self.id}')
         except ValueError:
-            raise ValueError(f'\'LENGTH\' param in simulation with id = {self.id} has to be an integer')
+            raise ValueError(f'\'LENGTH\' param in simulation with id = {self.id} has to be a float')
 
         self.simulation_trend = self._read_trend(self.lds_simulation.TrendID)
         if self.simulation_trend is None:
@@ -39,9 +39,11 @@ class SimulationBase:
                                  f'in simulation with id = {self.id}')
 
         try:
-           flow_trend_id = self.params['FLOW_TREND_ID']
+           flow_trend_id = int(self.params['FLOW_TREND_ID'])
         except KeyError:
             raise ValueError(f'No param \'FLOW_TREND_ID\' in simulation with id = {self.id}')
+        except ValueError:
+            raise ValueError(f'\'FLOW_TREND_ID\' param in simulation with id = {self.id} has to be an insteger')
 
         self.flow_trend = self._read_trend(flow_trend_id)
         if self.flow_trend is None:

@@ -22,7 +22,7 @@ class MethodWave(MethodSegments):
             self._alarm_level = float(self._params['ALARM_LEVEL'])
             self._wave_coeff = float(self._params['WAVE_COEFF'])
             self._normal_range = float(self._params['NORMAL_RANGE'])
-            self._no_detection_window = float(self._params['NO_DETECTION_WINDOW_SECONDS']) * 1000
+            self._no_detection_window = float(self._params['NO_DETECTION_WINDOW']) * 1000
             self._min_wave_value = float(self._params['MIN_WAVE_VALUE'])
             self._read_past_data = bool(self._params.get('READ_PAST_DATA', '1'))
         except KeyError as error:

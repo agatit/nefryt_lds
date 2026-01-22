@@ -20,9 +20,9 @@ class MethodTOF(MethodSegments):
             super()._get_params()
             self._drop_level = float(self._params['DROP_LEVEL'])
             self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
-            self._wave_speed_sigma = float(self._params['WAVE_SPEED_RANGE'])
-            self._time_sigma = float(self._params['TIME_RANGE'])
-            self._no_detection_window = float(self._params['NO_DETECTION_WINDOW_SECONDS']) * 1000
+            self._wave_speed_sigma = int(self._params['WAVE_SPEED_RANGE'])
+            self._time_sigma = int(self._params['TIME_RANGE'])
+            self._no_detection_window = float(self._params['NO_DETECTION_WINDOW']) * 1000
             self._read_past_data = bool(self._params.get('READ_PAST_DATA', False))
             self._time_between_peaks_ms = int(self._params.get('TIME_BETWEEN_PEAKS', 100))
             self._wave_speed = float(self._params['BASE_WAVE_SPEED'])
