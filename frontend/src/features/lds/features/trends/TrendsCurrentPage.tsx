@@ -45,8 +45,9 @@ import {
   ChartTrendData,
   generateValue,
 } from "./utils";
+import { SliderChangeEvent } from "@progress/kendo-react-inputs";
 
-const period = 1000; //in seconds so around 17 minutes
+// const period = 1000; //in seconds so around 17 minutes
 const mainChartSampleSize = 1000;
 
 export default function TrendsCurrentPage() {
@@ -56,12 +57,17 @@ export default function TrendsCurrentPage() {
   const appContext = React.useContext(AppContext);
 
   // UI STUFF
+  const [timeRange, setTimeRange] = React.useState<number>(960);
+  const handleTimeRangeChange = React.useCallback((value: number) => {
+    setTimeRange(value);
+  }, []);
+
   const [endDate, setEndDate] = React.useState<Date>(new Date());
   const startDate = React.useMemo(() => {
     let date = new Date(endDate);
-    date.setSeconds(date.getSeconds() - period);
+    date.setSeconds(date.getSeconds() - timeRange);
     return date;
-  }, [endDate]);
+  }, [endDate, timeRange]);
 
   const [showCursorBubble, setShowCursorBubble] =
     React.useState<boolean>(false);
@@ -151,7 +157,6 @@ export default function TrendsCurrentPage() {
       const response = await handleApiResponse(
         templateApi.listTemplatesTemplateGet.bind(templateApi)
       );
-      console.log(response);
       if (response?.data) setTemplates(response.data.items);
     } catch (error) {
       console.log(error);
@@ -190,7 +195,6 @@ export default function TrendsCurrentPage() {
           templateApi.createTemplateTemplatePost.bind(templateApi),
           newTemplate
         );
-        console.log(response);
         if (response?.data) setTemplates([...templates, response.data]);
       } catch (error) {
         console.log(error);
@@ -238,12 +242,11 @@ export default function TrendsCurrentPage() {
           trendDataApi.current
         ),
         trendIdList,
-        period,
+        timeRange,
         mainChartSampleSize,
         1,
         mainChartSampleSize
       );
-      console.log(response);
 
       if (response.status == 404) {
         setIsLoadingTrendsData(false);
@@ -278,7 +281,7 @@ export default function TrendsCurrentPage() {
     } catch (error) {
       console.log(error);
     }
-  }, [ldsContex, trendIdArr, trendIdList]);
+  }, [ldsContex, trendIdArr, trendIdList, timeRange]);
 
   async function loadLastSecondData() {
     if (trendIdList.length == 0) return;
@@ -294,7 +297,6 @@ export default function TrendsCurrentPage() {
         1,
         1
       );
-      console.log(response);
 
       if (response.status == 404) {
         setIsLoadingTrendsData(false);
@@ -414,6 +416,8 @@ export default function TrendsCurrentPage() {
           onSelectedTemplateChange={handleSelectedTemplateChange}
           handleCreateNewTemplate={handleCreateNewTemplate}
           onHighlightedTrendIDChange={setHighlightedTrendID}
+          timeRange={timeRange}
+          onTimeRangeChange={handleTimeRangeChange}
         />
       </main>
       {showChartEdit && (

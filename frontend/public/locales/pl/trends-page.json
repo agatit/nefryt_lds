@@ -11,5 +11,6 @@
   "no_data_in_range": "Brak danych w podanym przedziale czasu",
   "enter_template_name": "Podaj nazwę nowego szablonu",
   "add_trends_or_select_template": "Dodaj trendy lub wybierz szablon",
-  "selected_template_is_empty": "Wybany szablon jest pusty!"
+  "selected_template_is_empty": "Wybany szablon jest pusty!",
+  "time_range": "Przedział czasowy"
 }

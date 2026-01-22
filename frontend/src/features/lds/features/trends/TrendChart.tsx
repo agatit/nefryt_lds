@@ -419,14 +419,18 @@ const TrendChart = React.memo(function TrendChart({
       }
       for (let data of trend.data) {
         if (!data.value) continue;
+        if (max == null || min == null) {
+          max = data.value;
+          min = data.value;
+        }
         if (data.value > max!) max = data.value;
         if (data.value < min!) min = data.value;
       }
     }
 
     const step = Math.abs(max! - min!) / 5;
-    min = Math.round(min! - step);
-    max = Math.round(max! + step);
+    min = Math.round((min! - step) * 100) / 100;
+    max = Math.round((max! + step) * 100) / 100;
 
     return { min, max };
   }, [trendData]);
@@ -478,65 +482,85 @@ const TrendChart = React.memo(function TrendChart({
     };
   }, []);
 
+  const chartRenderCounter = React.useRef(0);
+
   const [ssBarStyles, setSSBarStyles] = React.useState<any[]>([]);
-  const handleSSBarsLeftPositioning = React.useCallback(() => {
-    if (isLoadingTrendsData) return;
+  // const handleSSBarsLeftPositioning = React.useCallback(() => {
+  //   if (isLoadingTrendsData) return;
+  //   const chartRect = document
+  //     .getElementsByClassName("main-chart")[0]
+  //     ?.getElementsByTagName("svg")[0]
+  //     ?.children[1]?.children[2]?.getBoundingClientRect();
+
+  //   const axesElements = document
+  //     .getElementsByClassName("main-chart")[0]
+  //     ?.getElementsByTagName("svg")[0]?.children[1]?.children[2]?.children;
+
+  //   const ssBarStylesArr = [];
+  //   let counter = 0;
+  //   for (let i = 0; i < axesElements.length; i++) {
+  //     const axis = axesState.find(
+  //       (axis) => axis.Name == axesElements[i].lastElementChild?.innerHTML
+  //     );
+
+  //     if (axis == undefined) continue;
+  //     counter++;
+
+  //     const axisRect = axesElements[i].getBoundingClientRect();
+  //     console.log(axisRect.left);
+  //     ssBarStylesArr.push({
+  //       left: axisRect.left + (counter == 1 ? 15 : -20),
+  //     });
+  //   }
+  //   if (chartRect && ssBarStylesArr.length > 0) setSSBarStyles(ssBarStylesArr);
+  // }, [isLoadingTrendsData, chartRenderCounter.current]);
+
+  // const [triggerRerender, setTriggerRerender] = React.useState<boolean>(false);
+  // React.useEffect(() => {
+  //   handleSSBarsLeftPositioning();
+  // }, [axesState, triggerRerender]);
+
+  const chartContainerRef = useResizeObserver<HTMLDivElement>(() => {
+    const axesElements = document
+      .getElementsByClassName("main-chart")[0]
+      ?.getElementsByTagName("svg")[0]?.children[1]?.children[2]?.children;
+    const rects = Array.from(axesElements).map((el) =>
+      el.getBoundingClientRect()
+    );
+
     const chartRect = document
       .getElementsByClassName("main-chart")[0]
       ?.getElementsByTagName("svg")[0]
       ?.children[1]?.children[2]?.getBoundingClientRect();
 
-    const axesElements = document
-      .getElementsByClassName("main-chart")[0]
-      ?.getElementsByTagName("svg")[0]?.children[1]?.children[2]?.children;
-
-    const ssBarStylesArr = [];
+    const ssBarStylesArr: any[] = [];
     let counter = 0;
-    for (let i = 0; i < axesElements.length; i++) {
+
+    rects.forEach((axisRect, i) => {
       const axis = axesState.find(
         (axis) => axis.Name == axesElements[i].lastElementChild?.innerHTML
       );
 
-      if (axis == undefined) continue;
+      if (axis == undefined) return;
       counter++;
 
-      const axisRect = axesElements[i].getBoundingClientRect();
       ssBarStylesArr.push({
-        left: axisRect.left + (counter == 1 ? 15 : -20),
+        left: axisRect.left + -20,
       });
-    }
+    });
+
+    ssBarStylesArr.splice(0, 1, { left: rects[0].left + 15 });
     if (chartRect && ssBarStylesArr.length > 0) setSSBarStyles(ssBarStylesArr);
-  }, [ssBarStyles, isLoadingTrendsData]);
 
-  const [triggerRerender, setTriggerRerender] = React.useState<boolean>(false);
-  React.useEffect(() => {
-    handleSSBarsLeftPositioning();
-  }, [axesState, triggerRerender]);
-
-  const chartRect = React.useRef({ width: 0, height: 0 });
-  const chartRenderCounter = React.useRef(0);
-  const chartContainerRef = useResizeObserver<HTMLDivElement>((size) => {
     chartRenderCounter.current++;
-    if (chartRenderCounter.current < 3) {
-      // on initial load with already set data we have proper position of axis at first rerender, fix later
-      handleSSBarsLeftPositioning();
-      return;
-    }
-
-    if (
-      size.width == chartRect.current.width &&
-      size.height == chartRect.current.height
-    ) {
-      chartRect.current = size;
-      handleSSBarsLeftPositioning();
-    }
+    // handleSSBarsLeftPositioning();
   });
 
   const scaleScrollBars = React.useMemo(() => {
-    if (ssBarStyles.length !== valueAxisState.length) {
-      setTriggerRerender(!triggerRerender);
-      return;
-    }
+    // if (ssBarStyles.length !== valueAxisState.length) {
+    //   setTriggerRerender(!triggerRerender);
+    //   return;
+    // }
 
     return ssBarStyles.map((style, i) => {
       return (
@@ -547,7 +571,7 @@ const TrendChart = React.memo(function TrendChart({
             top: ssBarVerticalStyle.current.top,
             left: style.left,
             height: ssBarVerticalStyle.current.height,
-            display: isEmpty || chartRenderCounter.current < 1 ? "none" : "",
+            display: isEmpty ? "none" : "",
           }}
           max={trendMinMaxValue.max}
           min={trendMinMaxValue.min}
@@ -560,7 +584,7 @@ const TrendChart = React.memo(function TrendChart({
         />
       );
     });
-  }, [ssBarStyles]);
+  }, [ssBarStyles, valueAxisState]);
 
   const grabbedHandle = React.useRef<HandleType>(HandleType.LEFT);
   const selectStartDate = React.useRef<Date>(startDate);

@@ -11,6 +11,8 @@ import {
   TrendDataMultiple,
   TrendDataApi,
   TemplateCreate,
+  TrendParam,
+  TrendParamApi,
 } from "../../../../services/api";
 
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
@@ -186,7 +188,7 @@ export default function TrendsPage() {
       const response = await handleApiResponse(
         templateApi.listTemplatesTemplateGet.bind(templateApi)
       );
-      console.log(response);
+
       if (response?.data) setTemplates(response.data.items);
     } catch (error) {
       console.log(error);
@@ -225,7 +227,7 @@ export default function TrendsPage() {
           templateApi.createTemplateTemplatePost.bind(templateApi),
           newTemplate
         );
-        console.log(response);
+
         if (response?.data) setTemplates([...templates, response.data]);
       } catch (error) {
         console.log(error);
@@ -269,7 +271,6 @@ export default function TrendsPage() {
           1,
           navigationChartSampleSize
         );
-        console.log(response);
 
         const newNavTrendsData: ChartSeriesTrendData[] = trendIdArr.map(
           (id) => {
@@ -341,7 +342,6 @@ export default function TrendsPage() {
         1,
         mainChartSampleSize
       );
-      console.log(response);
 
       if (response.status == 404) {
         isLoadingTrendsDataRef.current = {

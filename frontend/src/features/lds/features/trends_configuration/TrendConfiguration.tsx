@@ -14,6 +14,8 @@ import {
 import {
   FlatColorPicker,
   FlatColorPickerChangeEvent,
+  NumericTextBox,
+  NumericTextBoxChangeEvent,
   TextBox,
   TextBoxChangeEvent,
 } from "@progress/kendo-react-inputs";
@@ -27,10 +29,19 @@ import {
 import React from "react";
 import { ParsedTrendType } from "./TrendConfigurationPage";
 import { useTranslation } from "react-i18next";
-import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
+import {
+  Trend,
+  TrendDef,
+  TrendGroup,
+  TrendParamCreate,
+  TrendParamDef,
+  Unit,
+} from "../../../../services/api";
 import { rgbaToHex } from "../../../../lib/utilis";
 import ColorGridCell from "../../components/ColorGridCell";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
+import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
+import { LDSContext } from "../../contexts/ldsContext";
 
 export interface TrendConfigurationProps {
   showDialog: boolean;
@@ -38,9 +49,10 @@ export interface TrendConfigurationProps {
   closeDialog: () => void;
   trendDefs: TrendDef[];
   trendGroups: TrendGroup[];
+  trendParamDefs: TrendParamDef[];
   units: Unit[];
   trends: Trend[];
-  addTrend: (value: Trend) => Promise<void>;
+  addTrend: (value: Trend) => Promise<Trend>;
   deleteTrend: (value: Trend) => Promise<void>;
   selected: ParsedTrendType | null;
   setSelected: (value: ParsedTrendType) => void;
@@ -52,6 +64,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
   closeDialog,
   trendDefs,
   trendGroups,
+  trendParamDefs,
   units,
   trends,
   addTrend,
@@ -93,6 +106,11 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
   const [trendGroup, setTrendGroup] = React.useState<TrendGroup | undefined>();
   const [trendUnit, setTrendUnit] = React.useState<Unit | undefined>();
   const [trendColor, setTrendColor] = React.useState<string | undefined>();
+  const [trendParams, setTrendParams] = React.useState<number[]>([]);
+
+  React.useEffect(() => {
+    setTrendParams([]);
+  }, [trendType]);
 
   const handleTrendNameChange = React.useCallback(
     (event: TextBoxChangeEvent) => {
@@ -125,6 +143,14 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
     []
   );
 
+  const requiredTrendParams = React.useMemo(() => {
+    return trendParamDefs.filter((def) => def.TrendDefID == trendType?.ID);
+  }, [trendParamDefs, trendType]);
+
+  React.useEffect(() => {
+    setTrendParams(Array(requiredTrendParams.length).fill(0));
+  }, [requiredTrendParams]);
+
   const cancelAddNewTrend = React.useCallback(() => {
     setTrendName(undefined);
     setTrendType(undefined);
@@ -133,6 +159,22 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
     setTrendColor(undefined);
     closeDialog();
   }, [closeDialog]);
+
+  const handleApiResponse = useHandleApiResponse();
+  const ldsContext = React.useContext(LDSContext);
+
+  const addTrendParam = React.useCallback(
+    async (value: TrendParamCreate, id: number) => {
+      await handleApiResponse(
+        ldsContext!.trendParamApi.createTrendParamTrendTrendIdParamPost.bind(
+          ldsContext!.trendParamApi
+        ),
+        id,
+        value
+      );
+    },
+    []
+  );
 
   const confirmAddNewTrend = React.useCallback(async () => {
     const newTrend: Trend = {
@@ -147,7 +189,26 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
       ScaledMin: 0,
       ScaledMax: 0,
     };
-    await addTrend(newTrend);
+    const trend = await addTrend(newTrend);
+
+    for (let i = 0; i < trendParams.length; i++) {
+      let newParam: TrendParamCreate = {
+        TrendParamDefID: requiredTrendParams[i].ID,
+        Value: trendParams[i].toString(),
+      };
+      try {
+        const response = await handleApiResponse(
+          ldsContext!.trendParamApi.createTrendParamTrendTrendIdParamPost.bind(
+            ldsContext!.trendParamApi
+          ),
+          trend.ID,
+          newParam
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
     closeDialog();
   }, [
     closeDialog,
@@ -158,6 +219,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
     trendGroup,
     trendUnit,
     trendColor,
+    trendParams,
   ]);
 
   // Deletion dialog
@@ -290,6 +352,26 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
               onChange={handleTrendColorChange}
             />
           </div>
+          {requiredTrendParams.map((trendParam, index) => {
+            return (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <Label editorId={"trendParam-" + trendParam.ID}>
+                  {trendParam.Name}
+                </Label>
+                <NumericTextBox
+                  key={"trendParam " + index}
+                  id={"trendParam-" + trendParam.ID}
+                  value={trendParams[index]}
+                  onChange={(event) => {
+                    let params = [...trendParams];
+                    params.splice(index, 1, event.value ?? 0);
+                    console.log(trendParams);
+                    setTrendParams(params);
+                  }}
+                />
+              </div>
+            );
+          })}
           <DialogActionsBar>
             <Button svgIcon={cancelIcon} onClick={cancelAddNewTrend}>
               {t("common:cancel")}

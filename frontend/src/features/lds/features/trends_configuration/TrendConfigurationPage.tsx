@@ -5,14 +5,21 @@ import { DetailPanel } from "onyks_shared_kendo";
 import {
   mockupTrendDefs,
   mockupTrendGroups,
-  MockupTrendParamDefType,
   mockupTrends,
   mockupUnits,
 } from "../../../../data/mockup-data";
 import { useTranslation } from "react-i18next";
 import { Typography } from "@progress/kendo-react-common";
 
-import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
+import {
+  Trend,
+  TrendDef,
+  TrendGroup,
+  TrendParam,
+  TrendParamCreate,
+  TrendParamDef,
+  Unit,
+} from "../../../../services/api";
 import {
   Splitter,
   SplitterOnChangeEvent,
@@ -32,10 +39,11 @@ import TrendUnitConfigurationDetailPanel from "./TrendUnitConfigurationDetailPan
 import { LDSContext } from "../../contexts/ldsContext";
 import TrendParamDefConfiguration from "./TrendParamDefConfiguration";
 import TrendParamDefConfigurationDetailPanel from "./TrendParamDefConfigurationDetailPanel";
+import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
 
 export interface SelectionType {
   trend: ParsedTrendType | null;
-  trendParamDef: MockupTrendParamDefType | null;
+  trendParamDef: TrendParamDef | null;
   trendDef: TrendDef | null;
   trendGroup: TrendGroup | null;
   unit: Unit | null;
@@ -49,14 +57,15 @@ export interface ParsedTrendType extends Trend {
 
 const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   const { t } = useTranslation(["common", "config-page"]);
+  const handleApiResponse = useHandleApiResponse();
 
-  const ldsContex = React.useContext(LDSContext);
+  const ldsContext = React.useContext(LDSContext);
   React.useMemo(() => {
-    if (ldsContex == null)
+    if (ldsContext == null)
       throw new Error(
         "LDS Context cannot be null to use TrendConfigurationPage"
       );
-  }, [ldsContex]);
+  }, [ldsContext]);
 
   const [verticalPanes, setVerticalPanes] = React.useState<SplitterPaneProps[]>(
     [{ size: "66%" }, {}]
@@ -133,8 +142,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   );
 
   const handleSelectedTrendParamDefChange = React.useCallback(
-    (value: MockupTrendParamDefType) => {
-      console.log(value);
+    (value: TrendParamDef) => {
       setSelection({
         trend: null,
         trendParamDef: value,
@@ -181,7 +189,32 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
 
   const handleSelectedTrendDeletion = React.useCallback(
     async (value: Trend) => {
-      await ldsContex!.deleteTrend(value);
+      // try {
+      //   const trendParams: TrendParam[] = (
+      //     await handleApiResponse(
+      //       ldsContext!.trendParamApi.listTrendParamsByTrendIdTrendTrendIdParamGet.bind(
+      //         ldsContext!.trendParamApi
+      //       ),
+      //       value.ID
+      //     )
+      //   ).data.items;
+      await ldsContext!.deleteTrend(value);
+      //   for (let param of trendParams) {
+      //     try {
+      //       await handleApiResponse(
+      //         ldsContext!.trendParamApi.deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete.bind(
+      //           ldsContext!.trendParamApi
+      //         ),
+      //         value.ID,
+      //         param.TrendParamDefID
+      //       );
+      //     } catch (error) {
+      //       console.log(error);
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.log(error);
+      // }
       setSelection({
         trend: null,
         trendParamDef: null,
@@ -190,12 +223,12 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         unit: null,
       });
     },
-    [ldsContex]
+    []
   );
 
   const handleSelectedTrendGroupDeletion = React.useCallback(
     async (value: TrendGroup) => {
-      await ldsContex!.deleteTrendGroup(value);
+      await ldsContext!.deleteTrendGroup(value);
       setSelection({
         trend: null,
         trendParamDef: null,
@@ -204,31 +237,29 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         unit: null,
       });
     },
-    [ldsContex]
+    []
   );
 
-  const handleSelectedUnitDeletion = React.useCallback(
-    async (value: Unit) => {
-      await ldsContex!.deleteUnit(value);
-      setSelection({
-        trend: null,
-        trendParamDef: null,
-        trendDef: null,
-        trendGroup: null,
-        unit: null,
-      });
-    },
-    [ldsContex]
-  );
+  const handleSelectedUnitDeletion = React.useCallback(async (value: Unit) => {
+    await ldsContext!.deleteUnit(value);
+    setSelection({
+      trend: null,
+      trendParamDef: null,
+      trendDef: null,
+      trendGroup: null,
+      unit: null,
+    });
+  }, []);
 
   const SelectedDetailPanel = React.useCallback((): React.JSX.Element => {
     if (selection.trend)
       return (
         <TrendConfigurationDetailPanel
-          trendDefs={ldsContex!.trendDefs}
-          trendGroups={ldsContex!.trendGroups}
-          units={ldsContex!.units}
-          editTrend={ldsContex!.updateTrend}
+          trendDefs={ldsContext!.trendDefs}
+          trendGroups={ldsContext!.trendGroups}
+          trendParamDefs={ldsContext!.trendParamDefs}
+          units={ldsContext!.units}
+          editTrend={ldsContext!.updateTrend}
           deleteTrend={handleSelectedTrendDeletion}
           selected={selection.trend}
           enterAddNewTrend={openAddNewTrendDialog}
@@ -245,7 +276,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     if (selection.trendGroup)
       return (
         <TrendGroupConfigurationDetailPanel
-          editTrendGroup={ldsContex!.updateTrendGroup}
+          editTrendGroup={ldsContext!.updateTrendGroup}
           deleteTrendGroup={handleSelectedTrendGroupDeletion}
           selected={selection.trendGroup}
           enterAddNewTrendGroup={openAddNewTrendGroupDialog}
@@ -254,14 +285,14 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     if (selection.unit)
       return (
         <TrendUnitConfigurationDetailPanel
-          editUnit={ldsContex!.updateUnit}
+          editUnit={ldsContext!.updateUnit}
           deleteUnit={handleSelectedUnitDeletion}
           selected={selection.unit}
           enterAddNewUnit={openAddNewUnitDialog}
         />
       );
     return <></>;
-  }, [selection, ldsContex, openAddNewTrendDialog]);
+  }, [selection]);
 
   return (
     <React.Fragment>
@@ -276,11 +307,12 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
             showDialog={showAddNewTrendDialog}
             openDialog={openAddNewTrendDialog}
             closeDialog={closeAddNewTrendDialog}
-            trendDefs={ldsContex!.trendDefs}
-            trendGroups={ldsContex!.trendGroups}
-            units={ldsContex!.units}
-            trends={ldsContex!.trends}
-            addTrend={ldsContex!.addTrend}
+            trendDefs={ldsContext!.trendDefs}
+            trendGroups={ldsContext!.trendGroups}
+            trendParamDefs={ldsContext!.trendParamDefs}
+            units={ldsContext!.units}
+            trends={ldsContext!.trends}
+            addTrend={ldsContext!.addTrend}
             deleteTrend={handleSelectedTrendDeletion}
             selected={selection.trend}
             setSelected={handleSelectedTrendChange}
@@ -293,14 +325,14 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           >
             <TabStripTab title={t("config-page:trends_types")}>
               <TrendDefConfiguration
-                trendDefs={ldsContex!.trendDefs}
+                trendDefs={ldsContext!.trendDefs}
                 selected={selection.trendDef}
                 setSelected={handleSelectedTrendDefChange}
               />
             </TabStripTab>
             <TabStripTab title={t("config-page:trends_params")}>
               <TrendParamDefConfiguration
-                trendParamDefs={ldsContex!.trendParamDefs}
+                trendParamDefs={ldsContext!.trendParamDefs}
                 selected={selection.trendParamDef}
                 setSelected={handleSelectedTrendParamDefChange}
               />
@@ -310,8 +342,8 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 showDialog={showAddNewTrendGroupDialog}
                 openDialog={openAddNewTrendGroupDialog}
                 closeDialog={closeAddNewTrendGroupDialog}
-                trendGroups={ldsContex!.trendGroups}
-                addTrendGroup={ldsContex!.addTrendGroup}
+                trendGroups={ldsContext!.trendGroups}
+                addTrendGroup={ldsContext!.addTrendGroup}
                 deleteTrendGroup={handleSelectedTrendGroupDeletion}
                 selected={selection.trendGroup}
                 setSelected={handleSelectedTrendGroupChange}
@@ -322,8 +354,8 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 showDialog={showAddNewUnitDialog}
                 openDialog={openAddNewUnitDialog}
                 closeDialog={closeAddNewUnitDialog}
-                units={ldsContex!.units}
-                addUnit={ldsContex!.addUnit}
+                units={ldsContext!.units}
+                addUnit={ldsContext!.addUnit}
                 deleteUnit={handleSelectedUnitDeletion}
                 selected={selection.unit}
                 setSelected={handleSelectedUnitChange}

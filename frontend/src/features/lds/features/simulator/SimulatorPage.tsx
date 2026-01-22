@@ -75,7 +75,6 @@ export default function TrendsCurrentPage() {
     simParamDefsLoaded: false,
   });
   const isLoadingSimulations = React.useMemo(() => {
-    console.log("BAJO JAJO");
     return (
       !simulationLoadedStatus.current.simdefsLoaded &&
       !simulationLoadedStatus.current.simsLoaded &&
@@ -94,7 +93,7 @@ export default function TrendsCurrentPage() {
           simulationDefApi.current
         )
       );
-      console.log(response);
+
       if (response.data) setSimulationDefs(response.data.items);
       simulationLoadedStatus.current.simdefsLoaded = true;
     } catch (error) {
@@ -109,7 +108,7 @@ export default function TrendsCurrentPage() {
           simulationApi.current
         )
       );
-      console.log(response);
+
       if (response.data) setSimulations(response.data.items);
       simulationLoadedStatus.current.simsLoaded = true;
     } catch (error) {
@@ -124,7 +123,7 @@ export default function TrendsCurrentPage() {
           simulationParamApi.current
         )
       );
-      console.log(response);
+
       if (response.data) setSimulationParamDefs(response.data.items);
       simulationLoadedStatus.current.simParamDefsLoaded = true;
     } catch (error) {
@@ -162,7 +161,7 @@ export default function TrendsCurrentPage() {
         ),
         selectedSimulation.ID
       );
-      console.log(response);
+
       if (response.data) setSimulationParams(response.data.items);
     } catch (error) {
       console.log(error);
@@ -189,7 +188,7 @@ export default function TrendsCurrentPage() {
         ),
         1
       );
-      console.log(response);
+
       setTimeToRefresh(selectedSimulation.RefreshTimeSeconds);
       if (response.data) {
         setSimulationData(response.data.items[0].Data);

@@ -30,7 +30,12 @@ import {
   xIcon,
 } from "@progress/kendo-svg-icons";
 import { Template, Trend } from "../../../../services/api";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import {
+  Slider,
+  SliderChangeEvent,
+  TextBox,
+  TextBoxChangeEvent,
+} from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { chartLegendIcon } from "../../components/chartLegendIcon";
 import { AxisType, TreeViewDataItem } from "./utils";
@@ -50,6 +55,8 @@ export interface TrendDetailPanelProps {
   onSelectedTemplateChange: (value: Template) => void;
   handleCreateNewTemplate: (name: string) => void;
   onHighlightedTrendIDChange: (value: number | null) => void;
+  timeRange?: number;
+  onTimeRangeChange?: (value: number) => void;
 }
 
 const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
@@ -67,6 +74,8 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
   onSelectedTemplateChange,
   handleCreateNewTemplate,
   onHighlightedTrendIDChange,
+  timeRange,
+  onTimeRangeChange,
 }: TrendDetailPanelProps) {
   const { t } = useTranslation(["common", "trends-page"]);
 
@@ -77,6 +86,18 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
       setTabSelected(e.selected);
     },
     []
+  );
+
+  const timeRangeDate: Date = React.useMemo(() => {
+    if (!timeRange) return new Date();
+    return new Date(timeRange * 1000);
+  }, [timeRange]);
+
+  const handleTimeRangeChange = React.useCallback(
+    (event: SliderChangeEvent) => {
+      if (event.value && onTimeRangeChange) onTimeRangeChange(event.value);
+    },
+    [onTimeRangeChange]
   );
 
   // chart
@@ -291,6 +312,24 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
                             />
                           </div>
                         </div>
+                      </div>
+                    </React.Fragment>
+                  )}
+                  {onTimeRangeChange && (
+                    <React.Fragment>
+                      <div className="separator" />
+                      <div className="item">
+                        <Label>
+                          {t("common:time_range")}: {timeRangeDate.getMinutes()}{" "}
+                          min {timeRangeDate.getSeconds()} s
+                        </Label>
+                        <Slider
+                          min={2}
+                          max={960}
+                          step={1}
+                          value={timeRange}
+                          onChange={handleTimeRangeChange}
+                        />
                       </div>
                     </React.Fragment>
                   )}
