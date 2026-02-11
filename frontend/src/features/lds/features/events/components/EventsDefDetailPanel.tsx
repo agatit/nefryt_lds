@@ -32,7 +32,7 @@ const EventDefDetailPanel = React.memo(function EventDefDetailPanel({
   const appContext = React.useContext(AppContext);
   if (!appContext) return null;
 
-  const { t } = useTranslation(["common", "event-page", "config-page"]);
+  const { t } = useTranslation(["common", "event-page"]);
   const [inEdit, setInEdit] = React.useState(false);
   const [id, setId] = React.useState("");
   const [caption, setCaption] = React.useState("");
@@ -41,15 +41,6 @@ const EventDefDetailPanel = React.memo(function EventDefDetailPanel({
   const [visible, setVisible] = React.useState(true);
   const [enabled, setEnabled] = React.useState(true);
   const [showDialog, setShowDialog] = React.useState(false);
-
-  const setSelectedData = React.useCallback((def: EventDef) => {
-    setId(def.ID ?? "");
-    setCaption(def.Caption ?? "");
-    setVerbosity(def.Verbosity ?? "");
-    setSilent(!!def.Silent);
-    setVisible(!!def.Visible);
-    setEnabled(!!def.Enabled);
-  }, []);
 
   const booleanOptions = [
     { text: "True", value: true },
@@ -85,11 +76,6 @@ const EventDefDetailPanel = React.memo(function EventDefDetailPanel({
   const getBooleanOption = (value: boolean) =>
     booleanOptions.find((o) => o.value === value);
 
-  const cancelEdit = React.useCallback(() => {
-    setInEdit(false);
-    if (selected) setSelectedData(selected);
-  }, [selected, setSelectedData]);
-
   const saveEdit = React.useCallback(async () => {
     if (!selected || !editEventDef) return;
 
@@ -100,6 +86,28 @@ const EventDefDetailPanel = React.memo(function EventDefDetailPanel({
           style: "warning",
         },
         message: "Caption and Verbosity are required",
+      });
+      return;
+    }
+
+    if (!/^[a-z]+$/.test(caption)) {
+      appContext.showNotification({
+        notificationType: {
+          icon: true,
+          style: "error",
+        },
+        message: "Caption: use letters only",
+      });
+      return;
+    }
+
+    if (!/^[A-Z]+$/.test(verbosity)) {
+      appContext.showNotification({
+        notificationType: {
+          icon: true,
+          style: "error",
+        },
+        message: "Verbosity: use uppercase letters only",
       });
       return;
     }
@@ -122,20 +130,26 @@ const EventDefDetailPanel = React.memo(function EventDefDetailPanel({
     setInEdit(false);
   }, [selected, deleteEventDef]);
 
-  React.useEffect(() => {
-    if (selected) {
-      setSelectedData(selected);
-      setInEdit(false);
-    }
+  const setSelectedData = React.useCallback((def: EventDef) => {
+    setId(def.ID ?? "");
+    setCaption(def.Caption ?? "");
+    setVerbosity(def.Verbosity ?? "");
+    setSilent(!!def.Silent);
+    setVisible(!!def.Visible);
+    setEnabled(!!def.Enabled);
+  }, []);
+
+  const cancelEdit = React.useCallback(() => {
+    setInEdit(false);
+    if (selected) setSelectedData(selected);
   }, [selected, setSelectedData]);
 
-  if (!selected) {
-    return (
-      <div className="detail-panel-content">
-        <Label>{t("common:no_selection")}</Label>
-      </div>
-    );
-  }
+  React.useEffect(() => {
+    if (!selected) return;
+
+    setSelectedData(selected);
+    setInEdit(false);
+  }, [selected, setSelectedData]);
 
   return (
     <div className="detail-panel-content">
