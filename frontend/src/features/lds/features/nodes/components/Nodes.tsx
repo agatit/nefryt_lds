@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Node } from "../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
 import { plusIcon } from "@progress/kendo-svg-icons";
+import { GridCustomCellProps } from "@progress/kendo-react-grid";
 
 interface NodesProps {
   nodes: Node[];
@@ -56,14 +57,26 @@ const Nodes = React.memo(function LinksGrid({
         <GridSearchBox />
         <ButtonGroup>
           <Button svgIcon={plusIcon} onClick={openAddDialog}>
-            {t("link-page:add_new_node")}
+            {t("node-page:add_new_node")}
           </Button>
         </ButtonGroup>
       </GridToolbar>
 
       <GridColumn field="Type" title={t("node-page:type")} />
       <GridColumn field="Name" title={t("node-page:name")} />
-      <GridColumn field="EditorParams" title={t("node-page:EditorParams")} />
+      <GridColumn
+        field="EditorParams"
+        title={t("node-page:EditorParams")}
+        cells={{
+          data: (props: GridCustomCellProps) => (
+            <td>
+              {props.dataItem.EditorParams
+                ? `X: ${props.dataItem.EditorParams.PosX}, Y: ${props.dataItem.EditorParams.PosY}`
+                : ""}
+            </td>
+          ),
+        }}
+      />
       <GridColumn field="TrendID" title={t("node-page:TrendID")} />
       <GridColumn field="ID" title={t("node-page:ID")} />
     </Grid>
