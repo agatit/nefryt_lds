@@ -1,5 +1,5 @@
 import React from "react";
-import "../../../../styles/features/lds/features/linkPage.scss";
+import "../../../../styles/features/lds/features/nodesPage.scss";
 import { useTranslation } from "react-i18next";
 import { LDSContext } from "../../contexts/ldsContext";
 import Nodes from "./components/Nodes";
