@@ -55,11 +55,11 @@ const EventsDef = React.memo(function EventsDef({
   }, []);
 
   const handleCaptionChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setCaption(String(e.value ?? "").toUpperCase());
+    setCaption(String(e.value ?? ""));
   }, []);
 
   const handleVerbosityChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setVerbosity(String(e.value ?? ""));
+    setVerbosity(String(e.value ?? "").toUpperCase());
   }, []);
 
   const handleSilentChange = React.useCallback((e: DropDownListChangeEvent) => {
@@ -116,7 +116,29 @@ const EventsDef = React.memo(function EventsDef({
           icon: true,
           style: "error",
         },
-        message: "Use uppercase letters and underscores only",
+        message: "ID: use uppercase letters and underscores only",
+      });
+      return;
+    }
+
+    if (!/^[a-z]+$/.test(caption)) {
+      appContext.showNotification({
+        notificationType: {
+          icon: true,
+          style: "error",
+        },
+        message: "Caption: use letters only",
+      });
+      return;
+    }
+
+    if (!/^[A-Z]+$/.test(verbosity)) {
+      appContext.showNotification({
+        notificationType: {
+          icon: true,
+          style: "error",
+        },
+        message: "Verbosity: use uppercase letters only",
       });
       return;
     }
