@@ -1,5 +1,6 @@
 import React from "react";
 import { Label } from "@progress/kendo-react-labels";
+import { useTranslation } from "react-i18next";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
@@ -11,6 +12,7 @@ import {
   plusIcon,
 } from "@progress/kendo-svg-icons";
 import { Node, NodeCreate, NodeUpdate } from "../../../../../services/api";
+import { AppContext } from "../../../../../contexts/appContext";
 
 interface Props {
   selected: Node;
@@ -26,6 +28,10 @@ const NodesDetailPanel = React.memo(function NodesDetailPanel({
   deleteNode,
   openAddDialog,
 }: Props) {
+  const { t } = useTranslation(["common", "node-page"]);
+  const appContext = React.useContext(AppContext);
+  if (!appContext) return null;
+
   const [inEdit, setInEdit] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [type, setType] = React.useState("");
@@ -45,6 +51,42 @@ const NodesDetailPanel = React.memo(function NodesDetailPanel({
 
   const saveEdit = async () => {
     let parsedParams = null;
+
+    if (editorParams.trim()) {
+      try {
+        parsedParams = JSON.parse(editorParams);
+      } catch {
+        appContext.showNotification({
+          notificationType: { icon: true, style: "error" },
+          message: "Editor Params must be valid JSON",
+        });
+        return;
+      }
+    }
+
+    if (trendID && isNaN(Number(trendID))) {
+      appContext.showNotification({
+        notificationType: { icon: true, style: "error" },
+        message: "Trend ID must be a number",
+      });
+      return;
+    }
+
+    if (!/^[A-Z]+$/.test(type.trim())) {
+      appContext.showNotification({
+        notificationType: { icon: true, style: "error" },
+        message: "Type must contain uppercase letters only",
+      });
+      return;
+    }
+
+    if (name && !/^[A-Z0-9-]+$/.test(name.trim())) {
+      appContext.showNotification({
+        notificationType: { icon: true, style: "error" },
+        message: "Name must contain uppercase letters and numbers only",
+      });
+      return;
+    }
 
     try {
       parsedParams = editorParams ? JSON.parse(editorParams) : null;
@@ -100,41 +142,35 @@ const NodesDetailPanel = React.memo(function NodesDetailPanel({
         />
 
         <Label>Trend ID</Label>
-        <TextBox
-          value={trendID}
-          disabled={!inEdit}
-          onChange={(e: TextBoxChangeEvent) =>
-            setTrendID(e.value?.toString() ?? "")
-          }
-        />
+        <TextBox value={trendID} disabled />
       </div>
 
       <div className="item-row">
         {!inEdit ? (
           <>
             <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
-              Edit
+              {t("common:edit")}
             </Button>
 
             <Button svgIcon={plusIcon} onClick={openAddDialog}>
-              Add new node
+              {t("node-page:add_new_node")}
             </Button>
           </>
         ) : (
           <>
             <Button svgIcon={cancelIcon} onClick={() => setInEdit(false)}>
-              Cancel
+              {t("common:cancel")}
             </Button>
 
             <Button svgIcon={saveIcon} themeColor="primary" onClick={saveEdit}>
-              Save
+              {t("common:save")}
             </Button>
 
             <Button
               svgIcon={trashIcon}
               onClick={() => setShowDeleteDialog(true)}
             >
-              Delete
+              {t("common:delete")}
             </Button>
           </>
         )}
@@ -142,14 +178,16 @@ const NodesDetailPanel = React.memo(function NodesDetailPanel({
 
       {showDeleteDialog && (
         <Dialog
-          title="Confirm deletion"
+          title={t("common:confirm_deletion")}
           onClose={() => setShowDeleteDialog(false)}
         >
           Delete this node?
           <DialogActionsBar>
-            <Button onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button onClick={() => setShowDeleteDialog(false)}>
+              {t("common:cancel")}
+            </Button>
             <Button themeColor="primary" onClick={confirmDelete}>
-              Delete
+              {t("common:delete")}
             </Button>
           </DialogActionsBar>
         </Dialog>
