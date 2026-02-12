@@ -31,13 +31,9 @@ const LinksPage = React.memo(function LinksPage() {
 
   const openAddDialog = () => setShowAddDialog(true);
 
-  const handleEditLink = React.useCallback(
-    async (link: LinkUpdate) => {
-      if (!selected) return;
-      updateLink(selected.ID, link);
-    },
-    [selected, updateLink],
-  );
+  const handleEditLink = async (id: number, value: LinkUpdate) => {
+    await updateLink(id, value);
+  };
 
   const handleBeginNodeChange = React.useCallback((e: TextBoxChangeEvent) => {
     setNewBeginNodeID(String(e.value ?? ""));
@@ -76,11 +72,7 @@ const LinksPage = React.memo(function LinksPage() {
       Length: newLength === "" ? null : Number(newLength),
     });
 
-    setSelected(null);
-    setShowAddDialog(false);
-    setNewBeginNodeID("");
-    setNewEndNodeID("");
-    setNewLength("");
+    cancelAddLink();
   };
 
   const handleDelete = async (link: Link) => {
