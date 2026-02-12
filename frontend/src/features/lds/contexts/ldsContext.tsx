@@ -23,6 +23,8 @@ import {
   Pipeline,
   PipelineCreate,
   PipelineUpdate,
+  PipelineParam,
+  PipelineParamCreate,
 } from "../../../services/api";
 
 export type LDSContextType = {
@@ -68,6 +70,13 @@ export type LDSContextType = {
   addPipeline: (value: PipelineCreate) => Promise<Pipeline>;
   updatePipeline: (id: number, value: PipelineUpdate) => Promise<void>;
   deletePipeline: (value: Pipeline) => Promise<void>;
+  pipelineParams: PipelineParam[];
+  addPipelineParams: (
+    value: PipelineParamCreate,
+    pipelineID: number,
+  ) => Promise<PipelineParam>;
+  deletePipelineParams: (value: PipelineParam) => Promise<void>;
+  loadPipelineParamsByPipeline: (pipelineID: number) => Promise<void>;
 };
 
 export const LDSContext = React.createContext<LDSContextType | null>(null);
@@ -115,6 +124,13 @@ interface LDSContextProviderProps extends PropsWithChildren {
   addPipeline: (value: PipelineCreate) => Promise<Pipeline>;
   updatePipeline: (id: number, value: PipelineUpdate) => Promise<void>;
   deletePipeline: (value: Pipeline) => Promise<void>;
+  pipelineParams: PipelineParam[];
+  addPipelineParams: (
+    value: PipelineParamCreate,
+    pipelineID: number,
+  ) => Promise<PipelineParam>;
+  deletePipelineParams: (value: PipelineParam) => Promise<void>;
+  loadPipelineParamsByPipeline: (pipelineID: number) => Promise<void>;
 }
 
 export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
@@ -161,6 +177,10 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
   addPipeline,
   updatePipeline,
   deletePipeline,
+  pipelineParams,
+  addPipelineParams,
+  deletePipelineParams,
+  loadPipelineParamsByPipeline,
 }: LDSContextProviderProps) => {
   const value = React.useMemo(
     () => ({
@@ -206,6 +226,10 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addPipeline,
       updatePipeline,
       deletePipeline,
+      pipelineParams,
+      addPipelineParams,
+      deletePipelineParams,
+      loadPipelineParamsByPipeline,
     }),
     [
       trendDefs,
@@ -244,6 +268,10 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addPipeline,
       updatePipeline,
       deletePipeline,
+      pipelineParams,
+      addPipelineParams,
+      deletePipelineParams,
+      loadPipelineParamsByPipeline,
     ],
   );
 
