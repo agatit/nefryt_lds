@@ -1,5 +1,5 @@
 import React from "react";
-import "../../../../styles/features/lds/features/pipelinesPage.scss";
+import "./pipelinesPage.scss";
 import { useTranslation } from "react-i18next";
 import { LDSContext } from "../../contexts/ldsContext";
 import {
@@ -7,10 +7,10 @@ import {
   PipelineParam,
   PipelineParamCreate,
 } from "../../../../services/api";
-import Pipelines from "./components/Pipelines";
-import PipelinesDetailPanel from "./components/PipelinesDetailPanel";
-import PipelineParams from "./components/PipelineParams";
-import PipelinesParamDetailPanel from "./components/PipelineParamsDetailPanel";
+import Pipelines from "./components/Pipelines/Pipelines";
+import PipelinesDetailPanel from "./components/Pipelines/PipelinesDetailPanel";
+import PipelineParams from "./components/PipelineParams/PipelineParams";
+import PipelinesParamDetailPanel from "./components/PipelineParams/PipelineParamsDetailPanel";
 import { DetailPanel } from "onyks_shared_kendo";
 import { Typography } from "@progress/kendo-react-common";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";

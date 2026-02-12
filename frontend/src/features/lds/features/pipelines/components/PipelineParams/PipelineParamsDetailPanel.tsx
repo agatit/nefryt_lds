@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { PipelineParam } from "../../../../../services/api";
+import { PipelineParam } from "../../../../../../services/api";
 import { TextBox } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
 

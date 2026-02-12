@@ -8,8 +8,8 @@ import {
 } from "@progress/kendo-react-grid";
 import { useTranslation } from "react-i18next";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
-import { EventDef } from "../../../../../services/api";
-import { Event as ApiEvent } from "../../../../../services/api";
+import { EventDef } from "../../../../../../services/api";
+import { Event as ApiEvent } from "../../../../../../services/api";
 
 interface EventsProps {
   eventDefs: EventDef[];

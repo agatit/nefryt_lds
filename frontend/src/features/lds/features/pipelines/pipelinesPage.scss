@@ -1,0 +1,53 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
+main.pipelines-page {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+}
+
+.pipelines-grid-container {
+  flex: 4 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pipelines-grid-container .k-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.pipelines-trend-stuff-tab {
+  flex: 0 0 auto;
+  border-top: 1px solid #ddd;
+  background: white;
+}
+
+.pipelines-detail-panel.no-selected>div {
+  justify-content: center;
+  height: 100%;
+  cursor: not-allowed;
+}
+
+.detail-panel-content .item-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-panel-content .item-row {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-panel-content .item-column>div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pipelines-dialog .k-dialog {
+  width: 300px;
+}

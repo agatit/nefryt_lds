@@ -11,8 +11,8 @@ import {
   saveIcon,
   plusIcon,
 } from "@progress/kendo-svg-icons";
-import { Node, NodeCreate, NodeUpdate } from "../../../../../services/api";
-import { AppContext } from "../../../../../contexts/appContext";
+import { Node, NodeCreate, NodeUpdate } from "../../../../../../services/api";
+import { AppContext } from "../../../../../../contexts/appContext";
 
 interface Props {
   selected: Node;
@@ -48,6 +48,21 @@ const NodesDetailPanel = React.memo(function NodesDetailPanel({
     setTrendID(selected.TrendID?.toString() ?? "");
     setInEdit(false);
   }, [selected]);
+
+  const handleTypeChange = React.useCallback(
+    (e: TextBoxChangeEvent) => setType(String(e.value ?? "").toUpperCase()),
+    [],
+  );
+
+  const handleNameChange = React.useCallback(
+    (e: TextBoxChangeEvent) => setName(String(e.value ?? "").toUpperCase()),
+    [],
+  );
+
+  const handleParamsChange = React.useCallback(
+    (e: TextBoxChangeEvent) => setEditorParams(String(e.value ?? "")),
+    [],
+  );
 
   const saveEdit = async () => {
     let parsedParams = null;
@@ -112,33 +127,19 @@ const NodesDetailPanel = React.memo(function NodesDetailPanel({
     <div className="detail-panel-content">
       <div className="item-column">
         <Label>ID</Label>
-        <TextBox value={selected.ID!.toString() ?? ""} disabled />
+        <TextBox value={selected.ID!} disabled />
 
         <Label>Type</Label>
-        <TextBox
-          value={type}
-          disabled={!inEdit}
-          onChange={(e: TextBoxChangeEvent) =>
-            setType(e.value?.toString() ?? "")
-          }
-        />
+        <TextBox value={type} disabled={!inEdit} onChange={handleTypeChange} />
 
         <Label>Name</Label>
-        <TextBox
-          value={name}
-          disabled={!inEdit}
-          onChange={(e: TextBoxChangeEvent) =>
-            setName(e.value?.toString() ?? "")
-          }
-        />
+        <TextBox value={name} disabled={!inEdit} onChange={handleNameChange} />
 
         <Label>Editor Params</Label>
         <TextBox
           value={editorParams}
           disabled={!inEdit}
-          onChange={(e: TextBoxChangeEvent) =>
-            setEditorParams(e.value?.toString() ?? "")
-          }
+          onChange={handleParamsChange}
         />
 
         <Label>Trend ID</Label>

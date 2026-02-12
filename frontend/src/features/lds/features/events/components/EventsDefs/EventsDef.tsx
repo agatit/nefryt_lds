@@ -9,14 +9,14 @@ import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
 import { cancelIcon, checkIcon, plusIcon } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { EventDef, EventDefCreate } from "../../../../../services/api";
+import { EventDef, EventDefCreate } from "../../../../../../services/api";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
 import { Label } from "@progress/kendo-react-labels";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
-import { AppContext } from "../../../../../contexts/appContext";
+import { AppContext } from "../../../../../../contexts/appContext";
 
 export interface EventsDefProps {
   showDialog: boolean;
@@ -110,13 +110,21 @@ const EventsDef = React.memo(function EventsDef({
       return;
     }
 
-    if (!/^[A-Z_]+$/.test(id)) {
+    if (!/^[A-Z0-9_]+$/.test(id)) {
       appContext.showNotification({
         notificationType: {
           icon: true,
           style: "error",
         },
         message: "ID: use uppercase letters and underscores only",
+      });
+      return;
+    }
+
+    if (eventDefs.some((d) => d.ID === id)) {
+      appContext.showNotification({
+        notificationType: { icon: true, style: "error" },
+        message: "ID already exists",
       });
       return;
     }
@@ -132,7 +140,7 @@ const EventsDef = React.memo(function EventsDef({
       return;
     }
 
-    if (!/^[A-Z]+$/.test(verbosity)) {
+    if (!/^[A-Z_]+$/.test(verbosity)) {
       appContext.showNotification({
         notificationType: {
           icon: true,

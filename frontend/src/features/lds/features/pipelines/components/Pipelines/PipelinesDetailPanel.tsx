@@ -11,7 +11,7 @@ import {
   saveIcon,
   plusIcon,
 } from "@progress/kendo-svg-icons";
-import { Pipeline, PipelineUpdate } from "../../../../../services/api";
+import { Pipeline, PipelineUpdate } from "../../../../../../services/api";
 
 interface Props {
   selected: Pipeline;

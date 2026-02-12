@@ -10,7 +10,7 @@ import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import {
   PipelineParam,
   PipelineParamCreate,
-} from "../../../../../services/api";
+} from "../../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
 import { plusIcon } from "@progress/kendo-svg-icons";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";

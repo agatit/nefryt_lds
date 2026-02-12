@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Label } from "@progress/kendo-react-labels";
 import { TextBox } from "@progress/kendo-react-inputs";
-import { Event as ApiEvent } from "../../../../../services/api";
+import { Event as ApiEvent } from "../../../../../../services/api";
 
 export interface EventsDetailPanelProps {
   selected: ApiEvent;

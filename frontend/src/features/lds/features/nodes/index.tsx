@@ -1,8 +1,8 @@
 import React from "react";
-import "../../../../styles/features/lds/features/nodesPage.scss";
+import "./nodesPage.scss";
 import { useTranslation } from "react-i18next";
 import { LDSContext } from "../../contexts/ldsContext";
-import Nodes from "./components/Nodes";
+import Nodes from "./components/Nodes/Nodes";
 import { Node } from "../../../../services/api";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { Label } from "@progress/kendo-react-labels";
@@ -10,7 +10,7 @@ import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { DetailPanel } from "onyks_shared_kendo";
 import { Typography } from "@progress/kendo-react-common";
 import { Button } from "@progress/kendo-react-buttons";
-import NodesDetailPanel from "./components/NodesDetailPanel";
+import NodesDetailPanel from "./components/Nodes/NodesDetailPanel";
 import { AppContext } from "../../../../contexts/appContext";
 
 const NodesPage = React.memo(function NodesPage() {

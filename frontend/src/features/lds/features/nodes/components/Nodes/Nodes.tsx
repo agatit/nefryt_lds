@@ -8,7 +8,7 @@ import {
 } from "@progress/kendo-react-grid";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { useTranslation } from "react-i18next";
-import { Node } from "../../../../../services/api";
+import { Node } from "../../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
 import { plusIcon } from "@progress/kendo-svg-icons";
 import { GridCustomCellProps } from "@progress/kendo-react-grid";

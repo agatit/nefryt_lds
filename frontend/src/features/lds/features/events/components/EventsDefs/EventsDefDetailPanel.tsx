@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { EventDef, EventDefUpdate } from "../../../../../services/api";
+import { EventDef, EventDefUpdate } from "../../../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
 import {
@@ -13,7 +13,7 @@ import {
 import { Button } from "@progress/kendo-react-buttons";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
-import { AppContext } from "../../../../../contexts/appContext";
+import { AppContext } from "../../../../../../contexts/appContext";
 import { DropDownListChangeEvent } from "@progress/kendo-react-dropdowns";
 
 export interface EventDefDetailPanelProps {

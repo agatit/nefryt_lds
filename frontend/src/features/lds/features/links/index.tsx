@@ -1,11 +1,11 @@
 import React from "react";
-import "../../../../styles/features/lds/features/linkPage.scss";
+import "./linkPage.scss";
 import { DetailPanel } from "onyks_shared_kendo";
 import { useTranslation } from "react-i18next";
 import { Typography } from "@progress/kendo-react-common";
 import { LDSContext } from "../../contexts/ldsContext";
-import Links from "./components/Links";
-import LinksDetailPanel from "./components/LinksDetailPanel";
+import Links from "./components/Links/Links";
+import LinksDetailPanel from "./components/Links/LinksDetailPanel";
 import { Link, LinkUpdate } from "../../../../services/api";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { cancelIcon, checkIcon } from "@progress/kendo-svg-icons";

@@ -10,7 +10,7 @@ import {
   trashIcon,
   saveIcon,
 } from "@progress/kendo-svg-icons";
-import { Link, LinkUpdate } from "../../../../../services/api";
+import { Link, LinkUpdate } from "../../../../../../services/api";
 import { plusIcon } from "@progress/kendo-svg-icons";
 
 interface Props {

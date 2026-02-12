@@ -1,10 +1,10 @@
 import React from "react";
-import "../../../../styles/features/lds/features/eventsPage.scss";
+import "./eventsPage.scss";
 import { DetailPanel } from "onyks_shared_kendo";
 import { Typography } from "@progress/kendo-react-common";
 import { useTranslation } from "react-i18next";
 import { LDSContext } from "../../contexts/ldsContext";
-import Events from "./components/Events";
+import Events from "./components/Events/Events";
 import { Event as ApiEvent } from "../../../../services/api";
 import {
   Splitter,
@@ -15,9 +15,9 @@ import {
   TabStripTab,
 } from "@progress/kendo-react-layout";
 import type { EventDef as EventDefType } from "../../../../services/api";
-import EventsDef from "./components/EventsDef";
-import EventsDefDetailsPanel from "./components/EventsDefDetailPanel";
-import EventsDetailPanel from "./components/EventsDetailPanel";
+import EventsDef from "./components/EventsDefs/EventsDef";
+import EventsDefDetailsPanel from "./components/EventsDefs/EventsDefDetailPanel";
+import EventsDetailPanel from "./components/Events/EventsDetailPanel";
 
 export interface SelectionType {
   events: ApiEvent | null;

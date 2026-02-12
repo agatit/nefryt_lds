@@ -8,7 +8,7 @@ import {
 } from "@progress/kendo-react-grid";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { useTranslation } from "react-i18next";
-import { Pipeline } from "../../../../../services/api";
+import { Pipeline } from "../../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
 import { plusIcon } from "@progress/kendo-svg-icons";
 
