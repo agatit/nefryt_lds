@@ -15,7 +15,7 @@ import { plusIcon } from "@progress/kendo-svg-icons";
 
 interface Props {
   selected: Link;
-  editLink: (value: LinkUpdate) => Promise<void>;
+  editLink: (id: number, value: LinkUpdate) => Promise<void>;
   deleteLink: (value: Link) => Promise<void>;
   openAddDialog: () => void;
 }
@@ -46,12 +46,12 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
   }, []);
 
   const saveEdit = async () => {
-    await editLink({
-      ...selected,
+    await editLink(selected.ID, {
       BeginNodeID: beginNodeID === "" ? null : Number(beginNodeID),
       EndNodeID: endNodeID === "" ? null : Number(endNodeID),
       Length: length === "" ? null : Number(length),
     });
+
     setInEdit(false);
   };
 
@@ -117,7 +117,7 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
             </Button>
 
             <Button svgIcon={plusIcon} onClick={openAddDialog}>
-              {t("config-page:add_new_link")}
+              {t("link-page:add_new_link")}
             </Button>
           </>
         ) : (
