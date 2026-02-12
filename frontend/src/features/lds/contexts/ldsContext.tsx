@@ -9,6 +9,20 @@ import {
   TrendParamDef,
   Unit,
   UnitApi,
+  Event,
+  Link,
+  EventDef,
+  EventDefApi,
+  Node,
+  LinkCreate,
+  LinkUpdate,
+  EventDefUpdate,
+  EventDefCreate,
+  NodeCreate,
+  NodeUpdate,
+  Pipeline,
+  PipelineCreate,
+  PipelineUpdate,
 } from "../../../services/api";
 
 export type LDSContextType = {
@@ -33,6 +47,27 @@ export type LDSContextType = {
   addUnit: (value: Unit) => Promise<void>;
   updateUnit: (value: Unit) => Promise<void>;
   deleteUnit: (value: Unit) => Promise<void>;
+  events: Event[];
+  setEvents: (value: Event[]) => void;
+  ackEvent: (eventId: number) => Promise<void>;
+  links: Link[];
+  addLink: (value: LinkCreate) => Promise<Link>;
+  updateLink: (id: number, value: LinkUpdate) => Promise<void>;
+  deleteLink: (value: Link) => Promise<void>;
+  setLinks: (value: Link[]) => void;
+  eventDefs: EventDef[];
+  eventDefApi: EventDefApi;
+  updateEventDef: (id: string, value: EventDefUpdate) => Promise<void>;
+  deleteEventDef: (value: EventDef) => Promise<void>;
+  addEventDef: (value: EventDefCreate) => Promise<void>;
+  nodes: Node[];
+  addNode: (value: NodeCreate) => Promise<Node>;
+  updateNode: (id: number, value: NodeUpdate) => Promise<void>;
+  deleteNode: (value: Node) => Promise<void>;
+  pipelines: Pipeline[];
+  addPipeline: (value: PipelineCreate) => Promise<Pipeline>;
+  updatePipeline: (id: number, value: PipelineUpdate) => Promise<void>;
+  deletePipeline: (value: Pipeline) => Promise<void>;
 };
 
 export const LDSContext = React.createContext<LDSContextType | null>(null);
@@ -59,6 +94,27 @@ interface LDSContextProviderProps extends PropsWithChildren {
   addUnit: (value: Unit) => Promise<void>;
   updateUnit: (value: Unit) => Promise<void>;
   deleteUnit: (value: Unit) => Promise<void>;
+  events: Event[];
+  setEvents: (value: Event[]) => void;
+  ackEvent: (eventId: number) => Promise<void>;
+  links: Link[];
+  addLink: (value: LinkCreate) => Promise<Link>;
+  updateLink: (id: number, value: LinkUpdate) => Promise<void>;
+  deleteLink: (value: Link) => Promise<void>;
+  setLinks: (value: Link[]) => void;
+  eventDefs: EventDef[];
+  eventDefApi: EventDefApi;
+  updateEventDef: (id: string, value: EventDefUpdate) => Promise<void>;
+  deleteEventDef: (value: EventDef) => Promise<void>;
+  addEventDef: (value: EventDefCreate) => Promise<void>;
+  nodes: Node[];
+  addNode: (value: NodeCreate) => Promise<Node>;
+  updateNode: (id: number, value: NodeUpdate) => Promise<void>;
+  deleteNode: (value: Node) => Promise<void>;
+  pipelines: Pipeline[];
+  addPipeline: (value: PipelineCreate) => Promise<Pipeline>;
+  updatePipeline: (id: number, value: PipelineUpdate) => Promise<void>;
+  deletePipeline: (value: Pipeline) => Promise<void>;
 }
 
 export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
@@ -84,6 +140,27 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
   addUnit,
   updateUnit,
   deleteUnit,
+  events,
+  setEvents,
+  ackEvent,
+  links,
+  addLink,
+  updateLink,
+  deleteLink,
+  setLinks,
+  eventDefs,
+  eventDefApi,
+  updateEventDef,
+  deleteEventDef,
+  addEventDef,
+  nodes,
+  addNode,
+  updateNode,
+  deleteNode,
+  pipelines,
+  addPipeline,
+  updatePipeline,
+  deletePipeline,
 }: LDSContextProviderProps) => {
   const value = React.useMemo(
     () => ({
@@ -108,6 +185,27 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addUnit,
       updateUnit,
       deleteUnit,
+      events,
+      setEvents,
+      ackEvent,
+      links,
+      addLink,
+      updateLink,
+      deleteLink,
+      setLinks,
+      eventDefs,
+      eventDefApi,
+      updateEventDef,
+      deleteEventDef,
+      addEventDef,
+      nodes,
+      addNode,
+      updateNode,
+      deleteNode,
+      pipelines,
+      addPipeline,
+      updatePipeline,
+      deletePipeline,
     }),
     [
       trendDefs,
@@ -128,7 +226,25 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addUnit,
       updateUnit,
       deleteUnit,
-    ]
+      ackEvent,
+      links,
+      addLink,
+      updateLink,
+      deleteLink,
+      setLinks,
+      eventDefs,
+      updateEventDef,
+      deleteEventDef,
+      addEventDef,
+      nodes,
+      addNode,
+      updateNode,
+      deleteNode,
+      pipelines,
+      addPipeline,
+      updatePipeline,
+      deletePipeline,
+    ],
   );
 
   return <LDSContext.Provider value={value}>{children}</LDSContext.Provider>;
