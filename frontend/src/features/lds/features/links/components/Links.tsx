@@ -29,10 +29,10 @@ const Links = React.memo(function LinksGrid({
   const [select, setSelect] = React.useState<SelectDescriptor>();
 
   const handleSelectionChange = React.useCallback(
-    (event: GridSelectionChangeEvent) => {
-      const item = event.endDataItem as Link;
+    (link: GridSelectionChangeEvent) => {
+      const item = link.endDataItem as Link;
       onSelectLink(item);
-      setSelect(event.select);
+      setSelect(link.select);
     },
     [onSelectLink],
   );
