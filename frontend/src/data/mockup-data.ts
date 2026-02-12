@@ -9,6 +9,12 @@ import {
   TrendGroup,
   TrendParamDef,
   Unit,
+  Event,
+  Link,
+  EventDef,
+  Node,
+  Pipeline,
+  PipelineParam,
 } from "../services/api";
 
 // export type MockupTrendType = {
@@ -365,5 +371,204 @@ export const mockupTrendParamDefs: TrendParamDef[] = [
     TrendDefID: "DIFF",
     Name: "TrendID B",
     DataType: "TREND",
+  },
+];
+
+export const mockupEvents: Event[] = [
+  {
+    ID: 1,
+    EventDefID: "TEST",
+    MethodID: 1,
+    BeginDate: new Date("2026-02-04T08:00:00Z").toISOString(),
+    AckDate: new Date("2026-02-04T08:05:00Z").toISOString(),
+    EndDate: new Date("2026-02-04T08:10:00Z").toISOString(),
+    Details: "Pipeline pressure exceeded threshold",
+    Position: 1,
+    Verbosity: "INFO",
+    Caption: "Pressure warning",
+    Silent: false,
+  },
+  {
+    ID: 2,
+    EventDefID: "ALARM",
+    MethodID: 2,
+    BeginDate: new Date("2026-02-04T09:15:00Z").toISOString(),
+    AckDate: null,
+    EndDate: null,
+    Details: "Leak detected near valve A3",
+    Position: 3,
+    Verbosity: "ERROR",
+    Caption: "Leak detected",
+    Silent: false,
+  },
+  {
+    ID: 3,
+    EventDefID: "SYSTEM",
+    MethodID: 3,
+    BeginDate: new Date("2026-02-04T10:30:00Z").toISOString(),
+    AckDate: new Date("2026-02-04T10:32:00Z").toISOString(),
+    EndDate: null,
+    Details: "System entered maintenance mode",
+    Position: 0,
+    Verbosity: "INFO",
+    Caption: "Maintenance mode",
+    Silent: true,
+  },
+  {
+    ID: 4,
+    EventDefID: "WARNING",
+    MethodID: 4,
+    BeginDate: new Date("2026-02-04T11:45:00Z").toISOString(),
+    AckDate: null,
+    EndDate: null,
+    Details: "Temperature approaching critical level",
+    Position: 2,
+    Verbosity: "WARN",
+    Caption: "High temperature",
+    Silent: false,
+  },
+];
+
+export const mockupLinks: Link[] = [
+  {
+    ID: 1,
+    BeginNodeID: 10,
+    EndNodeID: 20,
+    Length: "125.5",
+  },
+  {
+    ID: 2,
+    BeginNodeID: 20,
+    EndNodeID: 30,
+    Length: "98.3",
+  },
+  {
+    ID: 3,
+    BeginNodeID: 30,
+    EndNodeID: 40,
+    Length: "210.0",
+  },
+];
+
+export const mockupEventDefs: EventDef[] = [
+  {
+    ID: "ANOMALY",
+    Caption: "Detekcja anomalii",
+    Enabled: true,
+    Verbosity: "WARNING",
+    Silent: false,
+    Visible: true,
+  },
+  {
+    ID: "LEAK",
+    Caption: "Detekcja wycieku",
+    Enabled: true,
+    Verbosity: "ALARM",
+    Silent: false,
+    Visible: true,
+  },
+  {
+    ID: "NO_DATA",
+    Caption: "Brak danych do detekcji",
+    Enabled: true,
+    Verbosity: "WARNING",
+    Silent: false,
+    Visible: true,
+  },
+  {
+    ID: "START",
+    Caption: "Uruchomienie detekcji",
+    Enabled: true,
+    Verbosity: "INFO",
+    Silent: false,
+    Visible: false,
+  },
+  {
+    ID: "STOP",
+    Caption: "Zatrzymanie detekcji",
+    Enabled: true,
+    Verbosity: "INFO",
+    Silent: false,
+    Visible: false,
+  },
+];
+
+export const mockupNodes: Node[] = [
+  {
+    Type: "PRESS",
+    Name: "PT-01",
+    EditorParams: null,
+    TrendID: null,
+    ID: 1,
+  },
+  {
+    Type: "PRESS",
+    Name: "PT-02",
+    EditorParams: null,
+    TrendID: null,
+    ID: 2,
+  },
+  {
+    Type: "PRESS",
+    Name: "PT-03",
+    EditorParams: null,
+    TrendID: null,
+    ID: 3,
+  },
+  {
+    Type: "PRESS",
+    Name: "PT-04",
+    EditorParams: null,
+    TrendID: null,
+    ID: 4,
+  },
+];
+
+export const mockupPipelines: Pipeline[] = [
+  {
+    ID: 1,
+    Name: "Zygmuntow_1",
+  },
+  {
+    ID: 2,
+    Name: "Zygmuntow_2",
+  },
+];
+
+export const mockupPipelineParams: PipelineParam[] = [
+  {
+    PipelineParamDefID: "ACTIVE_METHODS",
+    Value: "20,1001",
+    PipelineID: 1,
+    DataType: "LIST",
+    Name: "Metody generujące zdarzenia",
+  },
+  {
+    PipelineParamDefID: "BEGIN_POS",
+    Value: "3.31",
+    PipelineID: 1,
+    DataType: "INT",
+    Name: "Pozycja poczatkowa [m]",
+  },
+  {
+    PipelineParamDefID: "FIRST_NODE_ID",
+    Value: "4",
+    PipelineID: 1,
+    DataType: "INT",
+    Name: "First node ID",
+  },
+  {
+    PipelineParamDefID: "LENGTH_RESOLUTION",
+    Value: "10",
+    PipelineID: 1,
+    DataType: "INT",
+    Name: "Rozdzielczość w pozycji [m]",
+  },
+  {
+    PipelineParamDefID: "TIME_RESOLUTION",
+    Value: "1000",
+    PipelineID: 1,
+    DataType: "INT",
+    Name: "Rozdzielczość w czasie [ms]",
   },
 ];
