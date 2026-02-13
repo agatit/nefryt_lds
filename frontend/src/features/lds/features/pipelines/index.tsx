@@ -10,18 +10,25 @@ import {
 import Pipelines from "./components/Pipelines/Pipelines";
 import PipelinesDetailPanel from "./components/Pipelines/PipelinesDetailPanel";
 import PipelineParams from "./components/PipelineParams/PipelineParams";
-import PipelinesParamDetailPanel from "./components/PipelineParams/PipelineParamsDetailPanel";
+import PipelineParamsDetailPanel from "./components/PipelineParams/PipelineParamsDetailPanel";
 import { DetailPanel } from "onyks_shared_kendo";
 import { Typography } from "@progress/kendo-react-common";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { Label } from "@progress/kendo-react-labels";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
+import {
+  DropDownList,
+  DropDownListChangeEvent,
+} from "@progress/kendo-react-dropdowns";
 import { AppContext } from "../../../../contexts/appContext";
 import {
   Splitter,
-  SplitterPaneProps,
   SplitterOnChangeEvent,
+  SplitterPaneProps,
+  TabStrip,
+  TabStripSelectEventArguments,
+  TabStripTab,
 } from "@progress/kendo-react-layout";
 
 const PipelinesPage = React.memo(function PipelinesPage() {
@@ -37,42 +44,60 @@ const PipelinesPage = React.memo(function PipelinesPage() {
     updatePipeline,
     deletePipeline,
     pipelineParams,
+    pipelineParamDefs,
     addPipelineParams,
     deletePipelineParams,
+    updatePipelineParam,
     loadPipelineParamsByPipeline,
+    loadPipelineParamDefs,
   } = ldsContext;
 
   const [selectedPipeline, setSelectedPipeline] =
     React.useState<Pipeline | null>(null);
-
   const [selectedParam, setSelectedParam] =
     React.useState<PipelineParam | null>(null);
-
   const [showAddPipelineDialog, setShowAddPipelineDialog] =
     React.useState(false);
-
-  const [showAddParamDialog, setShowAddParamDialog] = React.useState(false);
-
   const [showDeleteParamDialog, setShowDeleteParamDialog] =
     React.useState(false);
-
+  const [showAddParamDialog, setShowAddParamDialog] = React.useState(false);
   const [newName, setNewName] = React.useState("");
-  const [pipelineParamDefID, setPipelineParamDefID] = React.useState("");
   const [value, setValue] = React.useState("");
-
+  const [selectedDef, setSelectedDef] = React.useState<PipelineParam | null>(
+    null,
+  );
   const [verticalPanes, setVerticalPanes] = React.useState<SplitterPaneProps[]>(
     [{ size: "65%" }, {}],
   );
 
-  const handleVerticalChange = React.useCallback((e: SplitterOnChangeEvent) => {
-    setVerticalPanes(e.newState);
+  const [tabSelected, setTabSelected] = React.useState<number>(0);
+
+  const handleParamChange = React.useCallback((e: DropDownListChangeEvent) => {
+    setSelectedDef(e.value);
   }, []);
+
+  const handleValueChange = React.useCallback((e: TextBoxChangeEvent) => {
+    setValue(String(e.value ?? ""));
+  }, []);
+
+  const handleNameChange = React.useCallback((e: TextBoxChangeEvent) => {
+    setNewName(String(e.value ?? ""));
+  }, []);
+
+  const availableDefs = React.useMemo(() => {
+    return pipelineParamDefs?.filter(
+      (def) =>
+        !pipelineParams.some(
+          (p) => p.PipelineParamDefID === def.PipelineParamDefID,
+        ),
+    );
+  }, [pipelineParamDefs, pipelineParams]);
 
   const confirmAddPipeline = async () => {
     if (!newName.trim()) {
       appContext.showNotification({
         notificationType: { icon: true, style: "error" },
-        message: "Pipeline name is required",
+        message: "Pipeline name required",
       });
       return;
     }
@@ -82,30 +107,33 @@ const PipelinesPage = React.memo(function PipelinesPage() {
     setShowAddPipelineDialog(false);
   };
 
-  const handleDeletePipeline = async (pipeline: Pipeline) => {
-    await deletePipeline(pipeline);
-    setSelectedPipeline(null);
-  };
-
   const confirmAddParam = async () => {
     if (!selectedPipeline) return;
 
-    if (!pipelineParamDefID.trim() || !value.trim()) {
+    if (!selectedDef || !value.trim()) {
       appContext.showNotification({
         notificationType: { icon: true, style: "error" },
-        message: "Param ID and value required",
+        message: "Select parameter and enter value",
+      });
+      return;
+    }
+
+    if (!value || !value.trim()) {
+      appContext.showNotification({
+        notificationType: { icon: true, style: "error" },
+        message: "Parameter value cannot be empty",
       });
       return;
     }
 
     const param: PipelineParamCreate = {
-      PipelineParamDefID: pipelineParamDefID,
+      PipelineParamDefID: selectedDef?.PipelineParamDefID,
       Value: value,
     };
 
     await addPipelineParams(param, selectedPipeline.ID);
 
-    setPipelineParamDefID("");
+    setSelectedDef(null);
     setValue("");
     setShowAddParamDialog(false);
   };
@@ -118,10 +146,33 @@ const PipelinesPage = React.memo(function PipelinesPage() {
     setShowDeleteParamDialog(false);
   };
 
+  const handleDeletePipeline = async (pipeline: Pipeline) => {
+    await deletePipeline(pipeline);
+    setSelectedPipeline(null);
+  };
+
+  const handleVerticalChange = (e: SplitterOnChangeEvent) =>
+    setVerticalPanes(e.newState);
+
+  React.useEffect(() => {
+    if (selectedPipeline?.ID) {
+      loadPipelineParamsByPipeline(selectedPipeline.ID);
+    }
+  }, [selectedPipeline?.ID]);
+
   React.useEffect(() => {
     if (!selectedPipeline?.ID) return;
+
     loadPipelineParamsByPipeline(selectedPipeline.ID);
+    loadPipelineParamDefs(selectedPipeline.ID);
   }, [selectedPipeline?.ID]);
+
+  const handleTabSelect = React.useCallback(
+    (e: TabStripSelectEventArguments) => {
+      setTabSelected(e.selected);
+    },
+    [],
+  );
 
   return (
     <main className="pipelines-page">
@@ -131,7 +182,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
         orientation="vertical"
         onChange={handleVerticalChange}
       >
-        <div>
+        <div className="pipelines-grid-container">
           <Pipelines
             pipelines={pipelines}
             selected={selectedPipeline}
@@ -141,33 +192,40 @@ const PipelinesPage = React.memo(function PipelinesPage() {
         </div>
 
         <div>
-          {selectedPipeline && (
-            <PipelineParams
-              params={pipelineParams}
-              selected={selectedParam}
-              onSelect={setSelectedParam}
-              openDialog={() => setShowAddParamDialog(true)}
-              closeDialog={() => setShowAddParamDialog(false)}
-              showDialog={showAddParamDialog}
-              addPipelineParam={confirmAddParam}
-              pipelineID={selectedPipeline.ID}
-            />
+          {selectedPipeline ? (
+            <TabStrip
+              className="events-stuff-tab"
+              selected={tabSelected}
+              onSelect={handleTabSelect}
+            >
+              <TabStripTab title={t("event-page:events_types")}>
+                <PipelineParams
+                  params={pipelineParams}
+                  selected={selectedParam}
+                  onSelect={setSelectedParam}
+                  pipelineID={selectedPipeline.ID}
+                  openDialog={() => setShowAddParamDialog(true)}
+                />
+              </TabStripTab>
+            </TabStrip>
+          ) : (
+            <Typography.p style={{ padding: "20px" }} fontSize="large">
+              {t("pipeline-page:choose_pipeline_first") ||
+                "Choose pipeline above to see parameters"}
+            </Typography.p>
           )}
         </div>
       </Splitter>
 
-      <DetailPanel
-        className={
-          "pipelines-detail-panel" +
-          (!selectedPipeline && !selectedParam ? " no-selected" : "")
-        }
-        flexGrow={1}
-        extandable={false}
-      >
+      <DetailPanel flexGrow={1} extandable={false}>
         {selectedParam ? (
-          <PipelinesParamDetailPanel
+          <PipelineParamsDetailPanel
             selected={selectedParam}
+            pipelineID={selectedPipeline!.ID}
+            updateParam={updatePipelineParam}
             deleteParam={async () => setShowDeleteParamDialog(true)}
+            openAddDialog={() => setShowAddParamDialog(true)}
+            openDeleteDialog={() => setShowDeleteParamDialog(true)}
           />
         ) : selectedPipeline ? (
           <PipelinesDetailPanel
@@ -183,56 +241,49 @@ const PipelinesPage = React.memo(function PipelinesPage() {
         )}
       </DetailPanel>
 
-      {showAddPipelineDialog && (
-        <Dialog
-          title="Add pipeline"
-          onClose={() => setShowAddPipelineDialog(false)}
-        >
-          <Label>Name</Label>
-          <TextBox
-            value={newName}
-            onChange={(e: TextBoxChangeEvent) =>
-              setNewName(String(e.value ?? ""))
-            }
-          />
-
-          <DialogActionsBar>
-            <Button onClick={() => setShowAddPipelineDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmAddPipeline}>
-              {t("common:add")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
-
       {showAddParamDialog && (
         <Dialog
           title="Add pipeline parameter"
           onClose={() => setShowAddParamDialog(false)}
+          className="pipeline-dialog"
         >
-          <Label>Param ID</Label>
-          <TextBox
-            value={pipelineParamDefID}
-            onChange={(e: TextBoxChangeEvent) =>
-              setPipelineParamDefID(String(e.value ?? "").toUpperCase())
-            }
+          <Label>Parameter</Label>
+          <DropDownList
+            data={availableDefs}
+            textField="Name"
+            dataItemKey="PipelineParamDefID"
+            value={selectedDef}
+            onChange={handleParamChange}
           />
 
           <Label>Value</Label>
-          <TextBox
-            value={value}
-            onChange={(e: TextBoxChangeEvent) =>
-              setValue(String(e.value ?? ""))
-            }
-          />
+          <TextBox value={value} onChange={handleValueChange} />
 
           <DialogActionsBar>
             <Button onClick={() => setShowAddParamDialog(false)}>
               {t("common:cancel")}
             </Button>
             <Button themeColor="primary" onClick={confirmAddParam}>
+              {t("common:add")}
+            </Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
+
+      {showAddPipelineDialog && (
+        <Dialog
+          title="Add pipeline"
+          onClose={() => setShowAddPipelineDialog(false)}
+          className="pipeline-dialog"
+        >
+          <Label>Name</Label>
+          <TextBox value={newName} onChange={handleNameChange} />
+
+          <DialogActionsBar>
+            <Button onClick={() => setShowAddPipelineDialog(false)}>
+              {t("common:cancel")}
+            </Button>
+            <Button themeColor="primary" onClick={confirmAddPipeline}>
               {t("common:add")}
             </Button>
           </DialogActionsBar>
