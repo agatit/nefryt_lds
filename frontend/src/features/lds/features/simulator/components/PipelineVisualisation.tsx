@@ -1,6 +1,6 @@
 import React from "react";
-import { Simulation, SimulationParam } from "../../../../services/api";
-import { SimulationData } from "./SimulatorPage";
+import { Simulation, SimulationParam } from "../../../../../services/api";
+import { SimulationData } from "../index";
 import { SvgIcon } from "@progress/kendo-react-common";
 import {
   chevronDoubleLeftIcon,

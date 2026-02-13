@@ -16,10 +16,10 @@ import {
 import React from "react";
 import ScaleScrollBar, {
   ScaleScrollBarChangeEvent,
-} from "../../../../components/ScaleScrollBar";
-import { throttle } from "../../../../lib/utilis";
-import CursorBubble from "../../../../components/CursorBubble";
-import { useResizeObserver } from "../../../../hooks/useResizeObserver";
+} from "../../../../../components/ScaleScrollBar";
+import { throttle } from "../../../../../lib/utilis";
+import CursorBubble from "../../../../../components/CursorBubble";
+import { useResizeObserver } from "../../../../../hooks/useResizeObserver";
 import { Loader } from "@progress/kendo-react-indicators";
 import { SvgIcon } from "@progress/kendo-react-common";
 import { xCircleIcon } from "@progress/kendo-svg-icons";
@@ -258,7 +258,7 @@ const NavigationSelectComponent = React.memo(
         document
           .getElementsByClassName("navigation-chart")[0]
           ?.getElementsByTagName("svg")[0]
-          ?.children[1]?.children[2]?.getBoundingClientRect()
+          ?.children[1]?.children[2]?.getBoundingClientRect(),
       );
     }, []);
 
@@ -294,7 +294,7 @@ const NavigationSelectComponent = React.memo(
         startingSelect.current =
           handle == HandleType.LEFT ? selectStart : selectEnd;
       },
-      [onSelectStart]
+      [onSelectStart],
     );
 
     const handleMouseMove = React.useCallback(
@@ -311,7 +311,7 @@ const NavigationSelectComponent = React.memo(
             break;
         }
       },
-      [selectStart, isDragging]
+      [selectStart, isDragging],
     );
 
     const handleMouseUp = React.useCallback(() => {
@@ -360,7 +360,7 @@ const NavigationSelectComponent = React.memo(
         <div className="mask" style={{ width: rightMaskWidth }} />
       </div>
     );
-  }
+  },
 );
 
 export interface TrendChartProps {
@@ -435,7 +435,7 @@ const TrendChart = React.memo(function TrendChart({
     return { min, max };
   }, [trendData]);
   const [valueAxisState, setValueAxisState] = React.useState<MinMaxType[]>(
-    new Array(axesState.length).fill(trendMinMaxValue)
+    new Array(axesState.length).fill(trendMinMaxValue),
   );
 
   React.useEffect(() => {
@@ -448,24 +448,24 @@ const TrendChart = React.memo(function TrendChart({
       arr.splice(index, 1, newMinMax);
       setValueAxisState(arr);
     },
-    [valueAxisState]
+    [valueAxisState],
   );
 
   const throttledValueAxisChange = React.useMemo(
     () => throttle(updateValueAxisState, chartScaleThrottleMs),
-    [updateValueAxisState]
+    [updateValueAxisState],
   );
 
   function handleScaleScrollBarChange(
     e: ScaleScrollBarChangeEvent,
-    index: number
+    index: number,
   ) {
     throttledValueAxisChange(
       {
         max: Math.round(e.value.end * 100) / 100,
         min: Math.round(e.value.start * 100) / 100,
       },
-      index
+      index,
     );
   }
 
@@ -525,7 +525,7 @@ const TrendChart = React.memo(function TrendChart({
       .getElementsByClassName("main-chart")[0]
       ?.getElementsByTagName("svg")[0]?.children[1]?.children[2]?.children;
     const rects = Array.from(axesElements).map((el) =>
-      el.getBoundingClientRect()
+      el.getBoundingClientRect(),
     );
 
     const chartRect = document
@@ -538,7 +538,7 @@ const TrendChart = React.memo(function TrendChart({
 
     rects.forEach((axisRect, i) => {
       const axis = axesState.find(
-        (axis) => axis.Name == axesElements[i].lastElementChild?.innerHTML
+        (axis) => axis.Name == axesElements[i].lastElementChild?.innerHTML,
       );
 
       if (axis == undefined) return;
@@ -598,7 +598,7 @@ const TrendChart = React.memo(function TrendChart({
       selectStartDate.current = startDate;
       selectEndDate.current = endDate;
     },
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   const handleSelectEnd = React.useCallback(() => {
@@ -625,7 +625,7 @@ const TrendChart = React.memo(function TrendChart({
           minute: "2-digit",
           seconds: "2-digit",
           fractionalSecondDigits: "3",
-        })
+        }),
       );
     }
   }, []);

@@ -1,5 +1,5 @@
 import React from "react";
-import "../../../../styles/features/lds/features/simulatorPage.scss";
+import "./simulatorPage.scss";
 import { AuthContext } from "../../../../contexts/authContext";
 
 import { LDSContext } from "../../contexts/ldsContext";
@@ -21,10 +21,10 @@ import {
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
 import { SvgIcon, Typography } from "@progress/kendo-react-common";
 import { arrowRightIcon } from "@progress/kendo-svg-icons";
-import SimulatorDetailPanel from "./SimulatorDetailPanel";
-import SimulatorChart from "./SimulatorChart";
+import SimulatorDetailPanel from "./components/SimulatorDetailPanel";
+import SimulatorChart from "./components/SimulatorChart";
 import { Loader } from "@progress/kendo-react-indicators";
-import PipelineVisualisation from "./PipelineVisualisation";
+import PipelineVisualisation from "./components/PipelineVisualisation";
 
 export interface SimulationData {
   Distance: number;
@@ -51,19 +51,19 @@ export default function TrendsCurrentPage() {
   const { useMockup } = React.useContext(NavbarContext);
 
   const simulationDefApi = React.useRef(
-    new SimulationDefApi(auth?.config, host, axiosInstance)
+    new SimulationDefApi(auth?.config, host, axiosInstance),
   );
   const [simulationDefs, setSimulationDefs] = React.useState<SimulationDef[]>(
-    []
+    [],
   );
 
   const simulationApi = React.useRef(
-    new SimulationApi(auth?.config, host, axiosInstance)
+    new SimulationApi(auth?.config, host, axiosInstance),
   );
   const [simulations, setSimulations] = React.useState<Simulation[]>([]);
 
   const simulationParamApi = React.useRef(
-    new SimulationParamApi(auth?.config, host, axiosInstance)
+    new SimulationParamApi(auth?.config, host, axiosInstance),
   );
   const [simulationParamDefs, setSimulationParamDefs] = React.useState<
     SimulationParamDef[]
@@ -90,8 +90,8 @@ export default function TrendsCurrentPage() {
     try {
       const response = await handleApiResponse(
         simulationDefApi.current.listSimulationDefsSimulationDefGet.bind(
-          simulationDefApi.current
-        )
+          simulationDefApi.current,
+        ),
       );
 
       if (response.data) setSimulationDefs(response.data.items);
@@ -105,8 +105,8 @@ export default function TrendsCurrentPage() {
     try {
       const response = await handleApiResponse(
         simulationApi.current.listSimulationsSimulationGet.bind(
-          simulationApi.current
-        )
+          simulationApi.current,
+        ),
       );
 
       if (response.data) setSimulations(response.data.items);
@@ -120,8 +120,8 @@ export default function TrendsCurrentPage() {
     try {
       const response = await handleApiResponse(
         simulationParamApi.current.listSimulationParamDefsSimulationParamDefGet.bind(
-          simulationParamApi.current
-        )
+          simulationParamApi.current,
+        ),
       );
 
       if (response.data) setSimulationParamDefs(response.data.items);
@@ -157,9 +157,9 @@ export default function TrendsCurrentPage() {
     try {
       const response = await handleApiResponse(
         simulationParamApi.current.listSimulationParamsBySimulationIdSimulationSimulationIdParamGet.bind(
-          simulationParamApi.current
+          simulationParamApi.current,
         ),
-        selectedSimulation.ID
+        selectedSimulation.ID,
       );
 
       if (response.data) setSimulationParams(response.data.items);
@@ -170,10 +170,10 @@ export default function TrendsCurrentPage() {
   }, [selectedSimulation]);
 
   const simulationDataApi = React.useRef(
-    new SimulationDataApi(auth?.config, host, axiosInstance)
+    new SimulationDataApi(auth?.config, host, axiosInstance),
   );
   const [simulationData, setSimulationData] = React.useState<SimulationData[]>(
-    []
+    [],
   );
   const [simulationCurrentDateTime, setSimulationCurrentDateTime] =
     React.useState<Date>(new Date());
@@ -184,16 +184,16 @@ export default function TrendsCurrentPage() {
     try {
       const response = await handleApiResponse(
         simulationDataApi.current.getSimulationDataSimulationSimulationIdDataGet.bind(
-          simulationDataApi.current
+          simulationDataApi.current,
         ),
-        1
+        1,
       );
 
       setTimeToRefresh(selectedSimulation.RefreshTimeSeconds);
       if (response.data) {
         setSimulationData(response.data.items[0].Data);
         setSimulationCurrentDateTime(
-          new Date(response.data.items[0].Time * 1000)
+          new Date(response.data.items[0].Time * 1000),
         );
       }
     } catch (error) {
@@ -205,7 +205,7 @@ export default function TrendsCurrentPage() {
     (simulation: Simulation) => {
       setSelectedSimulation(simulation);
     },
-    []
+    [],
   );
 
   const [timeToRefresh, setTimeToRefresh] = React.useState(0);
@@ -218,7 +218,7 @@ export default function TrendsCurrentPage() {
     loadSimulationData();
     const interval = setInterval(
       loadSimulationData,
-      selectedSimulation.RefreshTimeSeconds * 1000
+      selectedSimulation.RefreshTimeSeconds * 1000,
     );
 
     return () => clearInterval(interval);

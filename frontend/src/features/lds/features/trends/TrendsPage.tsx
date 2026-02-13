@@ -21,9 +21,9 @@ import "../../../../styles/features/lds/features/trendPage.scss";
 
 import { DateTimePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import CursorBubble from "../../../../components/CursorBubble";
-import TrendChart from "./TrendChart";
-import TrendsDetailPanel from "./TrendsDetailPanel";
-import ChartEditDialog from "./ChartEditDialog";
+import TrendChart from "./components/TrendChart";
+import TrendsDetailPanel from "./components/TrendsDetailPanel";
+import ChartEditDialog from "./components/ChartEditDialog";
 import {
   mockupAxes,
   mockupTemplates,
@@ -45,7 +45,7 @@ import {
   ChartSeriesTrendData,
   ChartTrendData,
   generateValue,
-} from "./utils";
+} from "./components/utils";
 
 const mainChartSampleSize = 750;
 const navigationChartSampleSize = 200;
@@ -78,12 +78,12 @@ export default function TrendsPage() {
 
   const navigationStartDate = React.useMemo(() => {
     return new Date(
-      startDate.getTime() - (endDate.getTime() - startDate.getTime())
+      startDate.getTime() - (endDate.getTime() - startDate.getTime()),
     );
   }, [startDate, endDate]);
   const navigationEndDate = React.useMemo(() => {
     return new Date(
-      endDate.getTime() + (endDate.getTime() - startDate.getTime())
+      endDate.getTime() + (endDate.getTime() - startDate.getTime()),
     );
   }, [startDate, endDate]);
 
@@ -91,13 +91,13 @@ export default function TrendsPage() {
     (e: DateTimePickerChangeEvent) => {
       if (e.value) setStartDate(e.value);
     },
-    []
+    [],
   );
   const handleEndDateChange = React.useCallback(
     (e: DateTimePickerChangeEvent) => {
       if (e.value) setEndDate(e.value);
     },
-    []
+    [],
   );
 
   const [showCursorBubble, setShowCursorBubble] =
@@ -134,10 +134,10 @@ export default function TrendsPage() {
   // templates data and axes
   const templateApi = React.useMemo(
     () => new TemplateApi(auth?.config, host, axiosInstance),
-    [auth]
+    [auth],
   );
   const [templates, setTemplates] = React.useState<Template[]>(
-    useMockup ? mockupTemplates : []
+    useMockup ? mockupTemplates : [],
   );
 
   const [isLoadingTemplates, setIsLoadingTemplates] =
@@ -171,11 +171,11 @@ export default function TrendsPage() {
       }
       setAxesState(newAxesState);
     },
-    [ldsContex?.units]
+    [ldsContex?.units],
   );
 
   const [axesState, setAxesState] = React.useState<AxisType[]>(
-    useMockup ? mockupAxes : []
+    useMockup ? mockupAxes : [],
   );
 
   const noAxes: boolean = React.useMemo(() => {
@@ -186,7 +186,7 @@ export default function TrendsPage() {
     setIsLoadingTemplates(true);
     try {
       const response = await handleApiResponse(
-        templateApi.listTemplatesTemplateGet.bind(templateApi)
+        templateApi.listTemplatesTemplateGet.bind(templateApi),
       );
 
       if (response?.data) setTemplates(response.data.items);
@@ -225,7 +225,7 @@ export default function TrendsPage() {
       try {
         const response = await handleApiResponse(
           templateApi.createTemplateTemplatePost.bind(templateApi),
-          newTemplate
+          newTemplate,
         );
 
         if (response?.data) setTemplates([...templates, response.data]);
@@ -233,15 +233,15 @@ export default function TrendsPage() {
         console.log(error);
       }
     },
-    [templates, axesState, useMockup]
+    [templates, axesState, useMockup],
   );
 
   // trends data
   const trendDataApi = React.useRef<TrendDataApi>(
-    new TrendDataApi(auth?.config, host, axiosInstance)
+    new TrendDataApi(auth?.config, host, axiosInstance),
   );
   const [trendsData, setTrendsData] = React.useState<ChartSeriesTrendData[]>(
-    []
+    [],
   );
   const [navigatorData, setNavigatorData] = React.useState<
     ChartSeriesTrendData[]
@@ -262,14 +262,14 @@ export default function TrendsPage() {
       try {
         const response = await handleApiResponse(
           trendDataApi.current.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
-            trendDataApi.current
+            trendDataApi.current,
           ),
           trendIdList,
           Math.floor(navigationStartDate.getTime() / 1000),
           Math.floor(navigationEndDate.getTime() / 1000),
           navigationChartSampleSize,
           1,
-          navigationChartSampleSize
+          navigationChartSampleSize,
         );
 
         const newNavTrendsData: ChartSeriesTrendData[] = trendIdArr.map(
@@ -279,14 +279,14 @@ export default function TrendsPage() {
               id: id,
               color: ldsContex!.trends.find((trend) => trend.ID == id)?.Color!,
             };
-          }
+          },
         );
 
         response?.data.items.forEach((item: TrendDataMultiple) => {
           const timestamp = new Date(item.Timestamp * 1000);
           item.Data?.forEach((dataitem) => {
             const index = newNavTrendsData.findIndex(
-              (td) => td.id == dataitem.ID
+              (td) => td.id == dataitem.ID,
             );
             newNavTrendsData[index].data.push({
               timestamp: timestamp,
@@ -304,7 +304,7 @@ export default function TrendsPage() {
         console.log(error);
       }
     },
-    [trendDataApi.current, ldsContex, navigationStartDate, navigationEndDate]
+    [trendDataApi.current, ldsContex, navigationStartDate, navigationEndDate],
   );
 
   const loadTrendsData = React.useCallback(async () => {
@@ -333,14 +333,14 @@ export default function TrendsPage() {
     try {
       const response = await handleApiResponse(
         trendDataApi.current.getTrendDataTrendTrendIdListDataBeginEndSamplesGet.bind(
-          trendDataApi.current
+          trendDataApi.current,
         ),
         trendIdList,
         Math.floor(startDate.getTime() / 1000),
         Math.floor(endDate.getTime() / 1000),
         mainChartSampleSize,
         1,
-        mainChartSampleSize
+        mainChartSampleSize,
       );
 
       if (response.status == 404) {
@@ -395,7 +395,7 @@ export default function TrendsPage() {
     const newNavData: ChartSeriesTrendData[] = [];
     const step2 = Math.floor(
       (navEndDate.getTime() - navStartDate.getTime()) /
-        navigationChartSampleSize
+        navigationChartSampleSize,
     );
 
     const activeTrendsIDs: number[] = [];

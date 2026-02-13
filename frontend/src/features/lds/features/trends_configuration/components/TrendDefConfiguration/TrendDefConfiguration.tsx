@@ -7,7 +7,7 @@ import {
 } from "@progress/kendo-react-grid";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendDef } from "../../../../services/api";
+import { TrendDef } from "../../../../../../services/api";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
 export interface TrendDefConfigurationProps {

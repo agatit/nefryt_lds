@@ -8,8 +8,8 @@ import {
   ChartValueAxis,
   ChartValueAxisItem,
 } from "@progress/kendo-react-charts";
-import { Simulation, SimulationParam } from "../../../../services/api";
-import { SimulationData } from "./SimulatorPage";
+import { Simulation, SimulationParam } from "../../../../../services/api";
+import { SimulationData } from "../index";
 
 const chartScaleThrottleMs = 10;
 

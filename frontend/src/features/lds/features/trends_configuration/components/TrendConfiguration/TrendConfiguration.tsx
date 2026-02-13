@@ -15,7 +15,6 @@ import {
   FlatColorPicker,
   FlatColorPickerChangeEvent,
   NumericTextBox,
-  NumericTextBoxChangeEvent,
   TextBox,
   TextBoxChangeEvent,
 } from "@progress/kendo-react-inputs";
@@ -27,7 +26,7 @@ import {
   trashIcon,
 } from "@progress/kendo-svg-icons";
 import React from "react";
-import { ParsedTrendType } from "./TrendConfigurationPage";
+import { ParsedTrendType } from "../..";
 import { useTranslation } from "react-i18next";
 import {
   Trend,
@@ -36,12 +35,12 @@ import {
   TrendParamCreate,
   TrendParamDef,
   Unit,
-} from "../../../../services/api";
-import { rgbaToHex } from "../../../../lib/utilis";
-import ColorGridCell from "../../components/ColorGridCell";
+} from "../../../../../../services/api";
+import { rgbaToHex } from "../../../../../../lib/utilis";
+import ColorGridCell from "../../../../components/ColorGridCell";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
-import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
-import { LDSContext } from "../../contexts/ldsContext";
+import { useHandleApiResponse } from "../../../../../../hooks/useHandleApiResponse";
+import { LDSContext } from "../../../../contexts/ldsContext";
 
 export interface TrendConfigurationProps {
   showDialog: boolean;
@@ -98,7 +97,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
       setSelected(item);
       setSelect(event.select);
     },
-    [setSelected]
+    [setSelected],
   );
 
   const [trendName, setTrendName] = React.useState<string | undefined>();
@@ -116,31 +115,31 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
     (event: TextBoxChangeEvent) => {
       if (event.value) setTrendName(event.value.toString());
     },
-    []
+    [],
   );
   const handleTrendTypeChange = React.useCallback(
     (event: DropDownListChangeEvent) => {
       if (event.value) setTrendType(event.value);
     },
-    []
+    [],
   );
   const handleTrendGroupChange = React.useCallback(
     (event: DropDownListChangeEvent) => {
       if (event.value) setTrendGroup(event.value);
     },
-    []
+    [],
   );
   const handleTrendUnitChange = React.useCallback(
     (event: DropDownListChangeEvent) => {
       if (event.value) setTrendUnit(event.value);
     },
-    []
+    [],
   );
   const handleTrendColorChange = React.useCallback(
     (event: FlatColorPickerChangeEvent) => {
       if (event.value) setTrendColor(rgbaToHex(event.value)!.slice(0, 7)); //slice to cut off opacity
     },
-    []
+    [],
   );
 
   const requiredTrendParams = React.useMemo(() => {
@@ -167,13 +166,13 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
     async (value: TrendParamCreate, id: number) => {
       await handleApiResponse(
         ldsContext!.trendParamApi.createTrendParamTrendTrendIdParamPost.bind(
-          ldsContext!.trendParamApi
+          ldsContext!.trendParamApi,
         ),
         id,
-        value
+        value,
       );
     },
-    []
+    [],
   );
 
   const confirmAddNewTrend = React.useCallback(async () => {
@@ -199,10 +198,10 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
       try {
         const response = await handleApiResponse(
           ldsContext!.trendParamApi.createTrendParamTrendTrendIdParamPost.bind(
-            ldsContext!.trendParamApi
+            ldsContext!.trendParamApi,
           ),
           trend.ID,
-          newParam
+          newParam,
         );
       } catch (error) {
         console.log(error);

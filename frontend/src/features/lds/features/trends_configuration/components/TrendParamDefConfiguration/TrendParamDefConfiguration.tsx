@@ -8,7 +8,7 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
-import { TrendParamDef } from "../../../../services/api";
+import { TrendParamDef } from "../../../../../../services/api";
 
 export interface TrendParamDefConfigurationProps {
   trendParamDefs: TrendParamDef[];
@@ -35,7 +35,7 @@ const TrendParamDefConfiguration = React.memo(
         setSelected(item);
         setSelect(event.select);
       },
-      [setSelected]
+      [setSelected],
     );
 
     return (
@@ -70,7 +70,7 @@ const TrendParamDefConfiguration = React.memo(
         </Grid>
       </React.Fragment>
     );
-  }
+  },
 );
 
 export default TrendParamDefConfiguration;

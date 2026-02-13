@@ -16,16 +16,16 @@ import {
 } from "@progress/kendo-react-treeview";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Trend, TrendDef, TrendGroup, Unit } from "../../../../services/api";
+import { Trend, TrendDef, TrendGroup, Unit } from "../../../../../services/api";
 import {
   cancelIcon,
   checkIcon,
   plusIcon,
   xIcon,
 } from "@progress/kendo-svg-icons";
-import { chartLegendIcon } from "../../components/chartLegendIcon";
+import { chartLegendIcon } from "../../../components/chartLegendIcon";
 import { AxisType, TreeViewDataItem } from "./utils";
-import { mockupTrendTreeData } from "../../../../data/mockup-data";
+import { mockupTrendTreeData } from "../../../../../data/mockup-data";
 
 export interface ChartEditDialogProps {
   useMockup: boolean;
@@ -69,12 +69,12 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
 
     for (let trend of trendsState) {
       const index = trendsTree.findIndex(
-        (item) => item.id == trend.TrendGroupID
+        (item) => item.id == trend.TrendGroupID,
       );
       const trendDef = trendDefs.find((item) => item.ID == trend.TrendDefID);
 
       const indexTrendDef = trendsTree[index].items?.findIndex(
-        (item) => item.id == trend.TrendDefID + trend.TrendGroupID
+        (item) => item.id == trend.TrendDefID + trend.TrendGroupID,
       );
 
       if (indexTrendDef == -1) {
@@ -134,7 +134,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
       index === -1 ? ids.push(event.item.id) : ids.splice(index, 1);
       setExpandTrendsTree({ ids, idField: "id" });
     },
-    [expandTrendsTree]
+    [expandTrendsTree],
   );
 
   const [expandAxesTree, setExpandAxesTree] =
@@ -153,7 +153,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
       index === -1 ? ids.push(event.item.text) : ids.splice(index, 1);
       setExpandAxesTree({ ids, idField: "text" });
     },
-    [expandAxesTree]
+    [expandAxesTree],
   );
 
   // DRAG STUFF
@@ -179,7 +179,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   const createNewAxis = React.useCallback(() => {
     if (fromDrag.current) {
       const trend = trendsState.find(
-        (trend) => trend.ID == draggedTrend.current?.ID
+        (trend) => trend.ID == draggedTrend.current?.ID,
       );
       const unit = units.find((unit) => unit.ID == trend?.UnitID);
       setNewAxesState([
@@ -211,12 +211,12 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
   const handleTreeItemDragStart = React.useCallback(
     (e: TreeViewItemDragStartEvent) => {
       draggedTrend.current = trendsState.find(
-        (trend) => trend.ID == e.item.id
+        (trend) => trend.ID == e.item.id,
       )!;
       onShowCursorBubbleChange(true);
       setDragging(true);
     },
-    []
+    [],
   );
 
   const handleTreeItemDragOver = React.useCallback(
@@ -241,12 +241,12 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
           ": " +
           newAxesState[
             parseInt(
-              eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_")[0]
+              eventAnalyzer.destinationMeta.itemHierarchicalIndex.split("_")[0],
             )
-          ].Name
+          ].Name,
       );
     },
-    [newAxesState]
+    [newAxesState],
   );
 
   const handleTreeItemDragEnd = React.useCallback(
@@ -310,10 +310,10 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
                 TrendIDs: newArr,
               };
           }
-        })
+        }),
       );
     },
-    [newAxesState]
+    [newAxesState],
   );
 
   const removeFromAxes = React.useCallback(
@@ -322,7 +322,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
 
       if (indexArray.length == 1) {
         setNewAxesState(
-          newAxesState.filter((axis) => axis.Name !== props.item.text)
+          newAxesState.filter((axis) => axis.Name !== props.item.text),
         );
         return;
       }
@@ -333,13 +333,13 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
           return {
             ...axis,
             TrendIDs: axis.TrendIDs.filter(
-              (ids, index) => index !== parseInt(indexArray[1])
+              (ids, index) => index !== parseInt(indexArray[1]),
             ),
           };
-        })
+        }),
       );
     },
-    [newAxesState]
+    [newAxesState],
   );
 
   const TrendsTreeCustomItem = React.useCallback(
@@ -364,7 +364,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
         </div>
       );
     },
-    [trendsState]
+    [trendsState],
   );
 
   const AxisTreeCustomItem = React.useCallback(
@@ -394,7 +394,7 @@ const ChartEditDialog = React.memo(function ChartEditDialog({
         </div>
       );
     },
-    [trendsState]
+    [trendsState],
   );
 
   const [showCreateAxisDialog, setShowCreateAxisDialog] =

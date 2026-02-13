@@ -28,12 +28,12 @@ import {
   TrendParamApi,
   TrendParamDef,
   Unit,
-} from "../../../../services/api";
-import { ParsedTrendType } from "./TrendConfigurationPage";
-import { rgbaToHex } from "../../../../lib/utilis";
+} from "../../../../../../services/api";
+import { ParsedTrendType } from "../../index";
+import { rgbaToHex } from "../../../../../../lib/utilis";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
-import { LDSContext } from "../../contexts/ldsContext";
+import { useHandleApiResponse } from "../../../../../../hooks/useHandleApiResponse";
+import { LDSContext } from "../../../../contexts/ldsContext";
 import { Loader } from "@progress/kendo-react-indicators";
 
 export interface TrendConfigurationDetailPanelProps {

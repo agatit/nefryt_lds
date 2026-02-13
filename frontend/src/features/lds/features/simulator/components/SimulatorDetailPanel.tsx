@@ -4,12 +4,12 @@ import {
   SimulationDef,
   SimulationParam,
   SimulationParamDef,
-} from "../../../../services/api";
+} from "../../../../../services/api";
 import { DetailPanel } from "onyks_shared_kendo";
 import { useTranslation } from "react-i18next";
 import { TabStripSelectEventArguments } from "@progress/kendo-react-layout";
 import { Loader } from "@progress/kendo-react-indicators";
-import { TreeViewDataItem } from "../trends/utils";
+import { TreeViewDataItem } from "../../trends/components/utils";
 import {
   processTreeViewItems,
   TreeView,
@@ -47,7 +47,7 @@ const SimulatorDetailPanel = React.memo(function SimulatorDetailPanel({
 
   const pipelineLength = React.useMemo(() => {
     let lengthParam = simulationParams.find(
-      (param) => param.SimulationParamDefID == "LENGTH"
+      (param) => param.SimulationParamDefID == "LENGTH",
     );
     return Number(lengthParam?.Value) ?? 0;
   }, [simulationParams]);
@@ -68,10 +68,10 @@ const SimulatorDetailPanel = React.memo(function SimulatorDetailPanel({
     (event: TreeViewItemClickEvent) => {
       setSimulationSelect([event.itemHierarchicalIndex]);
       onSelectedSimulationChange(
-        simulations.find((simulation) => simulation.ID == event.item.id)!
+        simulations.find((simulation) => simulation.ID == event.item.id)!,
       );
     },
-    [simulations]
+    [simulations],
   );
 
   const timeToRefreshRef = React.useRef(startTimeToRefresh);

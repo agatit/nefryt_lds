@@ -29,7 +29,7 @@ import {
   saveIcon,
   xIcon,
 } from "@progress/kendo-svg-icons";
-import { Template, Trend } from "../../../../services/api";
+import { Template, Trend } from "../../../../../services/api";
 import {
   Slider,
   SliderChangeEvent,
@@ -37,7 +37,7 @@ import {
   TextBoxChangeEvent,
 } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import { chartLegendIcon } from "../../components/chartLegendIcon";
+import { chartLegendIcon } from "../../../components/chartLegendIcon";
 import { AxisType, TreeViewDataItem } from "./utils";
 
 export interface TrendDetailPanelProps {
@@ -85,7 +85,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
     (e: TabStripSelectEventArguments) => {
       setTabSelected(e.selected);
     },
-    []
+    [],
   );
 
   const timeRangeDate: Date = React.useMemo(() => {
@@ -97,7 +97,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
     (event: SliderChangeEvent) => {
       if (event.value && onTimeRangeChange) onTimeRangeChange(event.value);
     },
-    [onTimeRangeChange]
+    [onTimeRangeChange],
   );
 
   // chart
@@ -137,7 +137,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
       index === -1 ? ids.push(event.item.text) : ids.splice(index, 1);
       setExpandAxesTree({ ids, idField: "text" });
     },
-    [expandAxesTree]
+    [expandAxesTree],
   );
 
   const removeFromAxes = React.useCallback(
@@ -146,7 +146,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
 
       if (indexArray.length == 1) {
         onAxesStateChange(
-          axesState.filter((axis) => axis.Name !== props.item.text)
+          axesState.filter((axis) => axis.Name !== props.item.text),
         );
         return;
       }
@@ -157,13 +157,13 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
           return {
             ...axis,
             TrendIDs: axis.TrendIDs.filter(
-              (ids, index) => index !== parseInt(indexArray[1])
+              (ids, index) => index !== parseInt(indexArray[1]),
             ),
           };
-        })
+        }),
       );
     },
-    [axesState]
+    [axesState],
   );
 
   const handleTreeItemMouseEnter = React.useCallback((id: number) => {
@@ -209,7 +209,7 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
         </div>
       );
     },
-    [trends, removeFromAxes]
+    [trends, removeFromAxes],
   );
 
   // templates
@@ -227,10 +227,10 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
     (event: TreeViewItemClickEvent) => {
       setTemplateSelect([event.itemHierarchicalIndex]);
       onSelectedTemplateChange(
-        templates.find((template) => template.ID == event.item.id)!
+        templates.find((template) => template.ID == event.item.id)!,
       );
     },
-    [templates]
+    [templates],
   );
 
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
@@ -240,14 +240,14 @@ const TrendsDetailPanel = React.memo(function TrendsDetailPanel({
     (event: TextBoxChangeEvent) => {
       setNewTemplateName(event.value ? event.value.toString() : "");
     },
-    []
+    [],
   );
 
   const handleSaveTemplateButtonClick = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       setShowDialog(true);
     },
-    []
+    [],
   );
 
   const handleCreateTemplateConfirm = React.useCallback(() => {

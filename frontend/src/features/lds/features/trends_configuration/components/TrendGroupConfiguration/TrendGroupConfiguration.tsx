@@ -14,33 +14,33 @@ import {
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Unit } from "../../../../services/api";
+import { TrendGroup } from "../../../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { Label } from "@progress/kendo-react-labels";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
-export interface TrendUnitConfigurationProps {
+export interface TrendGroupConfigurationProps {
   showDialog: boolean;
   openDialog: () => void;
   closeDialog: () => void;
-  units: Unit[];
-  addUnit: (value: Unit) => Promise<void>;
-  deleteUnit: (value: Unit) => Promise<void>;
-  selected: Unit | null;
-  setSelected: (value: Unit) => void;
+  trendGroups: TrendGroup[];
+  addTrendGroup: (value: TrendGroup) => Promise<void>;
+  deleteTrendGroup: (value: TrendGroup) => Promise<void>;
+  selected: TrendGroup | null;
+  setSelected: (valeu: TrendGroup) => void;
 }
 
-const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
+const TrendGroupConfiguration = React.memo(function TrendGroupConfiguration({
   showDialog,
   openDialog,
   closeDialog,
-  units,
-  addUnit,
-  deleteUnit,
+  trendGroups,
+  addTrendGroup,
+  deleteTrendGroup,
   selected,
   setSelected,
-}: TrendUnitConfigurationProps) {
+}: TrendGroupConfigurationProps) {
   const { t } = useTranslation(["common", "config-page"]);
 
   const [select, setSelect] = React.useState<SelectDescriptor>();
@@ -50,55 +50,37 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
 
   const handleSelectionChange = React.useCallback(
     (event: GridSelectionChangeEvent) => {
-      const item: Unit = event.endDataItem;
+      const item: TrendGroup = event.endDataItem;
       setSelected(item);
       setSelect(event.select);
     },
-    [setSelected]
+    [setSelected],
   );
 
-  const [unitName, setUnitName] = React.useState<string | undefined>();
-  const [unitSymbol, setUnitSymbol] = React.useState<string | undefined>();
-  const [unitMultiplier, setUnitMultiplier] = React.useState<
+  const [trendGroupName, setTrendGroupName] = React.useState<
     string | undefined
   >();
 
-  const handleUnitNameChange = React.useCallback(
+  const handleTrendGroupNameChange = React.useCallback(
     (event: TextBoxChangeEvent) => {
-      if (event.value) setUnitName(event.value.toString());
+      if (event.value) setTrendGroupName(event.value.toString());
     },
-    []
-  );
-  const handleUnitSymbolChange = React.useCallback(
-    (event: TextBoxChangeEvent) => {
-      if (event.value) setUnitSymbol(event.value.toString());
-    },
-    []
-  );
-  const handleUnitMultiplierChange = React.useCallback(
-    (event: TextBoxChangeEvent) => {
-      if (event.value) setUnitMultiplier(event.value.toString());
-    },
-    []
+    [],
   );
 
-  const cancelAddNewUnit = React.useCallback(() => {
-    setUnitName(undefined);
-    setUnitSymbol(undefined);
-    setUnitMultiplier(undefined);
+  const cancelAddNewTrendGroup = React.useCallback(() => {
+    setTrendGroupName(undefined);
     closeDialog();
   }, [closeDialog]);
 
-  const confirmAddNewUnit = React.useCallback(async () => {
-    const newUnit: Unit = {
-      ID: (units.length + 100).toString(),
-      Name: unitName!,
-      Symbol: unitSymbol!,
-      Multiplier: unitMultiplier!,
+  const confirmAddNewTrendGroup = React.useCallback(async () => {
+    const newTrendGroup: TrendGroup = {
+      ID: trendGroups.length + 100,
+      Name: trendGroupName!,
     };
-    await addUnit(newUnit);
+    await addTrendGroup(newTrendGroup);
     closeDialog();
-  }, [closeDialog, addUnit, units, unitName, unitSymbol, unitMultiplier]);
+  }, [closeDialog, addTrendGroup, trendGroups, trendGroupName]);
 
   // Deletion dialog
   const [showDeletionDialog, setShowDeletionDialog] =
@@ -111,14 +93,13 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
   }, []);
 
   const confirmDeletion = React.useCallback(async () => {
-    await deleteUnit(selected!);
-    closeDeletionDialog();
-  }, [selected, deleteUnit]);
+    await deleteTrendGroup(selected!);
+  }, [selected, deleteTrendGroup]);
 
   return (
     <React.Fragment>
       <Grid
-        data={units}
+        data={trendGroups}
         sortable={true}
         dataItemKey="ID"
         selectable={{ enabled: true, mode: "single" }}
@@ -129,7 +110,7 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
           <GridSearchBox />
           <ButtonGroup>
             <Button svgIcon={plusIcon} onClick={openDialog}>
-              {t("config-page:add_new_unit")}
+              {t("config-page:add_new_trend_group")}
             </Button>
             {selected && (
               <Button svgIcon={trashIcon} onClick={openDeletionDialog}>
@@ -138,61 +119,34 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
             )}
           </ButtonGroup>
         </GridToolbar>
+        <GridColumn title={t("config-page:id")} sortable={true} field="ID" />
         <GridColumn
           title={t("config-page:name")}
           sortable={true}
           field="Name"
         />
-        <GridColumn
-          title={t("config-page:symbol")}
-          sortable={true}
-          field="Symbol"
-        />
-        <GridColumn
-          title={t("config-page:multiplier")}
-          sortable={true}
-          field="Multiplier"
-        />
       </Grid>
       {showDialog && (
         <Dialog
           title={t("config-page:create_new_trend_group")}
-          onClose={cancelAddNewUnit}
+          onClose={cancelAddNewTrendGroup}
         >
           <div>
-            <Label editorId="unitName">{t("config-page:name")}</Label>
+            <Label editorId="trendDefName">{t("config-page:name")}</Label>
             <TextBox
-              id="unitName"
-              value={unitName}
-              onChange={handleUnitNameChange}
-            />
-          </div>
-          <div>
-            <Label editorId="unitSymbol">{t("config-page:symbol")}</Label>
-            <TextBox
-              id="unitSymbol"
-              value={unitSymbol}
-              onChange={handleUnitSymbolChange}
-            />
-          </div>
-          <div>
-            <Label editorId="unitMultiplier">
-              {t("config-page:multiplier")}
-            </Label>
-            <TextBox
-              id="unitMultiplier"
-              value={unitMultiplier}
-              onChange={handleUnitMultiplierChange}
+              id="trendDefName"
+              value={trendGroupName}
+              onChange={handleTrendGroupNameChange}
             />
           </div>
           <DialogActionsBar>
-            <Button svgIcon={cancelIcon} onClick={cancelAddNewUnit}>
+            <Button svgIcon={cancelIcon} onClick={cancelAddNewTrendGroup}>
               {t("common:cancel")}
             </Button>
             <Button
               svgIcon={checkIcon}
               themeColor={"primary"}
-              onClick={confirmAddNewUnit}
+              onClick={confirmAddNewTrendGroup}
             >
               {t("common:confirm")}
             </Button>
@@ -204,7 +158,7 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
           title={t("common:confirm_deletion")}
           onClose={closeDeletionDialog}
         >
-          {t("config-page:sure_you_want_delete_unit")}
+          {t("config-page:sure_you_want_delete_trend_group")}
           <DialogActionsBar>
             <Button svgIcon={cancelIcon} onClick={closeDeletionDialog}>
               {t("common:cancel")}
@@ -223,4 +177,4 @@ const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
   );
 });
 
-export default TrendUnitConfiguration;
+export default TrendGroupConfiguration;

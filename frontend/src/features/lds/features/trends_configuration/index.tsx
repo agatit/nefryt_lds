@@ -1,6 +1,6 @@
 import React from "react";
 import "../../../../styles/layouts/detail-panel.scss";
-import "../../../../styles/features/lds/features/trendConfiguration.scss";
+import "./trendConfiguration.scss";
 import { DetailPanel } from "onyks_shared_kendo";
 import {
   mockupTrendDefs,
@@ -28,17 +28,17 @@ import {
   TabStripSelectEventArguments,
   TabStripTab,
 } from "@progress/kendo-react-layout";
-import TrendConfigurationDetailPanel from "./TrendConfigurationDetailPanel";
-import TrendConfiguration from "./TrendConfiguration";
-import TrendDefConfiguration from "./TrendDefConfiguration";
-import TrendGroupConfiguration from "./TrendGroupConfiguration";
-import TrendUnitConfiguration from "./TrendUnitConfiguration";
-import TrendDefConfigurationDetailPanel from "./TrendDefConfigurationDetailPanel";
-import TrendGroupConfigurationDetailPanel from "./TrendGroupConfigurationDetailPanel";
-import TrendUnitConfigurationDetailPanel from "./TrendUnitConfigurationDetailPanel";
+import TrendConfigurationDetailPanel from "./components/TrendConfiguration/TrendConfigurationDetailPanel";
+import TrendConfiguration from "./components/TrendConfiguration/TrendConfiguration";
+import TrendDefConfiguration from "./components/TrendDefConfiguration/TrendDefConfiguration";
+import TrendGroupConfiguration from "./components/TrendGroupConfiguration/TrendGroupConfiguration";
+import TrendUnitConfiguration from "./components/TrendUnitConfiguration/TrendUnitConfiguration";
+import TrendDefConfigurationDetailPanel from "./components/TrendDefConfiguration/TrendDefConfigurationDetailPanel";
+import TrendGroupConfigurationDetailPanel from "./components/TrendGroupConfiguration/TrendGroupConfigurationDetailPanel";
+import TrendUnitConfigurationDetailPanel from "./components/TrendUnitConfiguration/TrendUnitConfigurationDetailPanel";
 import { LDSContext } from "../../contexts/ldsContext";
-import TrendParamDefConfiguration from "./TrendParamDefConfiguration";
-import TrendParamDefConfigurationDetailPanel from "./TrendParamDefConfigurationDetailPanel";
+import TrendParamDefConfiguration from "./components/TrendParamDefConfiguration/TrendParamDefConfiguration";
+import TrendParamDefConfigurationDetailPanel from "./components/TrendParamDefConfiguration/TrendParamDefConfigurationDetailPanel";
 import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
 
 export interface SelectionType {
@@ -63,12 +63,12 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   React.useMemo(() => {
     if (ldsContext == null)
       throw new Error(
-        "LDS Context cannot be null to use TrendConfigurationPage"
+        "LDS Context cannot be null to use TrendConfigurationPage",
       );
   }, [ldsContext]);
 
   const [verticalPanes, setVerticalPanes] = React.useState<SplitterPaneProps[]>(
-    [{ size: "66%" }, {}]
+    [{ size: "66%" }, {}],
   );
   const handleVerticalChange = (event: SplitterOnChangeEvent) => {
     setVerticalPanes(event.newState);
@@ -79,7 +79,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     (e: TabStripSelectEventArguments) => {
       setTabSelected(e.selected);
     },
-    []
+    [],
   );
 
   // Dialogs controls
@@ -125,7 +125,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
       selection.trendDef !== null ||
       selection.trendGroup !== null ||
       selection.unit !== null,
-    [selection]
+    [selection],
   );
 
   const handleSelectedTrendChange = React.useCallback(
@@ -138,7 +138,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         unit: null,
       });
     },
-    []
+    [],
   );
 
   const handleSelectedTrendParamDefChange = React.useCallback(
@@ -151,7 +151,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         unit: null,
       });
     },
-    []
+    [],
   );
 
   const handleSelectedTrendDefChange = React.useCallback((value: TrendDef) => {
@@ -174,7 +174,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         unit: null,
       });
     },
-    []
+    [],
   );
 
   const handleSelectedUnitChange = React.useCallback((value: Unit) => {
@@ -223,7 +223,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         unit: null,
       });
     },
-    []
+    [],
   );
 
   const handleSelectedTrendGroupDeletion = React.useCallback(
@@ -237,7 +237,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         unit: null,
       });
     },
-    []
+    [],
   );
 
   const handleSelectedUnitDeletion = React.useCallback(async (value: Unit) => {

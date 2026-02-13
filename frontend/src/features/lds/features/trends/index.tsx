@@ -20,9 +20,9 @@ import "../../../../styles/features/lds/features/trendPage.scss";
 
 import { DateTimePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import CursorBubble from "../../../../components/CursorBubble";
-import TrendChart from "./TrendChart";
-import TrendsDetailPanel from "./TrendsDetailPanel";
-import ChartEditDialog from "./ChartEditDialog";
+import TrendChart from "./components/TrendChart";
+import TrendsDetailPanel from "./components/TrendsDetailPanel";
+import ChartEditDialog from "./components/ChartEditDialog";
 import {
   mockupAxes,
   mockupTemplates,
@@ -44,7 +44,7 @@ import {
   ChartSeriesTrendData,
   ChartTrendData,
   generateValue,
-} from "./utils";
+} from "./components/utils";
 import { SliderChangeEvent } from "@progress/kendo-react-inputs";
 
 // const period = 1000; //in seconds so around 17 minutes
@@ -103,10 +103,10 @@ export default function TrendsCurrentPage() {
   // templates data and axes
   const templateApi = React.useMemo(
     () => new TemplateApi(auth?.config, host, axiosInstance),
-    [auth]
+    [auth],
   );
   const [templates, setTemplates] = React.useState<Template[]>(
-    useMockup ? mockupTemplates : []
+    useMockup ? mockupTemplates : [],
   );
 
   const [isLoadingTemplates, setIsLoadingTemplates] =
@@ -140,11 +140,11 @@ export default function TrendsCurrentPage() {
       }
       setAxesState(newAxesState);
     },
-    [ldsContex?.units]
+    [ldsContex?.units],
   );
 
   const [axesState, setAxesState] = React.useState<AxisType[]>(
-    useMockup ? mockupAxes : []
+    useMockup ? mockupAxes : [],
   );
 
   const noAxes: boolean = React.useMemo(() => {
@@ -155,7 +155,7 @@ export default function TrendsCurrentPage() {
     setIsLoadingTemplates(true);
     try {
       const response = await handleApiResponse(
-        templateApi.listTemplatesTemplateGet.bind(templateApi)
+        templateApi.listTemplatesTemplateGet.bind(templateApi),
       );
       if (response?.data) setTemplates(response.data.items);
     } catch (error) {
@@ -193,22 +193,22 @@ export default function TrendsCurrentPage() {
       try {
         const response = await handleApiResponse(
           templateApi.createTemplateTemplatePost.bind(templateApi),
-          newTemplate
+          newTemplate,
         );
         if (response?.data) setTemplates([...templates, response.data]);
       } catch (error) {
         console.log(error);
       }
     },
-    [templates, axesState, useMockup]
+    [templates, axesState, useMockup],
   );
 
   // trends data
   const trendDataApi = React.useRef<TrendDataApi>(
-    new TrendDataApi(auth?.config, host, axiosInstance)
+    new TrendDataApi(auth?.config, host, axiosInstance),
   );
   const [trendsData, setTrendsData] = React.useState<ChartSeriesTrendData[]>(
-    []
+    [],
   );
 
   const [isLoadingTrendsData, setIsLoadingTrendsData] =
@@ -239,13 +239,13 @@ export default function TrendsCurrentPage() {
     try {
       const response = await handleApiResponse(
         trendDataApi.current.getTrendCurrentDataTrendTrendIdListCurrentDataPeriodSamplesGet.bind(
-          trendDataApi.current
+          trendDataApi.current,
         ),
         trendIdList,
         timeRange,
         mainChartSampleSize,
         1,
-        mainChartSampleSize
+        mainChartSampleSize,
       );
 
       if (response.status == 404) {
@@ -289,13 +289,13 @@ export default function TrendsCurrentPage() {
     try {
       const response = await handleApiResponse(
         trendDataApi.current.getTrendCurrentDataTrendTrendIdListCurrentDataPeriodSamplesGet.bind(
-          trendDataApi.current
+          trendDataApi.current,
         ),
         trendIdList,
         1,
         1,
         1,
-        1
+        1,
       );
 
       if (response.status == 404) {
@@ -305,7 +305,7 @@ export default function TrendsCurrentPage() {
       if (response?.data.items[0].Data) {
         const newTrendsData: ChartSeriesTrendData[] = [...trendsData];
         const timestamp = new Date(
-          response?.data.items[0].Data[0].Timestamp * 1000
+          response?.data.items[0].Data[0].Timestamp * 1000,
         );
         response?.data.items[0].Data[0].Data?.forEach(
           (dataitem: TrendValue) => {
@@ -315,7 +315,7 @@ export default function TrendsCurrentPage() {
               timestamp: timestamp,
               value: dataitem.Value ? dataitem.Value : null,
             });
-          }
+          },
         );
 
         setTrendsData(newTrendsData);

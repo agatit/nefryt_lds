@@ -1,0 +1,146 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
+main.simulator-page {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+  gap: 20px;
+}
+
+main.simulator-page .chart-container {
+  flex: 4 0 0;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+main.simulator-page > .no-simulation-container {
+  flex: 4 0 0;
+  overflow-y: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: not-allowed;
+}
+
+main.simulator-page .chart-container > .simulator-chart {
+  flex-grow: 1;
+}
+
+main.simulator-page .chart-container > .pipeline-visualisation {
+  height: 15vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding-left: k-spacing(5);
+  padding-right: calc(k-spacing(5) - 2px);
+}
+
+main.simulator-page .chart-container > .pipeline-visualisation > * {
+  margin-left: -2px;
+}
+
+main.simulator-page .chart-container > .pipeline-visualisation > .sensors {
+  border-radius: 50%;
+  height: 1vw;
+  width: 1vw;
+  padding: 3px;
+  position: relative;
+  z-index: 2;
+}
+
+main.simulator-page
+  .chart-container
+  > .pipeline-visualisation
+  > .sensors::after {
+  border: 1px solid k-color(subtle);
+  border-radius: 50%;
+  position: absolute;
+  pointer-events: none;
+  inset: 0;
+  content: "";
+  z-index: 2;
+}
+
+main.simulator-page
+  .chart-container
+  > .pipeline-visualisation
+  > .sensors
+  > .sensors-empty {
+  background-color: k-color(app-surface);
+  width: 100%;
+  position: absolute;
+  z-index: 1;
+  transform: translate(-2px, -2px);
+}
+
+main.simulator-page
+  .chart-container
+  > .pipeline-visualisation
+  > .sensors
+  > .sensors-fill {
+  background-color: k-color(primary);
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+}
+
+main.simulator-page
+  .chart-container
+  > .pipeline-visualisation
+  > .sensors
+  > .sensors-distance {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+main.simulator-page .chart-container > .pipeline-visualisation > .pipe {
+  border-top: 1px solid k-color(subtle);
+  border-bottom: 1px solid k-color(subtle);
+  flex-grow: 1;
+  height: 0.5vw;
+  z-index: 3;
+  background-color: k-color(app-surface);
+  // padding-top: 2px;
+  // padding-bottom: 2px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+main.simulator-page
+  .chart-container
+  > .pipeline-visualisation
+  > .pipe
+  > .pipe-empty {
+  background-color: k-color(app-surface);
+  width: 100%;
+  position: absolute;
+  z-index: 2;
+  width: calc(100% + 4px);
+  margin-left: -2px;
+  margin-right: -2px;
+}
+
+main.simulator-page
+  .chart-container
+  > .pipeline-visualisation
+  > .pipe
+  > .pipe-fill {
+  background-color: k-color(primary);
+  height: 100%;
+  width: calc(100% + 4px);
+  margin-left: -2px;
+  margin-right: -2px;
+}
+
+//kendo customization
+main.simulator-page .simulation-treeview .k-treeview-item {
+  padding: 0 !important;
+}

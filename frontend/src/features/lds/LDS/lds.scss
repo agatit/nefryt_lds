@@ -1,0 +1,19 @@
+@use "../../../themes/variables.scss" as var;
+
+.router-lock-button {
+  position: absolute !important;
+  top: 95vh;
+  left: 10px;
+}
+
+.k-drawer-content > div.content-loader {
+  height: var.$underAppBarHeight;
+  position: relative;
+}
+
+.chart-loader {
+  position: absolute !important;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
