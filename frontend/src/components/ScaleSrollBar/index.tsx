@@ -1,6 +1,6 @@
 import React from "react";
-import "../styles/components/scaleScrollBar.scss";
-import { throttle } from "../lib/utilis";
+import "./scaleScrollBar.scss";
+import { throttle } from "../../lib/utilis";
 
 type ScaleScrollBarValueType = {
   start: number;
@@ -17,8 +17,10 @@ export interface ScaleScrollBarChangeEvent {
   value: ScaleScrollBarValueType;
 }
 
-export interface ScaleScrollBarProps
-  extends Omit<React.ComponentPropsWithoutRef<"div">, "onChange"> {
+export interface ScaleScrollBarProps extends Omit<
+  React.ComponentPropsWithoutRef<"div">,
+  "onChange"
+> {
   value: ScaleScrollBarValueType;
   min: number;
   max: number;
@@ -38,10 +40,10 @@ export default function ScaleScrollBar({
     return max - min;
   }, [max, min]);
   const [startPercentage, setStartPercentage] = React.useState<number>(
-    ((value.start - min) / range) * 100
+    ((value.start - min) / range) * 100,
   );
   const [endPercentage, setEndPercentage] = React.useState<number>(
-    ((value.end - min) / range) * 100
+    ((value.end - min) / range) * 100,
   );
 
   const valueRef = React.useRef<ScaleScrollBarValueType>(value);
@@ -72,7 +74,7 @@ export default function ScaleScrollBar({
 
   function handleMouseDown(
     event: React.MouseEvent<HTMLSpanElement, MouseEvent>,
-    clickedOn: Dragged
+    clickedOn: Dragged,
   ) {
     setIsDragging(clickedOn);
     // document.addEventListener("mousemove", handleMouseMove);
