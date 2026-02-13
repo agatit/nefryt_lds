@@ -77,6 +77,13 @@ export type LDSContextType = {
   ) => Promise<PipelineParam>;
   deletePipelineParams: (value: PipelineParam) => Promise<void>;
   loadPipelineParamsByPipeline: (pipelineID: number) => Promise<void>;
+  updatePipelineParam: (
+    pipelineID: number,
+    pipelineParamDefID: string,
+    value: string,
+  ) => Promise<any>;
+  pipelineParamDefs: PipelineParam[];
+  loadPipelineParamDefs: (pipelineID: number) => Promise<void>;
 };
 
 export const LDSContext = React.createContext<LDSContextType | null>(null);
@@ -131,6 +138,13 @@ interface LDSContextProviderProps extends PropsWithChildren {
   ) => Promise<PipelineParam>;
   deletePipelineParams: (value: PipelineParam) => Promise<void>;
   loadPipelineParamsByPipeline: (pipelineID: number) => Promise<void>;
+  updatePipelineParam: (
+    pipelineID: number,
+    pipelineParamDefID: string,
+    value: string,
+  ) => Promise<any>;
+  pipelineParamDefs: PipelineParam[];
+  loadPipelineParamDefs: (pipelineID: number) => Promise<void>;
 }
 
 export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
@@ -181,6 +195,9 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
   addPipelineParams,
   deletePipelineParams,
   loadPipelineParamsByPipeline,
+  updatePipelineParam,
+  pipelineParamDefs,
+  loadPipelineParamDefs,
 }: LDSContextProviderProps) => {
   const value = React.useMemo(
     () => ({
@@ -230,6 +247,9 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addPipelineParams,
       deletePipelineParams,
       loadPipelineParamsByPipeline,
+      updatePipelineParam,
+      pipelineParamDefs,
+      loadPipelineParamDefs,
     }),
     [
       trendDefs,
@@ -272,6 +292,9 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addPipelineParams,
       deletePipelineParams,
       loadPipelineParamsByPipeline,
+      updatePipelineParam,
+      pipelineParamDefs,
+      loadPipelineParamDefs,
     ],
   );
 

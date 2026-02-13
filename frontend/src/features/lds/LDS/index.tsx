@@ -83,7 +83,7 @@ import {
 } from "../../../data/mockup-data";
 import { Loader } from "@progress/kendo-react-indicators";
 import { useHandleApiResponse } from "../../../hooks/useHandleApiResponse";
-import TrendsCurrentPage from "../features/trends";
+import TrendsCurrentPage from "../features/trends/TrendsCurrentPage";
 import SimulatorPage from "../features/simulator";
 
 export default function LDS() {
@@ -308,6 +308,10 @@ export default function LDS() {
   const [pipelineParams, setPipelineParams] = React.useState<PipelineParam[]>(
     nav.useMockup ? mockupPipelineParams : [],
   );
+
+  const [pipelineParamDefs, setPipelineParamDefs] = React.useState<
+    PipelineParam[]
+  >([]);
 
   const [eventDefs, setEventDefs] = React.useState<EventDef[]>(
     nav.useMockup ? mockupEventDefs : [],
@@ -798,6 +802,55 @@ export default function LDS() {
     [nav, pipelineParamApi],
   );
 
+  const updatePipelineParam = React.useCallback(
+    async (pipelineID: number, pipelineParamDefID: string, value: string) => {
+      try {
+        const response = await handleApiResponse(
+          pipelineParamApi.updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut.bind(
+            pipelineParamApi,
+          ),
+          pipelineID,
+          pipelineParamDefID,
+          value,
+        );
+
+        if (response?.data) {
+          setPipelineParams((prev) =>
+            prev.map((p) =>
+              p.PipelineID === pipelineID &&
+              p.PipelineParamDefID === pipelineParamDefID
+                ? response.data
+                : p,
+            ),
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [pipelineParamApi],
+  );
+
+  const loadPipelineParamDefs = React.useCallback(
+    async (pipelineID: number) => {
+      try {
+        const response = await handleApiResponse(
+          pipelineParamApi.listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet.bind(
+            pipelineParamApi,
+          ),
+          pipelineID,
+        );
+
+        if (response?.data?.items) {
+          setPipelineParamDefs(response.data.items);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [pipelineParamApi],
+  );
+
   const deletePipelineParam = React.useCallback(
     async (value: PipelineParam) => {
       if (nav.useMockup) {
@@ -1202,6 +1255,9 @@ export default function LDS() {
               addPipelineParams={addPipelineParams}
               deletePipelineParams={deletePipelineParam}
               loadPipelineParamsByPipeline={loadPipelineParamsByPipeline}
+              updatePipelineParam={updatePipelineParam}
+              loadPipelineParamDefs={loadPipelineParamDefs}
+              pipelineParamDefs={pipelineParamDefs}
             >
               <Routes>
                 <Route path="/" element={<HomePage key={"home-page"} />} />
