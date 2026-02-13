@@ -1,0 +1,179 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
+main.trends-page {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+  gap: 20px;
+}
+
+.chart-container {
+  flex: 4 0 0;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+main.trends-page > .no-axes-container {
+  flex: 4 0 0;
+  overflow-y: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: not-allowed;
+}
+
+.chart-container > .main-chart {
+  flex-grow: 1;
+}
+
+.detail-panel-tabs {
+  width: 100%;
+  flex-grow: 1;
+}
+
+.detail-panel-panel-bar {
+  width: 100%;
+}
+
+.detail-panel-content > .item > .legend-container {
+  display: flex;
+  justify-content: center;
+  align-items: left;
+  flex-direction: column;
+  width: 100%;
+}
+
+.k-panelbar-content > .item {
+  display: flex;
+  margin: 0 k-spacing(1) 0 k-spacing(1);
+}
+
+.chart-edit-container {
+  z-index: 10002;
+  width: 60vw;
+  height: 75vh;
+  display: flex;
+  flex-direction: row;
+  gap: k-spacing(10);
+}
+
+.chart-edit-container > * {
+  flex: 1 0 0%;
+  height: 100%;
+  width: 100%;
+}
+
+.chart-edit-container > .separator {
+  flex: 0 0 1px;
+  background-color: k-color(border);
+}
+
+.chart-edit-container > .selected-trends {
+  display: flex;
+  flex-direction: column;
+}
+
+// .chart-edit-container > .selected-trends > .axis-treeview {
+//   flex: 1 0 0;
+// }
+
+.chart-edit-container > .selected-trends > .create-axis-area {
+  flex: 1 0 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: k-border-radius(xxxl);
+  border: 1px solid k-color(border);
+  margin: k-spacing(2);
+  transition: 200ms;
+  cursor: pointer;
+}
+
+.chart-edit-container > .selected-trends > .create-axis-area:hover {
+  color: k-color(on-inverse);
+  background-color: k-color(inverse-subtle);
+  scale: 1.04;
+}
+
+.item-container > .item {
+  padding: k-spacing(1) k-spacing(5) k-spacing(1) k-spacing(5);
+}
+
+.grabbing,
+.grabbing * {
+  cursor: grabbing !important;
+}
+
+.navigation-selection-container {
+  position: absolute;
+  display: flex;
+  pointer-events: none;
+}
+
+.navigation-selection-container > .mask {
+  background-color: k-color(surface-alt);
+  opacity: 0.8;
+}
+
+.navigation-selection-container > .selection {
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: 1px;
+  border-color: color-mix(in srgb, k-color(on-app-surface) 8%, transparent);
+  box-shadow: inset 0 1px 7px
+    color-mix(in srgb, k-color(on-app-surface) 15%, transparent);
+  position: relative;
+}
+
+.navigation-selection-container > .selection > * {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  background-color: k-color(base);
+  border-radius: 50%;
+  border-style: solid;
+  border-width: 1px;
+  border-color: k-color(border);
+  top: 50%;
+  translate: -50% -50%;
+  z-index: 2;
+  cursor: ew-resize;
+  pointer-events: all;
+}
+
+.navigation-selection-container > .selection > *.pass-events {
+  pointer-events: none;
+}
+
+.navigation-selection-container > .selection > .right-handle {
+  left: 100%;
+}
+
+// kendo customization
+.k-tabstrip-content {
+  padding-block: 0;
+  padding-inline: 0;
+}
+
+.k-tabstrip-content > div {
+  width: 100%;
+}
+
+.k-treeview-leaf-text > div > button {
+  margin-left: k-spacing(2);
+}
+
+.k-treeview-leaf-text > div.change-cursor:hover {
+  cursor: pointer;
+}
+
+.k-treeview-leaf-text > div.change-cursor.grabable:hover {
+  cursor: grab;
+}
+
+.detail-panel-content *.k-treeview-leaf {
+  cursor: pointer;
+}

@@ -16,7 +16,7 @@ import {
 
 import { axiosInstance, host } from "../../../../lib/apiUtilities";
 import "../../../../styles/layouts/detail-panel.scss";
-import "../../../../styles/features/lds/features/trendPage.scss";
+import "./trendPage.scss";
 
 import { DateTimePickerChangeEvent } from "@progress/kendo-react-dateinputs";
 import CursorBubble from "../../../../components/CursorBubble";
