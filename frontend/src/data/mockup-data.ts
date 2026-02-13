@@ -1,7 +1,7 @@
 import {
   AxisType,
   TreeViewDataItem,
-} from "../features/lds/features/trends/utils";
+} from "../features/lds/features/trends/components/utils";
 import {
   Template,
   Trend,
@@ -15,6 +15,7 @@ import {
   Node,
   Pipeline,
   PipelineParam,
+  Method,
 } from "../services/api";
 
 // export type MockupTrendType = {
@@ -529,10 +530,6 @@ export const mockupPipelines: Pipeline[] = [
     ID: 1,
     Name: "Zygmuntow_1",
   },
-  {
-    ID: 2,
-    Name: "Zygmuntow_2",
-  },
 ];
 
 export const mockupPipelineParams: PipelineParam[] = [
@@ -570,5 +567,20 @@ export const mockupPipelineParams: PipelineParam[] = [
     PipelineID: 1,
     DataType: "INT",
     Name: "Rozdzielczość w czasie [ms]",
+  },
+];
+
+export const mockupMethods: Method[] = [
+  {
+    PipelineID: 1,
+    Name: "Fali",
+    ID: 20,
+    MethodDefID: "WAVE",
+  },
+  {
+    PipelineID: 1,
+    Name: "Test TOF",
+    ID: 1001,
+    MethodDefID: "TOF",
   },
 ];

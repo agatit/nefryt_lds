@@ -66,6 +66,11 @@ import {
   PipelineParam,
   PipelineParamApi,
   PipelineParamCreate,
+  Method,
+  MethodCreate,
+  MethodUpdate,
+  MethodDef,
+  MethodApi,
 } from "../../../services/api";
 import { axiosInstance, host } from "../../../lib/apiUtilities";
 import {
@@ -80,11 +85,13 @@ import {
   mockupNodes,
   mockupPipelines,
   mockupPipelineParams,
+  mockupMethods,
 } from "../../../data/mockup-data";
 import { Loader } from "@progress/kendo-react-indicators";
 import { useHandleApiResponse } from "../../../hooks/useHandleApiResponse";
 import TrendsCurrentPage from "../features/trends/TrendsCurrentPage";
 import SimulatorPage from "../features/simulator";
+import MethodsPage from "../features/methods";
 
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav", "kendo"]);
@@ -184,6 +191,15 @@ export default function LDS() {
       {
         separator: true,
       },
+      {
+        text: t("nav:methods"),
+        svgIcon: trackChangesIcon,
+        selected: pathname == "/methods",
+        route: "/methods",
+      },
+      {
+        separator: true,
+      },
     ],
   );
 
@@ -259,6 +275,11 @@ export default function LDS() {
     [auth],
   );
 
+  const methodApi = React.useMemo(
+    () => new MethodApi(auth?.config, host, axiosInstance),
+    [auth],
+  );
+
   const trendApi = React.useMemo(
     () => new TrendApi(auth?.config, host, axiosInstance),
     [auth],
@@ -305,6 +326,12 @@ export default function LDS() {
     nav.useMockup ? mockupPipelines : [],
   );
 
+  const [methods, setMethods] = React.useState<Method[]>(
+    nav.useMockup ? mockupMethods : [],
+  );
+
+  const [methodDefs, setMethodDefs] = React.useState<MethodDef[]>([]);
+
   const [pipelineParams, setPipelineParams] = React.useState<PipelineParam[]>(
     nav.useMockup ? mockupPipelineParams : [],
   );
@@ -329,6 +356,7 @@ export default function LDS() {
     setEventDefs(nav.useMockup ? mockupEventDefs : []);
     setPipelines(nav.useMockup ? mockupPipelines : []);
     setPipelineParams(nav.useMockup ? mockupPipelineParams : []);
+    setMethods(nav.useMockup ? mockupMethods : []);
   }, [nav.useMockup]);
 
   const addTrend = React.useCallback(
@@ -677,6 +705,107 @@ export default function LDS() {
       }
     },
     [nav, pipelineApi],
+  );
+
+  const addMethod = React.useCallback(
+    async (value: MethodCreate) => {
+      if (nav.useMockup) {
+        const mock: Method = {
+          ID: Math.max(0, ...methods.map((m) => m.ID)) + 1,
+          ...value,
+        };
+
+        setMethods((prev) => [...prev, mock]);
+        return mock;
+      }
+
+      try {
+        const response = await handleApiResponse(
+          methodApi.createMethodMethodPost.bind(methodApi),
+          value,
+        );
+
+        if (response?.data) {
+          setMethods((prev) => [...prev, response.data]);
+          return response.data;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, methodApi],
+  );
+
+  const updateMethod = React.useCallback(
+    async (id: number, value: MethodUpdate) => {
+      if (nav.useMockup) {
+        setMethods((prev) =>
+          prev.map((m) =>
+            m.ID === id
+              ? {
+                  ...m,
+                  MethodDefID: value.MethodDefID ?? m.MethodDefID,
+                  PipelineID: value.PipelineID ?? m.PipelineID,
+                  Name: value.Name ?? m.Name,
+                }
+              : m,
+          ),
+        );
+        return;
+      }
+
+      try {
+        const response = await handleApiResponse(
+          methodApi.updateMethodMethodMethodIdPut.bind(methodApi),
+          id,
+          value,
+        );
+
+        if (response?.data) {
+          setMethods((prev) =>
+            prev.map((m) => (m.ID === id ? response.data : m)),
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [methodApi],
+  );
+
+  const loadMethodDefs = React.useCallback(async () => {
+    try {
+      const response = await handleApiResponse(
+        methodApi.listMethodsMethodGet.bind(methodApi),
+      );
+
+      if (response?.data?.items) {
+        setMethodDefs(response.data.items);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }, [methodApi]);
+
+  const deleteMethod = React.useCallback(
+    async (value: Method) => {
+      if (nav.useMockup) {
+        setMethods((prev) => prev.filter((m) => m.ID !== value.ID));
+        return;
+      }
+
+      try {
+        await handleApiResponse(
+          methodApi.deleteMethodByIdMethodMethodIdDelete.bind(methodApi),
+          value.ID,
+        );
+
+        setMethods((prev) => prev.filter((m) => m.ID !== value.ID));
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, methodApi],
   );
 
   const addLink = React.useCallback(
@@ -1094,6 +1223,12 @@ export default function LDS() {
         console.log(error);
       });
 
+    handleApiResponse(methodApi.listMethodsMethodGet.bind(methodApi))
+      .then((response) => {
+        if (response?.data) setMethods(response.data.items);
+      })
+      .catch(console.log);
+
     handleApiResponse(linkApi.listLinksLinkGet.bind(linkApi))
       .then((response) => {
         if (response?.data) setLinks(response?.data.items);
@@ -1258,6 +1393,12 @@ export default function LDS() {
               updatePipelineParam={updatePipelineParam}
               loadPipelineParamDefs={loadPipelineParamDefs}
               pipelineParamDefs={pipelineParamDefs}
+              methods={methods}
+              addMethod={addMethod}
+              deleteMethod={deleteMethod}
+              updateMethod={updateMethod}
+              methodDefs={methodDefs}
+              loadMethodDefs={loadMethodDefs}
             >
               <Routes>
                 <Route path="/" element={<HomePage key={"home-page"} />} />
@@ -1285,6 +1426,7 @@ export default function LDS() {
                 <Route path="/links" element={<LinksPage />} />
                 <Route path="/nodes" element={<NodesPage />} />
                 <Route path="/pipelines" element={<PipelinesPage />} />
+                <Route path="/methods" element={<MethodsPage />} />
               </Routes>
             </LDSContextProvider>
           </KendoLocalizationWrapper>
