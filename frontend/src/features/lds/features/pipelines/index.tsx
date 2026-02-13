@@ -194,11 +194,11 @@ const PipelinesPage = React.memo(function PipelinesPage() {
         <div>
           {selectedPipeline ? (
             <TabStrip
-              className="events-stuff-tab"
+              className="pipelines-stuff-tab"
               selected={tabSelected}
               onSelect={handleTabSelect}
             >
-              <TabStripTab title={t("event-page:events_types")}>
+              <TabStripTab title={t("pipeline-page:pipelines_params")}>
                 <PipelineParams
                   params={pipelineParams}
                   selected={selectedParam}
