@@ -1,6 +1,6 @@
 import React from "react";
 import { Simulation, SimulationParam } from "../../../../../services/api";
-import { SimulationData } from "../index";
+import { SimulationData } from "..";
 import { SvgIcon } from "@progress/kendo-react-common";
 import {
   chevronDoubleLeftIcon,
@@ -32,7 +32,7 @@ const PipelineVisualisation: React.FC<PipelineVisualisationProps> = ({
 
   const pipelineLength = React.useMemo(() => {
     let lengthParam = simulationParams.find(
-      (param) => param.SimulationParamDefID == "LENGTH"
+      (param) => param.SimulationParamDefID == "LENGTH",
     );
     return Number(lengthParam?.Value) ?? 0;
   }, [simulationParams]);

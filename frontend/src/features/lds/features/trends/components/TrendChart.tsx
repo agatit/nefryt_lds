@@ -16,7 +16,7 @@ import {
 import React from "react";
 import ScaleScrollBar, {
   ScaleScrollBarChangeEvent,
-} from "../../../../../components/ScaleScrollBar";
+} from "../../../../../components/ScaleSrollBar";
 import { throttle } from "../../../../../lib/utilis";
 import CursorBubble from "../../../../../components/CursorBubble";
 import { useResizeObserver } from "../../../../../hooks/useResizeObserver";
