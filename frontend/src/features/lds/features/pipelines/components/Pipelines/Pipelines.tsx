@@ -62,7 +62,7 @@ const Pipelines = React.memo(function Pipelines({
       </GridToolbar>
 
       <GridColumn field="Name" title={t("pipeline-page:name")} />
-      <GridColumn field="ID" title="ID" width="120px" />
+      <GridColumn field="ID" title="ID" />
     </Grid>
   );
 });
