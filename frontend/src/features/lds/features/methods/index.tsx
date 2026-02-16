@@ -15,6 +15,8 @@ import MethodDefDetailPanel from "./components/MethodDefs/MethodDefsDetailPanel"
 import MethodsDetailPanel from "./components/Methods/MethodsDetailPanel";
 import MethodParams from "./components/MethodParams/MethodParams";
 import MethodParamDetailPanel from "./components/MethodParams/MethodParamDetailPanel";
+import MethodParamDefs from "./components/MethodParamDefs/MethodParamDefs";
+import MethodParamDefDetailPanel from "./components/MethodParamDefs/MethodParamDefsDetailPanel";
 import { DetailPanel } from "onyks_shared_kendo";
 import { Typography } from "@progress/kendo-react-common";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
@@ -69,7 +71,7 @@ const MethodsPage = () => {
     any | null
   >(null);
   const [dialogSelectedMethod, setDialogSelectedMethod] =
-    React.useState<Method | null>(null);
+    React.useState<MethodDef | null>(null);
   const [selectedMethodDef, setSelectedMethodDef] =
     React.useState<MethodDef | null>(null);
   const [selectedMethodParam, setSelectedMethodParam] =
@@ -80,6 +82,8 @@ const MethodsPage = () => {
     React.useState(false);
   const [paramValue, setParamValue] = React.useState("");
   const [selectedParamDef, setSelectedParamDef] =
+    React.useState<MethodParamDef | null>(null);
+  const [selectedMethodParamDef, setSelectedMethodParamDef] =
     React.useState<MethodParamDef | null>(null);
 
   const handleParamValueChange = React.useCallback((e: TextBoxChangeEvent) => {
@@ -99,6 +103,7 @@ const MethodsPage = () => {
   const handlePipelineChange = React.useCallback(
     (e: DropDownListChangeEvent) => {
       setDialogSelectedPipeline(e.value?.ID ?? null);
+      setDialogSelectedMethod(null);
     },
     [],
   );
@@ -140,7 +145,7 @@ const MethodsPage = () => {
 
     const method: MethodCreate = {
       PipelineID: dialogSelectedPipeline,
-      MethodDefID: dialogSelectedMethod.MethodDefID,
+      MethodDefID: dialogSelectedMethod.ID,
       Name: name || null,
     };
 
@@ -165,6 +170,16 @@ const MethodsPage = () => {
         !usedDefs.includes(def.ID),
     );
   }, [methodParamDefs, methodParams, selectedMethod]);
+
+  const availableMethodDefs = React.useMemo(() => {
+    if (!dialogSelectedPipeline) return methodDefs;
+
+    const usedDefs = methods
+      .filter((m) => m.PipelineID === dialogSelectedPipeline)
+      .map((m) => m.MethodDefID);
+
+    return methodDefs.filter((def) => !usedDefs.includes(def.ID));
+  }, [methods, methodDefs, dialogSelectedPipeline]);
 
   const handleOpenAddParamDialog = React.useCallback(() => {
     if (availableParamDefs.length === 0) {
@@ -236,7 +251,17 @@ const MethodsPage = () => {
               setSelectedMethodParam(null);
               setSelectedMethodDef(null);
             }}
-            openAddDialog={() => setShowAddDialog(true)}
+            openAddDialog={() => {
+              if (availableMethodDefs.length === 0) {
+                appContext.showNotification({
+                  notificationType: { icon: true, style: "warning" },
+                  message: "No available method to add.",
+                });
+                return;
+              }
+
+              setShowAddDialog(true);
+            }}
           />
         </div>
 
@@ -253,6 +278,17 @@ const MethodsPage = () => {
                 setSelectedMethodDef(d);
                 setSelectedMethod(null);
                 setSelectedMethodParam(null);
+              }}
+            />
+          </TabStripTab>
+          <TabStripTab title={t("method-page:method_param_defs")}>
+            <MethodParamDefs
+              selected={selectedMethodParamDef}
+              setSelected={(d) => {
+                setSelectedMethodParamDef(d);
+                setSelectedMethod(null);
+                setSelectedMethodParam(null);
+                setSelectedMethodDef(null);
               }}
             />
           </TabStripTab>
@@ -279,12 +315,17 @@ const MethodsPage = () => {
         extandable={false}
         className={
           "methods-detail-panel" +
-          (selectedMethod || selectedMethodDef || selectedMethodParam
+          (selectedMethod ||
+          selectedMethodDef ||
+          selectedMethodParam ||
+          selectedMethodParamDef
             ? ""
             : " no-selected")
         }
       >
-        {selectedMethodParam && selectedMethod ? (
+        {selectedMethodParamDef ? (
+          <MethodParamDefDetailPanel selected={selectedMethodParamDef} />
+        ) : selectedMethodParam && selectedMethod ? (
           <MethodParamDetailPanel
             selected={selectedMethodParam}
             selectedMethod={selectedMethod}
@@ -355,8 +396,8 @@ const MethodsPage = () => {
 
           <Label>Method definition</Label>
           <DropDownList
-            data={methods}
-            textField="Name"
+            data={availableMethodDefs}
+            textField="ID"
             dataItemKey="ID"
             value={dialogSelectedMethod}
             onChange={handleMethodChange}
