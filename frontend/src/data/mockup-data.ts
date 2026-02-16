@@ -18,6 +18,7 @@ import {
   Method,
   MethodDef,
   MethodParam,
+  MethodParamDef,
 } from "../services/api";
 
 // export type MockupTrendType = {
@@ -587,81 +588,6 @@ export const mockupMethods: Method[] = [
   },
 ];
 
-// export const mockupMethodParams: MethodParam[] = [
-//   {
-//     DataType: "REAL",
-//     ID: "ALARM_LEVEL",
-//     MethodDefID: "BALANCE",
-//     Name: "AlarmLevel",
-//   },
-//   {
-//     DataType: "REAL",
-//     ID: "ALARM_LEVEL",
-//     MethodDefID: "WAVE",
-//     Name: "AlarmLevel",
-//   },
-//   {
-//     DataType: "REAL",
-//     ID: "BASE_WAVE_SPEED",
-//     MethodDefID: "TOF",
-//     Name: "BaseWaveSpeed",
-//   },
-//   {
-//     DataType: "REAL",
-//     ID: "BASE_WAVE_SPEED",
-//     MethodDefID: "WAVE",
-//     Name: "BaseWaveSpeed",
-//   },
-//   {
-//     DataType: "REAL",
-//     ID: "CONSTANT_CORRECTION",
-//     MethodDefID: "BALANCE",
-//     Name: "ConstantCorrection",
-//   },
-//   {
-//     DataType: "TREND",
-//     ID: "DENSITY_TREND_1",
-//     MethodDefID: "BALANCE",
-//     Name: "DensityTrend1",
-//   },
-//   {
-//     DataType: "TREND",
-//     ID: "DENSITY_TREND_2",
-//     MethodDefID: "BALANCE",
-//     Name: "DensityTrend2",
-//   },
-//   {
-//     DataType: "REAL",
-//     ID: "DROP_LEVEL",
-//     MethodDefID: "TOF",
-//     Name: "DropLevel",
-//   },
-//   {
-//     DataType: "TREND",
-//     ID: "DYNAMIC_STATE",
-//     MethodDefID: "MASK",
-//     Name: "DynamicState",
-//   },
-//   {
-//     DataType: "TREND",
-//     ID: "FLOW_TREND_1",
-//     MethodDefID: "BALANCE",
-//     Name: "FlowTrend1",
-//   },
-//   {
-//     DataType: "TREND",
-//     ID: "FLOW_TREND_2",
-//     MethodDefID: "BALANCE",
-//     Name: "FlowTrend2",
-//   },
-//   {
-//     DataType: "REAL",
-//     ID: "LEAKAGE_LEVEL",
-//     MethodDefID: "WAVE",
-//     Name: "LeakageLevel",
-//   }
-// ];
-
 export const mockupMethodDefs: MethodDef[] = [
   {
     Name: "Matoda bilansu",
@@ -686,5 +612,89 @@ export const mockupMethodDefs: MethodDef[] = [
   {
     Name: "Metoda fali",
     ID: "WAVE",
+  },
+];
+
+export const mockupMethodParamDef: MethodParamDef[] = [
+  {
+    DataType: "REAL",
+    ID: "ALARM_LEVEL",
+    MethodDefID: "BALANCE",
+    Name: "AlarmLevel",
+  },
+  {
+    DataType: "REAL",
+    ID: "ALARM_LEVEL",
+    MethodDefID: "WAVE",
+    Name: "AlarmLevel",
+  },
+  {
+    DataType: "REAL",
+    ID: "BASE_WAVE_SPEED",
+    MethodDefID: "TOF",
+    Name: "BaseWaveSpeed",
+  },
+  {
+    DataType: "REAL",
+    ID: "BASE_WAVE_SPEED",
+    MethodDefID: "WAVE",
+    Name: "BaseWaveSpeed",
+  },
+  {
+    DataType: "REAL",
+    ID: "CONSTANT_CORRECTION",
+    MethodDefID: "BALANCE",
+    Name: "ConstantCorrection",
+  },
+  {
+    DataType: "TREND",
+    ID: "DENSITY_TREND_1",
+    MethodDefID: "BALANCE",
+    Name: "DensityTrend1",
+  },
+];
+
+export const mockupMethodParams: MethodParam[] = [
+  {
+    MethodParamDefID: "ALARM_LEVEL",
+    Value: "0.06",
+    MethodID: 20,
+    DataType: "REAL",
+    Name: "AlarmLevel",
+  },
+  {
+    MethodParamDefID: "BASE_WAVE_SPEED",
+    Value: "425",
+    MethodID: 20,
+    DataType: "REAL",
+    Name: "BaseWaveSpeed",
+  },
+  {
+    MethodParamDefID: "LEAKAGE_LEVEL",
+    Value: "0.02",
+    MethodID: 20,
+    DataType: "REAL",
+    Name: "LeakageLevel",
+  },
+  {
+    MethodParamDefID: "LEAKAGE_WINDOW",
+    Value: "2000",
+    MethodID: 20,
+    DataType: "REAL",
+    Name: "LeakageWindow",
+  },
+  {
+    MethodParamDefID: "MIN_WAVE_VALUE",
+    Value: "10",
+    MethodID: 20,
+    DataType: "REAL",
+    Name: "MinWaveValue",
+  },
+  {
+    MethodParamDefID: "NO_DETECTION_WINDOW",
+    Value: "10",
+    MethodID: 20,
+    DataType: "REAL",
+    Name: "NoDetectionWindow",
   },
 ];

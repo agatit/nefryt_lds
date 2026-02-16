@@ -29,6 +29,9 @@ import {
   MethodCreate,
   MethodUpdate,
   MethodDef,
+  MethodParam,
+  MethodParamCreate,
+  MethodParamDef,
 } from "../../../services/api";
 
 export type LDSContextType = {
@@ -93,8 +96,19 @@ export type LDSContextType = {
   addMethod: (value: MethodCreate) => Promise<Method>;
   updateMethod: (id: number, value: MethodUpdate) => Promise<void>;
   deleteMethod: (value: Method) => Promise<void>;
-
-  loadMethodDefs: () => Promise<void>;
+  methodParams: MethodParam[];
+  methodParamDefs: MethodParamDef[];
+  addMethodParam: (methodID: number, value: MethodParamCreate) => Promise<void>;
+  updateMethodParam: (
+    methodID: number,
+    methodParamDefID: string,
+    value: string,
+  ) => Promise<void>;
+  deleteMethodParam: (
+    methodID: number,
+    methodParamDefID: string,
+  ) => Promise<void>;
+  loadMethodParamsByMethod: (methodID: number) => Promise<void>;
 };
 
 export const LDSContext = React.createContext<LDSContextType | null>(null);
@@ -161,7 +175,19 @@ interface LDSContextProviderProps extends PropsWithChildren {
   addMethod: (value: MethodCreate) => Promise<Method>;
   updateMethod: (id: number, value: MethodUpdate) => Promise<void>;
   deleteMethod: (value: Method) => Promise<void>;
-  loadMethodDefs: () => Promise<void>;
+  addMethodParam: (methodID: number, value: MethodParamCreate) => Promise<void>;
+  updateMethodParam: (
+    methodID: number,
+    methodParamDefID: string,
+    value: string,
+  ) => Promise<void>;
+  deleteMethodParam: (
+    methodID: number,
+    methodParamDefID: string,
+  ) => Promise<void>;
+  methodParams: MethodParam[];
+  methodParamDefs: MethodParamDef[];
+  loadMethodParamsByMethod: (methodID: number) => Promise<void>;
 }
 
 export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
@@ -220,7 +246,12 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
   addMethod,
   updateMethod,
   deleteMethod,
-  loadMethodDefs,
+  addMethodParam,
+  updateMethodParam,
+  deleteMethodParam,
+  methodParams,
+  methodParamDefs,
+  loadMethodParamsByMethod,
 }: LDSContextProviderProps) => {
   const value = React.useMemo(
     () => ({
@@ -278,7 +309,12 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addMethod,
       updateMethod,
       deleteMethod,
-      loadMethodDefs,
+      addMethodParam,
+      updateMethodParam,
+      deleteMethodParam,
+      methodParams,
+      methodParamDefs,
+      loadMethodParamsByMethod,
     }),
     [
       trendDefs,
@@ -329,7 +365,12 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addMethod,
       updateMethod,
       deleteMethod,
-      loadMethodDefs,
+      addMethodParam,
+      updateMethodParam,
+      deleteMethodParam,
+      methodParams,
+      methodParamDefs,
+      loadMethodParamsByMethod,
     ],
   );
 

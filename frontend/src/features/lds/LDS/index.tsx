@@ -72,6 +72,10 @@ import {
   MethodDef,
   MethodApi,
   MethodDefApi,
+  MethodParam,
+  MethodParamCreate,
+  MethodParamDef,
+  MethodParamApi,
 } from "../../../services/api";
 import { axiosInstance, host } from "../../../lib/apiUtilities";
 import {
@@ -88,6 +92,8 @@ import {
   mockupPipelineParams,
   mockupMethods,
   mockupMethodDefs,
+  mockupMethodParamDef,
+  mockupMethodParams,
 } from "../../../data/mockup-data";
 import { Loader } from "@progress/kendo-react-indicators";
 import { useHandleApiResponse } from "../../../hooks/useHandleApiResponse";
@@ -296,6 +302,11 @@ export default function LDS() {
     [auth],
   );
 
+  const methodParamApi = React.useMemo(
+    () => new MethodParamApi(auth?.config, host, axiosInstance),
+    [auth],
+  );
+
   const trendApi = React.useMemo(
     () => new TrendApi(auth?.config, host, axiosInstance),
     [auth],
@@ -350,6 +361,14 @@ export default function LDS() {
     nav.useMockup ? mockupMethodDefs : [],
   );
 
+  const [methodParams, setMethodParams] = React.useState<MethodParam[]>(
+    nav.useMockup ? mockupMethodParams : [],
+  );
+
+  const [methodParamDefs, setMethodParamDefs] = React.useState<
+    MethodParamDef[]
+  >(nav.useMockup ? mockupMethodParamDef : []);
+
   const [pipelineParams, setPipelineParams] = React.useState<PipelineParam[]>(
     nav.useMockup ? mockupPipelineParams : [],
   );
@@ -376,6 +395,8 @@ export default function LDS() {
     setPipelineParams(nav.useMockup ? mockupPipelineParams : []);
     setMethods(nav.useMockup ? mockupMethods : []);
     setMethodDefs(nav.useMockup ? mockupMethodDefs : []);
+    setMethodParams(nav.useMockup ? mockupMethodParams : []);
+    setMethodParamDefs(nav.useMockup ? mockupMethodParamDef : []);
   }, [nav.useMockup]);
 
   const addTrend = React.useCallback(
@@ -1187,6 +1208,102 @@ export default function LDS() {
     [nav, units, unitApi],
   );
 
+  const addMethodParam = React.useCallback(
+    async (methodID: number, value: MethodParamCreate) => {
+      try {
+        const response = await handleApiResponse(
+          methodParamApi.createMethodParamMethodMethodIdParamPost.bind(
+            methodParamApi,
+          ),
+          methodID,
+          value,
+        );
+
+        if (response?.data) {
+          setMethodParams((prev) => [...prev, response.data]);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [methodParamApi],
+  );
+
+  const updateMethodParam = React.useCallback(
+    async (methodID: number, methodParamDefID: string, value: string) => {
+      try {
+        const response = await handleApiResponse(
+          methodParamApi.updateMethodParamMethodMethodIdParamMethodParamDefIdPut.bind(
+            methodParamApi,
+          ),
+          methodID,
+          methodParamDefID,
+          value,
+        );
+
+        if (response?.data) {
+          setMethodParams((prev) =>
+            prev.map((p) =>
+              p.MethodID === methodID && p.MethodParamDefID === methodParamDefID
+                ? response.data
+                : p,
+            ),
+          );
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [methodParamApi],
+  );
+  
+  const deleteMethodParam = React.useCallback(
+    async (methodID: number, methodParamDefID: string) => {
+      try {
+        await handleApiResponse(
+          methodParamApi.deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete.bind(
+            methodParamApi,
+          ),
+          methodID,
+          methodParamDefID,
+        );
+
+        setMethodParams((prev) =>
+          prev.filter(
+            (p) =>
+              !(
+                p.MethodID === methodID &&
+                p.MethodParamDefID === methodParamDefID
+              ),
+          ),
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [methodParamApi],
+  );
+
+  const loadMethodParamsByMethod = React.useCallback(
+    async (methodID: number) => {
+      try {
+        const response = await handleApiResponse(
+          methodParamApi.listMethodParamsByMethodIdMethodMethodIdParamGet.bind(
+            methodParamApi,
+          ),
+          methodID,
+        );
+
+        if (response?.data) {
+          setMethodParams(response.data.items);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [methodParamApi],
+  );
+
   const LoadData = React.useCallback(async () => {
     handleApiResponse(trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi))
       .then((response) => {
@@ -1243,6 +1360,14 @@ export default function LDS() {
     handleApiResponse(methodApi.listMethodsMethodGet.bind(methodApi))
       .then((response) => {
         if (response?.data) setMethods(response.data.items);
+      })
+      .catch(console.log);
+
+    handleApiResponse(
+      methodParamApi.listMethodParamDefsMethodParamDefGet.bind(methodParamApi),
+    )
+      .then((response) => {
+        if (response?.data) setMethodParamDefs(response.data.items);
       })
       .catch(console.log);
 
@@ -1418,6 +1543,12 @@ export default function LDS() {
               deleteMethod={deleteMethod}
               updateMethod={updateMethod}
               methodDefs={methodDefs}
+              methodParams={methodParams}
+              methodParamDefs={methodParamDefs}
+              addMethodParam={addMethodParam}
+              deleteMethodParam={deleteMethodParam}
+              updateMethodParam={updateMethodParam}
+              loadMethodParamsByMethod={loadMethodParamsByMethod}
             >
               <Routes>
                 <Route path="/" element={<HomePage key={"home-page"} />} />
