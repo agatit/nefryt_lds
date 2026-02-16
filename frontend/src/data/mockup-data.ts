@@ -16,6 +16,8 @@ import {
   Pipeline,
   PipelineParam,
   Method,
+  MethodDef,
+  MethodParam,
 } from "../services/api";
 
 // export type MockupTrendType = {
@@ -582,5 +584,107 @@ export const mockupMethods: Method[] = [
     Name: "Test TOF",
     ID: 1001,
     MethodDefID: "TOF",
+  },
+];
+
+// export const mockupMethodParams: MethodParam[] = [
+//   {
+//     DataType: "REAL",
+//     ID: "ALARM_LEVEL",
+//     MethodDefID: "BALANCE",
+//     Name: "AlarmLevel",
+//   },
+//   {
+//     DataType: "REAL",
+//     ID: "ALARM_LEVEL",
+//     MethodDefID: "WAVE",
+//     Name: "AlarmLevel",
+//   },
+//   {
+//     DataType: "REAL",
+//     ID: "BASE_WAVE_SPEED",
+//     MethodDefID: "TOF",
+//     Name: "BaseWaveSpeed",
+//   },
+//   {
+//     DataType: "REAL",
+//     ID: "BASE_WAVE_SPEED",
+//     MethodDefID: "WAVE",
+//     Name: "BaseWaveSpeed",
+//   },
+//   {
+//     DataType: "REAL",
+//     ID: "CONSTANT_CORRECTION",
+//     MethodDefID: "BALANCE",
+//     Name: "ConstantCorrection",
+//   },
+//   {
+//     DataType: "TREND",
+//     ID: "DENSITY_TREND_1",
+//     MethodDefID: "BALANCE",
+//     Name: "DensityTrend1",
+//   },
+//   {
+//     DataType: "TREND",
+//     ID: "DENSITY_TREND_2",
+//     MethodDefID: "BALANCE",
+//     Name: "DensityTrend2",
+//   },
+//   {
+//     DataType: "REAL",
+//     ID: "DROP_LEVEL",
+//     MethodDefID: "TOF",
+//     Name: "DropLevel",
+//   },
+//   {
+//     DataType: "TREND",
+//     ID: "DYNAMIC_STATE",
+//     MethodDefID: "MASK",
+//     Name: "DynamicState",
+//   },
+//   {
+//     DataType: "TREND",
+//     ID: "FLOW_TREND_1",
+//     MethodDefID: "BALANCE",
+//     Name: "FlowTrend1",
+//   },
+//   {
+//     DataType: "TREND",
+//     ID: "FLOW_TREND_2",
+//     MethodDefID: "BALANCE",
+//     Name: "FlowTrend2",
+//   },
+//   {
+//     DataType: "REAL",
+//     ID: "LEAKAGE_LEVEL",
+//     MethodDefID: "WAVE",
+//     Name: "LeakageLevel",
+//   }
+// ];
+
+export const mockupMethodDefs: MethodDef[] = [
+  {
+    Name: "Matoda bilansu",
+    ID: "BALANCE",
+  },
+  {
+    Name: "Wynik łączny",
+    ID: "COMBINE",
+  },
+  {
+    Name: "Zaślepka",
+    ID: "DUMMY",
+  },
+  {
+    Name: "Maskowanie zdarzeń tech.",
+    ID: "MASK",
+  },
+  {
+    Name: "Metoda czasu przypływu",
+    ID: "TOF",
+  },
+  {
+    Name: "Metoda fali",
+    ID: "WAVE",
   },
 ];

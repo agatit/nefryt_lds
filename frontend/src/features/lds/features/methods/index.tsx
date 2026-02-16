@@ -2,8 +2,9 @@ import React from "react";
 import "./methodsPage.scss";
 import { useTranslation } from "react-i18next";
 import { LDSContext } from "../../contexts/ldsContext";
-import { Method, MethodCreate } from "../../../../services/api";
+import { Method, MethodCreate, MethodDef } from "../../../../services/api";
 import Methods from "./components/Methods/Methods";
+import MethodDefDetailPanel from "./components/MethodDefs/MethodDefsDetailPanel";
 import MethodsDetailPanel from "./components/Methods/MethodsDetailPanel";
 import { DetailPanel } from "onyks_shared_kendo";
 import { Typography } from "@progress/kendo-react-common";
@@ -19,8 +20,12 @@ import {
   Splitter,
   SplitterOnChangeEvent,
   SplitterPaneProps,
+  TabStrip,
+  TabStripSelectEventArguments,
+  TabStripTab,
 } from "@progress/kendo-react-layout";
 import { AppContext } from "../../../../contexts/appContext";
+import MethodDefs from "./components/MethodDefs/MethodDefs";
 
 const MethodsPage = () => {
   const { t } = useTranslation(["common", "method-page"]);
@@ -28,8 +33,14 @@ const MethodsPage = () => {
   const ldsContext = React.useContext(LDSContext);
   if (!appContext || !ldsContext) return null;
 
-  const { pipelines, methods, addMethod, updateMethod, deleteMethod } =
-    ldsContext;
+  const {
+    methodDefs,
+    pipelines,
+    methods,
+    addMethod,
+    updateMethod,
+    deleteMethod,
+  } = ldsContext;
   const [selectedMethod, setSelectedMethod] = React.useState<Method | null>(
     null,
   );
@@ -44,6 +55,9 @@ const MethodsPage = () => {
   >(null);
   const [dialogSelectedMethod, setDialogSelectedMethod] =
     React.useState<Method | null>(null);
+  const [selectedMethodDef, setSelectedMethodDef] =
+    React.useState<MethodDef | null>(null);
+  const [tabSelected, setTabSelected] = React.useState<number>(0);
 
   const handleVerticalChange = (e: SplitterOnChangeEvent) =>
     setVerticalPanes(e.newState);
@@ -62,6 +76,13 @@ const MethodsPage = () => {
   const handleNameChange = React.useCallback((e: TextBoxChangeEvent) => {
     setName(String(e.value ?? ""));
   }, []);
+
+  const handleTabSelect = React.useCallback(
+    (e: TabStripSelectEventArguments) => {
+      setTabSelected(e.selected);
+    },
+    [],
+  );
 
   const selectedPipelineObject = React.useMemo(() => {
     return pipelines.find((p) => p.ID === dialogSelectedPipeline) ?? null;
@@ -97,6 +118,12 @@ const MethodsPage = () => {
     setShowAddDialog(false);
   };
 
+  React.useEffect(() => {
+    if (selectedMethod && selectedMethodDef) {
+      setSelectedMethodDef(null);
+    }
+  }, [selectedMethod, selectedMethodDef]);
+
   return (
     <main className="methods-page">
       <Splitter
@@ -113,25 +140,45 @@ const MethodsPage = () => {
             openAddDialog={() => setShowAddDialog(true)}
           />
         </div>
-        <div />
+
+        <TabStrip
+          className="method-stuff-tab"
+          selected={tabSelected}
+          onSelect={handleTabSelect}
+        >
+          <TabStripTab title={t("method-page:method_defs")}>
+            <MethodDefs
+              methodDefs={methodDefs}
+              selected={selectedMethodDef}
+              setSelected={setSelectedMethodDef}
+            />
+          </TabStripTab>
+        </TabStrip>
       </Splitter>
 
       <DetailPanel
         flexGrow={1}
         extandable={false}
         className={
-          "methods-detail-panel" + (selectedMethod ? "" : " no-selected")
+          "methods-detail-panel" +
+          (selectedMethod || selectedMethodDef ? "" : " no-selected")
         }
       >
-        {selectedMethod ? (
+        {selectedMethod && (
           <MethodsDetailPanel
             selected={selectedMethod}
             updateMethod={updateMethod}
             deleteMethod={async () => setShowDeleteDialog(true)}
             openAddDialog={() => setShowAddDialog(true)}
           />
-        ) : (
-          <Typography.p style={{ padding: "20px" }}>
+        )}
+
+        {selectedMethodDef && (
+          <MethodDefDetailPanel selected={selectedMethodDef} />
+        )}
+
+        {!selectedMethod && !selectedMethodDef && (
+          <Typography.p style={{ padding: 20 }}>
             {t("method-page:select_method")}
           </Typography.p>
         )}

@@ -71,6 +71,7 @@ import {
   MethodUpdate,
   MethodDef,
   MethodApi,
+  MethodDefApi,
 } from "../../../services/api";
 import { axiosInstance, host } from "../../../lib/apiUtilities";
 import {
@@ -86,6 +87,7 @@ import {
   mockupPipelines,
   mockupPipelineParams,
   mockupMethods,
+  mockupMethodDefs,
 } from "../../../data/mockup-data";
 import { Loader } from "@progress/kendo-react-indicators";
 import { useHandleApiResponse } from "../../../hooks/useHandleApiResponse";
@@ -200,6 +202,15 @@ export default function LDS() {
       {
         separator: true,
       },
+      {
+        text: t("nav:templates"),
+        svgIcon: trackChangesIcon,
+        selected: pathname == "/templates",
+        route: "/templates",
+      },
+      {
+        separator: true,
+      },
     ],
   );
 
@@ -280,6 +291,11 @@ export default function LDS() {
     [auth],
   );
 
+  const methodDefApi = React.useMemo(
+    () => new MethodDefApi(auth?.config, host, axiosInstance),
+    [auth],
+  );
+
   const trendApi = React.useMemo(
     () => new TrendApi(auth?.config, host, axiosInstance),
     [auth],
@@ -330,7 +346,9 @@ export default function LDS() {
     nav.useMockup ? mockupMethods : [],
   );
 
-  const [methodDefs, setMethodDefs] = React.useState<MethodDef[]>([]);
+  const [methodDefs, setMethodDefs] = React.useState<MethodDef[]>(
+    nav.useMockup ? mockupMethodDefs : [],
+  );
 
   const [pipelineParams, setPipelineParams] = React.useState<PipelineParam[]>(
     nav.useMockup ? mockupPipelineParams : [],
@@ -357,6 +375,7 @@ export default function LDS() {
     setPipelines(nav.useMockup ? mockupPipelines : []);
     setPipelineParams(nav.useMockup ? mockupPipelineParams : []);
     setMethods(nav.useMockup ? mockupMethods : []);
+    setMethodDefs(nav.useMockup ? mockupMethodDefs : []);
   }, [nav.useMockup]);
 
   const addTrend = React.useCallback(
@@ -772,20 +791,6 @@ export default function LDS() {
     },
     [methodApi],
   );
-
-  const loadMethodDefs = React.useCallback(async () => {
-    try {
-      const response = await handleApiResponse(
-        methodApi.listMethodsMethodGet.bind(methodApi),
-      );
-
-      if (response?.data?.items) {
-        setMethodDefs(response.data.items);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }, [methodApi]);
 
   const deleteMethod = React.useCallback(
     async (value: Method) => {
@@ -1223,6 +1228,18 @@ export default function LDS() {
         console.log(error);
       });
 
+    handleApiResponse(
+      methodDefApi.listMethodDefsMethodDefGet.bind(methodDefApi),
+    )
+      .then((response) => {
+        if (response?.data) {
+          setMethodDefs(response.data.items);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
     handleApiResponse(methodApi.listMethodsMethodGet.bind(methodApi))
       .then((response) => {
         if (response?.data) setMethods(response.data.items);
@@ -1278,6 +1295,7 @@ export default function LDS() {
     pipelineApi,
     eventDefApi,
     pipelineParamApi,
+    methodDefApi,
   ]);
 
   React.useEffect(() => {
@@ -1294,7 +1312,8 @@ export default function LDS() {
       nodes.length == 0 ||
       //events.length == 0 ||
       eventDefs.length == 0 ||
-      pipelines.length === 0,
+      pipelines.length === 0 ||
+      methodDefs.length === 0,
     [
       trendDefs,
       trendGroups,
@@ -1305,6 +1324,7 @@ export default function LDS() {
       nodes,
       events,
       eventDefs,
+      methodDefs,
     ],
   );
 
@@ -1398,7 +1418,6 @@ export default function LDS() {
               deleteMethod={deleteMethod}
               updateMethod={updateMethod}
               methodDefs={methodDefs}
-              loadMethodDefs={loadMethodDefs}
             >
               <Routes>
                 <Route path="/" element={<HomePage key={"home-page"} />} />
