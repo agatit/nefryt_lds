@@ -204,7 +204,17 @@ const PipelinesPage = React.memo(function PipelinesPage() {
                   selected={selectedParam}
                   onSelect={setSelectedParam}
                   pipelineID={selectedPipeline.ID}
-                  openDialog={() => setShowAddParamDialog(true)}
+                  openDialog={() => {
+                    if (availableDefs.length === 0) {
+                      appContext.showNotification({
+                        notificationType: { icon: true, style: "warning" },
+                        message: "No available parameters to add.",
+                      });
+                      return;
+                    }
+
+                    setShowAddParamDialog(true);
+                  }}
                 />
               </TabStripTab>
             </TabStrip>
@@ -247,7 +257,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
           onClose={() => setShowAddParamDialog(false)}
           className="pipeline-dialog"
         >
-          <Label>Parameter</Label>
+          <Label>Name</Label>
           <DropDownList
             data={availableDefs}
             textField="Name"
