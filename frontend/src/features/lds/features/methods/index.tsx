@@ -52,7 +52,6 @@ const MethodsPage = () => {
     updateMethod,
     deleteMethod,
     addMethodParam,
-    updateMethodParam,
     deleteMethodParam,
     loadMethodParamsByMethod,
     methodParamDefs,
@@ -356,14 +355,16 @@ const MethodsPage = () => {
           onClose={() => setShowAddParamDialog(false)}
           className="methods-dialog"
         >
-          <Label>Parameter definition</Label>
-          <DropDownList
-            data={availableParamDefs}
-            textField="Name"
-            dataItemKey="MethodParamDefID"
-            value={selectedParamDef}
-            onChange={handleParamDefChange}
-          />
+          <div className="form-field">
+            <Label>Parameter definition</Label>
+            <DropDownList
+              data={availableParamDefs}
+              textField="Name"
+              dataItemKey="MethodParamDefID"
+              value={selectedParamDef}
+              onChange={handleParamDefChange}
+            />
+          </div>
 
           <Label>Value</Label>
           <TextBox value={paramValue} onChange={handleParamValueChange} />
@@ -385,23 +386,27 @@ const MethodsPage = () => {
           onClose={() => setShowAddDialog(false)}
           className="methods-dialog"
         >
-          <Label>Pipeline</Label>
-          <DropDownList
-            data={pipelines}
-            textField="Name"
-            dataItemKey="ID"
-            value={selectedPipelineObject}
-            onChange={handlePipelineChange}
-          />
+          <div className="form-field">
+            <Label>Pipeline</Label>
+            <DropDownList
+              data={pipelines}
+              textField="Name"
+              dataItemKey="ID"
+              value={selectedPipelineObject}
+              onChange={handlePipelineChange}
+            />
+          </div>
 
-          <Label>Method definition</Label>
-          <DropDownList
-            data={availableMethodDefs}
-            textField="ID"
-            dataItemKey="ID"
-            value={dialogSelectedMethod}
-            onChange={handleMethodChange}
-          />
+          <div className="form-field">
+            <Label>Method definition</Label>
+            <DropDownList
+              data={availableMethodDefs}
+              textField="ID"
+              dataItemKey="ID"
+              value={dialogSelectedMethod}
+              onChange={handleMethodChange}
+            />
+          </div>
 
           <Label>Name</Label>
           <TextBox value={name} onChange={handleNameChange} />

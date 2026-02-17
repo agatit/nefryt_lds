@@ -257,6 +257,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
           onClose={() => setShowAddParamDialog(false)}
           className="pipeline-dialog"
         >
+          <div className="form-field">
           <Label>Name</Label>
           <DropDownList
             data={availableDefs}
@@ -265,6 +266,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
             value={selectedDef}
             onChange={handleParamChange}
           />
+          </div>
 
           <Label>Value</Label>
           <TextBox value={value} onChange={handleValueChange} />

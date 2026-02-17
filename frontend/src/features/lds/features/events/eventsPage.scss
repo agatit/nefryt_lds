@@ -41,3 +41,13 @@ main.events-page {
   display: flex;
   gap: 12px;
 }
+
+.k-dialog-content .k-input,
+.k-dialog-content .k-dropdown,
+.k-dialog-content .k-numerictextbox {
+  margin-bottom: 12px;
+}
+
+.form-field {
+  margin-bottom: 16px;
+}

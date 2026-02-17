@@ -161,7 +161,7 @@ const EventsDef = React.memo(function EventsDef({
     };
 
     await addEventDef(newEventDef);
-    closeDialog();
+    cancelAddNewEventDef();
   }, [
     id,
     caption,
@@ -229,7 +229,7 @@ const EventsDef = React.memo(function EventsDef({
             <TextBox value={verbosity} onChange={handleVerbosityChange} />
           </div>
 
-          <div>
+          <div className="form-field">
             <Label>Silent</Label>
             <DropDownList
               data={booleanOptions}
@@ -239,7 +239,8 @@ const EventsDef = React.memo(function EventsDef({
               onChange={handleSilentChange}
             />
           </div>
-          <div>
+
+          <div className="form-field">
             <Label>Visible</Label>
             <DropDownList
               data={booleanOptions}
@@ -249,7 +250,8 @@ const EventsDef = React.memo(function EventsDef({
               onChange={handleVisibleChange}
             />
           </div>
-          <div>
+
+          <div className="form-field">
             <Label>Enabled</Label>
             <DropDownList
               data={booleanOptions}
