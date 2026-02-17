@@ -12,6 +12,9 @@ import {
   linkIcon,
   shareIcon,
   trackChangesIcon,
+  arrowsSwapIcon,
+  codeIcon,
+  fileIcon
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -197,7 +200,7 @@ export default function LDS() {
       },
       {
         text: t("nav:pipelines"),
-        svgIcon: trackChangesIcon,
+        svgIcon: arrowsSwapIcon,
         selected: pathname == "/pipelines",
         route: "/pipelines",
       },
@@ -206,7 +209,7 @@ export default function LDS() {
       },
       {
         text: t("nav:methods"),
-        svgIcon: trackChangesIcon,
+        svgIcon: codeIcon,
         selected: pathname == "/methods",
         route: "/methods",
       },
@@ -215,7 +218,7 @@ export default function LDS() {
       },
       {
         text: t("nav:templates"),
-        svgIcon: trackChangesIcon,
+        svgIcon: fileIcon,
         selected: pathname == "/templates",
         route: "/templates",
       },
@@ -1503,7 +1506,7 @@ export default function LDS() {
   React.useEffect(() => {
     if (!nav.useMockup) LoadData();
   }, [nav.useMockup]);
-  
+
   const isLoadingContext = isLoading;
 
   const loadPipelineParamsByPipeline = React.useCallback(
