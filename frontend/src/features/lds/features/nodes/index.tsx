@@ -11,7 +11,16 @@ import { DetailPanel } from "onyks_shared_kendo";
 import { Typography } from "@progress/kendo-react-common";
 import { Button } from "@progress/kendo-react-buttons";
 import NodesDetailPanel from "./components/Nodes/NodesDetailPanel";
+import {
+  NumericTextBox,
+  NumericTextBoxChangeEvent,
+} from "@progress/kendo-react-inputs";
 import { AppContext } from "../../../../contexts/appContext";
+
+interface EditorNode {
+  PosX?: number;
+  PosY?: number;
+}
 
 const NodesPage = React.memo(function NodesPage() {
   const { t } = useTranslation(["common", "nodes-page"]);
@@ -26,8 +35,9 @@ const NodesPage = React.memo(function NodesPage() {
   const [showAddDialog, setShowAddDialog] = React.useState(false);
   const [newType, setNewType] = React.useState("");
   const [newName, setNewName] = React.useState("");
-  const [newEditorParams, setNewEditorParams] = React.useState("");
-  const [newTrendID, setNewTrendID] = React.useState("");
+  const [newEditorParams, setNewEditorParams] =
+    React.useState<EditorNode | null>(null);
+  const [newTrendID, setNewTrendID] = React.useState<number | null>(null);
 
   const openAddDialog = () => setShowAddDialog(true);
 
@@ -41,15 +51,26 @@ const NodesPage = React.memo(function NodesPage() {
     [],
   );
 
-  const handleParamsChange = React.useCallback(
-    (e: TextBoxChangeEvent) => setNewEditorParams(String(e.value ?? "")),
+  const handleTrendChange = React.useCallback(
+    (e: NumericTextBoxChangeEvent) => {
+      setNewTrendID(e.value ?? null);
+    },
     [],
   );
 
-  const handleTrendChange = React.useCallback(
-    (e: TextBoxChangeEvent) => setNewTrendID(String(e.value ?? "")),
-    [],
-  );
+  const handlePosXChange = React.useCallback((e: NumericTextBoxChangeEvent) => {
+    setNewEditorParams((prev) => ({
+      ...prev,
+      PosX: e.value ?? 0,
+    }));
+  }, []);
+
+  const handlePosYChange = React.useCallback((e: NumericTextBoxChangeEvent) => {
+    setNewEditorParams((prev) => ({
+      ...prev,
+      PosY: e.value ?? 0,
+    }));
+  }, []);
 
   const confirmAdd = async () => {
     if (!newType.trim()) {
@@ -58,20 +79,6 @@ const NodesPage = React.memo(function NodesPage() {
         message: "Type is required",
       });
       return;
-    }
-
-    let parsedParams = null;
-
-    if (newEditorParams.trim()) {
-      try {
-        parsedParams = JSON.parse(newEditorParams);
-      } catch {
-        appContext.showNotification({
-          notificationType: { icon: true, style: "error" },
-          message: "Editor Params must be valid JSON",
-        });
-        return;
-      }
     }
 
     if (newTrendID && isNaN(Number(newTrendID))) {
@@ -98,13 +105,11 @@ const NodesPage = React.memo(function NodesPage() {
       return;
     }
 
-    const trendIdNum = newTrendID === "" ? null : Number(newTrendID);
-
     await addNode({
       Type: newType,
       Name: newName || null,
-      EditorParams: parsedParams,
-      TrendID: trendIdNum,
+      EditorParams: newEditorParams,
+      TrendID: newTrendID,
     });
 
     cancelAddNode();
@@ -114,8 +119,8 @@ const NodesPage = React.memo(function NodesPage() {
     setShowAddDialog(false);
     setNewType("");
     setNewName("");
-    setNewEditorParams("");
-    setNewTrendID("");
+    setNewEditorParams(null);
+    setNewTrendID(null);
   }, []);
 
   const handleDelete = async (node: Node) => {
@@ -164,15 +169,21 @@ const NodesPage = React.memo(function NodesPage() {
           <Label>Name</Label>
           <TextBox value={newName} onChange={handleNameChange} />
 
-          <Label>Editor Params (JSON)</Label>
-          <TextBox
-            value={newEditorParams}
-            placeholder='e.g. {"PosX":100,"PosY":200}'
-            onChange={handleParamsChange}
+          <Label>Editor Params:</Label>
+          <Label>Position X</Label>
+          <NumericTextBox
+            value={newEditorParams?.PosX ?? null}
+            onChange={handlePosXChange}
+          />
+
+          <Label>Position Y</Label>
+          <NumericTextBox
+            value={newEditorParams?.PosY ?? null}
+            onChange={handlePosYChange}
           />
 
           <Label>Trend ID</Label>
-          <TextBox value={newTrendID} onChange={handleTrendChange} />
+          <NumericTextBox value={newTrendID} onChange={handleTrendChange} />
 
           <DialogActionsBar>
             <Button onClick={cancelAddNode}>{t("common:cancel")}</Button>
