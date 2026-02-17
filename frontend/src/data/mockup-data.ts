@@ -260,42 +260,6 @@ export const mockupUnits: Unit[] = [
   },
 ];
 
-export const mockupTemplates: Template[] = [
-  {
-    Name: "Pomiary ciśnień",
-    Axes: [
-      {
-        TrendsID: [0, 1, 2],
-        Title: "Ciśnienie",
-        UnitID: "MPa",
-        ScaledMin: -4,
-        ScaledMax: 12,
-      },
-    ],
-    ID: 0,
-  },
-  {
-    Name: "Ciśnienia wszystko",
-    Axes: [
-      {
-        TrendsID: [0, 1, 2],
-        Title: "Ciśnienie",
-        UnitID: "MPa",
-        ScaledMin: -4,
-        ScaledMax: 12,
-      },
-      {
-        TrendsID: [3, 4],
-        Title: "Pochodna",
-        UnitID: "MPa_s",
-        ScaledMin: -4,
-        ScaledMax: 12,
-      },
-    ],
-    ID: 1,
-  },
-];
-
 export interface MockupTrendGroupType {
   ID: number;
   Name: string;
@@ -696,5 +660,41 @@ export const mockupMethodParams: MethodParam[] = [
     MethodID: 20,
     DataType: "REAL",
     Name: "NoDetectionWindow",
+  },
+];
+
+export const mockupTemplates: Template[] = [
+  {
+    Name: "Pomiary ciśnień",
+    Axes: [
+      {
+        TrendsID: [0, 1, 2],
+        Title: "Ciśnienie",
+        UnitID: "MPa",
+        ScaledMin: -4,
+        ScaledMax: 12,
+      },
+    ],
+    ID: 0,
+  },
+  {
+    Name: "Ciśnienia wszystko",
+    Axes: [
+      {
+        TrendsID: [0, 1, 2],
+        Title: "Ciśnienie",
+        UnitID: "MPa",
+        ScaledMin: -4,
+        ScaledMax: 12,
+      },
+      {
+        TrendsID: [3, 4],
+        Title: "Pochodna",
+        UnitID: "MPa_s",
+        ScaledMin: -4,
+        ScaledMax: 12,
+      },
+    ],
+    ID: 1,
   },
 ];

@@ -76,6 +76,10 @@ import {
   MethodParamCreate,
   MethodParamDef,
   MethodParamApi,
+  Template,
+  TemplateCreate,
+  TemplateApi,
+  TemplateUpdate,
 } from "../../../services/api";
 import { axiosInstance, host } from "../../../lib/apiUtilities";
 import {
@@ -94,13 +98,14 @@ import {
   mockupMethodDefs,
   mockupMethodParamDef,
   mockupMethodParams,
+  mockupTemplates,
 } from "../../../data/mockup-data";
 import { Loader } from "@progress/kendo-react-indicators";
 import { useHandleApiResponse } from "../../../hooks/useHandleApiResponse";
 import TrendsCurrentPage from "../features/trends/TrendsCurrentPage";
 import SimulatorPage from "../features/simulator";
 import MethodsPage from "../features/methods";
-
+import TemplatePage from "../features/templates";
 export default function LDS() {
   const { t } = useTranslation(["common", "titles", "nav", "kendo"]);
   const { pathname } = useLocation();
@@ -317,6 +322,11 @@ export default function LDS() {
     [auth],
   );
 
+  const templateApi = React.useMemo(
+    () => new TemplateApi(auth?.config, host, axiosInstance),
+    [auth],
+  );
+
   const [trendDefs, setTrendDefs] = React.useState<TrendDef[]>(
     nav.useMockup ? mockupTrendDefs : [],
   );
@@ -377,6 +387,10 @@ export default function LDS() {
     PipelineParam[]
   >([]);
 
+  const [templates, setTemplates] = React.useState<Template[]>(
+    nav.useMockup ? mockupTemplates : [],
+  );
+
   const [eventDefs, setEventDefs] = React.useState<EventDef[]>(
     nav.useMockup ? mockupEventDefs : [],
   );
@@ -397,6 +411,7 @@ export default function LDS() {
     setMethodDefs(nav.useMockup ? mockupMethodDefs : []);
     setMethodParams(nav.useMockup ? mockupMethodParams : []);
     setMethodParamDefs(nav.useMockup ? mockupMethodParamDef : []);
+    setTemplates(nav.useMockup ? mockupTemplates : []);
   }, [nav.useMockup]);
 
   const addTrend = React.useCallback(
@@ -1256,7 +1271,7 @@ export default function LDS() {
     },
     [methodParamApi],
   );
-  
+
   const deleteMethodParam = React.useCallback(
     async (methodID: number, methodParamDefID: string) => {
       try {
@@ -1302,6 +1317,101 @@ export default function LDS() {
       }
     },
     [methodParamApi],
+  );
+
+  const addTemplate = React.useCallback(
+    async (value: TemplateCreate) => {
+      if (nav.useMockup) {
+        const mock: Template = {
+          ID: Math.max(0, ...templates.map((t) => t.ID ?? 0)) + 1,
+          ...value,
+        };
+
+        setTemplates((prev) => [...prev, mock]);
+        return mock;
+      }
+
+      try {
+        const response = await handleApiResponse(
+          templateApi.createTemplateTemplatePost.bind(templateApi),
+          value,
+        );
+
+        if (response?.data) {
+          setTemplates((prev) => [...prev, response.data]);
+          return response.data;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, templates, templateApi],
+  );
+
+  const updateTemplate = React.useCallback(
+    async (id: number, value: TemplateUpdate) => {
+      if (nav.useMockup) {
+        setTemplates((prev) =>
+          prev.map((t) =>
+            t.ID === id
+              ? {
+                  ...t,
+                  Name: value.Name ?? t.Name ?? "",
+                  Axes: value.Axes ?? t.Axes,
+                }
+              : t,
+          ),
+        );
+        return;
+      }
+
+      try {
+        const response = await handleApiResponse(
+          templateApi.updateTemplateTemplateTemplateIdPut.bind(templateApi),
+          id,
+          value,
+        );
+
+        if (response?.data) {
+          setTemplates((prev) =>
+            prev.map((t) =>
+              t.ID === id
+                ? {
+                    ...response.data,
+                    Name: response.data.Name ?? "",
+                  }
+                : t,
+            ),
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [templateApi],
+  );
+
+  const deleteTemplate = React.useCallback(
+    async (id: number) => {
+      if (nav.useMockup) {
+        setTemplates((prev) => prev.filter((t) => t.ID !== id));
+        return;
+      }
+
+      try {
+        await handleApiResponse(
+          templateApi.deleteTemplateByIdTemplateTemplateIdDelete.bind(
+            templateApi,
+          ),
+          id,
+        );
+
+        setTemplates((prev) => prev.filter((t) => t.ID !== id));
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [nav, templateApi],
   );
 
   const LoadData = React.useCallback(async () => {
@@ -1403,6 +1513,14 @@ export default function LDS() {
         console.log(error);
       });
 
+    handleApiResponse(templateApi.listTemplatesTemplateGet.bind(templateApi))
+      .then((response) => {
+        if (response?.data) setTemplates(response?.data.items);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
     handleApiResponse(
       trendParamApi.listTrendParamDefsTrendParamDefGet.bind(trendParamApi),
     ).then((resposne) => {
@@ -1439,6 +1557,7 @@ export default function LDS() {
       eventDefs.length == 0 ||
       pipelines.length === 0 ||
       methodDefs.length === 0,
+    // templates.length === 0,
     [
       trendDefs,
       trendGroups,
@@ -1450,6 +1569,7 @@ export default function LDS() {
       events,
       eventDefs,
       methodDefs,
+      templates,
     ],
   );
 
@@ -1549,6 +1669,10 @@ export default function LDS() {
               deleteMethodParam={deleteMethodParam}
               updateMethodParam={updateMethodParam}
               loadMethodParamsByMethod={loadMethodParamsByMethod}
+              templates={templates}
+              addTemplate={addTemplate}
+              deleteTemplate={deleteTemplate}
+              updateTemplate={updateTemplate}
             >
               <Routes>
                 <Route path="/" element={<HomePage key={"home-page"} />} />
@@ -1577,6 +1701,7 @@ export default function LDS() {
                 <Route path="/nodes" element={<NodesPage />} />
                 <Route path="/pipelines" element={<PipelinesPage />} />
                 <Route path="/methods" element={<MethodsPage />} />
+                <Route path="/templates" element={<TemplatePage />} />
               </Routes>
             </LDSContextProvider>
           </KendoLocalizationWrapper>

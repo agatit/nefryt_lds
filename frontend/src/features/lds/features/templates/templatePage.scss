@@ -1,0 +1,83 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
+main.templates-page {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+}
+
+.templates-grid-container {
+  flex: 4 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.templates-grid-container .k-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.templates-trend-stuff-tab {
+  flex: 0 0 auto;
+  border-top: 1px solid #ddd;
+  background: white;
+}
+
+.templates-detail-panel.no-selected>div {
+  justify-content: center;
+  height: 100%;
+  cursor: not-allowed;
+}
+
+.templates-panel-content .item-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.templates-panel-content .item-row {
+  display: flex;
+  gap: 10px;
+}
+
+.templates-panel-content .item-column>div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.templates-dialog .k-dialog {
+  width: 300px;
+}
+
+.axes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.axis-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.k-dialog-content label {
+  margin-bottom: 4px;
+  display: block;
+}
+
+.k-dialog-content .k-input,
+.k-dialog-content .k-dropdown,
+.k-dialog-content .k-numerictextbox {
+  margin-bottom: 12px;
+}
+
+.template-button{
+  margin-bottom: 12px;
+}
