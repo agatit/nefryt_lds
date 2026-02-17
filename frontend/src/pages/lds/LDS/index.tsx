@@ -485,7 +485,7 @@ export default function LDS() {
           value.ID,
         );
 
-        setLinks((prev) => prev.filter((link) => link.ID !== value.ID));
+        setTrends((prev) => prev.filter((link) => link.ID !== value.ID));
       } catch (error) {
         console.log(error);
       }
@@ -1414,118 +1414,76 @@ export default function LDS() {
     [nav, templateApi],
   );
 
+  const [isLoading, setIsLoading] = React.useState(true);
+
   const LoadData = React.useCallback(async () => {
-    handleApiResponse(trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi))
-      .then((response) => {
-        if (response?.data) setTrendDefs(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    setIsLoading(true);
 
-    handleApiResponse(
-      eventDefApi.listEventDefsEventDefGet.bind(eventDefApi),
-    ).then((res) => {
-      if (res?.data) setEventDefs(res.data.items);
-    });
+    try {
+      await Promise.all([
+        handleApiResponse(
+          trendDefApi.listTrendDefsTrendDefGet.bind(trendDefApi),
+        ).then((res) => res?.data && setTrendDefs(res.data.items)),
 
-    handleApiResponse(
-      trendGroupApi.listTrendGroupsTrendGroupGet.bind(trendGroupApi),
-    )
-      .then((response) => {
-        if (response?.data) setTrendGroups(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(
+          eventDefApi.listEventDefsEventDefGet.bind(eventDefApi),
+        ).then((res) => res?.data && setEventDefs(res.data.items)),
 
-    handleApiResponse(unitApi.listUnitsUnitGet.bind(unitApi))
-      .then((response) => {
-        if (response?.data) setUnits(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(
+          trendGroupApi.listTrendGroupsTrendGroupGet.bind(trendGroupApi),
+        ).then((res) => res?.data && setTrendGroups(res.data.items)),
 
-    handleApiResponse(eventApi.listEventsEventGet.bind(eventApi))
-      .then((response) => {
-        if (response?.data) setEvents(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(unitApi.listUnitsUnitGet.bind(unitApi)).then(
+          (res) => res?.data && setUnits(res.data.items),
+        ),
 
-    handleApiResponse(
-      methodDefApi.listMethodDefsMethodDefGet.bind(methodDefApi),
-    )
-      .then((response) => {
-        if (response?.data) {
-          setMethodDefs(response.data.items);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(eventApi.listEventsEventGet.bind(eventApi)).then(
+          (res) => res?.data && setEvents(res.data.items),
+        ),
 
-    handleApiResponse(methodApi.listMethodsMethodGet.bind(methodApi))
-      .then((response) => {
-        if (response?.data) setMethods(response.data.items);
-      })
-      .catch(console.log);
+        handleApiResponse(
+          methodDefApi.listMethodDefsMethodDefGet.bind(methodDefApi),
+        ).then((res) => res?.data && setMethodDefs(res.data.items)),
 
-    handleApiResponse(
-      methodParamApi.listMethodParamDefsMethodParamDefGet.bind(methodParamApi),
-    )
-      .then((response) => {
-        if (response?.data) setMethodParamDefs(response.data.items);
-      })
-      .catch(console.log);
+        handleApiResponse(methodApi.listMethodsMethodGet.bind(methodApi)).then(
+          (res) => res?.data && setMethods(res.data.items),
+        ),
 
-    handleApiResponse(linkApi.listLinksLinkGet.bind(linkApi))
-      .then((response) => {
-        if (response?.data) setLinks(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(
+          methodParamApi.listMethodParamDefsMethodParamDefGet.bind(
+            methodParamApi,
+          ),
+        ).then((res) => res?.data && setMethodParamDefs(res.data.items)),
 
-    handleApiResponse(nodeApi.listNodesNodeGet.bind(nodeApi))
-      .then((response) => {
-        if (response?.data) setNodes(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(linkApi.listLinksLinkGet.bind(linkApi)).then(
+          (res) => res?.data && setLinks(res.data.items),
+        ),
 
-    handleApiResponse(pipelineApi.listPipelinesPipelineGet.bind(pipelineApi))
-      .then((response) => {
-        if (response?.data) setPipelines(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(nodeApi.listNodesNodeGet.bind(nodeApi)).then(
+          (res) => res?.data && setNodes(res.data.items),
+        ),
 
-    handleApiResponse(trendApi.listTrendsTrendGet.bind(trendApi))
-      .then((response) => {
-        if (response?.data) setTrends(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(
+          pipelineApi.listPipelinesPipelineGet.bind(pipelineApi),
+        ).then((res) => res?.data && setPipelines(res.data.items)),
 
-    handleApiResponse(templateApi.listTemplatesTemplateGet.bind(templateApi))
-      .then((response) => {
-        if (response?.data) setTemplates(response?.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        handleApiResponse(trendApi.listTrendsTrendGet.bind(trendApi)).then(
+          (res) => res?.data && setTrends(res.data.items),
+        ),
 
-    handleApiResponse(
-      trendParamApi.listTrendParamDefsTrendParamDefGet.bind(trendParamApi),
-    ).then((resposne) => {
-      if (resposne.data) setTrendParamDefs(resposne.data.items);
-    });
+        handleApiResponse(
+          templateApi.listTemplatesTemplateGet.bind(templateApi),
+        ).then((res) => res?.data && setTemplates(res.data.items)),
+
+        handleApiResponse(
+          trendParamApi.listTrendParamDefsTrendParamDefGet.bind(trendParamApi),
+        ).then((res) => res?.data && setTrendParamDefs(res.data.items)),
+      ]);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [
     trendDefApi,
     trendGroupApi,
@@ -1537,41 +1495,16 @@ export default function LDS() {
     nodeApi,
     pipelineApi,
     eventDefApi,
-    pipelineParamApi,
-    methodDefApi,
+    methodApi,
+    methodParamApi,
+    templateApi,
   ]);
 
   React.useEffect(() => {
     if (!nav.useMockup) LoadData();
   }, [nav.useMockup]);
-
-  const isLoadingContext = React.useMemo(
-    () =>
-      trendDefs.length == 0 ||
-      trendGroups.length == 0 ||
-      units.length == 0 ||
-      trends.length == 0 ||
-      links.length == 0 ||
-      nodes.length == 0 ||
-      //events.length == 0 ||
-      eventDefs.length == 0 ||
-      pipelines.length === 0 ||
-      methodDefs.length === 0,
-    // templates.length === 0,
-    [
-      trendDefs,
-      trendGroups,
-      units,
-      trends,
-      pipelines,
-      links,
-      nodes,
-      events,
-      eventDefs,
-      methodDefs,
-      templates,
-    ],
-  );
+  
+  const isLoadingContext = isLoading;
 
   const loadPipelineParamsByPipeline = React.useCallback(
     async (pipelineID: number) => {
