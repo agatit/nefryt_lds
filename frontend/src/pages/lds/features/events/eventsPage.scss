@@ -26,7 +26,7 @@ main.events-page {
 }
 
 .events-detail-panel.no-selected > div {
-  justify-content: center;
+  align-items: flex-start; 
   height: 100%;
   cursor: not-allowed;
 }
@@ -34,6 +34,7 @@ main.events-page {
 .detail-panel-content .item-column {
   display: flex;
   flex-direction: column;
+  align-items: flex-start; 
   gap: 12px;
 }
 
