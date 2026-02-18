@@ -37,9 +37,10 @@ main.events-page {
   gap: 12px;
 }
 
-.detail-panel-content .item-row {
+.detail-panel-content .item-column > div {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start; 
 }
 
 .k-dialog-content .k-input,
@@ -48,6 +49,7 @@ main.events-page {
   margin-bottom: 12px;
 }
 
-.form-field {
-  margin-bottom: 16px;
+.k-label {
+  text-align: left;
+  width: 100%;
 }
