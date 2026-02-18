@@ -1,18 +1,17 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Grid,
   GridColumn,
   GridSearchBox,
   GridToolbar,
   GridSelectionChangeEvent,
+  GridCellProps,
 } from "@progress/kendo-react-grid";
-import { useTranslation } from "react-i18next";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
-import { EventDef } from "../../../../../../services/api";
 import { Event as ApiEvent } from "../../../../../../services/api";
 
 interface EventsProps {
-  eventDefs: EventDef[];
   events: ApiEvent[];
   selected: ApiEvent | null;
   onSelectEvent: (value: ApiEvent) => void;
@@ -56,16 +55,40 @@ const Events = React.memo(function EventsGrid({
       <GridToolbar>
         <GridSearchBox />
       </GridToolbar>
-
+      <GridColumn field="EventDefID" title={t("events-page:event_def_id")} />
       <GridColumn field="MethodID" title={t("events-page:method")} />
+      <GridColumn
+        field="BeginDate"
+        title={t("events-page:begin_date")}
+        cells={{
+          data: (props: GridCellProps) => (
+            <td>
+              {props.dataItem.BeginDate
+                ? new Date(props.dataItem.BeginDate).toLocaleString()
+                : ""}
+            </td>
+          ),
+        }}
+      />
+      <GridColumn field="AckDate" title={t("events-page:ack_date")} />
+      <GridColumn field="EndDate" title={t("events-page:end_date")} />
       <GridColumn field="Details" title={t("events-page:details")} />
       <GridColumn field="Position" title={t("events-page:position")} />
       <GridColumn field="Verbosity" title={t("events-page:verbosity")} />
       <GridColumn field="Caption" title={t("events-page:caption")} />
-      <GridColumn field="Silient" title={t("events-page:silent")} />
-      <GridColumn field="BeginDate" title={t("events-page:begin_date")} />
-      <GridColumn field="AckDate" title={t("events-page:ack_date")} />
-      <GridColumn field="EndDate" title={t("events-page:end_date")} />
+      <GridColumn
+        field="Silent"
+        title={t("events-page:silent")}
+        cells={{
+          data: (props: GridCellProps) => (
+            <td>
+              {props.dataItem.Silent
+                ? t("events-page:yes")
+                : t("events-page:no")}
+            </td>
+          ),
+        }}
+      />
     </Grid>
   );
 });
