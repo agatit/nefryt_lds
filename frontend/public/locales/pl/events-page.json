@@ -1,0 +1,15 @@
+{
+  "event_def_id": "ID definicji zdarzenia",
+  "method": "Metoda",
+  "begin_date": "Data rozpoczęcia",
+  "ack_date": "Data potwierdzenia",
+  "not_acknowledged": "Niepotwierdzone",
+  "end_date": "Data zakończenia",
+  "details": "Szczegóły",
+  "position": "Pozycja",
+  "verbosity": "Szczegółowość",
+  "caption": "Podpis",
+  "silent": "Cichy",
+  "yes": "Tak",
+  "no": "Nie"
+}

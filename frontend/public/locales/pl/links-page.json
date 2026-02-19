@@ -1,0 +1,10 @@
+{
+  "begin_node": "Węzeł początkowy",
+  "end_node": "Węzeł końcowy",
+  "length": "Długość",
+  "add_new_link": "Dodaj nowy link",
+  "begin_node_positive": "ID węzła początkowego musi być dodatnie",
+  "end_node_positive": "ID węzła końcowego musi być dodatnie",
+  "nodes_same_error": "Węzły początkowy i końcowy nie mogą być takie same",
+  "length_positive": "Długość musi być dodatnia"
+}
