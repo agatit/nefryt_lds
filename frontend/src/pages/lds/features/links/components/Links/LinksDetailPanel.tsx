@@ -1,7 +1,8 @@
 import React from "react";
 import { Label, Error } from "@progress/kendo-react-labels";
 import { useTranslation } from "react-i18next";
-import { TextBox } from "@progress/kendo-react-inputs";
+import { TFunction } from "i18next";
+import { NumericTextBox } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import {
@@ -9,7 +10,6 @@ import {
   cancelIcon,
   trashIcon,
   saveIcon,
-  plusIcon,
 } from "@progress/kendo-svg-icons";
 import {
   Form,
@@ -28,6 +28,65 @@ interface Props {
   setAddMode: (v: boolean) => void;
 }
 
+interface LinkFormValues {
+  BeginNodeID: number | null;
+  EndNodeID: number | null;
+  Length: number | null;
+}
+
+interface ValidationErrors {
+  [key: string]: string;
+}
+const linkValidator = (t: TFunction) => (values: LinkFormValues) => {
+  const errors: ValidationErrors = {};
+
+  if (values.BeginNodeID != null && values.BeginNodeID < 0) {
+    errors.BeginNodeID = t("links-page:begin_node_positive");
+  }
+
+  if (values.EndNodeID != null && values.EndNodeID < 0) {
+    errors.EndNodeID = t("links-page:end_node_positive");
+  }
+
+  if (
+    values.BeginNodeID != null &&
+    values.EndNodeID != null &&
+    values.BeginNodeID === values.EndNodeID
+  ) {
+    errors.EndNodeID = t("links-page:nodes_same_error");
+  }
+
+  if (values.Length != null && values.Length < 0) {
+    errors.Length = t("links-page:length_positive");
+  }
+
+  return Object.keys(errors).length ? errors : undefined;
+};
+
+const ValidatedInput = (props: FieldRenderProps) => {
+  const {
+    validationMessage,
+    touched,
+    visited,
+    valid,
+    modified,
+    ...inputProps
+  } = props;
+
+  return (
+    <div className="field-wrapper">
+      <NumericTextBox
+        {...inputProps}
+        validationMessage={validationMessage ?? undefined}
+      />
+
+      {(touched || visited) && validationMessage && (
+        <Error className="error-container">{validationMessage}</Error>
+      )}
+    </div>
+  );
+};
+
 const LinksDetailPanel = React.memo(function LinksDetailPanel({
   selected,
   editLink,
@@ -36,80 +95,47 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
   addMode,
   setAddMode,
 }: Props) {
-  const { t } = useTranslation(["common", "link-page"]);
+  const { t } = useTranslation(["common", "links-page"]);
   const [inEdit, setInEdit] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
-  const initialValues = addMode
+  const initialValues: LinkFormValues = addMode
     ? {
-        BeginNodeID: "",
-        EndNodeID: "",
-        Length: "",
+        BeginNodeID: null,
+        EndNodeID: null,
+        Length: null,
       }
     : {
-        BeginNodeID: selected?.BeginNodeID?.toString() ?? "",
-        EndNodeID: selected?.EndNodeID?.toString() ?? "",
-        Length: selected?.Length?.toString() ?? "",
+        BeginNodeID: selected?.BeginNodeID ?? null,
+        EndNodeID: selected?.EndNodeID ?? null,
+        Length: selected?.Length != null ? Number(selected.Length) : null,
       };
-
-  const linkValidator = (values: any) => {
-    const errors: any = {};
-
-    if (values.BeginNodeID && !/^\d+$/.test(values.BeginNodeID)) {
-      errors.BeginNodeID = "Begin Node ID must be an integer";
-    }
-
-    if (values.EndNodeID && !/^\d+$/.test(values.EndNodeID)) {
-      errors.EndNodeID = "End Node ID must be an integer";
-    }
-
-    if (values.Length && !/^\d+(\.\d+)?$/.test(values.Length)) {
-      errors.Length = "Length must be a valid number";
-    }
-
-    if (
-      values.BeginNodeID &&
-      values.EndNodeID &&
-      values.BeginNodeID === values.EndNodeID
-    ) {
-      errors.EndNodeID = "Begin and End Node cannot be the same";
-    }
-
-    return Object.keys(errors).length ? errors : undefined;
-  };
-
-  const ValidatedInput = (props: FieldRenderProps) => {
-    const { validationMessage, touched, visited, ...others } = props;
-
-    return (
-      <div className="field-wrapper">
-        <TextBox {...others} />
-        {(touched || visited) && validationMessage && (
-          <Error>{validationMessage}</Error>
-        )}
-      </div>
-    );
-  };
 
   const handleSubmit = React.useCallback(
-    async (values: any) => {
+    async (values: LinkFormValues) => {
       const payload = {
-        BeginNodeID:
-          values.BeginNodeID === "" ? null : Number(values.BeginNodeID),
-        EndNodeID: values.EndNodeID === "" ? null : Number(values.EndNodeID),
-        Length: values.Length === "" ? null : Number(values.Length),
+        BeginNodeID: values.BeginNodeID,
+        EndNodeID: values.EndNodeID,
+        Length: values.Length,
       };
 
-      if (addMode) {
-        await addLink(payload);
-        setAddMode(false);
-        return;
+      try {
+        setLoading(true);
+
+        if (addMode) {
+          await addLink(payload as LinkCreate);
+          setAddMode(false);
+          return;
+        }
+
+        if (!selected) return;
+
+        await editLink(selected.ID, payload as LinkUpdate);
+        setInEdit(false);
+      } finally {
+        setLoading(false);
       }
-
-      if (!selected) return;
-
-      await editLink(selected.ID, payload);
-      setInEdit(false);
     },
     [addMode, addLink, editLink, selected, setAddMode],
   );
@@ -117,9 +143,14 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
   const confirmDelete = async () => {
     if (!selected) return;
 
-    await deleteLink(selected);
-    setShowDeleteDialog(false);
-    setInEdit(false);
+    try {
+      setLoading(true);
+      await deleteLink(selected);
+      setShowDeleteDialog(false);
+      setInEdit(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   React.useEffect(() => {
@@ -130,39 +161,31 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
     <Form
       key={addMode ? "add" : (selected?.ID ?? "empty")}
       initialValues={initialValues}
-      validator={linkValidator}
-      onSubmit={handleSubmit}
+      validator={linkValidator(t)}
+      onSubmit={(values) => handleSubmit(values as LinkFormValues)}
       render={(formProps) => (
         <FormElement className="detail-panel-content">
-          <div className="item">
-            <div className="item-column">
-              <div>
-                <Label>Begin Node</Label>
-                <Field
-                  name="BeginNodeID"
-                  component={ValidatedInput}
-                  disabled={!inEdit}
-                />
-              </div>
+          <div className="item-column">
+            <Label>{t("links-page:begin_node")}</Label>
+            <Field
+              name="BeginNodeID"
+              component={ValidatedInput}
+              disabled={!inEdit}
+            />
 
-              <div>
-                <Label>End Node</Label>
-                <Field
-                  name="EndNodeID"
-                  component={ValidatedInput}
-                  disabled={!inEdit}
-                />
-              </div>
+            <Label>{t("links-page:end_node")}</Label>
+            <Field
+              name="EndNodeID"
+              component={ValidatedInput}
+              disabled={!inEdit}
+            />
 
-              <div>
-                <Label>Length</Label>
-                <Field
-                  name="Length"
-                  component={ValidatedInput}
-                  disabled={!inEdit}
-                />
-              </div>
-            </div>
+            <Label>{t("links-page:length")}</Label>
+            <Field
+              name="Length"
+              component={ValidatedInput}
+              disabled={!inEdit}
+            />
           </div>
 
           <div className="item-row">
@@ -171,15 +194,12 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
                 <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
                   {t("common:edit")}
                 </Button>
-
-                <Button svgIcon={plusIcon} onClick={() => setAddMode(true)}>
-                  {t("link-page:add_new_link")}
-                </Button>
               </>
             ) : (
               <>
                 <Button
                   svgIcon={cancelIcon}
+                  disabled={loading}
                   onClick={() => {
                     setAddMode(false);
                     setInEdit(false);
@@ -192,7 +212,14 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
                 {!addMode && (
                   <Button
                     svgIcon={trashIcon}
-                    onClick={() => setShowDeleteDialog(true)}
+                    disabled={loading}
+                    onClick={async () => {
+                      if (!selected) return;
+                      setLoading(true);
+                      await deleteLink(selected);
+                      setInEdit(false);
+                      setLoading(false);
+                    }}
                   >
                     {t("common:delete")}
                   </Button>
@@ -201,7 +228,7 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
                 <Button
                   svgIcon={saveIcon}
                   themeColor="primary"
-                  disabled={!formProps.allowSubmit}
+                  disabled={!formProps.allowSubmit || loading}
                   onClick={formProps.onSubmit}
                 >
                   {addMode ? t("common:add") : t("common:save")}
@@ -210,12 +237,12 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
             )}
           </div>
 
-          {showDeleteDialog && (
+          {showDeleteDialog && selected && (
             <Dialog
               title={t("common:confirm_deletion")}
               onClose={() => setShowDeleteDialog(false)}
             >
-              Delete this link?
+              Delete link?
               <DialogActionsBar>
                 <Button onClick={() => setShowDeleteDialog(false)}>
                   {t("common:cancel")}

@@ -39,7 +39,7 @@ main.links-page {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 16px;
+  //gap: 16px;
   width: 100%;
 }
 
@@ -52,8 +52,13 @@ main.links-page {
 .field-wrapper {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
+
 
 .field-wrapper .k-input,
 .field-wrapper .k-textbox,
@@ -75,4 +80,23 @@ main.links-page {
   gap: 12px;
   margin-top: 20px;
   flex-wrap: wrap;
+}
+
+.detail-panel-content .item-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-wrapper .k-form-error,
+.field-wrapper .k-error {
+  margin-top: 0;
+  align-self: flex-start;
+  text-align: left;
+}
+
+.field-wrapper .k-form-error,
+.field-wrapper .k-error {
+  margin-top: -10px;
+  align-self: flex-start;
+  text-align: left;
 }

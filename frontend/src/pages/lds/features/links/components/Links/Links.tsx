@@ -10,7 +10,7 @@ import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { useTranslation } from "react-i18next";
 import { Link } from "../../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
-import { plusIcon } from "@progress/kendo-svg-icons";
+import { plusIcon, trashIcon } from "@progress/kendo-svg-icons";
 
 interface LinksProps {
   links: Link[];
@@ -25,7 +25,7 @@ const Links = React.memo(function LinksGrid({
   onSelectLink,
   openAddDialog,
 }: LinksProps) {
-  const { t } = useTranslation(["link-page"]);
+  const { t } = useTranslation(["links-page"]);
   const [select, setSelect] = React.useState<SelectDescriptor>();
 
   const handleSelectionChange = React.useCallback(
@@ -56,14 +56,19 @@ const Links = React.memo(function LinksGrid({
         <GridSearchBox />
         <ButtonGroup>
           <Button svgIcon={plusIcon} onClick={openAddDialog}>
-            {t("link-page:add_new_link")}
+            {t("links-page:add_new_link")}
           </Button>
+          {selected && (
+            <Button svgIcon={trashIcon} onClick={openAddDialog}>
+              {t("links-page:delete")}
+            </Button>
+          )}
         </ButtonGroup>
       </GridToolbar>
 
-      <GridColumn field="BeginNodeID" title={t("link-page:begin_node")} />
-      <GridColumn field="EndNodeID" title={t("link-page:end_node")} />
-      <GridColumn field="Length" title={t("link-page:length")} />
+      <GridColumn field="BeginNodeID" title={t("links-page:begin_node")} />
+      <GridColumn field="EndNodeID" title={t("links-page:end_node")} />
+      <GridColumn field="Length" title={t("links-page:length")} />
     </Grid>
   );
 });

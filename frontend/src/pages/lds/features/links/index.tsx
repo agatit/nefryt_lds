@@ -11,12 +11,9 @@ const LinksPage: React.FC = () => {
   const appContext = useContext(AppContext);
   const ldsContext = useContext(LDSContext);
 
-  if (!appContext || !ldsContext) {
-    throw new Error("Context missing");
-  }
+  if (!appContext || !ldsContext) return null;
 
   const { links, updateLink, deleteLink, addLink } = ldsContext;
-
   const [selected, setSelected] = useState<Link | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [addMode, setAddMode] = useState(false);
@@ -32,6 +29,7 @@ const LinksPage: React.FC = () => {
     async (link: Link) => {
       await deleteLink(link);
       setSelected(null);
+      setPanelOpen(false);
     },
     [deleteLink],
   );
