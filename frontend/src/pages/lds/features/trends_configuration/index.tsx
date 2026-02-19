@@ -2,12 +2,6 @@ import React from "react";
 import "../../../../styles/layouts/detail-panel.scss";
 import "./trendConfiguration.scss";
 import { DetailPanel } from "onyks_shared_kendo";
-import {
-  mockupTrendDefs,
-  mockupTrendGroups,
-  mockupTrends,
-  mockupUnits,
-} from "../../../../data/mockup-data";
 import { useTranslation } from "react-i18next";
 import { Typography } from "@progress/kendo-react-common";
 
@@ -15,8 +9,6 @@ import {
   Trend,
   TrendDef,
   TrendGroup,
-  TrendParam,
-  TrendParamCreate,
   TrendParamDef,
   Unit,
 } from "../../../../services/api";
@@ -37,9 +29,6 @@ import TrendDefConfigurationDetailPanel from "./components/TrendDefConfiguration
 import TrendGroupConfigurationDetailPanel from "./components/TrendGroupConfiguration/TrendGroupConfigurationDetailPanel";
 import TrendUnitConfigurationDetailPanel from "./components/TrendUnitConfiguration/TrendUnitConfigurationDetailPanel";
 import { LDSContext } from "../../contexts/ldsContext";
-import TrendParamDefConfiguration from "./components/TrendParamDefConfiguration/TrendParamDefConfiguration";
-import TrendParamDefConfigurationDetailPanel from "./components/TrendParamDefConfiguration/TrendParamDefConfigurationDetailPanel";
-import { useHandleApiResponse } from "../../../../hooks/useHandleApiResponse";
 
 export interface SelectionType {
   trend: ParsedTrendType | null;
@@ -57,8 +46,6 @@ export interface ParsedTrendType extends Trend {
 
 const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   const { t } = useTranslation(["common", "config-page"]);
-  const handleApiResponse = useHandleApiResponse();
-
   const ldsContext = React.useContext(LDSContext);
   React.useMemo(() => {
     if (ldsContext == null)
@@ -82,7 +69,6 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     [],
   );
 
-  // Dialogs controls
   const [showAddNewTrendDialog, setShowAddNewTrendDialog] =
     React.useState<boolean>(false);
   const openAddNewTrendDialog = React.useCallback(() => {
@@ -110,7 +96,6 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     setShowAddNewUnitDialog(false);
   }, []);
 
-  // Selection
   const [selection, setSelection] = React.useState<SelectionType>({
     trend: null,
     trendParamDef: null,
@@ -133,19 +118,6 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
       setSelection({
         trend: value,
         trendParamDef: null,
-        trendDef: null,
-        trendGroup: null,
-        unit: null,
-      });
-    },
-    [],
-  );
-
-  const handleSelectedTrendParamDefChange = React.useCallback(
-    (value: TrendParamDef) => {
-      setSelection({
-        trend: null,
-        trendParamDef: value,
         trendDef: null,
         trendGroup: null,
         unit: null,
@@ -265,12 +237,6 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           enterAddNewTrend={openAddNewTrendDialog}
         />
       );
-    if (selection.trendParamDef)
-      return (
-        <TrendParamDefConfigurationDetailPanel
-          selected={selection.trendParamDef}
-        />
-      );
     if (selection.trendDef)
       return <TrendDefConfigurationDetailPanel selected={selection.trendDef} />;
     if (selection.trendGroup)
@@ -330,13 +296,6 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
                 setSelected={handleSelectedTrendDefChange}
               />
             </TabStripTab>
-            <TabStripTab title={t("config-page:trends_params")}>
-              <TrendParamDefConfiguration
-                trendParamDefs={ldsContext!.trendParamDefs}
-                selected={selection.trendParamDef}
-                setSelected={handleSelectedTrendParamDefChange}
-              />
-            </TabStripTab>
             <TabStripTab title={t("config-page:trends_groups")}>
               <TrendGroupConfiguration
                 showDialog={showAddNewTrendGroupDialog}
@@ -366,7 +325,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         <DetailPanel
           className={"config-detail-panel" + (isSelected ? "" : " no-selected")}
           flexGrow={1}
-          extandable={false}
+          extandable={true}
         >
           {isSelected ? (
             <SelectedDetailPanel />
