@@ -19,35 +19,60 @@ main.links-page {
   min-height: 0;
 }
 
-.links-trend-stuff-tab {
-  flex: 0 0 auto;
-  border-top: 1px solid #ddd;
-  background: white;
+.links-detail-panel > div {
+  width: 100%;
 }
 
 .links-detail-panel.no-selected>div {
-  justify-content: center;
+  justify-content: flex-start;
   height: 100%;
-  cursor: not-allowed;
+}
+
+.detail-panel-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .detail-panel-content .item-column {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.detail-panel-content .item-row {
-  display: flex;
-  gap: 10px;
+  align-items: stretch;
+  gap: 16px;
+  width: 100%;
 }
 
 .detail-panel-content .item-column>div {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  width: 100%;
 }
 
-.links-dialog .k-dialog {
-  width: 300px;
+.field-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.field-wrapper .k-input,
+.field-wrapper .k-textbox,
+.field-wrapper .k-input-inner {
+  width: 100%;
+}
+
+.field-input {
+  width: 100%;
+}
+
+.field-error {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.detail-panel-content .item-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
 }

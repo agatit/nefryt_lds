@@ -1,7 +1,7 @@
 import React from "react";
-import { Label } from "@progress/kendo-react-labels";
+import { Label, Error } from "@progress/kendo-react-labels";
 import { useTranslation } from "react-i18next";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import { TextBox } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import {
@@ -9,154 +9,226 @@ import {
   cancelIcon,
   trashIcon,
   saveIcon,
+  plusIcon,
 } from "@progress/kendo-svg-icons";
-import { Link, LinkUpdate } from "../../../../../../services/api";
-import { plusIcon } from "@progress/kendo-svg-icons";
+import {
+  Form,
+  Field,
+  FormElement,
+  FieldRenderProps,
+} from "@progress/kendo-react-form";
+import { Link, LinkCreate, LinkUpdate } from "../../../../../../services/api";
 
 interface Props {
-  selected: Link;
+  selected: Link | null;
   editLink: (id: number, value: LinkUpdate) => Promise<void>;
   deleteLink: (value: Link) => Promise<void>;
-  openAddDialog: () => void;
+  addLink: (value: LinkCreate) => Promise<Link>;
+  addMode: boolean;
+  setAddMode: (v: boolean) => void;
 }
 
 const LinksDetailPanel = React.memo(function LinksDetailPanel({
   selected,
   editLink,
   deleteLink,
-  openAddDialog,
+  addLink,
+  addMode,
+  setAddMode,
 }: Props) {
   const { t } = useTranslation(["common", "link-page"]);
   const [inEdit, setInEdit] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-  const [beginNodeID, setBeginNodeID] = React.useState("");
-  const [endNodeID, setEndNodeID] = React.useState("");
-  const [length, setLength] = React.useState("");
 
-  const handleBeginNodeChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setBeginNodeID(String(e.value ?? ""));
-  }, []);
+  const initialValues = addMode
+    ? {
+        BeginNodeID: "",
+        EndNodeID: "",
+        Length: "",
+      }
+    : {
+        BeginNodeID: selected?.BeginNodeID?.toString() ?? "",
+        EndNodeID: selected?.EndNodeID?.toString() ?? "",
+        Length: selected?.Length?.toString() ?? "",
+      };
 
-  const handleEndNodeChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setEndNodeID(String(e.value ?? ""));
-  }, []);
+  const linkValidator = (values: any) => {
+    const errors: any = {};
 
-  const handleLengthChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setLength(String(e.value ?? ""));
-  }, []);
+    if (values.BeginNodeID && !/^\d+$/.test(values.BeginNodeID)) {
+      errors.BeginNodeID = "Begin Node ID must be an integer";
+    }
 
-  const saveEdit = async () => {
-    await editLink(selected.ID, {
-      BeginNodeID: beginNodeID === "" ? null : Number(beginNodeID),
-      EndNodeID: endNodeID === "" ? null : Number(endNodeID),
-      Length: length === "" ? null : Number(length),
-    });
+    if (values.EndNodeID && !/^\d+$/.test(values.EndNodeID)) {
+      errors.EndNodeID = "End Node ID must be an integer";
+    }
 
-    setInEdit(false);
+    if (values.Length && !/^\d+(\.\d+)?$/.test(values.Length)) {
+      errors.Length = "Length must be a valid number";
+    }
+
+    if (
+      values.BeginNodeID &&
+      values.EndNodeID &&
+      values.BeginNodeID === values.EndNodeID
+    ) {
+      errors.EndNodeID = "Begin and End Node cannot be the same";
+    }
+
+    return Object.keys(errors).length ? errors : undefined;
   };
 
-  const confirmDelete = React.useCallback(async () => {
+  const ValidatedInput = (props: FieldRenderProps) => {
+    const { validationMessage, touched, visited, ...others } = props;
+
+    return (
+      <div className="field-wrapper">
+        <TextBox {...others} />
+        {(touched || visited) && validationMessage && (
+          <Error>{validationMessage}</Error>
+        )}
+      </div>
+    );
+  };
+
+  const handleSubmit = React.useCallback(
+    async (values: any) => {
+      const payload = {
+        BeginNodeID:
+          values.BeginNodeID === "" ? null : Number(values.BeginNodeID),
+        EndNodeID: values.EndNodeID === "" ? null : Number(values.EndNodeID),
+        Length: values.Length === "" ? null : Number(values.Length),
+      };
+
+      if (addMode) {
+        await addLink(payload);
+        setAddMode(false);
+        return;
+      }
+
+      if (!selected) return;
+
+      await editLink(selected.ID, payload);
+      setInEdit(false);
+    },
+    [addMode, addLink, editLink, selected, setAddMode],
+  );
+
+  const confirmDelete = async () => {
     if (!selected) return;
 
     await deleteLink(selected);
     setShowDeleteDialog(false);
     setInEdit(false);
-  }, [selected, deleteLink]);
-
-  const setSelectedData = React.useCallback((link: Link) => {
-    setBeginNodeID(link.BeginNodeID?.toString() ?? "");
-    setEndNodeID(link.EndNodeID?.toString() ?? "");
-    setLength(link.Length?.toString() ?? "");
-  }, []);
-
-  const cancelEdit = () => {
-    setSelectedData(selected);
-    setInEdit(false);
   };
 
   React.useEffect(() => {
-    if (!selected) return;
-
-    setSelectedData(selected);
-    setInEdit(false);
-  }, [selected, setSelectedData]);
+    setInEdit(addMode);
+  }, [selected, addMode]);
 
   return (
-    <div className="detail-panel-content">
-      <div className="item-column">
-        <Label>ID</Label>
-        <TextBox value={selected.ID.toString()} disabled />
+    <Form
+      key={addMode ? "add" : (selected?.ID ?? "empty")}
+      initialValues={initialValues}
+      validator={linkValidator}
+      onSubmit={handleSubmit}
+      render={(formProps) => (
+        <FormElement className="detail-panel-content">
+          <div className="item">
+            <div className="item-column">
+              <div>
+                <Label>Begin Node</Label>
+                <Field
+                  name="BeginNodeID"
+                  component={ValidatedInput}
+                  disabled={!inEdit}
+                />
+              </div>
 
-        <Label>Begin Node</Label>
-        <TextBox
-          value={beginNodeID}
-          disabled={!inEdit}
-          onChange={handleBeginNodeChange}
-        />
+              <div>
+                <Label>End Node</Label>
+                <Field
+                  name="EndNodeID"
+                  component={ValidatedInput}
+                  disabled={!inEdit}
+                />
+              </div>
 
-        <Label>End Node</Label>
-        <TextBox
-          value={endNodeID}
-          disabled={!inEdit}
-          onChange={handleEndNodeChange}
-        />
+              <div>
+                <Label>Length</Label>
+                <Field
+                  name="Length"
+                  component={ValidatedInput}
+                  disabled={!inEdit}
+                />
+              </div>
+            </div>
+          </div>
 
-        <Label>Length</Label>
-        <TextBox
-          value={length}
-          disabled={!inEdit}
-          onChange={handleLengthChange}
-        />
-      </div>
+          <div className="item-row">
+            {!inEdit && !addMode ? (
+              <>
+                <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
+                  {t("common:edit")}
+                </Button>
 
-      <div className="item-row">
-        {!inEdit ? (
-          <>
-            <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
-              {t("common:edit")}
-            </Button>
+                <Button svgIcon={plusIcon} onClick={() => setAddMode(true)}>
+                  {t("link-page:add_new_link")}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  svgIcon={cancelIcon}
+                  onClick={() => {
+                    setAddMode(false);
+                    setInEdit(false);
+                    formProps.onFormReset();
+                  }}
+                >
+                  {t("common:cancel")}
+                </Button>
 
-            <Button svgIcon={plusIcon} onClick={openAddDialog}>
-              {t("link-page:add_new_link")}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button svgIcon={cancelIcon} onClick={cancelEdit}>
-              {t("common:cancel")}
-            </Button>
+                {!addMode && (
+                  <Button
+                    svgIcon={trashIcon}
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    {t("common:delete")}
+                  </Button>
+                )}
 
-            <Button svgIcon={saveIcon} themeColor="primary" onClick={saveEdit}>
-              {t("common:save")}
-            </Button>
+                <Button
+                  svgIcon={saveIcon}
+                  themeColor="primary"
+                  disabled={!formProps.allowSubmit}
+                  onClick={formProps.onSubmit}
+                >
+                  {addMode ? t("common:add") : t("common:save")}
+                </Button>
+              </>
+            )}
+          </div>
 
-            <Button
-              svgIcon={trashIcon}
-              onClick={() => setShowDeleteDialog(true)}
+          {showDeleteDialog && (
+            <Dialog
+              title={t("common:confirm_deletion")}
+              onClose={() => setShowDeleteDialog(false)}
             >
-              {t("common:delete")}
-            </Button>
-          </>
-        )}
-      </div>
-
-      {showDeleteDialog && (
-        <Dialog
-          title={t("common:confirm_deletion")}
-          onClose={() => setShowDeleteDialog(false)}
-        >
-          Delete this link?
-          <DialogActionsBar>
-            <Button onClick={() => setShowDeleteDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmDelete}>
-              {t("common:delete")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
+              Delete this link?
+              <DialogActionsBar>
+                <Button onClick={() => setShowDeleteDialog(false)}>
+                  {t("common:cancel")}
+                </Button>
+                <Button themeColor="primary" onClick={confirmDelete}>
+                  {t("common:delete")}
+                </Button>
+              </DialogActionsBar>
+            </Dialog>
+          )}
+        </FormElement>
       )}
-    </div>
+    />
   );
 });
 
