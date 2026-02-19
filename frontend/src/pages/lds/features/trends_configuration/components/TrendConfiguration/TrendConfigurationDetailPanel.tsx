@@ -1,382 +1,251 @@
-import { Button } from "@progress/kendo-react-buttons";
+import React from "react";
 import {
-  DropDownList,
-  DropDownListChangeEvent,
-} from "@progress/kendo-react-dropdowns";
+  Form,
+  Field,
+  FormElement,
+  FieldRenderProps,
+} from "@progress/kendo-react-form";
+import { DropDownList } from "@progress/kendo-react-dropdowns";
 import {
-  FlatColorPicker,
-  FlatColorPickerChangeEvent,
   NumericTextBox,
   TextBox,
-  TextBoxChangeEvent,
+  FlatColorPicker,
 } from "@progress/kendo-react-inputs";
-import { Label } from "@progress/kendo-react-labels";
+import { Label, Error } from "@progress/kendo-react-labels";
+import { Button } from "@progress/kendo-react-buttons";
 import {
   cancelIcon,
-  pencilIcon,
-  plusIcon,
   saveIcon,
   trashIcon,
+  pencilIcon,
 } from "@progress/kendo-svg-icons";
-import React from "react";
-import { useTranslation } from "react-i18next";
+
 import {
   Trend,
   TrendDef,
   TrendGroup,
-  TrendParam,
-  TrendParamApi,
-  TrendParamDef,
   Unit,
 } from "../../../../../../services/api";
 import { ParsedTrendType } from "../../index";
-import { rgbaToHex } from "../../../../../../lib/utilis";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import { useHandleApiResponse } from "../../../../../../hooks/useHandleApiResponse";
-import { LDSContext } from "../../../../contexts/ldsContext";
-import { Loader } from "@progress/kendo-react-indicators";
 
-export interface TrendConfigurationDetailPanelProps {
+const ValidatedNumeric = (props: FieldRenderProps) => {
+  const { validationMessage, touched, visited, ...inputProps } = props;
+
+  return (
+    <div>
+      <NumericTextBox {...inputProps} />
+      {(touched || visited) && validationMessage && (
+        <Error>{validationMessage}</Error>
+      )}
+    </div>
+  );
+};
+
+interface Props {
+  selected: ParsedTrendType | null;
   trendDefs: TrendDef[];
   trendGroups: TrendGroup[];
-  trendParamDefs: TrendParamDef[];
   units: Unit[];
   editTrend: (value: Trend) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
-  selected: ParsedTrendType | null;
-  enterAddNewTrend: () => void;
+  addTrend: (value: Trend) => Promise<Trend>;
+  addMode: boolean;
+  setAddMode: (v: boolean) => void;
 }
 
-const TrendConfigurationDetailPanel = React.memo(
-  function TrendConfigurationDetailPanel({
-    trendDefs,
-    trendGroups,
-    trendParamDefs,
-    units,
-    editTrend,
-    deleteTrend,
-    selected,
-    enterAddNewTrend,
-  }: TrendConfigurationDetailPanelProps) {
-    const { t } = useTranslation(["common", "config-page"]);
-    const handleApiResponse = useHandleApiResponse();
-    const ldsContext = React.useContext(LDSContext);
+const TrendConfigurationDetailPanel = React.memo(function ({
+  selected,
+  trendDefs,
+  trendGroups,
+  units,
+  editTrend,
+  deleteTrend,
+  addTrend,
+  addMode,
+  setAddMode,
+}: Props) {
+  const [inEdit, setInEdit] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
-    const setSelectedData = React.useCallback(
-      (selectedTrend: ParsedTrendType) => {
-        setTrendID(selectedTrend.ID);
-        setTrendName(selectedTrend.Name!);
-        setTrendType(
-          trendDefs.find((def) => def.ID == selectedTrend.TrendDefID)!
-        );
-        setTrendGroup(
-          trendGroups.find((group) => group.ID == selectedTrend.TrendGroupID)!
-        );
-        setTrendUnit(units.find((unit) => unit.ID == selectedTrend.UnitID));
-        setTrendColor(selectedTrend.Color!);
-      },
-      [trendDefs, trendGroups]
-    );
-
-    const [inEdit, setInEdit] = React.useState<boolean>(false);
-
-    const enterEdit = React.useCallback(() => {
-      setInEdit(true);
-    }, []);
-    const cancelEdit = React.useCallback(() => {
-      setInEdit(false);
-      if (selected !== null) setSelectedData(selected);
-    }, [selected, setSelectedData]);
-
-    const [isLoadingParams, setIsLoadingParams] =
-      React.useState<boolean>(false);
-
-    // DATA
-
-    const [trendID, setTrendID] = React.useState<number | undefined>(
-      selected?.ID
-    );
-    const [trendName, setTrendName] = React.useState<string | undefined>(
-      selected?.Name!
-    );
-    const [trendType, setTrendType] = React.useState<TrendDef | undefined>(
-      trendDefs.find((def) => def.ID == selected?.TrendDefID)
-    );
-    const [trendGroup, setTrendGroup] = React.useState<TrendGroup | undefined>(
-      trendGroups.find((group) => group.ID == selected?.TrendGroupID)
-    );
-    const [trendUnit, setTrendUnit] = React.useState<Unit | undefined>(
-      units.find((unit) => unit.ID == selected?.UnitID)
-    );
-    const [trendColor, setTrendColor] = React.useState<string | undefined>(
-      selected?.Color!
-    );
-    const [trendParams, setTrendParams] = React.useState<number[]>([]);
-
-    const loadParams = React.useCallback(async () => {
-      if (!selected) return;
-      try {
-        const response = await handleApiResponse(
-          ldsContext!.trendParamApi.listTrendParamsByTrendIdTrendTrendIdParamGet.bind(
-            ldsContext!.trendParamApi
-          ),
-          selected?.ID
-        );
-        if (response.data)
-          setTrendParams(
-            response.data.items.map((el: TrendParam) => {
-              return Number(el.Value);
-            })
-          );
-        setIsLoadingParams(false);
-      } catch (error) {
-        console.log(error);
-      }
-    }, [selected]);
-
-    React.useEffect(() => {
-      setIsLoadingParams(true);
-      loadParams();
-    }, [selected]);
-
-    const requiredTrendParams = React.useMemo(() => {
-      return trendParamDefs.filter((def) => def.TrendDefID == trendType?.ID);
-    }, [trendParamDefs, trendType]);
-
-    React.useEffect(() => {
-      setTrendParams(Array(requiredTrendParams.length).fill(0));
-    }, [requiredTrendParams]);
-
-    React.useEffect(() => {
-      if (selected !== null) setSelectedData(selected);
-    }, [selected]);
-
-    const handleTrendNameChange = React.useCallback(
-      (event: TextBoxChangeEvent) => {
-        if (event.value) setTrendName(event.value.toString());
-      },
-      []
-    );
-    const handleTrendTypeChange = React.useCallback(
-      (event: DropDownListChangeEvent) => {
-        if (event.value) setTrendType(event.value);
-      },
-      []
-    );
-    const handleTrendGroupChange = React.useCallback(
-      (event: DropDownListChangeEvent) => {
-        if (event.value) setTrendGroup(event.value);
-      },
-      []
-    );
-    const handleTrendUnitChange = React.useCallback(
-      (event: DropDownListChangeEvent) => {
-        if (event.value) setTrendUnit(event.value);
-      },
-      []
-    );
-    const handleTrendColorChange = React.useCallback(
-      (event: FlatColorPickerChangeEvent) => {
-        if (event.value) setTrendColor(rgbaToHex(event.value)!.slice(0, 7)); //slice to cut off opacity
-      },
-      []
-    );
-
-    const saveEdit = React.useCallback(async () => {
-      const newTrend: Trend = {
-        ID: trendID!,
-        Name: trendName!,
-        TrendDefID: trendType!.ID,
-        TrendGroupID: trendGroup!.ID,
-        UnitID: trendUnit!.ID!,
-        Color: trendColor!,
-        RawMin: -10000,
-        RawMax: 10000,
-        ScaledMin: -10000,
-        ScaledMax: 10000,
-      };
-      await editTrend(newTrend);
-      for (let i = 0; i < trendParams.length; i++) {
-        try {
-          const response = await handleApiResponse(
-            ldsContext!.trendParamApi.updateTrendParamTrendTrendIdParamTrendParamDefIdPut.bind(
-              ldsContext!.trendParamApi
-            ),
-            trendID!,
-            requiredTrendParams[i].ID,
-            JSON.stringify(String(trendParams[i])) // WHY WE USE STRINGS AS NUMBERS IN THE API ITS STUPID
-          );
-        } catch (error) {
-          console.log(error);
+  const initialValues =
+    addMode || !selected
+      ? {
+          Name: "",
+          TrendDefID: null,
+          TrendGroupID: null,
+          UnitID: null,
+          Color: "#ffffff",
+          RawMin: 0,
+          RawMax: 100,
+          ScaledMin: 0,
+          ScaledMax: 100,
         }
+      : selected;
+
+  const handleSubmit = async (values: any) => {
+    const payload: Trend = {
+      ID: addMode ? 0 : selected!.ID,
+      Name: values.Name,
+      TrendDefID: values.TrendDefID?.ID ?? values.TrendDefID,
+      TrendGroupID: values.TrendGroupID?.ID ?? values.TrendGroupID,
+      UnitID: values.UnitID?.ID ?? values.UnitID,
+      Color: values.Color,
+      RawMin: values.RawMin,
+      RawMax: values.RawMax,
+      ScaledMin: values.ScaledMin,
+      ScaledMax: values.ScaledMax,
+    };
+
+    try {
+      setLoading(true);
+
+      if (addMode) {
+        await addTrend(payload);
+        setAddMode(false);
+        return;
       }
+
+      await editTrend(payload);
       setInEdit(false);
-    }, [
-      editTrend,
-      trendID,
-      trendName,
-      trendType,
-      trendGroup,
-      trendUnit,
-      trendColor,
-      trendParams,
-    ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Deletion dialog
-    const [showDialog, setShowDialog] = React.useState<boolean>(false);
-    const openDialog = React.useCallback(() => {
-      setShowDialog(true);
-    }, []);
-    const closeDialog = React.useCallback(() => {
-      setShowDialog(false);
-    }, []);
+  React.useEffect(() => {
+    setInEdit(addMode);
+  }, [selected, addMode]);
 
-    const confirmDeletion = React.useCallback(async () => {
-      const { trendType, trendGroup, ...selectedTrend } = selected!;
-      await deleteTrend(selectedTrend);
+  return (
+    <Form
+      key={addMode ? "add" : selected?.ID}
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      render={(formProps) => (
+        <FormElement className="detail-panel-content">
+          <Label>Name</Label>
+          <Field name="Name" component={TextBox} disabled={!inEdit} />
 
-      setInEdit(false);
-    }, [selected, deleteTrend]);
-
-    return (
-      <div className="detail-panel-content">
-        <div className="item">
-          <div className="item-column">
-            <div>
-              <Label editorId="trendName">{t("config-page:name")}</Label>
-              <TextBox
-                value={trendName}
-                onChange={handleTrendNameChange}
-                disabled={!inEdit}
-              />
-            </div>
-            <div>
-              <Label editorId="trendType">{t("config-page:trend_type")}</Label>
+          <Label>Trend Type</Label>
+          <Field
+            name="TrendDefID"
+            component={(props: any) => (
               <DropDownList
-                id="trendType"
+                {...props}
                 data={trendDefs}
                 textField="Name"
                 dataItemKey="ID"
-                value={trendType}
-                onChange={handleTrendTypeChange}
                 disabled={!inEdit}
+                onChange={(e) => props.onChange({ value: e.value })}
               />
-            </div>
-            <div>
-              <Label editorId="trendGroup">
-                {t("config-page:trend_group")}
-              </Label>
+            )}
+          />
+
+          <Label>Trend Group</Label>
+          <Field
+            name="TrendGroupID"
+            component={(props: any) => (
               <DropDownList
-                id="trendGroup"
+                {...props}
                 data={trendGroups}
                 textField="Name"
                 dataItemKey="ID"
-                value={trendGroup}
-                onChange={handleTrendGroupChange}
                 disabled={!inEdit}
+                onChange={(e) => props.onChange({ value: e.value })}
               />
-            </div>
-            <div>
-              <Label editorId="trendUnit">{t("config-page:unit")}</Label>
+            )}
+          />
+
+          <Label>Unit</Label>
+          <Field
+            name="UnitID"
+            component={(props: any) => (
               <DropDownList
-                id="trendUnit"
+                {...props}
                 data={units}
                 textField="Symbol"
                 dataItemKey="ID"
-                value={trendUnit}
-                onChange={handleTrendUnitChange}
                 disabled={!inEdit}
+                onChange={(e) => props.onChange({ value: e.value })}
               />
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <Label editorId="trendColor">{t("config-page:color")}</Label>
-              <FlatColorPicker
-                id="trendColor"
-                format="hex"
-                value={trendColor}
-                onChange={handleTrendColorChange}
-                disabled={!inEdit}
-              />
-            </div>
-            {isLoadingParams ? (
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {" "}
-                <Loader size="medium" type={"infinite-spinner"} />{" "}
-              </div>
+            )}
+          />
+
+          <Label>Color</Label>
+          <Field name="Color" component={FlatColorPicker} />
+
+          <Label>Raw Min</Label>
+          <Field
+            name="RawMin"
+            component={ValidatedNumeric}
+            disabled={!inEdit}
+          />
+
+          <Label>Raw Max</Label>
+          <Field
+            name="RawMax"
+            component={ValidatedNumeric}
+            disabled={!inEdit}
+          />
+
+          <Label>Scaled Min</Label>
+          <Field
+            name="ScaledMin"
+            component={ValidatedNumeric}
+            disabled={!inEdit}
+          />
+
+          <Label>Scaled Max</Label>
+          <Field
+            name="ScaledMax"
+            component={ValidatedNumeric}
+            disabled={!inEdit}
+          />
+
+          <div className="item-row">
+            {!inEdit && !addMode ? (
+              <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
+                Edit
+              </Button>
             ) : (
-              requiredTrendParams.map((trendParam, index) => {
-                return (
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Label editorId={"trendParam-" + trendParam.ID}>
-                      {trendParam.Name}
-                    </Label>
-                    <NumericTextBox
-                      key={"trendParam " + index}
-                      id={"trendParam-" + trendParam.ID}
-                      value={trendParams[index]}
-                      onChange={(event) => {
-                        let params = [...trendParams];
-                        params.splice(index, 1, event.value ?? 0);
-                        console.log(trendParams);
-                        setTrendParams(params);
-                      }}
-                      disabled={!inEdit}
-                    />
-                  </div>
-                );
-              })
+              <>
+                <Button
+                  svgIcon={cancelIcon}
+                  disabled={loading}
+                  onClick={() => {
+                    setAddMode(false);
+                    setInEdit(false);
+                    formProps.onFormReset();
+                  }}
+                >
+                  Cancel
+                </Button>
+
+                {!addMode && selected && (
+                  <Button
+                    svgIcon={trashIcon}
+                    disabled={loading}
+                    onClick={() => deleteTrend(selected)}
+                  >
+                    Delete
+                  </Button>
+                )}
+
+                <Button
+                  svgIcon={saveIcon}
+                  themeColor="primary"
+                  disabled={!formProps.allowSubmit || loading}
+                  onClick={formProps.onSubmit}
+                >
+                  {addMode ? "Add" : "Save"}
+                </Button>
+              </>
             )}
           </div>
-        </div>
-        <div className="separator" />
-        <div className="item">
-          {!inEdit ? (
-            <div className="item-row">
-              <Button svgIcon={pencilIcon} onClick={enterEdit}>
-                {t("common:edit")}
-              </Button>
-              <Button svgIcon={plusIcon} onClick={enterAddNewTrend}>
-                {t("config-page:add_new_trend")}
-              </Button>
-            </div>
-          ) : (
-            <div className="item-row">
-              <Button svgIcon={cancelIcon} onClick={cancelEdit}>
-                {t("common:cancel")}
-              </Button>
-              <Button svgIcon={trashIcon} onClick={openDialog}>
-                {t("common:delete")}
-              </Button>
-              <Button
-                svgIcon={saveIcon}
-                onClick={saveEdit}
-                themeColor={"primary"}
-              >
-                {t("common:save")}
-              </Button>
-            </div>
-          )}
-        </div>
-        {showDialog && (
-          <Dialog title={t("common:confirm_deletion")} onClose={closeDialog}>
-            {t("config-page:sure_you_want_delete_trend")}
-            <DialogActionsBar>
-              <Button svgIcon={cancelIcon} onClick={closeDialog}>
-                {t("common:cancel")}
-              </Button>
-              <Button
-                svgIcon={trashIcon}
-                onClick={confirmDeletion}
-                themeColor={"primary"}
-              >
-                {t("common:delete")}
-              </Button>
-            </DialogActionsBar>
-          </Dialog>
-        )}
-      </div>
-    );
-  }
-);
+        </FormElement>
+      )}
+    />
+  );
+});
 
 export default TrendConfigurationDetailPanel;

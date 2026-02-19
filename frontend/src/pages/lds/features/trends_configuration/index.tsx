@@ -3,8 +3,6 @@ import "../../../../styles/layouts/detail-panel.scss";
 import "./trendConfiguration.scss";
 import { DetailPanel } from "onyks_shared_kendo";
 import { useTranslation } from "react-i18next";
-import { Typography } from "@progress/kendo-react-common";
-
 import {
   Trend,
   TrendDef,
@@ -47,21 +45,23 @@ export interface ParsedTrendType extends Trend {
 const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   const { t } = useTranslation(["common", "config-page"]);
   const ldsContext = React.useContext(LDSContext);
-  React.useMemo(() => {
-    if (ldsContext == null)
-      throw new Error(
-        "LDS Context cannot be null to use TrendConfigurationPage",
-      );
-  }, [ldsContext]);
+
+  if (!ldsContext) return null;
 
   const [verticalPanes, setVerticalPanes] = React.useState<SplitterPaneProps[]>(
     [{ size: "66%" }, {}],
   );
+  const [panelOpen, setPanelOpen] = React.useState(false);
+  const [addMode, setAddMode] = React.useState(false);
+  const [tabSelected, setTabSelected] = React.useState(0);
+  const [showAddNewTrendGroupDialog, setShowAddNewTrendGroupDialog] =
+    React.useState(false);
+  const [showAddNewUnitDialog, setShowAddNewUnitDialog] = React.useState(false);
+
   const handleVerticalChange = (event: SplitterOnChangeEvent) => {
     setVerticalPanes(event.newState);
   };
 
-  const [tabSelected, setTabSelected] = React.useState<number>(0);
   const handleTabSelect = React.useCallback(
     (e: TabStripSelectEventArguments) => {
       setTabSelected(e.selected);
@@ -69,32 +69,14 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     [],
   );
 
-  const [showAddNewTrendDialog, setShowAddNewTrendDialog] =
-    React.useState<boolean>(false);
-  const openAddNewTrendDialog = React.useCallback(() => {
-    setShowAddNewTrendDialog(true);
-  }, []);
-  const closeAddNewTrendDialog = React.useCallback(() => {
-    setShowAddNewTrendDialog(false);
-  }, []);
+  const openAddNewTrendGroupDialog = () => setShowAddNewTrendGroupDialog(true);
 
-  const [showAddNewTrendGroupDialog, setShowAddNewTrendGroupDialog] =
-    React.useState<boolean>(false);
-  const openAddNewTrendGroupDialog = React.useCallback(() => {
-    setShowAddNewTrendGroupDialog(true);
-  }, []);
-  const closeAddNewTrendGroupDialog = React.useCallback(() => {
+  const closeAddNewTrendGroupDialog = () =>
     setShowAddNewTrendGroupDialog(false);
-  }, []);
 
-  const [showAddNewUnitDialog, setShowAddNewUnitDialog] =
-    React.useState<boolean>(false);
-  const openAddNewUnitDialog = React.useCallback(() => {
-    setShowAddNewUnitDialog(true);
-  }, []);
-  const closeAddNewUnitDialog = React.useCallback(() => {
-    setShowAddNewUnitDialog(false);
-  }, []);
+  const openAddNewUnitDialog = () => setShowAddNewUnitDialog(true);
+
+  const closeAddNewUnitDialog = () => setShowAddNewUnitDialog(false);
 
   const [selection, setSelection] = React.useState<SelectionType>({
     trend: null,
@@ -103,30 +85,33 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     trendGroup: null,
     unit: null,
   });
-  const isSelected = React.useMemo(
-    () =>
-      selection.trend !== null ||
-      selection.trendParamDef !== null ||
-      selection.trendDef !== null ||
-      selection.trendGroup !== null ||
-      selection.unit !== null,
-    [selection],
-  );
 
-  const handleSelectedTrendChange = React.useCallback(
-    (value: ParsedTrendType) => {
-      setSelection({
-        trend: value,
-        trendParamDef: null,
-        trendDef: null,
-        trendGroup: null,
-        unit: null,
-      });
-    },
-    [],
-  );
+  const openAddNewTrendPanel = () => {
+    setSelection({
+      trend: null,
+      trendParamDef: null,
+      trendDef: null,
+      trendGroup: null,
+      unit: null,
+    });
 
-  const handleSelectedTrendDefChange = React.useCallback((value: TrendDef) => {
+    setAddMode(true);
+    setPanelOpen(true);
+  };
+
+  const handleSelectedTrendChange = (value: ParsedTrendType) => {
+    setAddMode(false);
+    setSelection({
+      trend: value,
+      trendParamDef: null,
+      trendDef: null,
+      trendGroup: null,
+      unit: null,
+    });
+    setPanelOpen(true);
+  };
+
+  const handleSelectedTrendDefChange = (value: TrendDef) => {
     setSelection({
       trend: null,
       trendParamDef: null,
@@ -134,22 +119,21 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
       trendGroup: null,
       unit: null,
     });
-  }, []);
+    setPanelOpen(true);
+  };
 
-  const handleSelectedTrendGroupChange = React.useCallback(
-    (value: TrendGroup) => {
-      setSelection({
-        trend: null,
-        trendParamDef: null,
-        trendDef: null,
-        trendGroup: value,
-        unit: null,
-      });
-    },
-    [],
-  );
+  const handleSelectedTrendGroupChange = (value: TrendGroup) => {
+    setSelection({
+      trend: null,
+      trendParamDef: null,
+      trendDef: null,
+      trendGroup: value,
+      unit: null,
+    });
+    setPanelOpen(true);
+  };
 
-  const handleSelectedUnitChange = React.useCallback((value: Unit) => {
+  const handleSelectedUnitChange = (value: Unit) => {
     setSelection({
       trend: null,
       trendParamDef: null,
@@ -157,63 +141,11 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
       trendGroup: null,
       unit: value,
     });
-  }, []);
+    setPanelOpen(true);
+  };
 
-  const handleSelectedTrendDeletion = React.useCallback(
-    async (value: Trend) => {
-      // try {
-      //   const trendParams: TrendParam[] = (
-      //     await handleApiResponse(
-      //       ldsContext!.trendParamApi.listTrendParamsByTrendIdTrendTrendIdParamGet.bind(
-      //         ldsContext!.trendParamApi
-      //       ),
-      //       value.ID
-      //     )
-      //   ).data.items;
-      await ldsContext!.deleteTrend(value);
-      //   for (let param of trendParams) {
-      //     try {
-      //       await handleApiResponse(
-      //         ldsContext!.trendParamApi.deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete.bind(
-      //           ldsContext!.trendParamApi
-      //         ),
-      //         value.ID,
-      //         param.TrendParamDefID
-      //       );
-      //     } catch (error) {
-      //       console.log(error);
-      //     }
-      //   }
-      // } catch (error) {
-      //   console.log(error);
-      // }
-      setSelection({
-        trend: null,
-        trendParamDef: null,
-        trendDef: null,
-        trendGroup: null,
-        unit: null,
-      });
-    },
-    [],
-  );
-
-  const handleSelectedTrendGroupDeletion = React.useCallback(
-    async (value: TrendGroup) => {
-      await ldsContext!.deleteTrendGroup(value);
-      setSelection({
-        trend: null,
-        trendParamDef: null,
-        trendDef: null,
-        trendGroup: null,
-        unit: null,
-      });
-    },
-    [],
-  );
-
-  const handleSelectedUnitDeletion = React.useCallback(async (value: Unit) => {
-    await ldsContext!.deleteUnit(value);
+  const handleSelectedTrendDeletion = async (value: Trend) => {
+    await ldsContext.deleteTrend(value);
     setSelection({
       trend: null,
       trendParamDef: null,
@@ -221,122 +153,153 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
       trendGroup: null,
       unit: null,
     });
-  }, []);
+    setPanelOpen(false);
+  };
 
-  const SelectedDetailPanel = React.useCallback((): React.JSX.Element => {
-    if (selection.trend)
+  const handleSelectedTrendGroupDeletion = async (value: TrendGroup) => {
+    await ldsContext.deleteTrendGroup(value);
+    setSelection({
+      trend: null,
+      trendParamDef: null,
+      trendDef: null,
+      trendGroup: null,
+      unit: null,
+    });
+    setPanelOpen(false);
+  };
+
+  const handleSelectedUnitDeletion = async (value: Unit) => {
+    await ldsContext.deleteUnit(value);
+    setSelection({
+      trend: null,
+      trendParamDef: null,
+      trendDef: null,
+      trendGroup: null,
+      unit: null,
+    });
+    setPanelOpen(false);
+  };
+
+  const isSelected =
+    addMode ||
+    selection.trend ||
+    selection.trendDef ||
+    selection.trendGroup ||
+    selection.unit;
+
+  const SelectedDetailPanel = () => {
+    if (selection.trend || addMode) {
       return (
         <TrendConfigurationDetailPanel
-          trendDefs={ldsContext!.trendDefs}
-          trendGroups={ldsContext!.trendGroups}
-          trendParamDefs={ldsContext!.trendParamDefs}
-          units={ldsContext!.units}
-          editTrend={ldsContext!.updateTrend}
+          trendDefs={ldsContext.trendDefs}
+          trendGroups={ldsContext.trendGroups}
+          units={ldsContext.units}
+          editTrend={ldsContext.updateTrend}
+          addTrend={ldsContext.addTrend}
           deleteTrend={handleSelectedTrendDeletion}
           selected={selection.trend}
-          enterAddNewTrend={openAddNewTrendDialog}
+          addMode={addMode}
+          setAddMode={setAddMode}
         />
       );
+    }
+
     if (selection.trendDef)
       return <TrendDefConfigurationDetailPanel selected={selection.trendDef} />;
+
     if (selection.trendGroup)
       return (
         <TrendGroupConfigurationDetailPanel
-          editTrendGroup={ldsContext!.updateTrendGroup}
+          editTrendGroup={ldsContext.updateTrendGroup}
           deleteTrendGroup={handleSelectedTrendGroupDeletion}
           selected={selection.trendGroup}
           enterAddNewTrendGroup={openAddNewTrendGroupDialog}
         />
       );
+
     if (selection.unit)
       return (
         <TrendUnitConfigurationDetailPanel
-          editUnit={ldsContext!.updateUnit}
+          editUnit={ldsContext.updateUnit}
           deleteUnit={handleSelectedUnitDeletion}
           selected={selection.unit}
           enterAddNewUnit={openAddNewUnitDialog}
         />
       );
+
     return <></>;
-  }, [selection]);
+  };
 
   return (
-    <React.Fragment>
-      <main className="config-page">
-        <Splitter
-          className="config-grid-container"
-          panes={verticalPanes}
-          orientation="vertical"
-          onChange={handleVerticalChange}
-        >
-          <TrendConfiguration
-            showDialog={showAddNewTrendDialog}
-            openDialog={openAddNewTrendDialog}
-            closeDialog={closeAddNewTrendDialog}
-            trendDefs={ldsContext!.trendDefs}
-            trendGroups={ldsContext!.trendGroups}
-            trendParamDefs={ldsContext!.trendParamDefs}
-            units={ldsContext!.units}
-            trends={ldsContext!.trends}
-            addTrend={ldsContext!.addTrend}
-            deleteTrend={handleSelectedTrendDeletion}
-            selected={selection.trend}
-            setSelected={handleSelectedTrendChange}
-          />
+    <main className="config-page">
+      <Splitter
+        className="config-grid-container"
+        panes={verticalPanes}
+        orientation="vertical"
+        onChange={handleVerticalChange}
+      >
+        <TrendConfiguration
+          trendDefs={ldsContext.trendDefs}
+          trendGroups={ldsContext.trendGroups}
+          units={ldsContext.units}
+          trends={ldsContext.trends}
+          selected={selection.trend}
+          setSelected={handleSelectedTrendChange}
+          deleteTrend={handleSelectedTrendDeletion}
+          enterAddNewTrend={openAddNewTrendPanel}
+        />
 
-          <TabStrip
-            className="config-trend-stuff-tab"
-            selected={tabSelected}
-            onSelect={handleTabSelect}
-          >
-            <TabStripTab title={t("config-page:trends_types")}>
-              <TrendDefConfiguration
-                trendDefs={ldsContext!.trendDefs}
-                selected={selection.trendDef}
-                setSelected={handleSelectedTrendDefChange}
-              />
-            </TabStripTab>
-            <TabStripTab title={t("config-page:trends_groups")}>
-              <TrendGroupConfiguration
-                showDialog={showAddNewTrendGroupDialog}
-                openDialog={openAddNewTrendGroupDialog}
-                closeDialog={closeAddNewTrendGroupDialog}
-                trendGroups={ldsContext!.trendGroups}
-                addTrendGroup={ldsContext!.addTrendGroup}
-                deleteTrendGroup={handleSelectedTrendGroupDeletion}
-                selected={selection.trendGroup}
-                setSelected={handleSelectedTrendGroupChange}
-              />
-            </TabStripTab>
-            <TabStripTab title={t("config-page:trends_units")}>
-              <TrendUnitConfiguration
-                showDialog={showAddNewUnitDialog}
-                openDialog={openAddNewUnitDialog}
-                closeDialog={closeAddNewUnitDialog}
-                units={ldsContext!.units}
-                addUnit={ldsContext!.addUnit}
-                deleteUnit={handleSelectedUnitDeletion}
-                selected={selection.unit}
-                setSelected={handleSelectedUnitChange}
-              />
-            </TabStripTab>
-          </TabStrip>
-        </Splitter>
-        <DetailPanel
-          className={"config-detail-panel" + (isSelected ? "" : " no-selected")}
-          flexGrow={1}
-          extandable={true}
+        <TabStrip
+          className="config-trend-stuff-tab"
+          selected={tabSelected}
+          onSelect={handleTabSelect}
         >
-          {isSelected ? (
-            <SelectedDetailPanel />
-          ) : (
-            <Typography.p style={{ marginBottom: 0 }}>
-              {t("config-page:select_element_to_edit")}
-            </Typography.p>
-          )}
-        </DetailPanel>
-      </main>
-    </React.Fragment>
+          <TabStripTab title={t("config-page:trends_types")}>
+            <TrendDefConfiguration
+              trendDefs={ldsContext.trendDefs}
+              selected={selection.trendDef}
+              setSelected={handleSelectedTrendDefChange}
+            />
+          </TabStripTab>
+
+          <TabStripTab title={t("config-page:trends_groups")}>
+            <TrendGroupConfiguration
+              showDialog={showAddNewTrendGroupDialog}
+              openDialog={openAddNewTrendGroupDialog}
+              closeDialog={closeAddNewTrendGroupDialog}
+              trendGroups={ldsContext.trendGroups}
+              addTrendGroup={ldsContext.addTrendGroup}
+              deleteTrendGroup={handleSelectedTrendGroupDeletion}
+              selected={selection.trendGroup}
+              setSelected={handleSelectedTrendGroupChange}
+            />
+          </TabStripTab>
+
+          <TabStripTab title={t("config-page:trends_units")}>
+            <TrendUnitConfiguration
+              showDialog={showAddNewUnitDialog}
+              openDialog={openAddNewUnitDialog}
+              closeDialog={closeAddNewUnitDialog}
+              units={ldsContext.units}
+              addUnit={ldsContext.addUnit}
+              deleteUnit={handleSelectedUnitDeletion}
+              selected={selection.unit}
+              setSelected={handleSelectedUnitChange}
+            />
+          </TabStripTab>
+        </TabStrip>
+      </Splitter>
+
+      <DetailPanel
+        className={"config-detail-panel" + (isSelected ? "" : " no-selected")}
+        flexGrow={1}
+        extandable
+        extended={panelOpen}
+        onExtendedChange={setPanelOpen}
+      >
+        {isSelected && <SelectedDetailPanel />}
+      </DetailPanel>
+    </main>
   );
 });
 
