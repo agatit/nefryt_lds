@@ -28,7 +28,20 @@ import {
 } from "../../../../../../services/api";
 import { ParsedTrendType } from "../../index";
 
-const ValidatedNumeric = (props: FieldRenderProps) => {
+interface Props {
+  selected: ParsedTrendType | null;
+  trendDefs: TrendDef[];
+  trendGroups: TrendGroup[];
+  units: Unit[];
+  editTrend: (value: Trend) => Promise<void>;
+  deleteTrend: (value: Trend) => Promise<void>;
+  addTrend: (value: Trend) => Promise<Trend>;
+  addMode: boolean;
+  setAddMode: (v: boolean) => void;
+  requestDelete: (value: ParsedTrendType) => void;
+}
+
+const ValidatedInput = (props: FieldRenderProps) => {
   const { validationMessage, touched, visited, ...inputProps } = props;
 
   return (
@@ -41,25 +54,13 @@ const ValidatedNumeric = (props: FieldRenderProps) => {
   );
 };
 
-interface Props {
-  selected: ParsedTrendType | null;
-  trendDefs: TrendDef[];
-  trendGroups: TrendGroup[];
-  units: Unit[];
-  editTrend: (value: Trend) => Promise<void>;
-  deleteTrend: (value: Trend) => Promise<void>;
-  addTrend: (value: Trend) => Promise<Trend>;
-  addMode: boolean;
-  setAddMode: (v: boolean) => void;
-}
-
 const TrendConfigurationDetailPanel = React.memo(function ({
   selected,
   trendDefs,
   trendGroups,
   units,
   editTrend,
-  deleteTrend,
+  requestDelete,
   addTrend,
   addMode,
   setAddMode,
@@ -76,11 +77,16 @@ const TrendConfigurationDetailPanel = React.memo(function ({
           UnitID: null,
           Color: "#ffffff",
           RawMin: 0,
-          RawMax: 100,
+          RawMax: 0,
           ScaledMin: 0,
-          ScaledMax: 100,
+          ScaledMax: 0,
         }
-      : selected;
+      : {
+          ...selected,
+          TrendDefID: trendDefs.find((t) => t.ID === selected.TrendDefID),
+          TrendGroupID: trendGroups.find((t) => t.ID === selected.TrendGroupID),
+          UnitID: units.find((t) => t.ID === selected.UnitID),
+        };
 
   const handleSubmit = async (values: any) => {
     const payload: Trend = {
@@ -175,30 +181,22 @@ const TrendConfigurationDetailPanel = React.memo(function ({
           <Field name="Color" component={FlatColorPicker} />
 
           <Label>Raw Min</Label>
-          <Field
-            name="RawMin"
-            component={ValidatedNumeric}
-            disabled={!inEdit}
-          />
+          <Field name="RawMin" component={ValidatedInput} disabled={!inEdit} />
 
           <Label>Raw Max</Label>
-          <Field
-            name="RawMax"
-            component={ValidatedNumeric}
-            disabled={!inEdit}
-          />
+          <Field name="RawMax" component={ValidatedInput} disabled={!inEdit} />
 
           <Label>Scaled Min</Label>
           <Field
             name="ScaledMin"
-            component={ValidatedNumeric}
+            component={ValidatedInput}
             disabled={!inEdit}
           />
 
           <Label>Scaled Max</Label>
           <Field
             name="ScaledMax"
-            component={ValidatedNumeric}
+            component={ValidatedInput}
             disabled={!inEdit}
           />
 
@@ -225,7 +223,7 @@ const TrendConfigurationDetailPanel = React.memo(function ({
                   <Button
                     svgIcon={trashIcon}
                     disabled={loading}
-                    onClick={() => deleteTrend(selected)}
+                    onClick={() => requestDelete(selected)}
                   >
                     Delete
                   </Button>

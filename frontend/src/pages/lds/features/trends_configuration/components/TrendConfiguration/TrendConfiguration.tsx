@@ -17,7 +17,7 @@ import {
   Unit,
 } from "../../../../../../services/api";
 import ColorGridCell from "../../../../components/ColorGridCell";
-import { ParsedTrendType } from "../../index"
+import { ParsedTrendType } from "../../index";
 
 export interface TrendConfigurationProps {
   trendDefs: TrendDef[];
@@ -26,8 +26,8 @@ export interface TrendConfigurationProps {
   trends: Trend[];
   selected: ParsedTrendType | null;
   setSelected: (value: ParsedTrendType) => void;
-  deleteTrend: (value: Trend) => Promise<void>;
   enterAddNewTrend: () => void;
+  requestDelete: (value: ParsedTrendType) => void;
 }
 
 const TrendConfiguration = React.memo(function TrendConfiguration({
@@ -37,8 +37,8 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
   trends,
   selected,
   setSelected,
-  deleteTrend,
   enterAddNewTrend,
+  requestDelete,
 }: TrendConfigurationProps) {
   const { t } = useTranslation(["common", "config-page"]);
   const [select, setSelect] = React.useState<SelectDescriptor>();
@@ -82,7 +82,7 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
           </Button>
 
           {selected && (
-            <Button svgIcon={trashIcon} onClick={() => deleteTrend(selected)}>
+            <Button svgIcon={trashIcon} onClick={() => requestDelete(selected)}>
               {t("common:delete")}
             </Button>
           )}

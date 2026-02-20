@@ -39,7 +39,6 @@ main.links-page {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  //gap: 16px;
   width: 100%;
 }
 
@@ -47,6 +46,7 @@ main.links-page {
   display: flex;
   flex-direction: column;
   width: 100%;
+  gap: 0 !important;
 }
 
 .field-wrapper {
@@ -58,7 +58,6 @@ main.links-page {
   margin: 0;
   padding: 0;
 }
-
 
 .field-wrapper .k-input,
 .field-wrapper .k-textbox,
@@ -77,8 +76,6 @@ main.links-page {
 
 .detail-panel-content .item-row {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
   flex-wrap: wrap;
 }
 
@@ -96,7 +93,6 @@ main.links-page {
 
 .field-wrapper .k-form-error,
 .field-wrapper .k-error {
-  margin-top: -10px;
   align-self: flex-start;
   text-align: left;
 }
