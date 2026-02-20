@@ -15,23 +15,23 @@ main.config-page {
   gap: k-spacing(1);
 }
 
-.config-grid-container > * {
+.config-grid-container>* {
   flex: 1 0 0;
   width: 100%;
 }
 
-.config-grid-container > .defs-and-groups {
+.config-grid-container>.defs-and-groups {
   display: flex;
   flex-direction: row;
 
   gap: k-spacing(2);
 }
 
-.config-grid-container > .defs-and-groups > * {
+.config-grid-container>.defs-and-groups>* {
   flex: 1 1 0;
 }
 
-.config-detail-panel.no-selected > div {
+.config-detail-panel.no-selected>div {
   justify-content: center;
   height: 100%;
   cursor: not-allowed;
@@ -41,8 +41,56 @@ main.config-page {
   display: none;
 }
 
-// Kendo customization
-
 .config-page .k-table-row:hover {
   cursor: pointer;
+}
+
+.detail-panel-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.detail-panel-content .item-column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+.detail-panel-content .item-column>div {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0 !important;
+}
+
+.k-form {
+  gap: 10px;
+}
+
+.field-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+
+.field-wrapper .k-input,
+.field-wrapper .k-textbox,
+.field-wrapper .k-input-inner .field-wrapper .k-numerictextbox {
+  width: 100%;
+}
+
+.field-input {
+  width: 100%;
+}
+
+.field-error {
+  margin-top: 4px;
+  font-size: 12px;
 }
