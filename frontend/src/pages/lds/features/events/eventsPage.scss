@@ -19,12 +19,6 @@ main.events-page {
   min-height: 0;
 }
 
-.events-trend-stuff-tab {
-  flex: 0 0 auto;
-  border-top: 1px solid #ddd;
-  background: white;
-}
-
 .events-detail-panel.no-selected > div {
   align-items: flex-start; 
   height: 100%;
@@ -52,5 +46,7 @@ main.events-page {
 
 .k-label {
   text-align: left;
+  margin-bottom: 5px;
   width: 100%;
+  font-size: 1rem;
 }
