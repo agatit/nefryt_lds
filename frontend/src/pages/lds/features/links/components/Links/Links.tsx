@@ -16,16 +16,18 @@ interface LinksProps {
   links: Link[];
   selected: Link | null;
   onSelectLink: (value: Link) => void;
-  openAddDialog: () => void;
+  openAddPanel: () => void;
+  requestDelete: (value: Link) => void;
 }
 
 const Links = React.memo(function LinksGrid({
   links,
   selected,
   onSelectLink,
-  openAddDialog,
+  openAddPanel,
+  requestDelete,
 }: LinksProps) {
-  const { t } = useTranslation(["links-page"]);
+  const { t } = useTranslation(["common", "links-page"]);
   const [select, setSelect] = React.useState<SelectDescriptor>();
 
   const handleSelectionChange = React.useCallback(
@@ -55,12 +57,12 @@ const Links = React.memo(function LinksGrid({
       <GridToolbar>
         <GridSearchBox />
         <ButtonGroup>
-          <Button svgIcon={plusIcon} onClick={openAddDialog}>
+          <Button svgIcon={plusIcon} onClick={openAddPanel}>
             {t("links-page:add_new_link")}
           </Button>
           {selected && (
-            <Button svgIcon={trashIcon} onClick={openAddDialog}>
-              {t("links-page:delete")}
+            <Button svgIcon={trashIcon} onClick={() => requestDelete(selected)}>
+              {t("common:delete")}
             </Button>
           )}
         </ButtonGroup>

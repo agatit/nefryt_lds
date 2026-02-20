@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import { NumericTextBox } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import {
   pencilIcon,
   cancelIcon,
@@ -22,10 +21,10 @@ import { Link, LinkCreate, LinkUpdate } from "../../../../../../services/api";
 interface Props {
   selected: Link | null;
   editLink: (id: number, value: LinkUpdate) => Promise<void>;
-  deleteLink: (value: Link) => Promise<void>;
   addLink: (value: LinkCreate) => Promise<Link>;
   addMode: boolean;
   setAddMode: (v: boolean) => void;
+  requestDelete: (value: Link) => void;
 }
 
 interface LinkFormValues {
@@ -37,6 +36,7 @@ interface LinkFormValues {
 interface ValidationErrors {
   [key: string]: string;
 }
+
 const linkValidator = (t: TFunction) => (values: LinkFormValues) => {
   const errors: ValidationErrors = {};
 
@@ -90,14 +90,13 @@ const ValidatedInput = (props: FieldRenderProps) => {
 const LinksDetailPanel = React.memo(function LinksDetailPanel({
   selected,
   editLink,
-  deleteLink,
   addLink,
   addMode,
   setAddMode,
+  requestDelete,
 }: Props) {
   const { t } = useTranslation(["common", "links-page"]);
   const [inEdit, setInEdit] = React.useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const initialValues: LinkFormValues = addMode
@@ -139,19 +138,6 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
     },
     [addMode, addLink, editLink, selected, setAddMode],
   );
-
-  const confirmDelete = async () => {
-    if (!selected) return;
-
-    try {
-      setLoading(true);
-      await deleteLink(selected);
-      setShowDeleteDialog(false);
-      setInEdit(false);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   React.useEffect(() => {
     setInEdit(addMode);
@@ -209,17 +195,11 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
                   {t("common:cancel")}
                 </Button>
 
-                {!addMode && (
+                {!addMode && selected && (
                   <Button
                     svgIcon={trashIcon}
                     disabled={loading}
-                    onClick={async () => {
-                      if (!selected) return;
-                      setLoading(true);
-                      await deleteLink(selected);
-                      setInEdit(false);
-                      setLoading(false);
-                    }}
+                    onClick={() => requestDelete(selected)}
                   >
                     {t("common:delete")}
                   </Button>
@@ -236,23 +216,6 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
               </>
             )}
           </div>
-
-          {showDeleteDialog && selected && (
-            <Dialog
-              title={t("common:confirm_deletion")}
-              onClose={() => setShowDeleteDialog(false)}
-            >
-              Delete link?
-              <DialogActionsBar>
-                <Button onClick={() => setShowDeleteDialog(false)}>
-                  {t("common:cancel")}
-                </Button>
-                <Button themeColor="primary" onClick={confirmDelete}>
-                  {t("common:delete")}
-                </Button>
-              </DialogActionsBar>
-            </Dialog>
-          )}
         </FormElement>
       )}
     />
