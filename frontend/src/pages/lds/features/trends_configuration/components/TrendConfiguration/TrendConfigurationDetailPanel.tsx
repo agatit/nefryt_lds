@@ -26,6 +26,8 @@ import {
   TrendDef,
   TrendGroup,
   Unit,
+  TrendUpdate,
+  TrendCreate,
 } from "../../../../../../services/api";
 import { ParsedTrendType } from "../../index";
 
@@ -34,9 +36,9 @@ interface Props {
   trendDefs: TrendDef[];
   trendGroups: TrendGroup[];
   units: Unit[];
-  editTrend: (value: Trend) => Promise<void>;
+  editTrend: (id: number, value: TrendUpdate) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
-  addTrend: (value: Trend) => Promise<Trend>;
+  addTrend: (value: TrendCreate) => Promise<Trend>;
   addMode: boolean;
   setAddMode: (v: boolean) => void;
   requestDelete: (value: ParsedTrendType) => void;
@@ -247,7 +249,7 @@ const TrendConfigurationDetailPanel = React.memo(function ({
         return;
       }
 
-      await editTrend(payload);
+      await editTrend(selected!.ID, payload);
       setInEdit(false);
     } finally {
       setLoading(false);

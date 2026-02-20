@@ -1,6 +1,8 @@
 import React, { PropsWithChildren } from "react";
 import {
   Trend,
+  TrendCreate,
+  TrendUpdate,
   TrendApi,
   TrendDef,
   TrendGroup,
@@ -42,8 +44,8 @@ export type LDSContextType = {
   trendApi: TrendApi;
   trends: Trend[];
   setTrends: (value: Trend[]) => void;
-  addTrend: (value: Trend) => Promise<Trend>;
-  updateTrend: (value: Trend) => Promise<void>;
+  addTrend: (value: TrendCreate) => Promise<Trend>;
+  updateTrend: (id: number, value: TrendUpdate) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
   trendParamApi: TrendParamApi;
   trendParamDefs: TrendParamDef[];
@@ -125,8 +127,8 @@ interface LDSContextProviderProps extends PropsWithChildren {
   trendApi: TrendApi;
   trends: Trend[];
   setTrends: (value: Trend[]) => void;
-  addTrend: (value: Trend) => Promise<Trend>;
-  updateTrend: (value: Trend) => Promise<void>;
+  addTrend: (value: TrendCreate) => Promise<Trend>;
+  updateTrend: (id: number, value: TrendUpdate) => Promise<void>;
   deleteTrend: (value: Trend) => Promise<void>;
   trendParamApi: TrendParamApi;
   trendParamDefs: TrendParamDef[];

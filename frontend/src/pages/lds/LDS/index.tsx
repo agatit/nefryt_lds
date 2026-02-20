@@ -11,10 +11,9 @@ import {
   wrenchIcon,
   linkIcon,
   shareIcon,
-  trackChangesIcon,
   arrowsSwapIcon,
   codeIcon,
-  fileIcon
+  fileIcon,
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -44,6 +43,8 @@ import {
   TrendDef,
   TrendGroup,
   TrendGroupApi,
+  TrendCreate,
+  TrendUpdate,
   Unit,
   UnitApi,
   TrendParamApi,
@@ -418,10 +419,15 @@ export default function LDS() {
   }, [nav.useMockup]);
 
   const addTrend = React.useCallback(
-    async (value: Trend) => {
+    async (value: TrendCreate) => {
       if (nav.useMockup) {
-        setTrends([...trends, value]);
-        return;
+        const mockTrend: Trend = {
+          ID: Math.max(0, ...trends.map((t) => t.ID)) + 1,
+          ...value,
+        };
+
+        setTrends((prev) => [...prev, mockTrend]);
+        return mockTrend;
       }
 
       try {
@@ -431,48 +437,63 @@ export default function LDS() {
         );
 
         if (response?.data) {
-          setTrends([...trends, response.data]);
+          setTrends((prev) => [...prev, response.data]);
           return response.data;
         }
       } catch (error) {
         console.log(error);
       }
     },
-    [nav, trends, trendApi],
+    [nav, trendApi, trends],
   );
 
   const updateTrend = React.useCallback(
-    async (value: Trend) => {
+    async (id: number, value: TrendUpdate) => {
       if (nav.useMockup) {
-        setTrends(
-          trends.map((trend) => {
-            if (trend.ID == value.ID) return value;
-            return trend;
-          }),
+        setTrends((prev) =>
+          prev.map((trend) =>
+            trend.ID === id
+              ? {
+                  ...trend,
+                  ...value,
+
+                  TrendDefID: value.TrendDefID ?? trend.TrendDefID,
+                  TrendGroupID: value.TrendGroupID ?? trend.TrendGroupID,
+                  UnitID: value.UnitID ?? trend.UnitID,
+                  Name: value.Name ?? trend.Name,
+                  Color: value.Color ?? trend.Color,
+
+                  RawMin: value.RawMin ?? trend.RawMin,
+                  RawMax: value.RawMax ?? trend.RawMax,
+                  ScaledMin: value.ScaledMin ?? trend.ScaledMin,
+                  ScaledMax: value.ScaledMax ?? trend.ScaledMax,
+                }
+              : trend,
+          ),
         );
+
         return;
       }
 
-      const { ID, ...updateTrend } = value;
       try {
         const response = await handleApiResponse(
           trendApi.updateTrendTrendTrendIdPut.bind(trendApi),
-          ID,
-          updateTrend,
+          id,
+          value,
         );
 
-        if (response?.data)
-          setTrends(
-            trends.map((trend) => {
-              if (trend.ID == response.data.ID) return response.data;
-              return trend;
-            }),
+        if (response?.data) {
+          setTrends((prev) =>
+            prev.map((trend) =>
+              trend.ID === response.data.ID ? response.data : trend,
+            ),
           );
+        }
       } catch (error) {
         console.log(error);
       }
     },
-    [nav, trends, trendApi],
+    [nav, trendApi],
   );
 
   const deleteTrend = React.useCallback(
@@ -483,7 +504,7 @@ export default function LDS() {
       }
 
       try {
-        const response = await handleApiResponse(
+        await handleApiResponse(
           trendApi.deleteTrendByIdTrendTrendIdDelete.bind(trendApi),
           value.ID,
         );
@@ -563,7 +584,7 @@ export default function LDS() {
       }
 
       try {
-        const response = await handleApiResponse(
+        await handleApiResponse(
           trendGroupApi.deleteTrendGroupByIdTrendGroupTrendGroupIdDelete.bind(
             trendGroupApi,
           ),
@@ -1213,7 +1234,7 @@ export default function LDS() {
       }
 
       try {
-        const response = await handleApiResponse(
+        await handleApiResponse(
           unitApi.deleteUnitByIdUnitUnitIdDelete.bind(unitApi),
           value.ID,
         );
