@@ -23,5 +23,17 @@
   "data_type": "Typ parametru",
   "sure_you_want_delete_trend": "Czy jesteś pewien że chcesz usunąć Trend?",
   "sure_you_want_delete_trend_group": "Czy jesteś pewien że chcesz usunąć Grupę trendów?",
-  "sure_you_want_delete_unit": "Czy jesteś pewien że chcesz usunąć jednostkę?"
+  "sure_you_want_delete_unit": "Czy jesteś pewien że chcesz usunąć jednostkę?",
+  "name_required": "Nazwa jest wymagana",
+  "type_required": "Typ trendu jest wymagany",
+  "group_required": "Grupa trendu jest wymagana",
+  "unit_required": "Jednostka jest wymagana",
+  "raw_same": "Wartości Raw Min i Raw Max nie mogą być takie same",
+  "raw_range": "Raw Max musi być większe niż Raw Min",
+  "scaled_same": "Wartości Scaled Min i Scaled Max nie mogą być takie same",
+  "scaled_range": "Scaled Max musi być większe niż Scaled Min",
+  "raw_min": "Min sur.",
+  "raw_max": "Max sur.",
+  "scaled_min": "Min skal.",
+  "scaled_max": "Mak skal."
 }
