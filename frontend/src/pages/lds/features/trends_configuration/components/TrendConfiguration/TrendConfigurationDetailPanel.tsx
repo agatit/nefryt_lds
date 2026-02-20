@@ -19,7 +19,8 @@ import {
   trashIcon,
   pencilIcon,
 } from "@progress/kendo-svg-icons";
-
+import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import {
   Trend,
   TrendDef,
@@ -41,17 +42,151 @@ interface Props {
   requestDelete: (value: ParsedTrendType) => void;
 }
 
+interface TrendFormValues {
+  Name: string;
+  TrendDefID: TrendDef | null;
+  TrendGroupID: TrendGroup | null;
+  UnitID: Unit | null;
+  Color: string;
+  RawMin: number | null;
+  RawMax: number | null;
+  ScaledMin: number | null;
+  ScaledMax: number | null;
+}
+
+interface ValidationErrors {
+  [key: string]: string;
+}
+
 const ValidatedInput = (props: FieldRenderProps) => {
-  const { validationMessage, touched, visited, ...inputProps } = props;
+  const { validationMessage, touched, modified, ...inputProps } = props;
 
   return (
     <div>
-      <NumericTextBox {...inputProps} />
-      {(touched || visited) && validationMessage && (
+      <div className="field-wrapper">
+        <NumericTextBox {...inputProps} />
+        {(touched || modified) && validationMessage && (
+          <Error>{validationMessage}</Error>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ValidatedTextBox = (props: FieldRenderProps) => {
+  const { validationMessage, touched, modified, ...inputProps } = props;
+
+  return (
+    <div className="field-wrapper">
+      <TextBox {...inputProps} />
+      {(touched || modified) && validationMessage && (
         <Error>{validationMessage}</Error>
       )}
     </div>
   );
+};
+
+const ValidatedDropDown = (
+  props: FieldRenderProps & {
+    data: any[];
+    textField: string;
+    dataItemKey: string;
+    disabled?: boolean;
+  },
+) => {
+  const { validationMessage, touched, modified, ...rest } = props;
+
+  return (
+    <div className="field-wrapper">
+      <DropDownList
+        {...rest}
+        validationMessage={validationMessage ?? undefined}
+        onChange={(e) => props.onChange({ value: e.value })}
+      />
+
+      {(touched || modified) && validationMessage && (
+        <Error>{validationMessage}</Error>
+      )}
+    </div>
+  );
+};
+
+const ValidatedColor = (props: FieldRenderProps) => {
+  const { validationMessage, touched, modified, ...rest } = props;
+
+  return (
+    <div className="field-wrapper">
+      <FlatColorPicker
+        {...rest}
+        showButtons={false}
+        showClearButton={false}
+        showPreview={false}
+        onChange={(e) => props.onChange({ value: e.value })}
+      />
+
+      {(touched || modified) && validationMessage && (
+        <Error>{validationMessage}</Error>
+      )}
+    </div>
+  );
+};
+
+const trendValidator = (t: TFunction) => (values: TrendFormValues) => {
+  const errors: ValidationErrors = {};
+
+  if (!values.Name?.trim()) {
+    errors.Name = t("config-page:name_required");
+  }
+
+  if (!values.TrendDefID) {
+    errors.TrendDefID = t("config-page:type_required");
+  }
+
+  if (!values.TrendGroupID) {
+    errors.TrendGroupID = t("config-page:group_required");
+  }
+
+  if (!values.UnitID) {
+    errors.UnitID = t("config-page:unit_required");
+  }
+
+  if (
+    values.RawMin != null &&
+    values.RawMax != null &&
+    values.RawMin === values.RawMax
+  ) {
+    errors.RawMin = " ";
+    errors.RawMax = t("config-page:raw_same");
+  }
+
+  if (
+    values.RawMin != null &&
+    values.RawMax != null &&
+    values.RawMin > values.RawMax
+  ) {
+    errors.RawMin = " ";
+    errors.RawMax = t("config-page:raw_range");
+  }
+
+  if (
+    values.ScaledMin != null &&
+    values.ScaledMax != null &&
+    values.ScaledMin > values.ScaledMax
+  ) {
+    errors.ScaledMin = " ";
+    errors.ScaledMax = t("config-page:scaled_same");
+  }
+
+  if (
+    values.ScaledMin != null &&
+    values.ScaledMax != null &&
+    values.ScaledMin === values.ScaledMax
+  ) {
+    errors.ScaledMin = " ";
+    errors.ScaledMax = t("config-page:scaled_range");
+  }
+
+  return Object.keys(errors).length ? errors : undefined;
 };
 
 const TrendConfigurationDetailPanel = React.memo(function ({
@@ -67,6 +202,7 @@ const TrendConfigurationDetailPanel = React.memo(function ({
 }: Props) {
   const [inEdit, setInEdit] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const { t } = useTranslation(["common", "config-page"]);
 
   const initialValues =
     addMode || !selected
@@ -88,18 +224,18 @@ const TrendConfigurationDetailPanel = React.memo(function ({
           UnitID: units.find((t) => t.ID === selected.UnitID),
         };
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: TrendFormValues) => {
     const payload: Trend = {
       ID: addMode ? 0 : selected!.ID,
       Name: values.Name,
-      TrendDefID: values.TrendDefID?.ID ?? values.TrendDefID,
-      TrendGroupID: values.TrendGroupID?.ID ?? values.TrendGroupID,
-      UnitID: values.UnitID?.ID ?? values.UnitID,
+      TrendDefID: String(values.TrendDefID?.ID ?? ""),
+      TrendGroupID: values.TrendGroupID?.ID ?? 0,
+      UnitID: String(values.UnitID?.ID ?? ""),
       Color: values.Color,
-      RawMin: values.RawMin,
-      RawMax: values.RawMax,
-      ScaledMin: values.ScaledMin,
-      ScaledMax: values.ScaledMax,
+      RawMin: values.RawMin ?? 0,
+      RawMax: values.RawMax ?? 0,
+      ScaledMin: values.ScaledMin ?? 0,
+      ScaledMax: values.ScaledMax ?? 0,
     };
 
     try {
@@ -126,79 +262,79 @@ const TrendConfigurationDetailPanel = React.memo(function ({
     <Form
       key={addMode ? "add" : selected?.ID}
       initialValues={initialValues}
-      onSubmit={handleSubmit}
+      validator={trendValidator(t)}
+      onSubmit={(values) => handleSubmit(values as TrendFormValues)}
       render={(formProps) => (
         <FormElement className="detail-panel-content">
-          <Label>Name</Label>
-          <Field name="Name" component={TextBox} disabled={!inEdit} />
+          <div className="item-column">
+            <Label>{t("config-page:name")}</Label>
+            <Field
+              name="Name"
+              component={ValidatedTextBox}
+              disabled={!inEdit}
+            />
 
-          <Label>Trend Type</Label>
-          <Field
-            name="TrendDefID"
-            component={(props: any) => (
-              <DropDownList
-                {...props}
-                data={trendDefs}
-                textField="Name"
-                dataItemKey="ID"
-                disabled={!inEdit}
-                onChange={(e) => props.onChange({ value: e.value })}
-              />
-            )}
-          />
+            <Label>{t("config-page:trend_type")}</Label>
+            <Field
+              name="TrendDefID"
+              component={ValidatedDropDown}
+              data={trendDefs}
+              textField="Name"
+              dataItemKey="ID"
+              disabled={!inEdit}
+            />
 
-          <Label>Trend Group</Label>
-          <Field
-            name="TrendGroupID"
-            component={(props: any) => (
-              <DropDownList
-                {...props}
-                data={trendGroups}
-                textField="Name"
-                dataItemKey="ID"
-                disabled={!inEdit}
-                onChange={(e) => props.onChange({ value: e.value })}
-              />
-            )}
-          />
+            <Label>{t("config-page:trend_group")}</Label>
+            <Field
+              name="TrendGroupID"
+              component={ValidatedDropDown}
+              data={trendGroups}
+              textField="Name"
+              dataItemKey="ID"
+              disabled={!inEdit}
+            />
 
-          <Label>Unit</Label>
-          <Field
-            name="UnitID"
-            component={(props: any) => (
-              <DropDownList
-                {...props}
-                data={units}
-                textField="Symbol"
-                dataItemKey="ID"
-                disabled={!inEdit}
-                onChange={(e) => props.onChange({ value: e.value })}
-              />
-            )}
-          />
+            <Label>{t("config-page:unit")}</Label>
+            <Field
+              name="UnitID"
+              component={ValidatedDropDown}
+              data={units}
+              textField="Name"
+              dataItemKey="ID"
+              disabled={!inEdit}
+            />
 
-          <Label>Color</Label>
-          <Field name="Color" component={FlatColorPicker} />
+            <Label>{t("config-page:color")}</Label>
+            <Field name="Color" component={ValidatedColor} disabled={!inEdit} />
 
-          <Label>Raw Min</Label>
-          <Field name="RawMin" component={ValidatedInput} disabled={!inEdit} />
+            <Label>{t("config-page:raw_min")}</Label>
+            <Field
+              name="RawMin"
+              component={ValidatedInput}
+              disabled={!inEdit}
+            />
 
-          <Label>Raw Max</Label>
-          <Field name="RawMax" component={ValidatedInput} disabled={!inEdit} />
+            <Label>{t("config-page:raw_max")}</Label>
+            <Field
+              name="RawMax"
+              component={ValidatedInput}
+              disabled={!inEdit}
+            />
 
-          <Label>Scaled Min</Label>
-          <Field
-            name="ScaledMin"
-            component={ValidatedInput}
-            disabled={!inEdit}
-          />
+            <Label>{t("config-page:scaled_min")}</Label>
+            <Field
+              name="ScaledMin"
+              component={ValidatedInput}
+              disabled={!inEdit}
+            />
 
-          <Label>Scaled Max</Label>
-          <Field
-            name="ScaledMax"
-            component={ValidatedInput}
-            disabled={!inEdit}
-          />
+            <Label>{t("config-page:scaled_max")}</Label>
+            <Field
+              name="ScaledMax"
+              component={ValidatedInput}
+              disabled={!inEdit}
+            />
+          </div>
 
           <div className="item-row">
             {!inEdit && !addMode ? (
