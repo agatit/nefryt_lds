@@ -99,17 +99,18 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
   const [inEdit, setInEdit] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const initialValues: LinkFormValues = addMode
-    ? {
-        BeginNodeID: null,
-        EndNodeID: null,
-        Length: null,
-      }
-    : {
-        BeginNodeID: selected?.BeginNodeID ?? null,
-        EndNodeID: selected?.EndNodeID ?? null,
-        Length: selected?.Length != null ? Number(selected.Length) : null,
-      };
+  const initialValues =
+    addMode || !selected
+      ? {
+          BeginNodeID: null,
+          EndNodeID: null,
+          Length: null,
+        }
+      : {
+          BeginNodeID: selected?.BeginNodeID ?? null,
+          EndNodeID: selected?.EndNodeID ?? null,
+          Length: selected?.Length != null ? Number(selected.Length) : null,
+        };
 
   const handleSubmit = React.useCallback(
     async (values: LinkFormValues) => {
@@ -145,35 +146,38 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
 
   return (
     <Form
-      key={addMode ? "add" : (selected?.ID ?? "empty")}
+      key={addMode ? "add" : selected?.ID}
       initialValues={initialValues}
       validator={linkValidator(t)}
       onSubmit={(values) => handleSubmit(values as LinkFormValues)}
       render={(formProps) => (
         <FormElement className="detail-panel-content">
           <div className="item-column">
-            <Label>{t("links-page:begin_node")}</Label>
-            <Field
-              name="BeginNodeID"
-              component={ValidatedInput}
-              disabled={!inEdit}
-            />
-
-            <Label>{t("links-page:end_node")}</Label>
-            <Field
-              name="EndNodeID"
-              component={ValidatedInput}
-              disabled={!inEdit}
-            />
-
-            <Label>{t("links-page:length")}</Label>
-            <Field
-              name="Length"
-              component={ValidatedInput}
-              disabled={!inEdit}
-            />
+            <div>
+              <Label>{t("links-page:begin_node")}</Label>
+              <Field
+                name="BeginNodeID"
+                component={ValidatedInput}
+                disabled={!inEdit}
+              />
+            </div>
+            <div>
+              <Label>{t("links-page:end_node")}</Label>
+              <Field
+                name="EndNodeID"
+                component={ValidatedInput}
+                disabled={!inEdit}
+              />
+            </div>
+            <div>
+              <Label>{t("links-page:length")}</Label>
+              <Field
+                name="Length"
+                component={ValidatedInput}
+                disabled={!inEdit}
+              />
+            </div>
           </div>
-
           <div className="item-row">
             {!inEdit && !addMode ? (
               <>
