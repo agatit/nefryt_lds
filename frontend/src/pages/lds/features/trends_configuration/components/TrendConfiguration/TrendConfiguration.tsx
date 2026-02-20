@@ -98,10 +98,10 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
         title={t("config-page:color")}
         cells={{ data: ColorGridCell }}
       />
-      <GridColumn field="RawMin" title="Raw Min" />
-      <GridColumn field="RawMax" title="Raw Max" />
-      <GridColumn field="ScaledMin" title="Scaled Min" />
-      <GridColumn field="ScaledMax" title="Scaled Max" />
+      <GridColumn field="RawMin" title={t("config-page:raw_min")} />
+      <GridColumn field="RawMax" title={t("config-page:raw_max")} />
+      <GridColumn field="ScaledMin" title={t("config-page:scaled_min")} />
+      <GridColumn field="ScaledMax" title={t("config-page:scaled_max")} />
     </Grid>
   );
 });
