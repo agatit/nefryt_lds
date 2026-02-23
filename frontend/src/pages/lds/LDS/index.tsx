@@ -418,6 +418,11 @@ export default function LDS() {
     setTemplates(nav.useMockup ? mockupTemplates : []);
   }, [nav.useMockup]);
 
+  const unitSymbols = React.useMemo(
+    () => Array.from(new Set(units?.map((u) => u.Symbol).filter(Boolean))),
+    [units],
+  );
+
   const addTrend = React.useCallback(
     async (value: TrendCreate) => {
       if (nav.useMockup) {
@@ -1630,6 +1635,7 @@ export default function LDS() {
               addTemplate={addTemplate}
               deleteTemplate={deleteTemplate}
               updateTemplate={updateTemplate}
+              unitSymbols={unitSymbols}
             >
               <Routes>
                 <Route path="/" element={<HomePage key={"home-page"} />} />

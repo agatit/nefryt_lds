@@ -118,6 +118,7 @@ export type LDSContextType = {
   addTemplate: (template: TemplateCreate) => Promise<void>;
   updateTemplate: (id: number, template: TemplateUpdate) => Promise<void>;
   deleteTemplate: (id: number) => Promise<void>;
+  unitSymbols: string[];
 };
 
 export const LDSContext = React.createContext<LDSContextType | null>(null);
@@ -201,6 +202,7 @@ interface LDSContextProviderProps extends PropsWithChildren {
   addTemplate: (template: TemplateCreate) => Promise<void>;
   updateTemplate: (id: number, template: TemplateUpdate) => Promise<void>;
   deleteTemplate: (id: number) => Promise<void>;
+  unitSymbols: string[];
 }
 
 export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
@@ -269,6 +271,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
   addTemplate,
   updateTemplate,
   deleteTemplate,
+  unitSymbols,
 }: LDSContextProviderProps) => {
   const value = React.useMemo(
     () => ({
@@ -336,6 +339,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addTemplate,
       updateTemplate,
       deleteTemplate,
+      unitSymbols,
     }),
     [
       trendDefs,
@@ -396,6 +400,7 @@ export const LDSContextProvider: React.FC<LDSContextProviderProps> = ({
       addTemplate,
       updateTemplate,
       deleteTemplate,
+      unitSymbols,
     ],
   );
 
