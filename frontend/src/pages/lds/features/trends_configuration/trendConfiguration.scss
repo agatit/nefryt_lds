@@ -20,29 +20,10 @@ main.config-page {
   width: 100%;
 }
 
-.config-grid-container>.defs-and-groups {
-  display: flex;
-  flex-direction: row;
-
-  gap: k-spacing(2);
-}
-
-.config-grid-container>.defs-and-groups>* {
-  flex: 1 1 0;
-}
-
 .config-detail-panel.no-selected>div {
   justify-content: center;
   height: 100%;
   cursor: not-allowed;
-}
-
-.config-detail-panel .k-alpha-slider {
-  display: none;
-}
-
-.config-page .k-table-row:hover {
-  cursor: pointer;
 }
 
 .detail-panel-content {
@@ -62,12 +43,8 @@ main.config-page {
 .detail-panel-content .item-column>div {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   width: 100%;
-  gap: 0 !important;
-}
-
-.k-form {
-  gap: 10px;
 }
 
 .field-wrapper {
@@ -75,15 +52,9 @@ main.config-page {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  width: 100% !important;
+  width: 100%;
   margin: 0;
   padding: 0;
-}
-
-.field-wrapper .k-input,
-.field-wrapper .k-textbox,
-.field-wrapper .k-input-inner .field-wrapper .k-numerictextbox {
-  width: 100%;
 }
 
 .field-input {
@@ -93,4 +64,20 @@ main.config-page {
 .field-error {
   margin-top: 4px;
   font-size: 12px;
+}
+
+.k-label {
+  font-size: 1rem;
+  color: #000000;
+}
+
+.field-wrapper .k-form-error,
+.field-wrapper .k-error {
+  margin-top: 0;
+  align-self: flex-start;
+  text-align: left;
+}
+
+.field-wrapper .k-coloreditor{
+  width: 100%;
 }
