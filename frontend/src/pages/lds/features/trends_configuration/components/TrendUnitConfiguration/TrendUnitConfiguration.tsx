@@ -6,220 +6,71 @@ import {
   GridSelectionChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
-import {
-  cancelIcon,
-  checkIcon,
-  plusIcon,
-  trashIcon,
-} from "@progress/kendo-svg-icons";
+import { plusIcon, trashIcon } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Unit } from "../../../../../../services/api";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import { Label } from "@progress/kendo-react-labels";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 
 export interface TrendUnitConfigurationProps {
-  showDialog: boolean;
-  openDialog: () => void;
-  closeDialog: () => void;
   units: Unit[];
-  addUnit: (value: Unit) => Promise<void>;
-  deleteUnit: (value: Unit) => Promise<void>;
+  deleteUnit: (value: Unit) => void;
   selected: Unit | null;
-  setSelected: (value: Unit) => void;
+  setSelected: (value: Unit | null) => void;
+  enterAddNewUnit: () => void;
 }
 
 const TrendUnitConfiguration = React.memo(function TrendUnitConfiguration({
-  showDialog,
-  openDialog,
-  closeDialog,
   units,
-  addUnit,
   deleteUnit,
   selected,
   setSelected,
+  enterAddNewUnit,
 }: TrendUnitConfigurationProps) {
   const { t } = useTranslation(["common", "config-page"]);
-
   const [select, setSelect] = React.useState<SelectDescriptor>();
-  React.useEffect(() => {
-    if (selected == null) setSelect({});
-  }, [selected]);
 
   const handleSelectionChange = React.useCallback(
     (event: GridSelectionChangeEvent) => {
-      const item: Unit = event.endDataItem;
+      const item = event.endDataItem as Unit;
       setSelected(item);
       setSelect(event.select);
     },
     [setSelected],
   );
 
-  const [unitName, setUnitName] = React.useState<string | undefined>();
-  const [unitSymbol, setUnitSymbol] = React.useState<string | undefined>();
-  const [unitMultiplier, setUnitMultiplier] = React.useState<
-    string | undefined
-  >();
-
-  const handleUnitNameChange = React.useCallback(
-    (event: TextBoxChangeEvent) => {
-      if (event.value) setUnitName(event.value.toString());
-    },
-    [],
-  );
-  const handleUnitSymbolChange = React.useCallback(
-    (event: TextBoxChangeEvent) => {
-      if (event.value) setUnitSymbol(event.value.toString());
-    },
-    [],
-  );
-  const handleUnitMultiplierChange = React.useCallback(
-    (event: TextBoxChangeEvent) => {
-      if (event.value) setUnitMultiplier(event.value.toString());
-    },
-    [],
-  );
-
-  const cancelAddNewUnit = React.useCallback(() => {
-    setUnitName(undefined);
-    setUnitSymbol(undefined);
-    setUnitMultiplier(undefined);
-    closeDialog();
-  }, [closeDialog]);
-
-  const confirmAddNewUnit = React.useCallback(async () => {
-    const newUnit: Unit = {
-      ID: (units.length + 100).toString(),
-      Name: unitName!,
-      Symbol: unitSymbol!,
-      Multiplier: unitMultiplier!,
-    };
-    await addUnit(newUnit);
-    closeDialog();
-  }, [closeDialog, addUnit, units, unitName, unitSymbol, unitMultiplier]);
-
-  // Deletion dialog
-  const [showDeletionDialog, setShowDeletionDialog] =
-    React.useState<boolean>(false);
-  const openDeletionDialog = React.useCallback(() => {
-    setShowDeletionDialog(true);
-  }, []);
-  const closeDeletionDialog = React.useCallback(() => {
-    setShowDeletionDialog(false);
-  }, []);
-
-  const confirmDeletion = React.useCallback(async () => {
-    await deleteUnit(selected!);
-    closeDeletionDialog();
-  }, [selected, deleteUnit]);
+  React.useEffect(() => {
+    if (!selected) setSelect({});
+  }, [selected]);
 
   return (
-    <React.Fragment>
-      <Grid
-        data={units}
-        sortable={true}
-        dataItemKey="ID"
-        selectable={{ enabled: true, mode: "single" }}
-        select={select}
-        onSelectionChange={handleSelectionChange}
-      >
-        <GridToolbar>
-          <GridSearchBox />
-          <ButtonGroup>
-            <Button svgIcon={plusIcon} onClick={openDialog}>
-              {t("config-page:add_new_unit")}
-            </Button>
-            {selected && (
-              <Button svgIcon={trashIcon} onClick={openDeletionDialog}>
-                {t("common:delete")}
-              </Button>
-            )}
-          </ButtonGroup>
-        </GridToolbar>
-        <GridColumn
-          title={t("config-page:name")}
-          sortable={true}
-          field="Name"
-        />
-        <GridColumn
-          title={t("config-page:symbol")}
-          sortable={true}
-          field="Symbol"
-        />
-        <GridColumn
-          title={t("config-page:multiplier")}
-          sortable={true}
-          field="Multiplier"
-        />
-      </Grid>
-      {showDialog && (
-        <Dialog
-          title={t("config-page:create_new_trend_group")}
-          onClose={cancelAddNewUnit}
-        >
-          <div>
-            <Label editorId="unitName">{t("config-page:name")}</Label>
-            <TextBox
-              id="unitName"
-              value={unitName}
-              onChange={handleUnitNameChange}
-            />
-          </div>
-          <div>
-            <Label editorId="unitSymbol">{t("config-page:symbol")}</Label>
-            <TextBox
-              id="unitSymbol"
-              value={unitSymbol}
-              onChange={handleUnitSymbolChange}
-            />
-          </div>
-          <div>
-            <Label editorId="unitMultiplier">
-              {t("config-page:multiplier")}
-            </Label>
-            <TextBox
-              id="unitMultiplier"
-              value={unitMultiplier}
-              onChange={handleUnitMultiplierChange}
-            />
-          </div>
-          <DialogActionsBar>
-            <Button svgIcon={cancelIcon} onClick={cancelAddNewUnit}>
-              {t("common:cancel")}
-            </Button>
-            <Button
-              svgIcon={checkIcon}
-              themeColor={"primary"}
-              onClick={confirmAddNewUnit}
-            >
-              {t("common:confirm")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
-      {showDeletionDialog && (
-        <Dialog
-          title={t("common:confirm_deletion")}
-          onClose={closeDeletionDialog}
-        >
-          {t("config-page:sure_you_want_delete_unit")}
-          <DialogActionsBar>
-            <Button svgIcon={cancelIcon} onClick={closeDeletionDialog}>
-              {t("common:cancel")}
-            </Button>
-            <Button
-              svgIcon={trashIcon}
-              onClick={confirmDeletion}
-              themeColor={"primary"}
-            >
+    <Grid
+      data={units}
+      sortable
+      dataItemKey="ID"
+      selectable={{ enabled: true, mode: "single" }}
+      select={select}
+      onSelectionChange={handleSelectionChange}
+    >
+      <GridToolbar>
+        <GridSearchBox />
+        <ButtonGroup>
+          <Button svgIcon={plusIcon} onClick={enterAddNewUnit}>
+            {t("config-page:add_new_unit")}
+          </Button>
+
+          {selected && (
+            <Button svgIcon={trashIcon} onClick={() => deleteUnit(selected)}>
               {t("common:delete")}
             </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
-    </React.Fragment>
+          )}
+        </ButtonGroup>
+      </GridToolbar>
+
+      <GridColumn field="Name" title={t("config-page:name")} />
+      <GridColumn field="Symbol" title={t("config-page:symbol")} />
+      <GridColumn field="Multiplier" title={t("config-page:multiplier")} />
+    </Grid>
   );
 });
 

@@ -7,6 +7,16 @@ main.config-page {
   height: var.$underAppBarHeight;
 }
 
+main.config-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
+main.config-page .detail-panel-content .k-label {
+  margin-bottom: 4px;
+}
+
 .config-grid-container {
   flex: 4 0 0;
   overflow-y: hidden;
@@ -78,6 +88,6 @@ main.config-page {
   text-align: left;
 }
 
-.field-wrapper .k-coloreditor{
+.field-wrapper .k-coloreditor {
   width: 100%;
 }

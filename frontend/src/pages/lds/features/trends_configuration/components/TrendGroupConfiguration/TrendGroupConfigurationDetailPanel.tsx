@@ -1,157 +1,216 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendGroup } from "../../../../../../services/api";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
-import { Label } from "@progress/kendo-react-labels";
+import {
+  Form,
+  Field,
+  FormElement,
+  FieldRenderProps,
+} from "@progress/kendo-react-form";
+import { TextBox } from "@progress/kendo-react-inputs";
+import { Label, Error } from "@progress/kendo-react-labels";
 import {
   cancelIcon,
   pencilIcon,
-  plusIcon,
   saveIcon,
   trashIcon,
 } from "@progress/kendo-svg-icons";
 import { Button } from "@progress/kendo-react-buttons";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import { TrendGroup } from "../../../../../../services/api";
 
 export interface TrendGroupConfigurationDetailPanelProps {
   editTrendGroup: (value: TrendGroup) => Promise<void>;
   deleteTrendGroup: (value: TrendGroup) => Promise<void>;
+  addTrendGroup: (value: TrendGroup) => Promise<void>;
   selected: TrendGroup | null;
-  enterAddNewTrendGroup: () => void;
+  addMode: boolean;
+  setAddMode: (v: boolean) => void;
 }
+
+interface TrendGroupFormValues {
+  Name: string;
+}
+
+const ValidatedTextBox = (props: FieldRenderProps) => {
+  const { validationMessage, touched, modified, ...inputProps } = props;
+
+  return (
+    <div className="field-wrapper">
+      <TextBox {...inputProps} />
+      {(touched || modified) && validationMessage && (
+        <Error>{validationMessage}</Error>
+      )}
+    </div>
+  );
+};
+
+const validator = (values: TrendGroupFormValues) => {
+  const errors: any = {};
+
+  if (!values.Name?.trim()) {
+    errors.Name = "Name required";
+  }
+
+  return Object.keys(errors).length ? errors : undefined;
+};
 
 const TrendGroupConfigurationDetailPanel = React.memo(
   function TrendGroupConfigurationDetailPanel({
     editTrendGroup,
     deleteTrendGroup,
+    addTrendGroup,
     selected,
-    enterAddNewTrendGroup,
+    addMode,
+    setAddMode,
   }: TrendGroupConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
 
-    const setSelectedData = React.useCallback(
-      (selectedTrendGroup: TrendGroup) => {
-        setTrendGroupID(selectedTrendGroup.ID);
-        setTrendGroupName(selectedTrendGroup.Name ?? "");
-      },
-      [],
-    );
-
-    const [inEdit, setInEdit] = React.useState<boolean>(false);
-
-    const enterEdit = React.useCallback(() => {
-      setInEdit(true);
-    }, []);
-    const cancelEdit = React.useCallback(() => {
-      setInEdit(false);
-      if (selected !== null) setSelectedData(selected);
-    }, [selected, setSelectedData]);
-
-    const [trendGroupID, setTrendGroupID] = React.useState<number | undefined>(
-      selected?.ID,
-    );
-    const [trendGroupName, setTrendGroupName] = React.useState<
-      string | undefined
-    >(selected?.Name ?? "");
+    const [inEdit, setInEdit] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
 
     React.useEffect(() => {
-      if (selected !== null) setSelectedData(selected);
-    }, [selected]);
+      setInEdit(addMode);
+    }, [selected, addMode]);
 
-    const handleTrendGroupNameChange = React.useCallback(
-      (event: TextBoxChangeEvent) => {
-        if (event.value) setTrendGroupName(event.value.toString());
-      },
-      [],
-    );
+    const initialValues: TrendGroupFormValues =
+      addMode || !selected ? { Name: "" } : { Name: selected.Name ?? "" };
 
-    const saveEdit = React.useCallback(async () => {
-      const newTrendGroup: TrendGroup = {
-        ID: trendGroupID!,
-        Name: trendGroupName!,
-      };
+    const handleSubmit = async (values: TrendGroupFormValues) => {
+      try {
+        setLoading(true);
 
-      await editTrendGroup(newTrendGroup);
-      setInEdit(false);
-    }, [editTrendGroup, trendGroupID, trendGroupName]);
+        if (addMode) {
+          await addTrendGroup({
+            ID: 0,
+            Name: values.Name,
+          });
 
-    // Deletion dialog
-    const [showDialog, setShowDialog] = React.useState<boolean>(false);
-    const openDialog = React.useCallback(() => {
-      setShowDialog(true);
-    }, []);
-    const closeDialog = React.useCallback(() => {
-      setShowDialog(false);
-    }, []);
+          setAddMode(false);
+          return;
+        }
 
-    const confirmDeletion = React.useCallback(async () => {
-      await deleteTrendGroup(selected!);
-      setInEdit(false);
-      closeDialog();
-    }, [selected, deleteTrendGroup]);
+        if (!selected) return;
+
+        await editTrendGroup({
+          ID: selected.ID,
+          Name: values.Name,
+        });
+
+        setInEdit(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const confirmDelete = async () => {
+      if (!selected) return;
+
+      try {
+        setLoading(true);
+        await deleteTrendGroup(selected);
+        setShowDeleteDialog(false);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     return (
-      <div className="detail-panel-content">
-        <div className="item">
-          <div className="item-column">
-            <div>
-              <Label editorId="trendGroupName">{t("config-page:name")}</Label>
-              <TextBox
-                id="trendGroupName"
-                value={trendGroupName}
-                onChange={handleTrendGroupNameChange}
-                disabled={!inEdit}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="separator" />
-        <div className="item">
-          {!inEdit ? (
-            <div className="item-row">
-              <Button svgIcon={pencilIcon} onClick={enterEdit}>
-                {t("common:edit")}
-              </Button>
-              <Button svgIcon={plusIcon} onClick={enterAddNewTrendGroup}>
-                {t("config-page:add_new_trend_group")}
-              </Button>
-            </div>
-          ) : (
-            <div className="item-row">
-              <Button svgIcon={cancelIcon} onClick={cancelEdit}>
-                {t("common:cancel")}
-              </Button>
-              <Button svgIcon={trashIcon} onClick={openDialog}>
-                {t("common:delete")}
-              </Button>
-              <Button
-                svgIcon={saveIcon}
-                onClick={saveEdit}
-                themeColor={"primary"}
-              >
-                {t("common:save")}
-              </Button>
-            </div>
+      <>
+        <Form
+          key={addMode ? "add" : selected?.ID}
+          initialValues={initialValues}
+          validator={validator}
+          onSubmit={(values) => handleSubmit(values as TrendGroupFormValues)}
+          render={(formProps) => (
+            <FormElement className="detail-panel-content">
+              <div className="item-column">
+                <div>
+                  <Label>{t("config-page:name")}</Label>
+                  <Field
+                    name="Name"
+                    component={ValidatedTextBox}
+                    disabled={!inEdit && !addMode}
+                  />
+                </div>
+              </div>
+
+              <div className="separator" />
+
+              <div className="item-row">
+                {!inEdit && !addMode ? (
+                  <>
+                    <Button
+                      svgIcon={pencilIcon}
+                      onClick={() => setInEdit(true)}
+                    >
+                      {t("common:edit")}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      svgIcon={cancelIcon}
+                      disabled={loading}
+                      onClick={() => {
+                        setInEdit(false);
+                        setAddMode(false);
+                        formProps.onFormReset();
+                      }}
+                    >
+                      {t("common:cancel")}
+                    </Button>
+
+                    {!addMode && selected && (
+                      <Button
+                        svgIcon={trashIcon}
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
+                        {t("common:delete")}
+                      </Button>
+                    )}
+
+                    <Button
+                      svgIcon={saveIcon}
+                      themeColor="primary"
+                      disabled={!formProps.allowSubmit || loading}
+                      onClick={formProps.onSubmit}
+                    >
+                      {addMode ? t("common:add") : t("common:save")}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </FormElement>
           )}
-        </div>
-        {showDialog && (
-          <Dialog title={t("common:confirm_deletion")} onClose={closeDialog}>
+        />
+
+        {showDeleteDialog && (
+          <Dialog
+            title={t("common:confirm_deletion")}
+            onClose={() => setShowDeleteDialog(false)}
+          >
             {t("config-page:sure_you_want_delete_trend_group")}
+
             <DialogActionsBar>
-              <Button svgIcon={cancelIcon} onClick={closeDialog}>
+              <Button
+                disabled={loading}
+                onClick={() => setShowDeleteDialog(false)}
+              >
                 {t("common:cancel")}
               </Button>
+
               <Button
-                svgIcon={trashIcon}
-                onClick={confirmDeletion}
-                themeColor={"primary"}
+                themeColor="primary"
+                disabled={loading}
+                onClick={confirmDelete}
               >
                 {t("common:delete")}
               </Button>
             </DialogActionsBar>
           </Dialog>
         )}
-      </div>
+      </>
     );
   },
 );

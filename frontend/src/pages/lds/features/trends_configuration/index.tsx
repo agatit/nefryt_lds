@@ -44,16 +44,19 @@ export interface ParsedTrendType extends Trend {
   unit: string;
 }
 
+type AddModeType = "trend" | "trendGroup" | "unit" | null;
+
+type DeleteTarget =
+  | { type: "trend"; item: ParsedTrendType }
+  | { type: "trendGroup"; item: TrendGroup }
+  | { type: "unit"; item: Unit }
+  | null;
+
 const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
   const { t } = useTranslation(["common", "config-page"]);
   const ldsContext = useContext(LDSContext);
-
   if (!ldsContext) return null;
 
-  const [verticalPanes, setVerticalPanes] = useState<SplitterPaneProps[]>([
-    { size: "66%" },
-    {},
-  ]);
   const {
     trends,
     deleteTrend,
@@ -67,14 +70,18 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     addTrendGroup,
     addUnit,
   } = ldsContext;
+
+  const { unitSymbols } = ldsContext;
+
+  const [verticalPanes, setVerticalPanes] = useState<SplitterPaneProps[]>([
+    { size: "66%" },
+    {},
+  ]);
+
   const [panelOpen, setPanelOpen] = useState(false);
-  const [addMode, setAddMode] = useState(false);
+  const [addMode, setAddMode] = useState<AddModeType>(null);
   const [tabSelected, setTabSelected] = useState(0);
-  const [showAddNewTrendGroupDialog, setShowAddNewTrendGroupDialog] =
-    useState(false);
-  const [showAddNewUnitDialog, setShowAddNewUnitDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selected, setSelected] = useState<ParsedTrendType | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
 
   const [selection, setSelection] = useState<SelectionType>({
     trend: null,
@@ -84,143 +91,108 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     unit: null,
   });
 
+  const clearSelection = () =>
+    setSelection({
+      trend: null,
+      trendParamDef: null,
+      trendDef: null,
+      trendGroup: null,
+      unit: null,
+    });
+
+  const openAddMode = (mode: AddModeType) => {
+    clearSelection();
+    setAddMode(mode);
+    setPanelOpen(true);
+  };
+
   const handleVerticalChange = (event: SplitterOnChangeEvent) => {
     setVerticalPanes(event.newState);
   };
-
-  const openAddNewTrendGroupDialog = () => setShowAddNewTrendGroupDialog(true);
-
-  const closeAddNewTrendGroupDialog = () =>
-    setShowAddNewTrendGroupDialog(false);
-
-  const openAddNewUnitDialog = () => setShowAddNewUnitDialog(true);
-
-  const closeAddNewUnitDialog = () => setShowAddNewUnitDialog(false);
 
   const handleTabSelect = useCallback((e: TabStripSelectEventArguments) => {
     setTabSelected(e.selected);
   }, []);
 
-  const requestDelete = useCallback((trend: ParsedTrendType) => {
-    setSelected(trend);
-    setShowDeleteDialog(true);
-  }, []);
+  const handleSelectedTrendChange = (value: ParsedTrendType | null) => {
+    setAddMode(null);
+    clearSelection();
+    if (value) {
+      setSelection((prev) => ({ ...prev, trend: value }));
+      setPanelOpen(true);
+    }
+  };
 
-  const confirmDelete = useCallback(async () => {
-    if (!selected) return;
+  const handleSelectedTrendDefChange = (value: TrendDef | null) => {
+    setAddMode(null);
+    clearSelection();
+    if (value) {
+      setSelection((prev) => ({ ...prev, trendDef: value }));
+      setPanelOpen(true);
+    }
+  };
+
+  const handleSelectedTrendGroupChange = (value: TrendGroup | null) => {
+    setAddMode(null);
+    clearSelection();
+    if (value) {
+      setSelection((prev) => ({ ...prev, trendGroup: value }));
+      setPanelOpen(true);
+    }
+  };
+
+  const handleSelectedUnitChange = (value: Unit | null) => {
+    setAddMode(null);
+    clearSelection();
+    if (value) {
+      setSelection((prev) => ({ ...prev, unit: value }));
+      setPanelOpen(true);
+    }
+  };
+
+  const requestDeleteTrend = (trend: ParsedTrendType) =>
+    setDeleteTarget({ type: "trend", item: trend });
+
+  const requestDeleteTrendGroup = (group: TrendGroup) =>
+    setDeleteTarget({ type: "trendGroup", item: group });
+
+  const requestDeleteUnit = (unit: Unit) =>
+    setDeleteTarget({ type: "unit", item: unit });
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      await deleteTrend(selected);
-      setSelected(null);
+      switch (deleteTarget.type) {
+        case "trend":
+          await deleteTrend(deleteTarget.item);
+          break;
+
+        case "trendGroup":
+          await ldsContext.deleteTrendGroup(deleteTarget.item);
+          break;
+
+        case "unit":
+          await ldsContext.deleteUnit(deleteTarget.item);
+          break;
+      }
+
+      clearSelection();
       setPanelOpen(false);
     } finally {
-      setShowDeleteDialog(false);
+      setDeleteTarget(null);
     }
-  }, [selected, deleteTrend]);
-
-  const openAddNewTrendPanel = () => {
-    setSelection({
-      trend: null,
-      trendParamDef: null,
-      trendDef: null,
-      trendGroup: null,
-      unit: null,
-    });
-
-    setAddMode(true);
-    setPanelOpen(true);
-  };
-
-  const handleSelectedTrendChange = (value: ParsedTrendType) => {
-    setAddMode(false);
-    setSelection({
-      trend: value,
-      trendParamDef: null,
-      trendDef: null,
-      trendGroup: null,
-      unit: null,
-    });
-    setPanelOpen(true);
-  };
-
-  const handleSelectedTrendDefChange = (value: TrendDef) => {
-    setSelection({
-      trend: null,
-      trendParamDef: null,
-      trendDef: value,
-      trendGroup: null,
-      unit: null,
-    });
-    setPanelOpen(true);
-  };
-
-  const handleSelectedTrendGroupChange = (value: TrendGroup) => {
-    setSelection({
-      trend: null,
-      trendParamDef: null,
-      trendDef: null,
-      trendGroup: value,
-      unit: null,
-    });
-    setPanelOpen(true);
-  };
-
-  const handleSelectedUnitChange = (value: Unit) => {
-    setSelection({
-      trend: null,
-      trendParamDef: null,
-      trendDef: null,
-      trendGroup: null,
-      unit: value,
-    });
-    setPanelOpen(true);
-  };
-
-  const handleSelectedTrendDeletion = async (value: Trend) => {
-    await ldsContext.deleteTrend(value);
-    setSelection({
-      trend: null,
-      trendParamDef: null,
-      trendDef: null,
-      trendGroup: null,
-      unit: null,
-    });
-    setPanelOpen(false);
-  };
-
-  const handleSelectedTrendGroupDeletion = async (value: TrendGroup) => {
-    await ldsContext.deleteTrendGroup(value);
-    setSelection({
-      trend: null,
-      trendParamDef: null,
-      trendDef: null,
-      trendGroup: null,
-      unit: null,
-    });
-    setPanelOpen(false);
-  };
-
-  const handleSelectedUnitDeletion = async (value: Unit) => {
-    await ldsContext.deleteUnit(value);
-    setSelection({
-      trend: null,
-      trendParamDef: null,
-      trendDef: null,
-      trendGroup: null,
-      unit: null,
-    });
-    setPanelOpen(false);
   };
 
   const isSelected =
-    addMode ||
+    addMode !== null ||
     selection.trend ||
     selection.trendDef ||
     selection.trendGroup ||
     selection.unit;
 
   const SelectedDetailPanel = () => {
-    if (selection.trend || addMode) {
+    if (selection.trend || addMode === "trend") {
       return (
         <TrendConfigurationDetailPanel
           trendDefs={trendDefs}
@@ -228,39 +200,47 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           units={units}
           editTrend={updateTrend}
           addTrend={addTrend}
-          deleteTrend={handleSelectedTrendDeletion}
+          deleteTrend={deleteTrend}
           selected={selection.trend}
-          addMode={addMode}
-          setAddMode={setAddMode}
-          requestDelete={requestDelete}
+          addMode={addMode === "trend"}
+          setAddMode={(v) => setAddMode(v ? "trend" : null)}
+          requestDelete={requestDeleteTrend}
         />
       );
     }
 
-    if (selection.trendDef)
+    if (selection.trendDef) {
       return <TrendDefConfigurationDetailPanel selected={selection.trendDef} />;
+    }
 
-    if (selection.trendGroup)
+    if (selection.trendGroup || addMode === "trendGroup") {
       return (
         <TrendGroupConfigurationDetailPanel
           editTrendGroup={updateTrendGroup}
-          deleteTrendGroup={handleSelectedTrendGroupDeletion}
+          deleteTrendGroup={ldsContext.deleteTrendGroup}
+          addTrendGroup={addTrendGroup}
           selected={selection.trendGroup}
-          enterAddNewTrendGroup={openAddNewTrendGroupDialog}
+          addMode={addMode === "trendGroup"}
+          setAddMode={(v) => setAddMode(v ? "trendGroup" : null)}
         />
       );
+    }
 
-    if (selection.unit)
+    if (selection.unit || addMode === "unit") {
       return (
         <TrendUnitConfigurationDetailPanel
           editUnit={updateUnit}
-          deleteUnit={handleSelectedUnitDeletion}
+          addUnit={addUnit}
+          requestDelete={requestDeleteUnit}
           selected={selection.unit}
-          enterAddNewUnit={openAddNewUnitDialog}
+          addMode={addMode === "unit"}
+          setAddMode={(v) => setAddMode(v ? "unit" : null)}
+          symbols={unitSymbols}
         />
       );
+    }
 
-    return <></>;
+    return null;
   };
 
   return (
@@ -278,15 +258,11 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           trends={trends}
           selected={selection.trend}
           setSelected={handleSelectedTrendChange}
-          enterAddNewTrend={openAddNewTrendPanel}
-          requestDelete={requestDelete}
+          enterAddNewTrend={() => openAddMode("trend")}
+          requestDelete={requestDeleteTrend}
         />
 
-        <TabStrip
-          className="config-trend-stuff-tab"
-          selected={tabSelected}
-          onSelect={handleTabSelect}
-        >
+        <TabStrip selected={tabSelected} onSelect={handleTabSelect}>
           <TabStripTab title={t("config-page:trends_types")}>
             <TrendDefConfiguration
               trendDefs={trendDefs}
@@ -297,27 +273,21 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
 
           <TabStripTab title={t("config-page:trends_groups")}>
             <TrendGroupConfiguration
-              showDialog={showAddNewTrendGroupDialog}
-              openDialog={openAddNewTrendGroupDialog}
-              closeDialog={closeAddNewTrendGroupDialog}
               trendGroups={trendGroups}
-              addTrendGroup={addTrendGroup}
-              deleteTrendGroup={handleSelectedTrendGroupDeletion}
               selected={selection.trendGroup}
               setSelected={handleSelectedTrendGroupChange}
+              requestDelete={requestDeleteTrendGroup}
+              enterAddNewTrendGroup={() => openAddMode("trendGroup")}
             />
           </TabStripTab>
 
           <TabStripTab title={t("config-page:trends_units")}>
             <TrendUnitConfiguration
-              showDialog={showAddNewUnitDialog}
-              openDialog={openAddNewUnitDialog}
-              closeDialog={closeAddNewUnitDialog}
               units={units}
-              addUnit={addUnit}
-              deleteUnit={handleSelectedUnitDeletion}
               selected={selection.unit}
               setSelected={handleSelectedUnitChange}
+              deleteUnit={requestDeleteUnit}
+              enterAddNewUnit={() => openAddMode("unit")}
             />
           </TabStripTab>
         </TabStrip>
@@ -333,14 +303,20 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         {isSelected && <SelectedDetailPanel />}
       </DetailPanel>
 
-      {showDeleteDialog && (
+      {deleteTarget && (
         <Dialog
           title={t("common:confirm_deletion")}
-          onClose={() => setShowDeleteDialog(false)}
+          onClose={() => setDeleteTarget(null)}
         >
-          {t("config-page:sure_you_want_delete_trend")}
+          {deleteTarget.type === "trend" &&
+            t("config-page:sure_you_want_delete_trend")}
+          {deleteTarget.type === "trendGroup" &&
+            t("config-page:sure_you_want_delete_trend_group")}
+          {deleteTarget.type === "unit" &&
+            t("config-page:sure_you_want_delete_unit")}
+
           <DialogActionsBar>
-            <Button onClick={() => setShowDeleteDialog(false)}>
+            <Button onClick={() => setDeleteTarget(null)}>
               {t("common:cancel")}
             </Button>
             <Button themeColor="primary" onClick={confirmDelete}>
