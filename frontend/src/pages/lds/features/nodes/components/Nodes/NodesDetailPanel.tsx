@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Form,
@@ -90,6 +90,7 @@ const NodesDetailPanel = memo(function NodesDetailPanel({
 }: Props) {
   const { t } = useTranslation(["common", "nodes-page"]);
   const [inEdit, setInEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const initialValues: NodesFormValues =
     addMode || !selected
@@ -108,35 +109,44 @@ const NodesDetailPanel = memo(function NodesDetailPanel({
           TrendID: selected.TrendID ?? null,
         };
 
-  const handleSubmit = async (values: NodesFormValues) => {
-    if (addMode) {
-      await addNode({
-        Type: values.Type,
-        Name: values.Name || null,
-        EditorParams: {
-          PosX: values.PosX ?? 0,
-          PosY: values.PosY ?? 0,
-        },
-        TrendID: values.TrendID ?? null,
-      });
+  const handleSubmit = useCallback(
+    async (values: NodesFormValues) => {
+      try {
+        setLoading(true);
 
-      setAddMode(false);
-      return;
-    }
+        if (addMode) {
+          await addNode({
+            Type: values.Type,
+            Name: values.Name || null,
+            EditorParams: {
+              PosX: values.PosX ?? 0,
+              PosY: values.PosY ?? 0,
+            },
+            TrendID: values.TrendID ?? null,
+          });
 
-    if (!selected) return;
+          setAddMode(false);
+          return;
+        }
 
-    await editNode(selected.ID!, {
-      Type: values.Type,
-      Name: values.Name ?? null,
-      EditorParams: {
-        PosX: values.PosX ?? 0,
-        PosY: values.PosY ?? 0,
-      },
-    });
+        if (!selected) return;
 
-    setInEdit(false);
-  };
+        await editNode(selected.ID!, {
+          Type: values.Type,
+          Name: values.Name ?? null,
+          EditorParams: {
+            PosX: values.PosX ?? 0,
+            PosY: values.PosY ?? 0,
+          },
+        });
+
+        setInEdit(false);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [addMode, addNode, editNode, selected, setAddMode],
+  );
 
   useEffect(() => {
     setInEdit(addMode);
@@ -198,6 +208,7 @@ const NodesDetailPanel = memo(function NodesDetailPanel({
                 <>
                   <Button
                     svgIcon={cancelIcon}
+                    disabled={loading}
                     onClick={() => {
                       setInEdit(false);
                       setAddMode(false);
@@ -210,7 +221,7 @@ const NodesDetailPanel = memo(function NodesDetailPanel({
                   {!addMode && selected && (
                     <Button
                       svgIcon={trashIcon}
-                      disabled={!formProps.allowSubmit}
+                      disabled={loading}
                       onClick={() => requestDelete(selected)}
                     >
                       {t("common:delete")}
@@ -220,7 +231,7 @@ const NodesDetailPanel = memo(function NodesDetailPanel({
                   <Button
                     svgIcon={saveIcon}
                     themeColor="primary"
-                    disabled={!formProps.allowSubmit}
+                    disabled={!formProps.allowSubmit || loading}
                     onClick={formProps.onSubmit}
                   >
                     {addMode ? t("common:add") : t("common:save")}
