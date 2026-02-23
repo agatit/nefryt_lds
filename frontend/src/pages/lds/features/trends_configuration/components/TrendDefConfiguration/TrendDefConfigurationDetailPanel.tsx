@@ -1,4 +1,4 @@
-import React from "react";
+import { memo, useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { TrendDef } from "../../../../../../services/api";
 import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
@@ -8,29 +8,29 @@ export interface TrendDefConfigurationDetailPanelProps {
   selected: TrendDef | null;
 }
 
-const TrendDefConfigurationDetailPanel = React.memo(
+const TrendDefConfigurationDetailPanel = memo(
   function TrendDefConfigurationDetailPanel({
     selected,
   }: TrendDefConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
-
-    const setSelectedData = React.useCallback((selectedTrendDef: TrendDef) => {
-      setTrendDefName(selectedTrendDef.Name ?? "");
-    }, []);
-    const [trendDefName, setTrendDefName] = React.useState<string | undefined>(
-      selected?.Name ?? ""
+    const [trendDefName, setTrendDefName] = useState<string | undefined>(
+      selected?.Name ?? "",
     );
 
-    React.useEffect(() => {
-      if (selected !== null) setSelectedData(selected);
-    }, [selected]);
+    const setSelectedData = useCallback((selectedTrendDef: TrendDef) => {
+      setTrendDefName(selectedTrendDef.Name ?? "");
+    }, []);
 
-    const handleTrendDefNameChange = React.useCallback(
+    const handleTrendDefNameChange = useCallback(
       (event: TextBoxChangeEvent) => {
         if (event.value) setTrendDefName(event.value.toString());
       },
-      []
+      [],
     );
+
+    useEffect(() => {
+      if (selected !== null) setSelectedData(selected);
+    }, [selected]);
 
     return (
       <div className="detail-panel-content">
@@ -50,7 +50,7 @@ const TrendDefConfigurationDetailPanel = React.memo(
         <div className="separator" />
       </div>
     );
-  }
+  },
 );
 
 export default TrendDefConfigurationDetailPanel;

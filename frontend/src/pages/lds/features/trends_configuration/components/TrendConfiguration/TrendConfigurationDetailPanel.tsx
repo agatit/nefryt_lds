@@ -1,4 +1,4 @@
-import React from "react";
+import { memo, useState, useEffect } from "react";
 import {
   Form,
   Field,
@@ -50,10 +50,10 @@ interface TrendFormValues {
   TrendGroupID: TrendGroup | null;
   UnitID: Unit | null;
   Color: string;
-  RawMin: number | null;
-  RawMax: number | null;
-  ScaledMin: number | null;
-  ScaledMax: number | null;
+  RawMin: number;
+  RawMax: number;
+  ScaledMin: number;
+  ScaledMax: number;
 }
 
 interface ValidationErrors {
@@ -189,7 +189,7 @@ const trendValidator = (t: TFunction) => (values: TrendFormValues) => {
   return Object.keys(errors).length ? errors : undefined;
 };
 
-const TrendConfigurationDetailPanel = React.memo(function ({
+const TrendConfigurationDetailPanel = memo(function ({
   selected,
   trendDefs,
   trendGroups,
@@ -200,8 +200,8 @@ const TrendConfigurationDetailPanel = React.memo(function ({
   addMode,
   setAddMode,
 }: Props) {
-  const [inEdit, setInEdit] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  const [inEdit, setInEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { t } = useTranslation(["common", "config-page"]);
 
   const initialValues =
@@ -254,7 +254,7 @@ const TrendConfigurationDetailPanel = React.memo(function ({
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setInEdit(addMode);
   }, [selected, addMode]);
 
@@ -350,6 +350,7 @@ const TrendConfigurationDetailPanel = React.memo(function ({
               />
             </div>
           </div>
+          <div className="separator" />
           <div className="item-row">
             {!inEdit && !addMode ? (
               <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>

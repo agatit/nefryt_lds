@@ -1,4 +1,4 @@
-import React from "react";
+import { memo, useState, useMemo } from "react";
 import {
   Grid,
   GridColumn,
@@ -30,7 +30,7 @@ export interface TrendConfigurationProps {
   requestDelete: (value: ParsedTrendType) => void;
 }
 
-const TrendConfiguration = React.memo(function TrendConfiguration({
+const TrendConfiguration = memo(function TrendConfiguration({
   trendDefs,
   trendGroups,
   units,
@@ -41,9 +41,9 @@ const TrendConfiguration = React.memo(function TrendConfiguration({
   requestDelete,
 }: TrendConfigurationProps) {
   const { t } = useTranslation(["common", "config-page"]);
-  const [select, setSelect] = React.useState<SelectDescriptor>();
+  const [select, setSelect] = useState<SelectDescriptor>();
 
-  const data = React.useMemo((): ParsedTrendType[] => {
+  const data = useMemo((): ParsedTrendType[] => {
     return trends.map((trend) => {
       const unit = units.find((u) => u.ID === trend.UnitID);
 
