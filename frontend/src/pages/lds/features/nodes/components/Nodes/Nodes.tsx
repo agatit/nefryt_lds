@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, memo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Grid,
   GridColumn,
@@ -7,29 +8,29 @@ import {
   GridSelectionChangeEvent,
 } from "@progress/kendo-react-grid";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
-import { useTranslation } from "react-i18next";
-import { Node } from "../../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
-import { plusIcon } from "@progress/kendo-svg-icons";
-import { GridCustomCellProps } from "@progress/kendo-react-grid";
+import { plusIcon, trashIcon } from "@progress/kendo-svg-icons";
+import { Node } from "../../../../../../services/api";
 
 interface NodesProps {
   nodes: Node[];
   selected: Node | null;
   onSelectNode: (value: Node) => void;
-  openAddDialog: () => void;
+  onAdd: () => void;
+  requestDelete: (value: Node) => void;
 }
 
-const Nodes = React.memo(function LinksGrid({
+const Nodes = memo(function LinksGrid({
   nodes,
   selected,
   onSelectNode,
-  openAddDialog,
+  onAdd,
+  requestDelete,
 }: NodesProps) {
-  const { t } = useTranslation(["node-page"]);
-  const [select, setSelect] = React.useState<SelectDescriptor>();
+  const { t } = useTranslation(["nodes-page", "common"]);
+  const [select, setSelect] = useState<SelectDescriptor>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selected) setSelect({});
   }, [selected]);
 
@@ -56,29 +57,33 @@ const Nodes = React.memo(function LinksGrid({
       <GridToolbar>
         <GridSearchBox />
         <ButtonGroup>
-          <Button svgIcon={plusIcon} onClick={openAddDialog}>
-            {t("node-page:add_new_node")}
+          <Button svgIcon={plusIcon} onClick={onAdd}>
+            {t("nodes-page:add_new_node")}
           </Button>
+
+          {selected && (
+            <Button svgIcon={trashIcon} onClick={() => requestDelete(selected)}>
+              {t("common:delete")}
+            </Button>
+          )}
         </ButtonGroup>
       </GridToolbar>
 
-      <GridColumn field="Type" title={t("node-page:type")} />
-      <GridColumn field="Name" title={t("node-page:name")} />
+      <GridColumn field="Type" title={t("nodes-page:type")} />
+      <GridColumn field="Name" title={t("nodes-page:name")} />
       <GridColumn
-        field="EditorParams"
-        title={t("node-page:EditorParams")}
+        title={t("nodes-page:pos_x")}
         cells={{
-          data: (props: GridCustomCellProps) => (
-            <td>
-              {props.dataItem.EditorParams
-                ? `X: ${props.dataItem.EditorParams.PosX}, Y: ${props.dataItem.EditorParams.PosY}`
-                : ""}
-            </td>
-          ),
+          data: (props) => <td>{props.dataItem.EditorParams?.PosX ?? ""}</td>,
         }}
       />
-      <GridColumn field="TrendID" title={t("node-page:TrendID")} />
-      <GridColumn field="ID" title={t("node-page:ID")} />
+
+      <GridColumn
+        title={t("nodes-page:pos_y")}
+        cells={{
+          data: (props) => <td>{props.dataItem.EditorParams?.PosY ?? ""}</td>,
+        }}
+      />
     </Grid>
   );
 });

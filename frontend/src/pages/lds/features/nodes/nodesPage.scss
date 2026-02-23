@@ -7,6 +7,12 @@ main.nodes-page {
   height: var.$underAppBarHeight;
 }
 
+main.nodes-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
 .nodes-grid-container {
   flex: 4 0 0;
   display: flex;
@@ -26,7 +32,7 @@ main.nodes-page {
 }
 
 .nodes-detail-panel.no-selected>div {
-  justify-content: center;
+  justify-content: flex-start;
   height: 100%;
   cursor: not-allowed;
 }
@@ -34,6 +40,7 @@ main.nodes-page {
 .detail-panel-content .item-column {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 10px;
 }
 
@@ -42,10 +49,18 @@ main.nodes-page {
   gap: 10px;
 }
 
+.detail-panel-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .detail-panel-content .item-column>div {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
 }
 
 .nodes-dialog .k-dialog {

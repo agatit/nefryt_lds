@@ -1,199 +1,237 @@
-import React from "react";
-import { Label } from "@progress/kendo-react-labels";
+import { useState, useEffect, memo } from "react";
 import { useTranslation } from "react-i18next";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import {
+  Form,
+  Field,
+  FormElement,
+  FieldRenderProps,
+} from "@progress/kendo-react-form";
+import { Label, Error } from "@progress/kendo-react-labels";
+import { TextBox, NumericTextBox } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import {
   pencilIcon,
   cancelIcon,
   trashIcon,
   saveIcon,
-  plusIcon,
 } from "@progress/kendo-svg-icons";
 import { Node, NodeCreate, NodeUpdate } from "../../../../../../services/api";
-import { AppContext } from "../../../../../../contexts/appContext";
 
 interface Props {
-  selected: Node;
-  deleteNode: (value: Node) => Promise<void>;
+  selected: Node | null;
+  requestDelete: (value: Node) => void;
   addNode: (value: NodeCreate) => Promise<Node>;
   editNode: (id: number, value: NodeUpdate) => Promise<void>;
-  openAddDialog: () => void;
+  addMode: boolean;
+  setAddMode: (v: boolean) => void;
 }
 
-const NodesDetailPanel = React.memo(function NodesDetailPanel({
+interface NodesFormValues {
+  Type: string;
+  Name?: string | null;
+  PosX?: number | null;
+  PosY?: number | null;
+  TrendID?: number | null;
+}
+
+interface ValidationErrors {
+  [key: string]: string;
+}
+
+const ValidatedTextBox = (props: FieldRenderProps) => {
+  const { validationMessage, touched, modified, ...inputProps } = props;
+
+  return (
+    <div className="field-wrapper">
+      <TextBox {...inputProps} />
+      {(touched || modified) && validationMessage && (
+        <Error>{validationMessage}</Error>
+      )}
+    </div>
+  );
+};
+
+const ValidatedNumeric = (props: FieldRenderProps) => {
+  const { validationMessage, touched, modified, ...inputProps } = props;
+
+  return (
+    <div className="field-wrapper">
+      <NumericTextBox {...inputProps} />
+      {(touched || modified) && validationMessage && (
+        <Error>{validationMessage}</Error>
+      )}
+    </div>
+  );
+};
+
+const nodeValidator = (values: NodesFormValues) => {
+  const errors: ValidationErrors = {};
+
+  if (!values.Type?.trim()) {
+    errors.Type = "Type required";
+  } else if (!/^[A-Z]+$/.test(values.Type)) {
+    errors.Type = "Uppercase letters only";
+  }
+
+  if (values.Name && !/^[A-Z0-9-]+$/.test(values.Name)) {
+    errors.Name = "Invalid name";
+  }
+
+  return Object.keys(errors).length ? errors : undefined;
+};
+
+const NodesDetailPanel = memo(function NodesDetailPanel({
   selected,
   editNode,
-  deleteNode,
-  openAddDialog,
+  requestDelete,
+  addNode,
+  addMode,
+  setAddMode,
 }: Props) {
-  const { t } = useTranslation(["common", "node-page"]);
-  const appContext = React.useContext(AppContext);
-  if (!appContext) return null;
+  const { t } = useTranslation(["common", "nodes-page"]);
+  const [inEdit, setInEdit] = useState(false);
 
-  const [inEdit, setInEdit] = React.useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-  const [type, setType] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [editorParams, setEditorParams] = React.useState("");
-  const [trendID, setTrendID] = React.useState("");
+  const initialValues: NodesFormValues =
+    addMode || !selected
+      ? {
+          Type: "",
+          Name: "",
+          PosX: null,
+          PosY: null,
+          TrendID: null,
+        }
+      : {
+          Type: selected.Type ?? "",
+          Name: selected.Name ?? "",
+          PosX: selected.EditorParams?.PosX ?? null,
+          PosY: selected.EditorParams?.PosY ?? null,
+          TrendID: selected.TrendID ?? null,
+        };
 
-  React.useEffect(() => {
-    setType(selected.Type ?? "");
-    setName(selected.Name ?? "");
-    setEditorParams(
-      selected.EditorParams ? JSON.stringify(selected.EditorParams) : "",
-    );
-    setTrendID(selected.TrendID?.toString() ?? "");
-    setInEdit(false);
-  }, [selected]);
-
-  const handleTypeChange = React.useCallback(
-    (e: TextBoxChangeEvent) => setType(String(e.value ?? "").toUpperCase()),
-    [],
-  );
-
-  const handleNameChange = React.useCallback(
-    (e: TextBoxChangeEvent) => setName(String(e.value ?? "").toUpperCase()),
-    [],
-  );
-
-  const handleParamsChange = React.useCallback(
-    (e: TextBoxChangeEvent) => setEditorParams(String(e.value ?? "")),
-    [],
-  );
-
-  const saveEdit = async () => {
-    let parsedParams = null;
-
-    if (editorParams.trim()) {
-      try {
-        parsedParams = JSON.parse(editorParams);
-      } catch {
-        appContext.showNotification({
-          notificationType: { icon: true, style: "error" },
-          message: "Editor Params must be valid JSON",
-        });
-        return;
-      }
-    }
-
-    if (trendID && isNaN(Number(trendID))) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message: "Trend ID must be a number",
+  const handleSubmit = async (values: NodesFormValues) => {
+    if (addMode) {
+      await addNode({
+        Type: values.Type,
+        Name: values.Name || null,
+        EditorParams: {
+          PosX: values.PosX ?? 0,
+          PosY: values.PosY ?? 0,
+        },
+        TrendID: values.TrendID ?? null,
       });
+
+      setAddMode(false);
       return;
     }
 
-    if (!/^[A-Z]+$/.test(type.trim())) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message: "Type must contain uppercase letters only",
-      });
-      return;
-    }
-
-    if (name && !/^[A-Z0-9-]+$/.test(name.trim())) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message: "Name must contain uppercase letters and numbers only",
-      });
-      return;
-    }
-
-    try {
-      parsedParams = editorParams ? JSON.parse(editorParams) : null;
-    } catch {
-      parsedParams = null;
-    }
+    if (!selected) return;
 
     await editNode(selected.ID!, {
-      Type: type,
-      Name: name,
-      EditorParams: parsedParams,
+      Type: values.Type,
+      Name: values.Name ?? null,
+      EditorParams: {
+        PosX: values.PosX ?? 0,
+        PosY: values.PosY ?? 0,
+      },
     });
 
     setInEdit(false);
   };
 
-  const confirmDelete = async () => {
-    await deleteNode(selected);
-    setShowDeleteDialog(false);
-  };
+  useEffect(() => {
+    setInEdit(addMode);
+  }, [selected, addMode]);
 
   return (
-    <div className="detail-panel-content">
-      <div className="item-column">
-        <Label>ID</Label>
-        <TextBox value={selected.ID!} disabled />
+    <>
+      <Form
+        key={addMode ? "add" : selected?.ID}
+        initialValues={initialValues}
+        validator={nodeValidator}
+        onSubmit={(values) => handleSubmit(values as NodesFormValues)}
+        render={(formProps) => (
+          <FormElement className="detail-panel-content">
+            <div className="item-column">
+              <div>
+                <Label>{t("nodes-page:type")}</Label>
+                <Field
+                  name="Type"
+                  component={ValidatedTextBox}
+                  disabled={!inEdit && !addMode}
+                />
+              </div>
+              <div>
+                <Label>{t("nodes-page:name")}</Label>
+                <Field
+                  name="Name"
+                  component={ValidatedTextBox}
+                  disabled={!inEdit && !addMode}
+                />
+              </div>
+              <div>
+                <Label>{t("nodes-page:pos_x")}</Label>
+                <Field
+                  name="PosX"
+                  component={ValidatedNumeric}
+                  disabled={!inEdit && !addMode}
+                />
+              </div>
+              <div>
+                <Label>{t("nodes-page:pos_y")}</Label>
+                <Field
+                  name="PosY"
+                  component={ValidatedNumeric}
+                  disabled={!inEdit && !addMode}
+                />
+              </div>
+            </div>
+            <div className="separator" />
 
-        <Label>Type</Label>
-        <TextBox value={type} disabled={!inEdit} onChange={handleTypeChange} />
+            <div className="item-row">
+              {!inEdit && !addMode ? (
+                <>
+                  <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
+                    {t("common:edit")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    svgIcon={cancelIcon}
+                    onClick={() => {
+                      setInEdit(false);
+                      setAddMode(false);
+                      formProps.onFormReset();
+                    }}
+                  >
+                    {t("common:cancel")}
+                  </Button>
 
-        <Label>Name</Label>
-        <TextBox value={name} disabled={!inEdit} onChange={handleNameChange} />
+                  {!addMode && selected && (
+                    <Button
+                      svgIcon={trashIcon}
+                      disabled={!formProps.allowSubmit}
+                      onClick={() => requestDelete(selected)}
+                    >
+                      {t("common:delete")}
+                    </Button>
+                  )}
 
-        <Label>Editor Params</Label>
-        <TextBox
-          value={editorParams}
-          disabled={!inEdit}
-          onChange={handleParamsChange}
-        />
-
-        <Label>Trend ID</Label>
-        <TextBox value={trendID} disabled />
-      </div>
-
-      <div className="item-row">
-        {!inEdit ? (
-          <>
-            <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
-              {t("common:edit")}
-            </Button>
-
-            <Button svgIcon={plusIcon} onClick={openAddDialog}>
-              {t("node-page:add_new_node")}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button svgIcon={cancelIcon} onClick={() => setInEdit(false)}>
-              {t("common:cancel")}
-            </Button>
-
-            <Button svgIcon={saveIcon} themeColor="primary" onClick={saveEdit}>
-              {t("common:save")}
-            </Button>
-
-            <Button
-              svgIcon={trashIcon}
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              {t("common:delete")}
-            </Button>
-          </>
+                  <Button
+                    svgIcon={saveIcon}
+                    themeColor="primary"
+                    disabled={!formProps.allowSubmit}
+                    onClick={formProps.onSubmit}
+                  >
+                    {addMode ? t("common:add") : t("common:save")}
+                  </Button>
+                </>
+              )}
+            </div>
+          </FormElement>
         )}
-      </div>
-
-      {showDeleteDialog && (
-        <Dialog
-          title={t("common:confirm_deletion")}
-          onClose={() => setShowDeleteDialog(false)}
-        >
-          Delete this node?
-          <DialogActionsBar>
-            <Button onClick={() => setShowDeleteDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmDelete}>
-              {t("common:delete")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
-    </div>
+      />
+    </>
   );
 });
 
