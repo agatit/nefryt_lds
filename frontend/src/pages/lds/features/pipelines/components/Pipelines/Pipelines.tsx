@@ -1,45 +1,39 @@
-import React from "react";
+import { memo, useState } from "react";
 import {
   Grid,
   GridColumn,
-  GridSearchBox,
   GridToolbar,
+  GridSearchBox,
   GridSelectionChangeEvent,
 } from "@progress/kendo-react-grid";
+import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
+import { plusIcon, trashIcon } from "@progress/kendo-svg-icons";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { useTranslation } from "react-i18next";
 import { Pipeline } from "../../../../../../services/api";
-import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
-import { plusIcon } from "@progress/kendo-svg-icons";
 
-interface PipelinesProps {
+interface Props {
   pipelines: Pipeline[];
   selected: Pipeline | null;
-  onSelectPipeline: (value: Pipeline) => void;
-  openAddDialog: () => void;
+  setSelected: (value: Pipeline | null) => void;
+  enterAddNewPipeline: () => void;
+  requestDelete: (value: Pipeline) => void;
 }
 
-const Pipelines = React.memo(function Pipelines({
+const Pipelines = memo(function Pipelines({
   pipelines,
   selected,
-  onSelectPipeline,
-  openAddDialog,
-}: PipelinesProps) {
-  const { t } = useTranslation(["pipeline-page"]);
-  const [select, setSelect] = React.useState<SelectDescriptor>();
+  setSelected,
+  enterAddNewPipeline,
+  requestDelete,
+}: Props) {
+  const { t } = useTranslation(["common", "pipeline-page"]);
+  const [select, setSelect] = useState<SelectDescriptor>();
 
-  const handleSelectionChange = React.useCallback(
-    (pipeline: GridSelectionChangeEvent) => {
-      const item = pipeline.endDataItem as Pipeline;
-      onSelectPipeline(item);
-      setSelect(pipeline.select);
-    },
-    [onSelectPipeline],
-  );
-
-  React.useEffect(() => {
-    if (!selected) setSelect({});
-  }, [selected]);
+  const handleSelectionChange = (e: GridSelectionChangeEvent) => {
+    setSelected(e.endDataItem);
+    setSelect(e.select);
+  };
 
   return (
     <Grid
@@ -48,21 +42,27 @@ const Pipelines = React.memo(function Pipelines({
       autoProcessData
       sortable
       filterable
-      selectable={{ enabled: true, mode: "single" }}
+      selectable={{ mode: "single" }}
       select={select}
       onSelectionChange={handleSelectionChange}
     >
       <GridToolbar>
         <GridSearchBox />
+
         <ButtonGroup>
-          <Button svgIcon={plusIcon} onClick={openAddDialog}>
+          <Button svgIcon={plusIcon} onClick={enterAddNewPipeline}>
             {t("pipeline-page:add_new_pipeline")}
           </Button>
+
+          {selected && (
+            <Button svgIcon={trashIcon} onClick={() => requestDelete(selected)}>
+              {t("common:delete")}
+            </Button>
+          )}
         </ButtonGroup>
       </GridToolbar>
 
       <GridColumn field="Name" title={t("pipeline-page:name")} />
-      <GridColumn field="ID" title="ID" />
     </Grid>
   );
 });

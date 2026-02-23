@@ -1,4 +1,4 @@
-import React from "react";
+import { memo, useState, useCallback } from "react";
 import {
   Grid,
   GridColumn,
@@ -9,28 +9,28 @@ import {
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { PipelineParam } from "../../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
-import { plusIcon } from "@progress/kendo-svg-icons";
+import { plusIcon, trashIcon } from "@progress/kendo-svg-icons";
 import { useTranslation } from "react-i18next";
 
 interface Props {
   params: PipelineParam[];
   selected: PipelineParam | null;
+  enterAddMode: () => void;
+  requestDelete: (value: PipelineParam) => void;
   onSelect: (value: PipelineParam) => void;
-  openDialog: () => void;
-  pipelineID: number;
 }
 
-const PipelineParams = React.memo(function PipelineParamGrid({
+const PipelineParams = memo(function PipelineParams({
   params,
   selected,
+  enterAddMode,
+  requestDelete,
   onSelect,
-  openDialog,
 }: Props) {
-  const { t } = useTranslation(["pipeline-page"]);
+  const { t } = useTranslation(["common", "pipeline-page"]);
+  const [select, setSelect] = useState<SelectDescriptor>();
 
-  const [select, setSelect] = React.useState<SelectDescriptor>();
-
-  const handleSelectionChange = React.useCallback(
+  const handleSelectionChange = useCallback(
     (e: GridSelectionChangeEvent) => {
       const item = e.endDataItem as PipelineParam;
       onSelect(item);
@@ -38,10 +38,6 @@ const PipelineParams = React.memo(function PipelineParamGrid({
     },
     [onSelect],
   );
-
-  React.useEffect(() => {
-    if (!selected) setSelect({});
-  }, [selected]);
 
   return (
     <Grid
@@ -54,9 +50,15 @@ const PipelineParams = React.memo(function PipelineParamGrid({
       <GridToolbar>
         <GridSearchBox />
         <ButtonGroup>
-          <Button svgIcon={plusIcon} onClick={openDialog}>
+          <Button svgIcon={plusIcon} onClick={enterAddMode}>
             {t("pipeline-page:add_pipeline_param")}
           </Button>
+
+          {selected && (
+            <Button svgIcon={trashIcon} onClick={() => requestDelete(selected)}>
+              {t("common:delete")}
+            </Button>
+          )}
         </ButtonGroup>
       </GridToolbar>
 

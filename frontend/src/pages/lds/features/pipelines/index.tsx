@@ -1,27 +1,15 @@
-import React from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import "./pipelinesPage.scss";
 import { useTranslation } from "react-i18next";
 import { LDSContext } from "../../contexts/ldsContext";
-import {
-  Pipeline,
-  PipelineParam,
-  PipelineParamCreate,
-} from "../../../../services/api";
+import { Pipeline, PipelineParam } from "../../../../services/api";
 import Pipelines from "./components/Pipelines/Pipelines";
 import PipelinesDetailPanel from "./components/Pipelines/PipelinesDetailPanel";
 import PipelineParams from "./components/PipelineParams/PipelineParams";
-import PipelineParamsDetailPanel from "./components/PipelineParams/PipelineParamsDetailPanel";
+import PipelineParamDetailPanel from "./components/PipelineParams/PipelineParamsDetailPanel";
 import { DetailPanel } from "onyks_shared_kendo";
-import { Typography } from "@progress/kendo-react-common";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import { Label } from "@progress/kendo-react-labels";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
-import {
-  DropDownList,
-  DropDownListChangeEvent,
-} from "@progress/kendo-react-dropdowns";
-import { AppContext } from "../../../../contexts/appContext";
 import {
   Splitter,
   SplitterOnChangeEvent,
@@ -33,10 +21,8 @@ import {
 
 const PipelinesPage = React.memo(function PipelinesPage() {
   const { t } = useTranslation(["common", "pipeline-page"]);
-
-  const appContext = React.useContext(AppContext);
-  const ldsContext = React.useContext(LDSContext);
-  if (!appContext || !ldsContext) return null;
+  const ldsContext = useContext(LDSContext);
+  if (!ldsContext) return null;
 
   const {
     pipelines,
@@ -44,48 +30,69 @@ const PipelinesPage = React.memo(function PipelinesPage() {
     updatePipeline,
     deletePipeline,
     pipelineParams,
-    pipelineParamDefs,
+    updatePipelineParam,
     addPipelineParams,
     deletePipelineParams,
-    updatePipelineParam,
     loadPipelineParamsByPipeline,
     loadPipelineParamDefs,
+    pipelineParamDefs,
   } = ldsContext;
 
-  const [selectedPipeline, setSelectedPipeline] =
-    React.useState<Pipeline | null>(null);
-  const [selectedParam, setSelectedParam] =
-    React.useState<PipelineParam | null>(null);
-  const [showAddPipelineDialog, setShowAddPipelineDialog] =
-    React.useState(false);
-  const [showDeleteParamDialog, setShowDeleteParamDialog] =
-    React.useState(false);
-  const [showAddParamDialog, setShowAddParamDialog] = React.useState(false);
-  const [newName, setNewName] = React.useState("");
-  const [value, setValue] = React.useState("");
-  const [selectedDef, setSelectedDef] = React.useState<PipelineParam | null>(
+  const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | null>(
     null,
   );
-  const [verticalPanes, setVerticalPanes] = React.useState<SplitterPaneProps[]>(
-    [{ size: "65%" }, {}],
+  const [selectedParam, setSelectedParam] = useState<PipelineParam | null>(
+    null,
   );
+  const [pipelineAddMode, setPipelineAddMode] = useState(false);
+  const [paramAddMode, setParamAddMode] = useState(false);
+  const [deletePipelineTarget, setDeletePipelineTarget] =
+    useState<Pipeline | null>(null);
+  const [deleteParamTarget, setDeleteParamTarget] =
+    useState<PipelineParam | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [tabSelected, setTabSelected] = useState<number>(0);
+  const [verticalPanes, setVerticalPanes] = useState<SplitterPaneProps[]>([
+    { size: "70%" },
+    {},
+  ]);
 
-  const [tabSelected, setTabSelected] = React.useState<number>(0);
+  const handleVerticalChange = (e: SplitterOnChangeEvent) =>
+    setVerticalPanes(e.newState);
 
-  const handleParamChange = React.useCallback((e: DropDownListChangeEvent) => {
-    setSelectedDef(e.value);
+  const handleTabSelect = useCallback((e: TabStripSelectEventArguments) => {
+    setTabSelected(e.selected);
   }, []);
 
-  const handleValueChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setValue(String(e.value ?? ""));
-  }, []);
+  const handleSelectPipeline = (pipeline: Pipeline | null) => {
+    setPipelineAddMode(false);
+    setParamAddMode(false);
+    setSelectedPipeline(pipeline);
+    setSelectedParam(null);
+    setPanelOpen(!!pipeline);
+  };
 
-  const handleNameChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setNewName(String(e.value ?? ""));
-  }, []);
+  const confirmDeletePipeline = async () => {
+    if (!deletePipelineTarget) return;
 
-  const availableDefs = React.useMemo(() => {
-    return pipelineParamDefs?.filter(
+    await deletePipeline(deletePipelineTarget);
+    setDeletePipelineTarget(null);
+    setSelectedPipeline(null);
+    setPanelOpen(false);
+  };
+
+  const confirmDeleteParam = async () => {
+    if (!deleteParamTarget) return;
+
+    await deletePipelineParams(deleteParamTarget);
+    setDeleteParamTarget(null);
+    setSelectedParam(null);
+  };
+
+  const availableParamDefs = React.useMemo(() => {
+    if (!pipelineParamDefs) return [];
+
+    return pipelineParamDefs.filter(
       (def) =>
         !pipelineParams.some(
           (p) => p.PipelineParamDefID === def.PipelineParamDefID,
@@ -93,103 +100,32 @@ const PipelinesPage = React.memo(function PipelinesPage() {
     );
   }, [pipelineParamDefs, pipelineParams]);
 
-  const confirmAddPipeline = async () => {
-    if (!newName.trim()) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message: "Pipeline name required",
-      });
-      return;
-    }
-
-    await addPipeline({ Name: newName });
-    setNewName("");
-    setShowAddPipelineDialog(false);
-  };
-
-  const confirmAddParam = async () => {
-    if (!selectedPipeline) return;
-
-    if (!selectedDef || !value.trim()) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message: "Select parameter and enter value",
-      });
-      return;
-    }
-
-    if (!value || !value.trim()) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message: "Parameter value cannot be empty",
-      });
-      return;
-    }
-
-    const param: PipelineParamCreate = {
-      PipelineParamDefID: selectedDef?.PipelineParamDefID,
-      Value: value,
-    };
-
-    await addPipelineParams(param, selectedPipeline.ID);
-
-    setSelectedDef(null);
-    setValue("");
-    setShowAddParamDialog(false);
-  };
-
-  const confirmDeleteParam = async () => {
-    if (!selectedParam) return;
-
-    await deletePipelineParams(selectedParam);
-    setSelectedParam(null);
-    setShowDeleteParamDialog(false);
-  };
-
-  const handleDeletePipeline = async (pipeline: Pipeline) => {
-    await deletePipeline(pipeline);
-    setSelectedPipeline(null);
-  };
-
-  const handleVerticalChange = (e: SplitterOnChangeEvent) =>
-    setVerticalPanes(e.newState);
-
-  React.useEffect(() => {
-    if (selectedPipeline?.ID) {
-      loadPipelineParamsByPipeline(selectedPipeline.ID);
-    }
-  }, [selectedPipeline?.ID]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedPipeline?.ID) return;
 
     loadPipelineParamsByPipeline(selectedPipeline.ID);
     loadPipelineParamDefs(selectedPipeline.ID);
   }, [selectedPipeline?.ID]);
 
-  const handleTabSelect = React.useCallback(
-    (e: TabStripSelectEventArguments) => {
-      setTabSelected(e.selected);
-    },
-    [],
-  );
-
   return (
     <main className="pipelines-page">
       <Splitter
-        className="pipelines-grid-container"
         panes={verticalPanes}
         orientation="vertical"
         onChange={handleVerticalChange}
+        className="pipelines-grid-container"
       >
-        <div className="pipelines-grid-container">
-          <Pipelines
-            pipelines={pipelines}
-            selected={selectedPipeline}
-            onSelectPipeline={setSelectedPipeline}
-            openAddDialog={() => setShowAddPipelineDialog(true)}
-          />
-        </div>
+        <Pipelines
+          pipelines={pipelines}
+          selected={selectedPipeline}
+          setSelected={handleSelectPipeline}
+          enterAddNewPipeline={() => {
+            setPipelineAddMode(true);
+            setSelectedPipeline(null);
+            setPanelOpen(true);
+          }}
+          requestDelete={setDeletePipelineTarget}
+        />
 
         <div>
           {selectedPipeline ? (
@@ -203,113 +139,94 @@ const PipelinesPage = React.memo(function PipelinesPage() {
                   params={pipelineParams}
                   selected={selectedParam}
                   onSelect={setSelectedParam}
-                  pipelineID={selectedPipeline.ID}
-                  openDialog={() => {
-                    if (availableDefs.length === 0) {
-                      appContext.showNotification({
-                        notificationType: { icon: true, style: "warning" },
-                        message: "No available parameters to add.",
-                      });
-                      return;
-                    }
-
-                    setShowAddParamDialog(true);
+                  enterAddMode={() => {
+                    if (!selectedPipeline) return;
+                    setSelectedParam(null);
+                    setParamAddMode(true);
+                    setPanelOpen(true);
                   }}
+                  requestDelete={setDeleteParamTarget}
                 />
               </TabStripTab>
             </TabStrip>
           ) : (
-            <Typography.p style={{ padding: "20px" }} fontSize="large">
+            <div style={{ padding: 20 }}>
               {t("pipeline-page:choose_pipeline_first") ||
-                "Choose pipeline above to see parameters"}
-            </Typography.p>
+                "Choose pipeline to see parameters"}
+            </div>
           )}
         </div>
       </Splitter>
 
-      <DetailPanel flexGrow={1} extandable={false}>
-        {selectedParam ? (
-          <PipelineParamsDetailPanel
+      <DetailPanel
+        className={
+          "config-detail-panel" +
+          (selectedPipeline || selectedParam || pipelineAddMode || paramAddMode
+            ? ""
+            : " no-selected")
+        }
+        flexGrow={1}
+        extandable
+        extended={panelOpen}
+        onExtendedChange={setPanelOpen}
+      >
+        {selectedParam || paramAddMode ? (
+          <PipelineParamDetailPanel
             selected={selectedParam}
             pipelineID={selectedPipeline!.ID}
             updateParam={updatePipelineParam}
-            deleteParam={async () => setShowDeleteParamDialog(true)}
-            openAddDialog={() => setShowAddParamDialog(true)}
-            openDeleteDialog={() => setShowDeleteParamDialog(true)}
+            addParam={async (pipelineID, paramID, value) => {
+              await addPipelineParams(
+                { PipelineParamDefID: paramID, Value: value },
+                pipelineID,
+              );
+            }}
+            addMode={paramAddMode}
+            setAddMode={setParamAddMode}
+            requestDelete={setDeleteParamTarget}
+            paramDefs={availableParamDefs}
           />
-        ) : selectedPipeline ? (
+        ) : (
           <PipelinesDetailPanel
             selected={selectedPipeline}
             editPipeline={updatePipeline}
-            deletePipeline={handleDeletePipeline}
-            openAddDialog={() => setShowAddPipelineDialog(true)}
+            addPipeline={addPipeline}
+            addMode={pipelineAddMode}
+            setAddMode={setPipelineAddMode}
+            requestDelete={setDeletePipelineTarget}
           />
-        ) : (
-          <Typography.p>
-            {t("pipeline-page:select_element_to_edit")}
-          </Typography.p>
         )}
       </DetailPanel>
 
-      {showAddParamDialog && (
-        <Dialog
-          title="Add pipeline parameter"
-          onClose={() => setShowAddParamDialog(false)}
-          className="pipeline-dialog"
-        >
-          <div className="form-field">
-          <Label>Name</Label>
-          <DropDownList
-            data={availableDefs}
-            textField="Name"
-            dataItemKey="PipelineParamDefID"
-            value={selectedDef}
-            onChange={handleParamChange}
-          />
-          </div>
-
-          <Label>Value</Label>
-          <TextBox value={value} onChange={handleValueChange} />
-
-          <DialogActionsBar>
-            <Button onClick={() => setShowAddParamDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmAddParam}>
-              {t("common:add")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
-
-      {showAddPipelineDialog && (
-        <Dialog
-          title="Add pipeline"
-          onClose={() => setShowAddPipelineDialog(false)}
-          className="pipeline-dialog"
-        >
-          <Label>Name</Label>
-          <TextBox value={newName} onChange={handleNameChange} />
-
-          <DialogActionsBar>
-            <Button onClick={() => setShowAddPipelineDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmAddPipeline}>
-              {t("common:add")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
-
-      {showDeleteParamDialog && (
+      {deletePipelineTarget && (
         <Dialog
           title={t("common:confirm_deletion")}
-          onClose={() => setShowDeleteParamDialog(false)}
+          onClose={() => setDeletePipelineTarget(null)}
         >
-          Delete pipeline parameter?
+          {t("pipeline-page:sure_you_want_delete_pipeline") ||
+            "Delete this pipeline?"}
+
           <DialogActionsBar>
-            <Button onClick={() => setShowDeleteParamDialog(false)}>
+            <Button onClick={() => setDeletePipelineTarget(null)}>
+              {t("common:cancel")}
+            </Button>
+            <Button themeColor="primary" onClick={confirmDeletePipeline}>
+              {t("common:delete")}
+            </Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
+
+      {deleteParamTarget && (
+        <Dialog
+          title={t("common:confirm_deletion")}
+          onClose={() => setDeleteParamTarget(null)}
+        >
+          {t("pipeline-page:sure_you_want_delete_param") ||
+            "Delete this parameter?"}
+
+          <DialogActionsBar>
+            <Button onClick={() => setDeleteParamTarget(null)}>
               {t("common:cancel")}
             </Button>
             <Button themeColor="primary" onClick={confirmDeleteParam}>

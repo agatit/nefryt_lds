@@ -1,123 +1,150 @@
-import React from "react";
-import { Label } from "@progress/kendo-react-labels";
-import { useTranslation } from "react-i18next";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
-import { Button } from "@progress/kendo-react-buttons";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import { memo, useEffect, useState } from "react";
 import {
-  pencilIcon,
+  Form,
+  Field,
+  FormElement,
+  FieldRenderProps,
+} from "@progress/kendo-react-form";
+import { TextBox } from "@progress/kendo-react-inputs";
+import { Label, Error } from "@progress/kendo-react-labels";
+import { Button } from "@progress/kendo-react-buttons";
+import {
   cancelIcon,
-  trashIcon,
   saveIcon,
-  plusIcon,
+  trashIcon,
+  pencilIcon,
 } from "@progress/kendo-svg-icons";
-import { Pipeline, PipelineUpdate } from "../../../../../../services/api";
+import { useTranslation } from "react-i18next";
+import {
+  Pipeline,
+  PipelineCreate,
+  PipelineUpdate,
+} from "../../../../../../services/api";
 
 interface Props {
-  selected: Pipeline;
+  selected: Pipeline | null;
   editPipeline: (id: number, value: PipelineUpdate) => Promise<void>;
-  deletePipeline: (value: Pipeline) => Promise<void>;
-  openAddDialog: () => void;
+  addPipeline: (value: PipelineCreate) => Promise<Pipeline>;
+  addMode: boolean;
+  setAddMode: (v: boolean) => void;
+  requestDelete: (value: Pipeline) => void;
 }
 
-const PipelinesDetailPanel = React.memo(function PipelinesDetailPanel({
-  selected,
-  editPipeline,
-  deletePipeline,
-  openAddDialog,
-}: Props) {
-  const { t } = useTranslation(["common", "pipeline-page"]);
-  const [inEdit, setInEdit] = React.useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-  const [name, setName] = React.useState("");
+interface PipelineFormValues {
+  Name: string;
+}
 
-  const handleNameChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setName(String(e.value ?? ""));
-  }, []);
+interface ValidationErrors {
+  [key: string]: string;
+}
 
-  const saveEdit = async () => {
-    await editPipeline(selected.ID, {
-      Name: name || null,
-    });
-    setInEdit(false);
-  };
-
-  const confirmDelete = async () => {
-    if (!selected) return;
-
-    await deletePipeline(selected);
-    setShowDeleteDialog(false);
-    setInEdit(false);
-  };
-
-  const cancelEdit = () => {
-    setName(selected.Name ?? "");
-    setInEdit(false);
-  };
-
-  React.useEffect(() => {
-    setName(selected.Name ?? "");
-    setInEdit(false);
-  }, [selected]);
+const ValidatedTextBox = (props: FieldRenderProps) => {
+  const { validationMessage, touched, modified, ...rest } = props;
 
   return (
-    <div className="detail-panel-content">
-      <div className="item-column">
-        <Label>ID</Label>
-        <TextBox value={selected.ID.toString()} disabled />
-
-        <Label>Name</Label>
-        <TextBox value={name} disabled={!inEdit} onChange={handleNameChange} />
-      </div>
-
-      <div className="item-row">
-        {!inEdit ? (
-          <>
-            <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
-              {t("common:edit")}
-            </Button>
-
-            <Button svgIcon={plusIcon} onClick={openAddDialog}>
-              {t("pipeline-page:add_new_pipeline")}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button svgIcon={cancelIcon} onClick={cancelEdit}>
-              {t("common:cancel")}
-            </Button>
-
-            <Button svgIcon={saveIcon} themeColor="primary" onClick={saveEdit}>
-              {t("common:save")}
-            </Button>
-
-            <Button
-              svgIcon={trashIcon}
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              {t("common:delete")}
-            </Button>
-          </>
-        )}
-      </div>
-
-      {showDeleteDialog && (
-        <Dialog
-          title="Confirm deletion"
-          onClose={() => setShowDeleteDialog(false)}
-        >
-          Delete this pipeline?
-          <DialogActionsBar>
-            <Button onClick={() => setShowDeleteDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmDelete}>
-              {t("common:delete")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
+    <div className="field-wrapper">
+      <TextBox {...rest} />
+      {(touched || modified) && validationMessage && (
+        <Error>{validationMessage}</Error>
       )}
     </div>
+  );
+};
+
+const pipelineValidator = (values: PipelineFormValues) => {
+  const errors: ValidationErrors = {};
+  if (!values.Name?.trim()) errors.Name = "Name required";
+  return Object.keys(errors).length ? errors : undefined;
+};
+
+const PipelinesDetailPanel = memo(function PipelinesDetailPanel({
+  selected,
+  editPipeline,
+  addPipeline,
+  addMode,
+  setAddMode,
+  requestDelete,
+}: Props) {
+  const { t } = useTranslation(["common", "pipelines-page"]);
+  const [inEdit, setInEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const initialValues =
+    addMode || !selected ? { Name: "" } : { Name: selected.Name };
+
+  const handleSubmit = async (values: PipelineFormValues) => {
+    try {
+      setLoading(true);
+
+      if (addMode) {
+        await addPipeline({ Name: values.Name });
+        setAddMode(false);
+        return;
+      }
+
+      await editPipeline(selected!.ID, { Name: values.Name });
+      setInEdit(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => setInEdit(addMode), [selected, addMode]);
+
+  return (
+    <Form
+      key={addMode ? "add" : selected?.ID}
+      initialValues={initialValues}
+      validator={pipelineValidator}
+      onSubmit={(values) => handleSubmit(values as PipelineFormValues)}
+      render={(formProps) => (
+        <FormElement className="detail-panel-content">
+          <Label>{t("pipelines-page:name")}</Label>
+          <Field name="Name" component={ValidatedTextBox} disabled={!inEdit} />
+
+          <div className="item-row">
+            {!inEdit && !addMode ? (
+              <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
+                {t("common:edit")}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  svgIcon={cancelIcon}
+                  disabled={loading}
+                  onClick={() => {
+                    setAddMode(false);
+                    setInEdit(false);
+                    formProps.onFormReset();
+                  }}
+                >
+                  {t("common:cancel")}
+                </Button>
+
+                {!addMode && selected && (
+                  <Button
+                    svgIcon={trashIcon}
+                    disabled={loading}
+                    onClick={() => requestDelete(selected)}
+                  >
+                    {t("common:delete")}
+                  </Button>
+                )}
+
+                <Button
+                  svgIcon={saveIcon}
+                  themeColor="primary"
+                  disabled={!formProps.allowSubmit || loading}
+                  onClick={formProps.onSubmit}
+                >
+                  {addMode ? t("common:add") : t("common:save")}
+                </Button>
+              </>
+            )}
+          </div>
+        </FormElement>
+      )}
+    />
   );
 });
 
