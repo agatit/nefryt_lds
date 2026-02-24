@@ -27,7 +27,7 @@ const Pipelines = memo(function Pipelines({
   enterAddNewPipeline,
   requestDelete,
 }: Props) {
-  const { t } = useTranslation(["common", "pipeline-page"]);
+  const { t } = useTranslation(["common", "pipelines-page"]);
   const [select, setSelect] = useState<SelectDescriptor>();
 
   const handleSelectionChange = (e: GridSelectionChangeEvent) => {
@@ -51,7 +51,7 @@ const Pipelines = memo(function Pipelines({
 
         <ButtonGroup>
           <Button svgIcon={plusIcon} onClick={enterAddNewPipeline}>
-            {t("pipeline-page:add_new_pipeline")}
+            {t("pipelines-page:add_new_pipeline")}
           </Button>
 
           {selected && (
@@ -62,7 +62,7 @@ const Pipelines = memo(function Pipelines({
         </ButtonGroup>
       </GridToolbar>
 
-      <GridColumn field="Name" title={t("pipeline-page:name")} />
+      <GridColumn field="Name" title={t("pipelines-page:name")} />
     </Grid>
   );
 });
