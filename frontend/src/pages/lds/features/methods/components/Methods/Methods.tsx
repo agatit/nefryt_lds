@@ -1,4 +1,5 @@
-import React from "react";
+import { memo, useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Grid,
   GridColumn,
@@ -7,68 +8,73 @@ import {
   GridSelectionChangeEvent,
 } from "@progress/kendo-react-grid";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
-import { useTranslation } from "react-i18next";
-import { Method } from "../../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
-import { plusIcon } from "@progress/kendo-svg-icons";
+import { plusIcon, trashIcon } from "@progress/kendo-svg-icons";
+import { Method } from "../../../../../../services/api";
 
 interface Props {
   methods: Method[];
-  selected?: Method | null;
-  onSelect: (m: Method) => void;
-  openAddDialog: () => void;
+  selected: Method | null;
+  onSelect: (value: Method | null) => void;
+  onAdd: () => void;
+  requestDelete: (value: Method) => void;
 }
 
-const Methods = React.memo(function methods({
+const Methods = memo(function Methods({
   methods,
   selected,
   onSelect,
-  openAddDialog,
+  onAdd,
+  requestDelete,
 }: Props) {
-  const { t } = useTranslation(["pipeline-page"]);
+  const { t } = useTranslation(["common", "method-page"]);
+  const [select, setSelect] = useState<SelectDescriptor>({});
 
-  const [select, setSelect] = React.useState<SelectDescriptor>();
-
-  const handleSelectionChange = React.useCallback(
-    (method: GridSelectionChangeEvent) => {
-      const item = method.endDataItem as Method;
+  const handleSelectionChange = useCallback(
+    (e: GridSelectionChangeEvent) => {
+      const item = e.endDataItem as Method;
       onSelect(item);
-      setSelect(method.select);
+      setSelect(e.select);
     },
     [onSelect],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selected) setSelect({});
   }, [selected]);
 
   return (
-    <div>
-      <Grid
-        data={methods}
-        dataItemKey="ID"
-        autoProcessData
-        sortable
-        filterable
-        select={select}
-        selectable={{ enabled: true, mode: "single" }}
-        onSelectionChange={handleSelectionChange}
-      >
-        <GridToolbar>
-          <GridSearchBox />
-          <ButtonGroup>
-            <Button svgIcon={plusIcon} onClick={openAddDialog}>
-              {t("pipeline-page:add_new_method")}
-            </Button>
-          </ButtonGroup>
-        </GridToolbar>
+    <Grid
+      data={methods}
+      dataItemKey="ID"
+      autoProcessData
+      sortable
+      filterable
+      selectable={{ mode: "single" }}
+      select={select}
+      onSelectionChange={handleSelectionChange}
+    >
+      <GridToolbar>
+        <GridSearchBox />
 
-        <GridColumn field="ID" title="ID" />
-        <GridColumn field="PipelineID" title="PipelineID" />
-        <GridColumn field="MethodDefID" title="Definition ID" />
-        <GridColumn field="Name" title="Name" />
-      </Grid>
-    </div>
+        <ButtonGroup>
+          <Button svgIcon={plusIcon} onClick={onAdd}>
+            {t("method-page:add_new_method")}
+          </Button>
+
+          {selected && (
+            <Button svgIcon={trashIcon} onClick={() => requestDelete(selected)}>
+              {t("common:delete")}
+            </Button>
+          )}
+        </ButtonGroup>
+      </GridToolbar>
+
+      <GridColumn field="ID" title="ID" />
+      <GridColumn field="PipelineID" title="PipelineID" />
+      <GridColumn field="MethodDefID" title="Definition ID" />
+      <GridColumn field="Name" title="Name" />
+    </Grid>
   );
 });
 

@@ -1,4 +1,5 @@
-import React from "react";
+import { memo, useCallback, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Grid,
   GridColumn,
@@ -6,11 +7,10 @@ import {
   GridToolbar,
   GridSelectionChangeEvent,
 } from "@progress/kendo-react-grid";
-import { MethodParam, Method } from "../../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
 import { plusIcon } from "@progress/kendo-svg-icons";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
-import { useTranslation } from "react-i18next";
+import { MethodParam, Method } from "../../../../../../services/api";
 
 type Props = {
   methodParams: MethodParam[];
@@ -20,7 +20,7 @@ type Props = {
   setSelectedParam: (p: MethodParam | null) => void;
 };
 
-const MethodParams = React.memo(function MethodParams({
+const MethodParams = memo(function MethodParams({
   selectedMethod,
   selectedParam,
   methodParams,
@@ -28,11 +28,10 @@ const MethodParams = React.memo(function MethodParams({
   openDialog,
 }: Props) {
   if (!selectedMethod) return null;
-
-  const [select, setSelect] = React.useState<SelectDescriptor>({});
+  const [select, setSelect] = useState<SelectDescriptor>({});
   const { t } = useTranslation(["method-page"]);
 
-  const handleSelectionChange = React.useCallback(
+  const handleSelectionChange = useCallback(
     (event: GridSelectionChangeEvent) => {
       const item = (event.endDataItem ?? event.dataItem) as MethodParam;
 
@@ -44,7 +43,7 @@ const MethodParams = React.memo(function MethodParams({
     [setSelectedParam],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedParam) {
       setSelect({});
     }

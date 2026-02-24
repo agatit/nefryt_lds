@@ -1,32 +1,5 @@
-import React from "react";
-import "./methodsPage.scss";
+import { useEffect, useState, useContext, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { LDSContext } from "../../contexts/ldsContext";
-import {
-  Method,
-  MethodCreate,
-  MethodDef,
-  MethodParam,
-  MethodParamCreate,
-  MethodParamDef,
-} from "../../../../services/api";
-import Methods from "./components/Methods/Methods";
-import MethodDefDetailPanel from "./components/MethodDefs/MethodDefsDetailPanel";
-import MethodsDetailPanel from "./components/Methods/MethodsDetailPanel";
-import MethodParams from "./components/MethodParams/MethodParams";
-import MethodParamDetailPanel from "./components/MethodParams/MethodParamDetailPanel";
-import MethodParamDefs from "./components/MethodParamDefs/MethodParamDefs";
-import MethodParamDefDetailPanel from "./components/MethodParamDefs/MethodParamDefsDetailPanel";
-import { DetailPanel } from "onyks_shared_kendo";
-import { Typography } from "@progress/kendo-react-common";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import { Label } from "@progress/kendo-react-labels";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
-import { Button } from "@progress/kendo-react-buttons";
-import {
-  DropDownList,
-  DropDownListChangeEvent,
-} from "@progress/kendo-react-dropdowns";
 import {
   Splitter,
   SplitterOnChangeEvent,
@@ -35,13 +8,24 @@ import {
   TabStripSelectEventArguments,
   TabStripTab,
 } from "@progress/kendo-react-layout";
-import { AppContext } from "../../../../contexts/appContext";
+import { Button } from "@progress/kendo-react-buttons";
+import { DetailPanel } from "onyks_shared_kendo";
+import { Typography } from "@progress/kendo-react-common";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import { LDSContext } from "../../contexts/ldsContext";
+import Methods from "./components/Methods/Methods";
+import MethodsDetailPanel from "./components/Methods/MethodsDetailPanel";
+import MethodParams from "./components/MethodParams/MethodParams";
+import MethodParamDetailPanel from "./components/MethodParams/MethodParamDetailPanel";
 import MethodDefs from "./components/MethodDefs/MethodDefs";
+import { AppContext } from "../../../../contexts/appContext";
+import { Method, MethodDef, MethodParam } from "../../../../services/api";
+import "./methodsPage.scss";
 
 const MethodsPage = () => {
   const { t } = useTranslation(["common", "method-page"]);
-  const appContext = React.useContext(AppContext);
-  const ldsContext = React.useContext(LDSContext);
+  const appContext = useContext(AppContext);
+  const ldsContext = useContext(LDSContext);
   if (!appContext || !ldsContext) return null;
 
   const {
@@ -51,80 +35,34 @@ const MethodsPage = () => {
     addMethod,
     updateMethod,
     deleteMethod,
-    addMethodParam,
     deleteMethodParam,
     loadMethodParamsByMethod,
     methodParamDefs,
     methodParams,
   } = ldsContext;
-  const [selectedMethod, setSelectedMethod] = React.useState<Method | null>(
+  const [selectedMethod, setSelectedMethod] = useState<Method | null>(null);
+  const [verticalPanes, setVerticalPanes] = useState<SplitterPaneProps[]>([
+    { size: "65%" },
+    {},
+  ]);
+  const [methodAddMode, setMethodAddMode] = useState(false);
+  const [paramAddMode, setParamAddMode] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedMethodDef, setSelectedMethodDef] = useState<MethodDef | null>(
     null,
   );
-  const [verticalPanes, setVerticalPanes] = React.useState<SplitterPaneProps[]>(
-    [{ size: "65%" }, {}],
-  );
-  const [showAddDialog, setShowAddDialog] = React.useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-  const [name, setName] = React.useState("");
-  const [dialogSelectedPipeline, setDialogSelectedPipeline] = React.useState<
-    any | null
-  >(null);
-  const [dialogSelectedMethod, setDialogSelectedMethod] =
-    React.useState<MethodDef | null>(null);
-  const [selectedMethodDef, setSelectedMethodDef] =
-    React.useState<MethodDef | null>(null);
   const [selectedMethodParam, setSelectedMethodParam] =
-    React.useState<MethodParam | null>(null);
-  const [tabSelected, setTabSelected] = React.useState<number>(0);
-  const [showAddParamDialog, setShowAddParamDialog] = React.useState(false);
-  const [showDeleteParamDialog, setShowDeleteParamDialog] =
-    React.useState(false);
-  const [paramValue, setParamValue] = React.useState("");
-  const [selectedParamDef, setSelectedParamDef] =
-    React.useState<MethodParamDef | null>(null);
-  const [selectedMethodParamDef, setSelectedMethodParamDef] =
-    React.useState<MethodParamDef | null>(null);
-
-  const handleParamValueChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setParamValue(String(e.value ?? ""));
-  }, []);
-
-  const handleParamDefChange = React.useCallback(
-    (e: DropDownListChangeEvent) => {
-      setSelectedParamDef(e.value);
-    },
-    [],
-  );
+    useState<MethodParam | null>(null);
+  const [tabSelected, setTabSelected] = useState<number>(0);
+  const [showDeleteParamDialog, setShowDeleteParamDialog] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
 
   const handleVerticalChange = (e: SplitterOnChangeEvent) =>
     setVerticalPanes(e.newState);
 
-  const handlePipelineChange = React.useCallback(
-    (e: DropDownListChangeEvent) => {
-      setDialogSelectedPipeline(e.value?.ID ?? null);
-      setDialogSelectedMethod(null);
-    },
-    [],
-  );
-
-  const handleMethodChange = React.useCallback((e: DropDownListChangeEvent) => {
-    setDialogSelectedMethod(e.value);
+  const handleTabSelect = useCallback((e: TabStripSelectEventArguments) => {
+    setTabSelected(e.selected);
   }, []);
-
-  const handleNameChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setName(String(e.value ?? ""));
-  }, []);
-
-  const handleTabSelect = React.useCallback(
-    (e: TabStripSelectEventArguments) => {
-      setTabSelected(e.selected);
-    },
-    [],
-  );
-
-  const selectedPipelineObject = React.useMemo(() => {
-    return pipelines.find((p) => p.ID === dialogSelectedPipeline) ?? null;
-  }, [pipelines, dialogSelectedPipeline]);
 
   const confirmDeleteMethod = async () => {
     if (!selectedMethod) return;
@@ -133,85 +71,35 @@ const MethodsPage = () => {
     setShowDeleteDialog(false);
   };
 
-  const confirmAddMethod = async () => {
-    if (!dialogSelectedPipeline || !dialogSelectedMethod) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message: "Method definition required",
-      });
-      return;
-    }
-
-    const method: MethodCreate = {
-      PipelineID: dialogSelectedPipeline,
-      MethodDefID: dialogSelectedMethod.ID,
-      Name: name || null,
-    };
-
-    await addMethod(method);
-
-    setName("");
-    setDialogSelectedPipeline(null);
-    setDialogSelectedMethod(null);
-    setShowAddDialog(false);
-  };
-
-  const availableParamDefs = React.useMemo(() => {
+  const availableParamDefs = useMemo(() => {
     if (!selectedMethod) return [];
+
+    const methodDefID = selectedMethod.MethodDefID;
 
     const usedDefs = methodParams
       .filter((p) => p.MethodID === selectedMethod.ID)
       .map((p) => p.MethodParamDefID);
 
-    return methodParamDefs.filter(
-      (def) =>
-        def.MethodDefID === selectedMethod.MethodDefID &&
-        !usedDefs.includes(def.ID),
-    );
+    return methodParamDefs
+      .filter((def) => String(def.MethodDefID) === String(methodDefID))
+      .map((def) => ({
+        ...def,
+        disabled: usedDefs.some((id) => String(id) === String(def.ID)),
+      }));
   }, [methodParamDefs, methodParams, selectedMethod]);
 
-  const availableMethodDefs = React.useMemo(() => {
-    if (!dialogSelectedPipeline) return methodDefs;
+  const availableMethodDefs = useMemo(() => {
+    if (!selectedMethod) return methodDefs;
 
     const usedDefs = methods
-      .filter((m) => m.PipelineID === dialogSelectedPipeline)
+      .filter((m) => m.PipelineID === selectedMethod.PipelineID)
       .map((m) => m.MethodDefID);
 
-    return methodDefs.filter((def) => !usedDefs.includes(def.ID));
-  }, [methods, methodDefs, dialogSelectedPipeline]);
-
-  const handleOpenAddParamDialog = React.useCallback(() => {
-    if (availableParamDefs.length === 0) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "warning" },
-        message: "No available parameters to add.",
-      });
-      return;
-    }
-
-    setShowAddParamDialog(true);
-  }, [availableParamDefs, appContext]);
-
-  const confirmAddParam = async () => {
-    if (!selectedMethod || !selectedParamDef?.ID || !paramValue.trim()) {
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message: "Select parameter definition and enter value",
-      });
-      return;
-    }
-
-    const param: MethodParamCreate = {
-      MethodParamDefID: selectedParamDef.ID,
-      Value: paramValue,
-    };
-
-    await addMethodParam(selectedMethod.ID, param);
-    setShowAddParamDialog(false);
-    setParamValue("");
-    setSelectedParamDef(null);
-    await loadMethodParamsByMethod(selectedMethod.ID);
-  };
+    return methodDefs.map((def) => ({
+      ...def,
+      disabled: usedDefs.includes(def.ID),
+    }));
+  }, [methodDefs, methods, selectedMethod]);
 
   const confirmDeleteParam = async () => {
     if (!selectedMethod || !selectedMethodParam) return;
@@ -227,7 +115,7 @@ const MethodsPage = () => {
     await loadMethodParamsByMethod(selectedMethod.ID);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedMethod) return;
 
     loadMethodParamsByMethod(selectedMethod.ID);
@@ -249,17 +137,18 @@ const MethodsPage = () => {
               setSelectedMethod(m);
               setSelectedMethodParam(null);
               setSelectedMethodDef(null);
+              setMethodAddMode(false);
+              setPanelOpen(!!m);
             }}
-            openAddDialog={() => {
-              if (availableMethodDefs.length === 0) {
-                appContext.showNotification({
-                  notificationType: { icon: true, style: "warning" },
-                  message: "No available method to add.",
-                });
-                return;
-              }
-
-              setShowAddDialog(true);
+            onAdd={() => {
+              setSelectedMethod(null);
+              setSelectedMethodParam(null);
+              setMethodAddMode(true);
+              setPanelOpen(true);
+            }}
+            requestDelete={(m) => {
+              setSelectedMethod(m);
+              setShowDeleteDialog(true);
             }}
           />
         </div>
@@ -280,17 +169,6 @@ const MethodsPage = () => {
               }}
             />
           </TabStripTab>
-          <TabStripTab title={t("method-page:method_param_defs")}>
-            <MethodParamDefs
-              selected={selectedMethodParamDef}
-              setSelected={(d) => {
-                setSelectedMethodParamDef(d);
-                setSelectedMethod(null);
-                setSelectedMethodParam(null);
-                setSelectedMethodDef(null);
-              }}
-            />
-          </TabStripTab>
           <TabStripTab title={t("method-page:method_params")}>
             {selectedMethod ? (
               <MethodParams
@@ -298,7 +176,20 @@ const MethodsPage = () => {
                 selectedParam={selectedMethodParam}
                 setSelectedParam={setSelectedMethodParam}
                 methodParams={methodParams}
-                openDialog={handleOpenAddParamDialog}
+                openDialog={() => {
+                  if (!selectedMethod) return;
+
+                  if (availableParamDefs.length === 0) {
+                    appContext.showNotification({
+                      notificationType: { icon: true, style: "warning" },
+                      message: "No available parameters to add.",
+                    });
+                    return;
+                  }
+
+                  setParamAddMode(true);
+                  setSelectedMethodParam(null);
+                }}
               />
             ) : (
               <Typography.p style={{ padding: 20 }}>
@@ -311,135 +202,78 @@ const MethodsPage = () => {
 
       <DetailPanel
         flexGrow={1}
-        extandable={false}
+        extandable
+        extended={panelOpen}
+        onExtendedChange={setPanelOpen}
         className={
           "methods-detail-panel" +
           (selectedMethod ||
           selectedMethodDef ||
           selectedMethodParam ||
-          selectedMethodParamDef
+          methodAddMode ||
+          paramAddMode
             ? ""
             : " no-selected")
         }
       >
-        {selectedMethodParamDef ? (
-          <MethodParamDefDetailPanel selected={selectedMethodParamDef} />
-        ) : selectedMethodParam && selectedMethod ? (
+        {(selectedMethodParam || paramAddMode) && selectedMethod && (
           <MethodParamDetailPanel
             selected={selectedMethodParam}
             selectedMethod={selectedMethod}
             updateParam={ldsContext.updateMethodParam}
             deleteParam={ldsContext.deleteMethodParam}
-            openAddDialog={() => setShowAddParamDialog(true)}
-            openDeleteDialog={() => setShowDeleteParamDialog(true)}
+            addMode={paramAddMode}
+            setAddMode={setParamAddMode}
+            requestDelete={() => setShowDeleteParamDialog(true)}
+            paramDefs={availableParamDefs}
+            methodParams={methodParams}
+            addMethodParam={ldsContext.addMethodParam}
           />
-        ) : selectedMethodDef ? (
-          <MethodDefDetailPanel selected={selectedMethodDef} />
-        ) : selectedMethod ? (
-          <MethodsDetailPanel
-            selected={selectedMethod}
-            updateMethod={updateMethod}
-            deleteMethod={async () => setShowDeleteDialog(true)}
-            openAddDialog={() => setShowAddDialog(true)}
-          />
-        ) : (
-          <Typography.p style={{ padding: 20 }}>
-            {t("method-page:select_method")}
-          </Typography.p>
         )}
+
+        {(selectedMethod || methodAddMode) &&
+          !(selectedMethodParam || paramAddMode) && (
+            <MethodsDetailPanel
+              selected={selectedMethod}
+              updateMethod={updateMethod}
+              addMethod={addMethod}
+              addMode={methodAddMode}
+              setAddMode={setMethodAddMode}
+              requestDelete={() => setShowDeleteDialog(true)}
+              pipelines={pipelines}
+              methodDefs={availableMethodDefs}
+            />
+          )}
+
+        {!selectedMethod &&
+          !selectedMethodDef &&
+          !selectedMethodParam &&
+          !methodAddMode &&
+          !paramAddMode && (
+            <Typography.p style={{ padding: 20 }}>
+              {t("method-page:select_method")}
+            </Typography.p>
+          )}
       </DetailPanel>
-
-      {showAddParamDialog && (
-        <Dialog
-          title="Add method parameter"
-          onClose={() => setShowAddParamDialog(false)}
-          className="methods-dialog"
-        >
-          <div className="form-field">
-            <Label>Parameter definition</Label>
-            <DropDownList
-              data={availableParamDefs}
-              textField="Name"
-              dataItemKey="MethodParamDefID"
-              value={selectedParamDef}
-              onChange={handleParamDefChange}
-            />
-          </div>
-
-          <Label>Value</Label>
-          <TextBox value={paramValue} onChange={handleParamValueChange} />
-
-          <DialogActionsBar>
-            <Button onClick={() => setShowAddParamDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmAddParam}>
-              {t("common:add")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
-
-      {showAddDialog && (
-        <Dialog
-          title="Add new method"
-          onClose={() => setShowAddDialog(false)}
-          className="methods-dialog"
-        >
-          <div className="form-field">
-            <Label>Pipeline</Label>
-            <DropDownList
-              data={pipelines}
-              textField="Name"
-              dataItemKey="ID"
-              value={selectedPipelineObject}
-              onChange={handlePipelineChange}
-            />
-          </div>
-
-          <div className="form-field">
-            <Label>Method definition</Label>
-            <DropDownList
-              data={availableMethodDefs}
-              textField="ID"
-              dataItemKey="ID"
-              value={dialogSelectedMethod}
-              onChange={handleMethodChange}
-            />
-          </div>
-
-          <Label>Name</Label>
-          <TextBox value={name} onChange={handleNameChange} />
-
-          <DialogActionsBar>
-            <Button onClick={() => setShowAddDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmAddMethod}>
-              {t("common:add")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
 
       {showDeleteDialog && (
         <Dialog
-          title="Confirm deletion"
+          title={t("common:confirm_deletion")}
           onClose={() => setShowDeleteDialog(false)}
-          className="methods-dialog"
         >
-          Delete selected method?
+          {t("method-page:delete_method")}
+
           <DialogActionsBar>
             <Button onClick={() => setShowDeleteDialog(false)}>
               {t("common:cancel")}
             </Button>
+
             <Button themeColor="primary" onClick={confirmDeleteMethod}>
               {t("common:delete")}
             </Button>
           </DialogActionsBar>
         </Dialog>
       )}
-
       {showDeleteParamDialog && (
         <Dialog
           title={t("common:confirm_deletion")}

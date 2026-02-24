@@ -1,113 +1,228 @@
-import React from "react";
-import { Method, MethodUpdate } from "../../../../../../services/api";
-import { Label } from "@progress/kendo-react-labels";
+import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import {
+  Form,
+  Field,
+  FormElement,
+  FieldRenderProps,
+} from "@progress/kendo-react-form";
+import { TextBox } from "@progress/kendo-react-inputs";
+import { Label, Error } from "@progress/kendo-react-labels";
 import { Button } from "@progress/kendo-react-buttons";
 import {
-  pencilIcon,
   cancelIcon,
-  trashIcon,
   saveIcon,
-  plusIcon,
+  trashIcon,
+  pencilIcon,
 } from "@progress/kendo-svg-icons";
+import { DropDownList } from "@progress/kendo-react-dropdowns";
+import {
+  Method,
+  MethodCreate,
+  MethodUpdate,
+  MethodDef,
+} from "../../../../../../services/api";
 
 interface Props {
-  selected: Method;
+  selected: Method | null;
   updateMethod: (id: number, value: MethodUpdate) => Promise<void>;
-  deleteMethod: (m: Method) => Promise<void>;
-  openAddDialog: () => void;
+  requestDelete: () => void;
+  addMethod: (value: MethodCreate) => Promise<Method>;
+  addMode: boolean;
+  setAddMode: (v: boolean) => void;
+  pipelines: any[];
+  methodDefs: MethodDef[];
 }
 
-const MethodsDetailPanel: React.FC<Props> = ({
-  selected,
-  updateMethod,
-  openAddDialog,
-  deleteMethod,
-}) => {
-  const { t } = useTranslation(["common"]);
-  const [inEdit, setInEdit] = React.useState(false);
-  const [name, setName] = React.useState(selected.Name ?? "");
-  const definition = selected.MethodDefID ?? "";
-  const pipeline = selected.PipelineID ?? "";
-  const id = selected.ID ?? "";
+interface ValidationErrors {
+  [key: string]: string;
+}
 
-  const handleNameChange = React.useCallback((e: TextBoxChangeEvent) => {
-    setName(String(e.value ?? ""));
-  }, []);
+export interface MethodFormValues {
+  MethodDefID: MethodDef | null;
+  PipelineID: { ID: number; Name: string } | null;
+  Name?: string;
+}
 
-  const cancelEdit = () => {
-    setName(selected.Name ?? "");
-    setInEdit(false);
-  };
-
-  const saveEdit = async () => {
-    await updateMethod(selected.ID, {
-      Name: name,
-      MethodDefID: selected.MethodDefID,
-      PipelineID: selected.PipelineID,
-    });
-
-    setInEdit(false);
-  };
-
-  React.useEffect(() => {
-    setName(selected.Name ?? "");
-    setInEdit(false);
-  }, [selected]);
+const ValidatedTextBox = (props: FieldRenderProps) => {
+  const { validationMessage, touched, modified, ...rest } = props;
 
   return (
-    <div className="detail-panel-content">
-      <div className="item-column">
-        <Label>ID</Label>
-        <TextBox value={id} disabled />
-
-        <Label>Pipeline ID</Label>
-        <TextBox value={pipeline} disabled />
-
-        <Label>Method definition ID</Label>
-        <TextBox value={definition} disabled />
-
-        <Label>Name</Label>
-        <TextBox value={name} disabled={!inEdit} onChange={handleNameChange} />
-
-        <div className="item-row">
-          {!inEdit ? (
-            <>
-              <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
-                {t("common:edit")}
-              </Button>
-
-              <Button svgIcon={plusIcon} onClick={openAddDialog}>
-                {t("link-page:add_new_method")}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button svgIcon={cancelIcon} onClick={cancelEdit}>
-                {t("common:cancel")}
-              </Button>
-
-              <Button
-                svgIcon={saveIcon}
-                themeColor="primary"
-                onClick={saveEdit}
-              >
-                {t("common:save")}
-              </Button>
-
-              <Button
-                svgIcon={trashIcon}
-                onClick={() => deleteMethod(selected)}
-              >
-                {t("common:delete")}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+    <div className="field-wrapper">
+      <TextBox {...rest} />
+      {(touched || modified) && validationMessage && (
+        <Error>{validationMessage}</Error>
+      )}
     </div>
   );
 };
+
+const ValidatedDropDown = (props: FieldRenderProps) => {
+  const { validationMessage, touched, modified, data, ...rest } = props;
+
+  return (
+    <div className="field-wrapper">
+      <DropDownList
+        {...rest}
+        data={data}
+        textField={props.textField}
+        dataItemKey={props.dataItemKey}
+        value={props.value}
+        skipDisabledItems={true}
+        onChange={(e) => props.onChange({ value: e.value })}
+      />
+
+      {(touched || modified) && validationMessage && (
+        <Error>{validationMessage}</Error>
+      )}
+    </div>
+  );
+};
+
+const methodValidator = (values: MethodFormValues) => {
+  const errors: ValidationErrors = {};
+
+  if (!values.PipelineID) errors.PipelineID = "Required";
+  if (!values.MethodDefID) errors.MethodDefID = "Required";
+
+  return Object.keys(errors).length ? errors : undefined;
+};
+
+const MethodsDetailPanel = memo(function MethodsDetailPanel({
+  selected,
+  updateMethod,
+  requestDelete,
+  addMethod,
+  addMode,
+  setAddMode,
+  pipelines,
+  methodDefs,
+}: Props) {
+  const { t } = useTranslation(["common"]);
+  const [inEdit, setInEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const initialValues =
+    addMode || !selected
+      ? { Name: "", PipelineID: null, MethodDefID: null }
+      : {
+          Name: selected.Name ?? "",
+          PipelineID:
+            pipelines.find((p) => p.ID === selected.PipelineID) ?? null,
+          MethodDefID:
+            methodDefs.find((d) => d.ID === selected.MethodDefID) ?? null,
+        };
+
+  const handleSubmit = async (values: MethodFormValues) => {
+    try {
+      setLoading(true);
+
+      const payload: MethodCreate = {
+        Name: values.Name,
+        PipelineID: values.PipelineID!.ID,
+        MethodDefID: values.MethodDefID!.ID,
+      };
+
+      console.log("Submitting payload:", payload);
+
+      if (addMode) {
+        await addMethod(payload);
+        setAddMode(false);
+        return;
+      }
+
+      await updateMethod(selected!.ID, payload);
+      setInEdit(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => setInEdit(addMode), [selected, addMode]);
+
+  return (
+    <Form
+      key={addMode ? "add" : selected?.ID}
+      initialValues={initialValues}
+      validator={methodValidator}
+      onSubmit={(values) => handleSubmit(values as MethodFormValues)}
+      render={(formProps) => (
+        <FormElement className="detail-panel-content">
+          <div className="item-column">
+            <Label>Pipeline</Label>
+            <Field
+              name="PipelineID"
+              component={ValidatedDropDown}
+              data={pipelines}
+              textField="Name"
+              dataItemKey="ID"
+              disabled={!inEdit}
+            />
+
+            <Label>Method definition</Label>
+            <Field
+              name="MethodDefID"
+              component={ValidatedDropDown}
+              data={methodDefs}
+              textField="ID"
+              dataItemKey="ID"
+              disabled={!inEdit}
+            />
+
+            <Label>Name</Label>
+            <Field
+              name="Name"
+              component={ValidatedTextBox}
+              disabled={!inEdit}
+            />
+          </div>
+
+          <div className="separator" />
+
+          <div className="item-row">
+            {!inEdit && !addMode ? (
+              <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
+                {t("common:edit")}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  svgIcon={cancelIcon}
+                  disabled={loading}
+                  onClick={() => {
+                    setAddMode(false);
+                    setInEdit(false);
+                    formProps.onFormReset();
+                  }}
+                >
+                  {t("common:cancel")}
+                </Button>
+
+                {!addMode && selected && (
+                  <Button
+                    svgIcon={trashIcon}
+                    disabled={loading}
+                    onClick={requestDelete}
+                  >
+                    {t("common:delete")}
+                  </Button>
+                )}
+
+                <Button
+                  svgIcon={saveIcon}
+                  themeColor="primary"
+                  disabled={!formProps.allowSubmit || loading}
+                  onClick={formProps.onSubmit}
+                >
+                  {addMode ? t("common:add") : t("common:save")}
+                </Button>
+              </>
+            )}
+          </div>
+        </FormElement>
+      )}
+    />
+  );
+});
 
 export default MethodsDetailPanel;
