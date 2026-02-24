@@ -7,6 +7,13 @@ main.events-page {
   height: var.$underAppBarHeight;
 }
 
+main.events-page .k-label {
+  text-align: left;
+  margin-bottom: 5px;
+  width: 100%;
+  font-size: 1rem;
+}
+
 .events-grid-container {
   flex: 4 0 0;
   display: flex;
@@ -20,7 +27,7 @@ main.events-page {
 }
 
 .events-detail-panel.no-selected > div {
-  align-items: flex-start; 
+  align-items: flex-start;
   height: 100%;
   cursor: not-allowed;
 }
@@ -28,25 +35,18 @@ main.events-page {
 .detail-panel-content .item-column {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; 
+  align-items: flex-start;
   gap: 12px;
 }
 
 .detail-panel-content .item-column > div {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; 
+  align-items: flex-start;
 }
 
 .k-dialog-content .k-input,
 .k-dialog-content .k-dropdown,
 .k-dialog-content .k-numerictextbox {
   margin-bottom: 12px;
-}
-
-.k-label {
-  text-align: left;
-  margin-bottom: 5px;
-  width: 100%;
-  font-size: 1rem;
 }
