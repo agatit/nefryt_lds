@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, useMemo } from "react";
 import {
   Form,
   Field,
@@ -69,8 +69,13 @@ const PipelinesDetailPanel = memo(function PipelinesDetailPanel({
   const [inEdit, setInEdit] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const initialValues =
-    addMode || !selected ? { Name: "" } : { Name: selected.Name };
+  const initialValues = useMemo(() => {
+    if (addMode || !selected) {
+      return { Name: "" };
+    }
+
+    return { Name: selected.Name ?? "" };
+  }, [selected?.ID, addMode]);
 
   const handleSubmit = async (values: PipelineFormValues) => {
     try {
@@ -82,14 +87,18 @@ const PipelinesDetailPanel = memo(function PipelinesDetailPanel({
         return;
       }
 
-      await editPipeline(selected!.ID, { Name: values.Name });
+      if (!selected) return;
+
+      await editPipeline(selected.ID, { Name: values.Name });
       setInEdit(false);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => setInEdit(addMode), [selected, addMode]);
+  useEffect(() => {
+    if (addMode) setInEdit(true);
+  }, [addMode]);
 
   return (
     <Form
@@ -99,9 +108,16 @@ const PipelinesDetailPanel = memo(function PipelinesDetailPanel({
       onSubmit={(values) => handleSubmit(values as PipelineFormValues)}
       render={(formProps) => (
         <FormElement className="detail-panel-content">
-          <Label>{t("pipelines-page:name")}</Label>
-          <Field name="Name" component={ValidatedTextBox} disabled={!inEdit} />
+          <div className="item-column">
+            <Label>{t("pipelines-page:name")}</Label>
+            <Field
+              name="Name"
+              component={ValidatedTextBox}
+              disabled={!inEdit}
+            />
+          </div>
 
+          <div className="separator" />
           <div className="item-row">
             {!inEdit && !addMode ? (
               <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
@@ -132,10 +148,10 @@ const PipelinesDetailPanel = memo(function PipelinesDetailPanel({
                 )}
 
                 <Button
+                  type="submit"
                   svgIcon={saveIcon}
                   themeColor="primary"
                   disabled={!formProps.allowSubmit || loading}
-                  onClick={formProps.onSubmit}
                 >
                   {addMode ? t("common:add") : t("common:save")}
                 </Button>
