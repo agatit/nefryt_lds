@@ -7,6 +7,12 @@ main.links-page {
   height: var.$underAppBarHeight;
 }
 
+main.links-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
 .links-grid-container {
   flex: 4 0 0;
   display: flex;
@@ -23,7 +29,7 @@ main.links-page {
   width: 100%;
 }
 
-.links-detail-panel.no-selected>div {
+.links-detail-panel.no-selected > div {
   justify-content: flex-start;
   height: 100%;
 }
@@ -42,7 +48,7 @@ main.links-page {
   width: 100%;
 }
 
-.detail-panel-content .item-column>div {
+.detail-panel-content .item-column > div {
   display: flex;
   flex-direction: column;
   width: 100%;
