@@ -123,8 +123,6 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
         MethodDefID: values.MethodDefID!.ID,
       };
 
-      console.log("Submitting payload:", payload);
-
       if (addMode) {
         await addMethod(payload);
         setAddMode(false);
@@ -142,43 +140,44 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
 
   return (
     <Form
-      key={addMode ? "add" : selected?.ID}
       initialValues={initialValues}
       validator={methodValidator}
       onSubmit={(values) => handleSubmit(values as MethodFormValues)}
       render={(formProps) => (
         <FormElement className="detail-panel-content">
           <div className="item-column">
-            <Label>Pipeline</Label>
-            <Field
-              name="PipelineID"
-              component={ValidatedDropDown}
-              data={pipelines}
-              textField="Name"
-              dataItemKey="ID"
-              disabled={!inEdit}
-            />
-
-            <Label>Method definition</Label>
-            <Field
-              name="MethodDefID"
-              component={ValidatedDropDown}
-              data={methodDefs}
-              textField="ID"
-              dataItemKey="ID"
-              disabled={!inEdit}
-            />
-
-            <Label>Name</Label>
-            <Field
-              name="Name"
-              component={ValidatedTextBox}
-              disabled={!inEdit}
-            />
+            <div>
+              <Label>Pipeline</Label>
+              <Field
+                name="PipelineID"
+                component={ValidatedDropDown}
+                data={pipelines}
+                textField="Name"
+                dataItemKey="ID"
+                disabled={!inEdit}
+              />
+            </div>
+            <div>
+              <Label>Method definition</Label>
+              <Field
+                name="MethodDefID"
+                component={ValidatedDropDown}
+                data={methodDefs}
+                textField="ID"
+                dataItemKey="ID"
+                disabled={!inEdit}
+              />
+            </div>
+            <div>
+              <Label>Name</Label>
+              <Field
+                name="Name"
+                component={ValidatedTextBox}
+                disabled={!inEdit}
+              />
+            </div>
           </div>
-
           <div className="separator" />
-
           <div className="item-row">
             {!inEdit && !addMode ? (
               <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>

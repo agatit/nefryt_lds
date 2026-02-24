@@ -7,6 +7,18 @@ main.methods-page {
   height: var.$underAppBarHeight;
 }
 
+main.methods-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
+main.methods-page .k-messagebox .k-messagebox-warning {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
 .methods-grid-container {
   flex: 4 0 0;
   display: flex;
@@ -25,7 +37,7 @@ main.methods-page {
   background: white;
 }
 
-.methods-detail-panel.no-selected>div {
+.methods-detail-panel.no-selected > div {
   justify-content: center;
   height: 100%;
   cursor: not-allowed;
@@ -42,7 +54,7 @@ main.methods-page {
   gap: 10px;
 }
 
-.detail-panel-content .item-column>div {
+.detail-panel-content .item-column > div {
   display: flex;
   align-items: center;
   gap: 12px;

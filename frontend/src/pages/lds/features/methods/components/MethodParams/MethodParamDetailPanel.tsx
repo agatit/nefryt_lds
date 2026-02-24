@@ -139,12 +139,6 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
         return;
       }
 
-      console.log("ADDING PARAM:", {
-        methodID: selectedMethod.ID,
-        paramDefID: values.MethodParamDefID?.ID,
-        value: values.Value,
-      });
-
       await updateParam(
         selectedMethod.ID,
         selected!.MethodParamDefID,
@@ -163,13 +157,19 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
       methodParams.some((p: MethodParam) => p.MethodParamDefID === def.ID),
     );
 
-  useEffect(() => setInEdit(addMode), [selected, addMode]);
+  useEffect(() => {
+    if (addMode) {
+      setInEdit(true);
+    }
+  }, [addMode]);
 
   if (addMode && allParamsUsed) {
     return (
       <div className="detail-panel-content">
-        <div className="k-messagebox k-messagebox-warning">
-          No parameters left
+        <div className="item-column">
+          <div className="k-messagebox k-messagebox-warning">
+            {t("pipelines-page:no_more_params_for_method")}
+          </div>
         </div>
       </div>
     );
@@ -177,7 +177,6 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
 
   return (
     <Form
-      key={addMode ? "add" : selected?.MethodParamDefID}
       initialValues={initialValues}
       validator={methodParamValidator}
       onSubmit={(values) => handleSubmit(values as MethodParamFormValues)}
@@ -186,34 +185,37 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
           <div className="item-column">
             {!addMode && selected && (
               <>
-                <Label>Name</Label>
-                <TextBox value={selected.Name ?? ""} disabled />
-
-                <Label>DataType</Label>
-                <TextBox value={selected.DataType ?? ""} disabled />
+                <div>
+                  <Label>Name</Label>
+                  <TextBox value={selected.Name ?? ""} disabled />
+                </div>
+                <div>
+                  <Label>DataType</Label>
+                  <TextBox value={selected.DataType ?? ""} disabled />
+                </div>
               </>
             )}
-
-            <Label>{t("method-page:param_id")}</Label>
-            <Field
-              name="MethodParamDefID"
-              component={ValidatedDropDown}
-              data={paramDefs}
-              textField="Name"
-              dataItemKey="ID"
-              disabled={!inEdit || !addMode}
-            />
-
-            <Label>{t("method-page:value")}</Label>
-            <Field
-              name="Value"
-              component={ValidatedTextBox}
-              disabled={!inEdit}
-            />
+            <div>
+              <Label>{t("method-page:param_id")}</Label>
+              <Field
+                name="MethodParamDefID"
+                component={ValidatedDropDown}
+                data={paramDefs}
+                textField="Name"
+                dataItemKey="ID"
+                disabled={!inEdit || !addMode}
+              />
+            </div>
+            <div>
+              <Label>{t("method-page:value")}</Label>
+              <Field
+                name="Value"
+                component={ValidatedTextBox}
+                disabled={!inEdit}
+              />
+            </div>
           </div>
-
           <div className="separator" />
-
           <div className="item-row">
             {!inEdit && !addMode ? (
               <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
