@@ -27,7 +27,7 @@ const PipelineParams = memo(function PipelineParams({
   requestDelete,
   onSelect,
 }: Props) {
-  const { t } = useTranslation(["common", "pipeline-page"]);
+  const { t } = useTranslation(["common", "pipelines-page"]);
   const [select, setSelect] = useState<SelectDescriptor>();
 
   const handleSelectionChange = useCallback(
@@ -51,7 +51,7 @@ const PipelineParams = memo(function PipelineParams({
         <GridSearchBox />
         <ButtonGroup>
           <Button svgIcon={plusIcon} onClick={enterAddMode}>
-            {t("pipeline-page:add_pipeline_param")}
+            {t("pipelines-page:add_pipeline_param")}
           </Button>
 
           {selected && (
