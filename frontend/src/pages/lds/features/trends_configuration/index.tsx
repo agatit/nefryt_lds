@@ -205,6 +205,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           addMode={addMode === "trend"}
           setAddMode={(v) => setAddMode(v ? "trend" : null)}
           requestDelete={requestDeleteTrend}
+          closePanel={() => setPanelOpen(false)}
         />
       );
     }
@@ -222,6 +223,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           selected={selection.trendGroup}
           addMode={addMode === "trendGroup"}
           setAddMode={(v) => setAddMode(v ? "trendGroup" : null)}
+          closePanel={() => setPanelOpen(false)}
         />
       );
     }
@@ -236,6 +238,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           addMode={addMode === "unit"}
           setAddMode={(v) => setAddMode(v ? "unit" : null)}
           symbols={unitSymbols}
+          closePanel={() => setPanelOpen(false)}
         />
       );
     }

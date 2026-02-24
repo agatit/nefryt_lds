@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect, useMemo } from "react";
 import {
   Form,
   Field,
@@ -42,6 +42,7 @@ interface Props {
   addMode: boolean;
   setAddMode: (v: boolean) => void;
   requestDelete: (value: ParsedTrendType) => void;
+  closePanel: () => void;
 }
 
 interface TrendFormValues {
@@ -199,30 +200,34 @@ const TrendConfigurationDetailPanel = memo(function ({
   addTrend,
   addMode,
   setAddMode,
+  closePanel,
 }: Props) {
   const [inEdit, setInEdit] = useState(false);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation(["common", "config-page"]);
 
-  const initialValues =
-    addMode || !selected
-      ? {
-          Name: "",
-          TrendDefID: null,
-          TrendGroupID: null,
-          UnitID: null,
-          Color: "#ffffff",
-          RawMin: 0,
-          RawMax: 0,
-          ScaledMin: 0,
-          ScaledMax: 0,
-        }
-      : {
-          ...selected,
-          TrendDefID: trendDefs.find((t) => t.ID === selected.TrendDefID),
-          TrendGroupID: trendGroups.find((t) => t.ID === selected.TrendGroupID),
-          UnitID: units.find((t) => t.ID === selected.UnitID),
-        };
+  const initialValues = useMemo(() => {
+    if (addMode || !selected) {
+      return {
+        Name: "",
+        TrendDefID: null,
+        TrendGroupID: null,
+        UnitID: null,
+        Color: "#ffffff",
+        RawMin: 0,
+        RawMax: 0,
+        ScaledMin: 0,
+        ScaledMax: 0,
+      };
+    }
+
+    return {
+      ...selected,
+      TrendDefID: trendDefs.find((t) => t.ID === selected.TrendDefID),
+      TrendGroupID: trendGroups.find((t) => t.ID === selected.TrendGroupID),
+      UnitID: units.find((t) => t.ID === selected.UnitID),
+    };
+  }, [selected?.ID, addMode]);
 
   const handleSubmit = async (values: TrendFormValues) => {
     const payload: Trend = {
@@ -244,6 +249,7 @@ const TrendConfigurationDetailPanel = memo(function ({
       if (addMode) {
         await addTrend(payload);
         setAddMode(false);
+        closePanel();
         return;
       }
 

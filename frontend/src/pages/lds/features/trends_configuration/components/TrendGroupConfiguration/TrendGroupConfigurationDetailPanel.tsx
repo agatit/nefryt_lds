@@ -25,6 +25,7 @@ export interface TrendGroupConfigurationDetailPanelProps {
   selected: TrendGroup | null;
   addMode: boolean;
   setAddMode: (v: boolean) => void;
+  closePanel: () => void;
 }
 
 interface TrendGroupFormValues {
@@ -61,6 +62,7 @@ const TrendGroupConfigurationDetailPanel = React.memo(
     addTrendGroup,
     selected,
     addMode,
+    closePanel,
     setAddMode,
   }: TrendGroupConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
@@ -87,6 +89,7 @@ const TrendGroupConfigurationDetailPanel = React.memo(
           });
 
           setAddMode(false);
+          closePanel();
           return;
         }
 

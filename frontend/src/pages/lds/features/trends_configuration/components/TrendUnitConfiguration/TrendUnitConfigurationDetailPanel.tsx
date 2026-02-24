@@ -26,6 +26,7 @@ export interface TrendUnitConfigurationDetailPanelProps {
   addMode: boolean;
   setAddMode: (v: boolean) => void;
   symbols: string[];
+  closePanel: () => void;
 }
 
 const ValidatedTextBox = (props: FieldRenderProps) => {
@@ -80,6 +81,7 @@ const TrendUnitConfigurationDetailPanel = memo(
     addMode,
     setAddMode,
     symbols,
+    closePanel,
   }: TrendUnitConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
     const [inEdit, setInEdit] = useState(false);
@@ -116,6 +118,7 @@ const TrendUnitConfigurationDetailPanel = memo(
         if (addMode) {
           await addUnit(payload);
           setAddMode(false);
+          closePanel();
           return;
         }
 
