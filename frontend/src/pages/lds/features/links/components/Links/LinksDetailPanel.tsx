@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, memo, useMemo, useCallback } from "react";
 import { Label, Error } from "@progress/kendo-react-labels";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
@@ -25,6 +25,7 @@ interface Props {
   addMode: boolean;
   setAddMode: (v: boolean) => void;
   requestDelete: (value: Link) => void;
+  closePanel: () => void;
 }
 
 interface LinkFormValues {
@@ -87,32 +88,32 @@ const ValidatedInput = (props: FieldRenderProps) => {
   );
 };
 
-const LinksDetailPanel = React.memo(function LinksDetailPanel({
+const LinksDetailPanel = memo(function LinksDetailPanel({
   selected,
   editLink,
   addLink,
   addMode,
   setAddMode,
   requestDelete,
+  closePanel,
 }: Props) {
   const { t } = useTranslation(["common", "links-page"]);
-  const [inEdit, setInEdit] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  const [inEdit, setInEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const initialValues =
-    addMode || !selected
-      ? {
-          BeginNodeID: null,
-          EndNodeID: null,
-          Length: null,
-        }
-      : {
-          BeginNodeID: selected?.BeginNodeID ?? null,
-          EndNodeID: selected?.EndNodeID ?? null,
-          Length: selected?.Length != null ? Number(selected.Length) : null,
-        };
+  const initialValues = useMemo(
+    () =>
+      addMode || !selected
+        ? { BeginNodeID: null, EndNodeID: null, Length: null }
+        : {
+            BeginNodeID: selected.BeginNodeID ?? null,
+            EndNodeID: selected.EndNodeID ?? null,
+            Length: selected.Length != null ? Number(selected.Length) : null,
+          },
+    [selected, addMode],
+  );
 
-  const handleSubmit = React.useCallback(
+  const handleSubmit = useCallback(
     async (values: LinkFormValues) => {
       const payload = {
         BeginNodeID: values.BeginNodeID,
@@ -126,6 +127,7 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
         if (addMode) {
           await addLink(payload as LinkCreate);
           setAddMode(false);
+          closePanel();
           return;
         }
 
@@ -140,7 +142,7 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
     [addMode, addLink, editLink, selected, setAddMode],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     setInEdit(addMode);
   }, [selected, addMode]);
 
@@ -178,6 +180,7 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
               />
             </div>
           </div>
+          <div className="separator" />
           <div className="item-row">
             {!inEdit && !addMode ? (
               <>
@@ -210,10 +213,10 @@ const LinksDetailPanel = React.memo(function LinksDetailPanel({
                 )}
 
                 <Button
+                  type="submit"
                   svgIcon={saveIcon}
                   themeColor="primary"
                   disabled={!formProps.allowSubmit || loading}
-                  onClick={formProps.onSubmit}
                 >
                   {addMode ? t("common:add") : t("common:save")}
                 </Button>
