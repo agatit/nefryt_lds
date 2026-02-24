@@ -1,10 +1,12 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, useMemo } from "react";
 import {
   Form,
   Field,
   FormElement,
   FieldRenderProps,
 } from "@progress/kendo-react-form";
+import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
 import { TextBox } from "@progress/kendo-react-inputs";
 import { Label, Error } from "@progress/kendo-react-labels";
@@ -15,7 +17,6 @@ import {
   trashIcon,
   pencilIcon,
 } from "@progress/kendo-svg-icons";
-import { useTranslation } from "react-i18next";
 import { PipelineParam } from "../../../../../../services/api";
 
 interface Props {
@@ -35,6 +36,7 @@ interface Props {
   setAddMode: (v: boolean) => void;
   requestDelete: (value: PipelineParam) => void;
   paramDefs: PipelineParam[];
+  pipelineParams: PipelineParam[];
 }
 
 interface ValidationErrors {
@@ -56,6 +58,7 @@ const ValidatedDropDown = (props: FieldRenderProps) => {
         data={props.data}
         textField={props.textField}
         dataItemKey={props.dataItemKey}
+        skipDisabledItems={true}
         onChange={(e) => props.onChange({ value: e.value })}
       />
 
@@ -79,19 +82,20 @@ const ValidatedTextBox = (props: FieldRenderProps) => {
   );
 };
 
-const pipelineParamValidator = (values: PipelineParamFormValues) => {
-  const errors: ValidationErrors = {};
+const pipelineParamValidator =
+  (t: TFunction) => (values: PipelineParamFormValues) => {
+    const errors: ValidationErrors = {};
 
-  if (!values.PipelineParamDefID) {
-    errors.PipelineParamDefID = "Parameter definition required";
-  }
+    if (!values.PipelineParamDefID) {
+      errors.PipelineParamDefID = t("pipelines-page:param_id");
+    }
 
-  if (!values.Value?.trim()) {
-    errors.Value = "Value required";
-  }
+    if (!values.Value?.trim()) {
+      errors.Value = "Value required";
+    }
 
-  return Object.keys(errors).length ? errors : undefined;
-};
+    return Object.keys(errors).length ? errors : undefined;
+  };
 
 const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
   selected,
@@ -102,20 +106,40 @@ const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
   setAddMode,
   requestDelete,
   paramDefs,
+  pipelineParams,
 }: Props) {
   const { t } = useTranslation(["common", "pipelines-page"]);
   const [inEdit, setInEdit] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => setInEdit(addMode), [selected, addMode]);
+  const allParamsUsed =
+    paramDefs.length > 0 && pipelineParams.length >= paramDefs.length;
 
-  const initialValues =
-    addMode || !selected
-      ? { PipelineParamDefID: "", Value: "" }
-      : {
-          PipelineParamDefID: selected.PipelineParamDefID,
-          Value: selected.Value ?? "",
-        };
+  if (addMode && allParamsUsed) {
+    return (
+      <div className="detail-panel-content">
+        <div className="item-column">
+          <div className="k-messagebox k-messagebox-warning">
+            {t("pipelines-page:no_more_params_for_pipeline")}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const initialValues = useMemo(() => {
+    if (addMode || !selected) {
+      return { PipelineParamDefID: null, Value: "" };
+    }
+
+    return {
+      PipelineParamDefID:
+        paramDefs.find(
+          (d) => d.PipelineParamDefID === selected.PipelineParamDefID,
+        ) ?? null,
+      Value: selected.Value ?? "",
+    };
+  }, [selected?.PipelineParamDefID, addMode]);
 
   const handleSubmit = async (values: PipelineParamFormValues) => {
     try {
@@ -132,50 +156,67 @@ const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
         return;
       }
 
-      await updateParam(
-        pipelineID,
-        values.PipelineParamDefID?.PipelineParamDefID ?? "",
-        values.Value,
-      );
+      await updateParam(pipelineID, selected!.PipelineParamDefID, values.Value);
       setInEdit(false);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (addMode) setInEdit(true);
+  }, [addMode]);
+
   return (
     <Form
       key={addMode ? "add" : selected?.PipelineParamDefID}
       initialValues={initialValues}
-      validator={pipelineParamValidator}
+      validator={pipelineParamValidator(t)}
       onSubmit={(values) => handleSubmit(values as PipelineParamFormValues)}
       render={(formProps) => (
         <FormElement className="detail-panel-content">
-          {selected && (
-            <>
-              <Label>{t("pipelines-page:name")}</Label>
-              <TextBox value={selected.Name ?? ""} disabled />
+          <div className="item-column">
+            {selected && (
+              <>
+                <div>
+                  <Label>{t("pipelines-page:data_type")}</Label>
+                  <TextBox value={selected.DataType ?? ""} disabled />
+                </div>
+                <div>
+                  <Label>{t("pipelines-page:param_id")}</Label>
+                  <TextBox value={selected.PipelineParamDefID ?? ""} disabled />
+                </div>
+              </>
+            )}
 
-              <Label>{t("pipelines-page:data_type")}</Label>
-              <TextBox value={selected.DataType ?? ""} disabled />
-
+            <div>
               <Label>{t("pipelines-page:param_id")}</Label>
-              <TextBox value={selected.PipelineParamDefID ?? ""} disabled />
-            </>
-          )}
 
-          <Label>{t("pipelines-page:name")}</Label>
-          <Field
-            name="PipelineParamDefID"
-            component={ValidatedDropDown}
-            data={paramDefs}
-            textField="Name"
-            dataItemKey="PipelineParamDefID"
-          />
-
-          <Label>{t("pipelines-page:value")}</Label>
-          <Field name="Value" component={ValidatedTextBox} disabled={!inEdit} />
-
+              {paramDefs.length === 0 ? (
+                <div className="k-messagebox k-messagebox-warning">
+                  {t("pipelines-page:no_param_defs_available")}
+                </div>
+              ) : (
+                <Field
+                  name="PipelineParamDefID"
+                  component={ValidatedDropDown}
+                  data={paramDefs}
+                  textField="PipelineParamDefID"
+                  dataItemKey="PipelineParamDefID"
+                  disabled={!inEdit}
+                />
+              )}
+            </div>
+            <div>
+              <Label>{t("pipelines-page:value")}</Label>
+              <Field
+                name="Value"
+                component={ValidatedTextBox}
+                disabled={!inEdit}
+              />
+            </div>
+          </div>
+          <div className="separator" />
           <div className="item-row">
             {!inEdit && !addMode ? (
               <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
@@ -207,6 +248,7 @@ const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
 
                 <Button
                   svgIcon={saveIcon}
+                  type="submit"
                   themeColor="primary"
                   disabled={!formProps.allowSubmit || loading}
                   onClick={formProps.onSubmit}

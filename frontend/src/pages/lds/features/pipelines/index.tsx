@@ -20,7 +20,7 @@ import {
 } from "@progress/kendo-react-layout";
 
 const PipelinesPage = React.memo(function PipelinesPage() {
-  const { t } = useTranslation(["common", "pipeline-page"]);
+  const { t } = useTranslation(["common", "pipelines-page"]);
   const ldsContext = useContext(LDSContext);
   if (!ldsContext) return null;
 
@@ -89,16 +89,38 @@ const PipelinesPage = React.memo(function PipelinesPage() {
     setSelectedParam(null);
   };
 
+  // const availableParamDefs = React.useMemo(() => {
+  //   if (!pipelineParamDefs) return [];
+
+  //   return pipelineParamDefs.filter((def) => {
+  //     const alreadyUsed = pipelineParams.some(
+  //       (p) => p.PipelineParamDefID === def.PipelineParamDefID,
+  //     );
+
+  //     if (selectedParam?.PipelineParamDefID === def.PipelineParamDefID) {
+  //       return true;
+  //     }
+
+  //     return !alreadyUsed;
+  //   });
+  // }, [pipelineParamDefs, pipelineParams, selectedParam]);
+
   const availableParamDefs = React.useMemo(() => {
     if (!pipelineParamDefs) return [];
 
-    return pipelineParamDefs.filter(
-      (def) =>
-        !pipelineParams.some(
-          (p) => p.PipelineParamDefID === def.PipelineParamDefID,
-        ),
-    );
-  }, [pipelineParamDefs, pipelineParams]);
+    return pipelineParamDefs.map((def) => {
+      const alreadyUsed = pipelineParams.some(
+        (p) => p.PipelineParamDefID === def.PipelineParamDefID,
+      );
+
+      return {
+        ...def,
+        disabled:
+          alreadyUsed &&
+          def.PipelineParamDefID !== selectedParam?.PipelineParamDefID,
+      };
+    });
+  }, [pipelineParamDefs, pipelineParams, selectedParam]);
 
   useEffect(() => {
     if (!selectedPipeline?.ID) return;
@@ -134,7 +156,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
               selected={tabSelected}
               onSelect={handleTabSelect}
             >
-              <TabStripTab title={t("pipeline-page:pipelines_params")}>
+              <TabStripTab title={t("pipelines-page:pipelines_params")}>
                 <PipelineParams
                   params={pipelineParams}
                   selected={selectedParam}
@@ -151,8 +173,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
             </TabStrip>
           ) : (
             <div style={{ padding: 20 }}>
-              {t("pipeline-page:choose_pipeline_first") ||
-                "Choose pipeline to see parameters"}
+              {t("pipelines-page:choose_pipeline_first")}
             </div>
           )}
         </div>
@@ -170,10 +191,10 @@ const PipelinesPage = React.memo(function PipelinesPage() {
         extended={panelOpen}
         onExtendedChange={setPanelOpen}
       >
-        {selectedParam || paramAddMode ? (
+        {(selectedParam || paramAddMode) && selectedPipeline && (
           <PipelineParamDetailPanel
             selected={selectedParam}
-            pipelineID={selectedPipeline!.ID}
+            pipelineID={selectedPipeline.ID}
             updateParam={updatePipelineParam}
             addParam={async (pipelineID, paramID, value) => {
               await addPipelineParams(
@@ -185,17 +206,21 @@ const PipelinesPage = React.memo(function PipelinesPage() {
             setAddMode={setParamAddMode}
             requestDelete={setDeleteParamTarget}
             paramDefs={availableParamDefs}
-          />
-        ) : (
-          <PipelinesDetailPanel
-            selected={selectedPipeline}
-            editPipeline={updatePipeline}
-            addPipeline={addPipeline}
-            addMode={pipelineAddMode}
-            setAddMode={setPipelineAddMode}
-            requestDelete={setDeletePipelineTarget}
+            pipelineParams={pipelineParams}
           />
         )}
+
+        {(selectedPipeline || pipelineAddMode) &&
+          !(selectedParam || paramAddMode) && (
+            <PipelinesDetailPanel
+              selected={selectedPipeline}
+              editPipeline={updatePipeline}
+              addPipeline={addPipeline}
+              addMode={pipelineAddMode}
+              setAddMode={setPipelineAddMode}
+              requestDelete={setDeletePipelineTarget}
+            />
+          )}
       </DetailPanel>
 
       {deletePipelineTarget && (
@@ -203,8 +228,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
           title={t("common:confirm_deletion")}
           onClose={() => setDeletePipelineTarget(null)}
         >
-          {t("pipeline-page:sure_you_want_delete_pipeline") ||
-            "Delete this pipeline?"}
+          {t("pipelines-page:delete_pipeline")}
 
           <DialogActionsBar>
             <Button onClick={() => setDeletePipelineTarget(null)}>
@@ -222,8 +246,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
           title={t("common:confirm_deletion")}
           onClose={() => setDeleteParamTarget(null)}
         >
-          {t("pipeline-page:sure_you_want_delete_param") ||
-            "Delete this parameter?"}
+          {t("pipelines-page:delete_param")}
 
           <DialogActionsBar>
             <Button onClick={() => setDeleteParamTarget(null)}>
