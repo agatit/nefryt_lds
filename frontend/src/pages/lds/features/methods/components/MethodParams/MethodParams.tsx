@@ -8,7 +8,7 @@ import {
   GridSelectionChangeEvent,
 } from "@progress/kendo-react-grid";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
-import { plusIcon } from "@progress/kendo-svg-icons";
+import { plusIcon, trashIcon } from "@progress/kendo-svg-icons";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { MethodParam, Method } from "../../../../../../services/api";
 
@@ -18,6 +18,7 @@ type Props = {
   selectedParam: MethodParam | null;
   openDialog: () => void;
   setSelectedParam: (p: MethodParam | null) => void;
+  requestDelete: (value: MethodParam) => void;
 };
 
 const MethodParams = memo(function MethodParams({
@@ -26,6 +27,7 @@ const MethodParams = memo(function MethodParams({
   methodParams,
   setSelectedParam,
   openDialog,
+  requestDelete,
 }: Props) {
   if (!selectedMethod) return null;
   const [select, setSelect] = useState<SelectDescriptor>({});
@@ -63,6 +65,15 @@ const MethodParams = memo(function MethodParams({
           <Button svgIcon={plusIcon} onClick={openDialog}>
             {t("method-page:add_method_param")}
           </Button>
+
+          {selectedParam && (
+            <Button
+              svgIcon={trashIcon}
+              onClick={() => requestDelete(selectedParam)}
+            >
+              {t("common:delete")}
+            </Button>
+          )}
         </ButtonGroup>
       </GridToolbar>
 

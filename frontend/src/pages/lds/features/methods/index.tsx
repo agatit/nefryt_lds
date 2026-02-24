@@ -18,6 +18,7 @@ import MethodsDetailPanel from "./components/Methods/MethodsDetailPanel";
 import MethodParams from "./components/MethodParams/MethodParams";
 import MethodParamDetailPanel from "./components/MethodParams/MethodParamDetailPanel";
 import MethodDefs from "./components/MethodDefs/MethodDefs";
+import MethodDefDetailPanel from "./components/MethodDefs/MethodDefsDetailPanel";
 import { AppContext } from "../../../../contexts/appContext";
 import { Method, MethodDef, MethodParam } from "../../../../services/api";
 import "./methodsPage.scss";
@@ -47,15 +48,27 @@ const MethodsPage = () => {
   ]);
   const [methodAddMode, setMethodAddMode] = useState(false);
   const [paramAddMode, setParamAddMode] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedMethodDef, setSelectedMethodDef] = useState<MethodDef | null>(
     null,
   );
   const [selectedMethodParam, setSelectedMethodParam] =
     useState<MethodParam | null>(null);
   const [tabSelected, setTabSelected] = useState<number>(0);
-  const [showDeleteParamDialog, setShowDeleteParamDialog] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+
+  type DeleteTarget =
+    | { type: "method"; item: Method }
+    | { type: "param"; item: MethodParam }
+    | { type: "methodDef"; item: MethodDef }
+    | null;
+
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
+
+  const requestDeleteMethod = (m: Method) =>
+    setDeleteTarget({ type: "method", item: m });
+
+  const requestDeleteParam = (p: MethodParam) =>
+    setDeleteTarget({ type: "param", item: p });
 
   const handleVerticalChange = (e: SplitterOnChangeEvent) =>
     setVerticalPanes(e.newState);
@@ -64,11 +77,28 @@ const MethodsPage = () => {
     setTabSelected(e.selected);
   }, []);
 
-  const confirmDeleteMethod = async () => {
-    if (!selectedMethod) return;
-    await deleteMethod(selectedMethod);
-    setSelectedMethod(null);
-    setShowDeleteDialog(false);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      switch (deleteTarget.type) {
+        case "method":
+          await deleteMethod(deleteTarget.item);
+          setSelectedMethod(null);
+          break;
+
+        case "param":
+          if (!selectedMethod) return;
+          await deleteMethodParam(
+            selectedMethod.ID,
+            deleteTarget.item.MethodParamDefID,
+          );
+          setSelectedMethodParam(null);
+          break;
+      }
+    } finally {
+      setDeleteTarget(null);
+    }
   };
 
   const availableParamDefs = useMemo(() => {
@@ -101,20 +131,6 @@ const MethodsPage = () => {
     }));
   }, [methodDefs, methods, selectedMethod]);
 
-  const confirmDeleteParam = async () => {
-    if (!selectedMethod || !selectedMethodParam) return;
-
-    await deleteMethodParam(
-      selectedMethod.ID,
-      selectedMethodParam.MethodParamDefID,
-    );
-
-    setSelectedMethodParam(null);
-    setShowDeleteParamDialog(false);
-
-    await loadMethodParamsByMethod(selectedMethod.ID);
-  };
-
   useEffect(() => {
     if (!selectedMethod) return;
 
@@ -146,10 +162,7 @@ const MethodsPage = () => {
               setMethodAddMode(true);
               setPanelOpen(true);
             }}
-            requestDelete={(m) => {
-              setSelectedMethod(m);
-              setShowDeleteDialog(true);
-            }}
+            requestDelete={(m) => requestDeleteMethod(m)}
           />
         </div>
 
@@ -166,6 +179,7 @@ const MethodsPage = () => {
                 setSelectedMethodDef(d);
                 setSelectedMethod(null);
                 setSelectedMethodParam(null);
+                setPanelOpen(!!d);
               }}
             />
           </TabStripTab>
@@ -190,6 +204,7 @@ const MethodsPage = () => {
                   setParamAddMode(true);
                   setSelectedMethodParam(null);
                 }}
+                requestDelete={(param) => requestDeleteParam(param)}
               />
             ) : (
               <Typography.p style={{ padding: 20 }}>
@@ -211,7 +226,8 @@ const MethodsPage = () => {
           selectedMethodDef ||
           selectedMethodParam ||
           methodAddMode ||
-          paramAddMode
+          paramAddMode ||
+          selectedMethodDef
             ? ""
             : " no-selected")
         }
@@ -224,7 +240,9 @@ const MethodsPage = () => {
             deleteParam={ldsContext.deleteMethodParam}
             addMode={paramAddMode}
             setAddMode={setParamAddMode}
-            requestDelete={() => setShowDeleteParamDialog(true)}
+            requestDelete={() =>
+              selectedMethodParam && requestDeleteParam(selectedMethodParam)
+            }
             paramDefs={availableParamDefs}
             methodParams={methodParams}
             addMethodParam={ldsContext.addMethodParam}
@@ -239,52 +257,37 @@ const MethodsPage = () => {
               addMethod={addMethod}
               addMode={methodAddMode}
               setAddMode={setMethodAddMode}
-              requestDelete={() => setShowDeleteDialog(true)}
+              requestDelete={() =>
+                selectedMethod && requestDeleteMethod(selectedMethod)
+              }
               pipelines={pipelines}
               methodDefs={availableMethodDefs}
             />
           )}
 
-        {!selectedMethod &&
-          !selectedMethodDef &&
-          !selectedMethodParam &&
-          !methodAddMode &&
-          !paramAddMode && (
-            <Typography.p style={{ padding: 20 }}>
-              {t("method-page:select_method")}
-            </Typography.p>
-          )}
+        {selectedMethodDef && !selectedMethod && !selectedMethodParam && (
+          <MethodDefDetailPanel selected={selectedMethodDef} />
+        )}
       </DetailPanel>
 
-      {showDeleteDialog && (
+      {deleteTarget && (
         <Dialog
           title={t("common:confirm_deletion")}
-          onClose={() => setShowDeleteDialog(false)}
+          onClose={() => setDeleteTarget(null)}
         >
-          {t("method-page:delete_method")}
+          {deleteTarget.type === "method" && t("method-page:delete_method")}
+
+          {deleteTarget.type === "param" && t("method-page:delete_param")}
+
+          {deleteTarget.type === "methodDef" &&
+            t("method-page:delete_method_def")}
 
           <DialogActionsBar>
-            <Button onClick={() => setShowDeleteDialog(false)}>
+            <Button onClick={() => setDeleteTarget(null)}>
               {t("common:cancel")}
             </Button>
 
-            <Button themeColor="primary" onClick={confirmDeleteMethod}>
-              {t("common:delete")}
-            </Button>
-          </DialogActionsBar>
-        </Dialog>
-      )}
-      {showDeleteParamDialog && (
-        <Dialog
-          title={t("common:confirm_deletion")}
-          onClose={() => setShowDeleteParamDialog(false)}
-        >
-          Delete pipeline parameter?
-          <DialogActionsBar>
-            <Button onClick={() => setShowDeleteParamDialog(false)}>
-              {t("common:cancel")}
-            </Button>
-            <Button themeColor="primary" onClick={confirmDeleteParam}>
+            <Button themeColor="primary" onClick={confirmDelete}>
               {t("common:delete")}
             </Button>
           </DialogActionsBar>
