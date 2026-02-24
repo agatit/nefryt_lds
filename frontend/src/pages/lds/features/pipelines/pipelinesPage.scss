@@ -7,6 +7,18 @@ main.pipelines-page {
   height: var.$underAppBarHeight;
 }
 
+main.pipelines-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
+main.pipelines-page .k-messagebox .k-messagebox-warning {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
 .pipelines-grid-container {
   flex: 4 0 0;
   display: flex;
@@ -25,7 +37,7 @@ main.pipelines-page {
   background: white;
 }
 
-.pipelines-detail-panel.no-selected>div {
+.pipelines-detail-panel.no-selected > div {
   justify-content: center;
   height: 100%;
   cursor: not-allowed;
@@ -34,6 +46,7 @@ main.pipelines-page {
 .detail-panel-content .item-column {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 10px;
 }
 
@@ -42,10 +55,18 @@ main.pipelines-page {
   gap: 10px;
 }
 
-.detail-panel-content .item-column>div {
+.detail-panel-content {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.detail-panel-content .item-column > div {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
 }
 
 .pipelines-dialog .k-dialog {
