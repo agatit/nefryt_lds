@@ -85,6 +85,7 @@ const EventsDetailPanel = React.memo(function EventsDetailPanel({
           </div>
         </div>
       </div>
+      <div className="separator" />
     </div>
   );
 });
