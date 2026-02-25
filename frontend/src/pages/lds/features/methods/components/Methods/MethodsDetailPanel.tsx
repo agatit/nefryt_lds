@@ -32,6 +32,7 @@ interface Props {
   setAddMode: (v: boolean) => void;
   pipelines: any[];
   methodDefs: MethodDef[];
+  closePanel: () => void;
 }
 
 interface ValidationErrors {
@@ -96,6 +97,7 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
   addMode,
   setAddMode,
   pipelines,
+  closePanel,
   methodDefs,
 }: Props) {
   const { t } = useTranslation(["common"]);
@@ -126,6 +128,7 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
       if (addMode) {
         await addMethod(payload);
         setAddMode(false);
+        closePanel();
         return;
       }
 
@@ -140,6 +143,7 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
 
   return (
     <Form
+      key={addMode ? "add" : selected?.ID}
       initialValues={initialValues}
       validator={methodValidator}
       onSubmit={(values) => handleSubmit(values as MethodFormValues)}
@@ -147,7 +151,7 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
         <FormElement className="detail-panel-content">
           <div className="item-column">
             <div>
-              <Label>Pipeline</Label>
+              <Label>{t("methods-page:pipeline")} </Label>
               <Field
                 name="PipelineID"
                 component={ValidatedDropDown}
@@ -158,7 +162,7 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
               />
             </div>
             <div>
-              <Label>Method definition</Label>
+              <Label>{t("methods-page:method_definition")} </Label>
               <Field
                 name="MethodDefID"
                 component={ValidatedDropDown}
@@ -169,7 +173,7 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
               />
             </div>
             <div>
-              <Label>Name</Label>
+              <Label>{t("methods-page:name")} </Label>
               <Field
                 name="Name"
                 component={ValidatedTextBox}
@@ -180,14 +184,18 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
           <div className="separator" />
           <div className="item-row">
             {!inEdit && !addMode ? (
-              <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
+              <Button
+                type="button"
+                svgIcon={pencilIcon}
+                onClick={() => setInEdit(true)}
+              >
                 {t("common:edit")}
               </Button>
             ) : (
               <>
                 <Button
+                  type="button"
                   svgIcon={cancelIcon}
-                  disabled={loading}
                   onClick={() => {
                     setAddMode(false);
                     setInEdit(false);
@@ -199,19 +207,19 @@ const MethodsDetailPanel = memo(function MethodsDetailPanel({
 
                 {!addMode && selected && (
                   <Button
+                    type="button"
                     svgIcon={trashIcon}
-                    disabled={loading}
-                    onClick={requestDelete}
+                    onClick={() => requestDelete}
                   >
                     {t("common:delete")}
                   </Button>
                 )}
 
                 <Button
+                  type="submit"
                   svgIcon={saveIcon}
                   themeColor="primary"
                   disabled={!formProps.allowSubmit || loading}
-                  onClick={formProps.onSubmit}
                 >
                   {addMode ? t("common:add") : t("common:save")}
                 </Button>

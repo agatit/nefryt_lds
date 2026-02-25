@@ -31,7 +31,7 @@ const MethodParams = memo(function MethodParams({
 }: Props) {
   if (!selectedMethod) return null;
   const [select, setSelect] = useState<SelectDescriptor>({});
-  const { t } = useTranslation(["method-page"]);
+  const { t } = useTranslation(["methods-page"]);
 
   const handleSelectionChange = useCallback(
     (event: GridSelectionChangeEvent) => {
@@ -63,7 +63,7 @@ const MethodParams = memo(function MethodParams({
         <GridSearchBox />
         <ButtonGroup>
           <Button svgIcon={plusIcon} onClick={openDialog}>
-            {t("method-page:add_method_param")}
+            {t("methods-page:add_method_param")}
           </Button>
 
           {selectedParam && (
@@ -77,10 +77,10 @@ const MethodParams = memo(function MethodParams({
         </ButtonGroup>
       </GridToolbar>
 
-      <GridColumn field="Name" title="Name" />
-      <GridColumn field="Value" title="Value" />
-      <GridColumn field="DataType" title="DataType" />
-      <GridColumn field="MethodParamDefID" title="MethodParamDefID" />
+      <GridColumn field="Name" title={t("methods-page:name")} />
+      <GridColumn field="Value" title={t("methods-page:value")}/>
+      <GridColumn field="DataType" title={t("methods-page:data_type")} />
+      <GridColumn field="MethodParamDefID" title={t("methods-page:method_param_id")}/>
     </Grid>
   );
 });

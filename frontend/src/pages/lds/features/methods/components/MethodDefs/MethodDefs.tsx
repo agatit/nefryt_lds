@@ -1,3 +1,5 @@
+import { useContext, useCallback, useState, memo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Grid,
   GridColumn,
@@ -5,7 +7,6 @@ import {
   GridSelectionChangeEvent,
   GridToolbar,
 } from "@progress/kendo-react-grid";
-import React from "react";
 import { MethodDef } from "../../../../../../services/api";
 import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { AppContext } from "../../../../../../contexts/appContext";
@@ -16,17 +17,18 @@ export interface Props {
   setSelected: (value: MethodDef | null) => void;
 }
 
-const MethodDefs = React.memo(function EventsDef({
+const MethodDefs = memo(function EventsDef({
   selected,
   setSelected,
   methodDefs,
 }: Props) {
-  const appContext = React.useContext(AppContext);
+  const { t } = useTranslation(["methods-page"]);
+  const appContext = useContext(AppContext);
   if (!appContext) return null;
 
-  const [select, setSelect] = React.useState<SelectDescriptor>();
+  const [select, setSelect] = useState<SelectDescriptor>();
 
-  const handleSelectionChange = React.useCallback(
+  const handleSelectionChange = useCallback(
     (event: GridSelectionChangeEvent) => {
       const item: MethodDef = event.endDataItem;
       setSelected(item);
@@ -35,7 +37,7 @@ const MethodDefs = React.memo(function EventsDef({
     [setSelected],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selected == null) setSelect({});
   }, [selected]);
 
@@ -52,8 +54,8 @@ const MethodDefs = React.memo(function EventsDef({
           <GridSearchBox />
         </GridToolbar>
 
-        <GridColumn field="ID" title="ID" />
-        <GridColumn field="Name" title="Name" />
+        <GridColumn field="ID" title={t("methods-page:id")} />
+        <GridColumn field="Name" title={t("methods-page:name")} />
       </Grid>
     </>
   );

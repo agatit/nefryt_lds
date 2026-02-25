@@ -1,4 +1,4 @@
-import React from "react";
+import { memo, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { MethodDef } from "../../../../../../services/api";
 import { TextBox } from "@progress/kendo-react-inputs";
@@ -9,11 +9,11 @@ export interface Props {
   selected: MethodDef | null;
 }
 
-const MethodDefDetailPanel = React.memo(function MethodDefDetailPanel({
+const MethodDefDetailPanel = memo(function MethodDefDetailPanel({
   selected,
 }: Props) {
-  const appContext = React.useContext(AppContext);
-  const { t } = useTranslation(["common", "method-page"]);
+  const appContext = useContext(AppContext);
+  const { t } = useTranslation(["methods-page"]);
 
   if (!appContext || !selected) return null;
 
@@ -21,12 +21,12 @@ const MethodDefDetailPanel = React.memo(function MethodDefDetailPanel({
     <div className="detail-panel-content">
       <div className="item-column">
         <div>
-          <Label>{t("common:id")}</Label>
+          <Label>{t("methods-page:id")}</Label>
           <TextBox value={selected.ID} disabled />
         </div>
 
         <div>
-          <Label>{t("common:name")}</Label>
+          <Label>{t("methods-page:name")}</Label>
           <TextBox value={selected.Name ?? ""} disabled />
         </div>
       </div>

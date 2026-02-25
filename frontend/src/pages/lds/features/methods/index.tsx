@@ -246,6 +246,7 @@ const MethodsPage = () => {
             paramDefs={availableParamDefs}
             methodParams={methodParams}
             addMethodParam={ldsContext.addMethodParam}
+            closePanel={() => setPanelOpen(false)}
           />
         )}
 
@@ -262,6 +263,7 @@ const MethodsPage = () => {
               }
               pipelines={pipelines}
               methodDefs={availableMethodDefs}
+              closePanel={() => setPanelOpen(false)}
             />
           )}
 

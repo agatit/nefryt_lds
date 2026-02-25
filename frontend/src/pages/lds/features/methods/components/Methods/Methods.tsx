@@ -27,7 +27,7 @@ const Methods = memo(function Methods({
   onAdd,
   requestDelete,
 }: Props) {
-  const { t } = useTranslation(["common", "method-page"]);
+  const { t } = useTranslation(["common", "methods-page"]);
   const [select, setSelect] = useState<SelectDescriptor>({});
 
   const handleSelectionChange = useCallback(
@@ -59,7 +59,7 @@ const Methods = memo(function Methods({
 
         <ButtonGroup>
           <Button svgIcon={plusIcon} onClick={onAdd}>
-            {t("method-page:add_new_method")}
+            {t("methods-page:add_new_method")}
           </Button>
 
           {selected && (
@@ -70,10 +70,9 @@ const Methods = memo(function Methods({
         </ButtonGroup>
       </GridToolbar>
 
-      <GridColumn field="ID" title="ID" />
-      <GridColumn field="PipelineID" title="PipelineID" />
-      <GridColumn field="MethodDefID" title="Definition ID" />
-      <GridColumn field="Name" title="Name" />
+      <GridColumn field="PipelineID" title={t("methods-page:pipeline_id")} />
+      <GridColumn field="MethodDefID" title={t("methods-page:method_def_id")} />
+      <GridColumn field="Name" title={t("methods-page:name")} />
     </Grid>
   );
 });

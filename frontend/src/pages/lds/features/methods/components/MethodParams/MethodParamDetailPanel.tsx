@@ -37,6 +37,7 @@ interface Props {
   requestDelete: () => void;
   paramDefs: MethodParamDef[];
   methodParams: MethodParam[];
+  closePanel: () => void;
   addMethodParam: (methodID: number, value: MethodParamCreate) => Promise<void>;
 }
 
@@ -103,8 +104,9 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
   paramDefs,
   addMethodParam,
   methodParams,
+  closePanel,
 }: Props) {
-  const { t } = useTranslation(["common", "method-page"]);
+  const { t } = useTranslation(["common", "methods-page"]);
   const [inEdit, setInEdit] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -136,6 +138,7 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
         });
 
         setAddMode(false);
+        closePanel();
         return;
       }
 
@@ -177,6 +180,7 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
 
   return (
     <Form
+      key={addMode ? "add" : selected?.MethodParamDefID}
       initialValues={initialValues}
       validator={methodParamValidator}
       onSubmit={(values) => handleSubmit(values as MethodParamFormValues)}
@@ -186,17 +190,17 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
             {!addMode && selected && (
               <>
                 <div>
-                  <Label>Name</Label>
+                  <Label>{t("methods-page:name")}</Label>
                   <TextBox value={selected.Name ?? ""} disabled />
                 </div>
                 <div>
-                  <Label>DataType</Label>
+                  <Label>{t("methods-page:data_type")}</Label>
                   <TextBox value={selected.DataType ?? ""} disabled />
                 </div>
               </>
             )}
             <div>
-              <Label>{t("method-page:param_id")}</Label>
+              <Label>{t("methods-page:param_id")}</Label>
               <Field
                 name="MethodParamDefID"
                 component={ValidatedDropDown}
@@ -207,7 +211,7 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
               />
             </div>
             <div>
-              <Label>{t("method-page:value")}</Label>
+              <Label>{t("methods-page:value")}</Label>
               <Field
                 name="Value"
                 component={ValidatedTextBox}
@@ -218,14 +222,18 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
           <div className="separator" />
           <div className="item-row">
             {!inEdit && !addMode ? (
-              <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
+              <Button
+                type="button"
+                svgIcon={pencilIcon}
+                onClick={() => setInEdit(true)}
+              >
                 {t("common:edit")}
               </Button>
             ) : (
               <>
                 <Button
+                  type="button"
                   svgIcon={cancelIcon}
-                  disabled={loading}
                   onClick={() => {
                     setAddMode(false);
                     setInEdit(false);
@@ -237,19 +245,19 @@ const MethodParamDetailPanel = memo(function MethodParamDetailPanel({
 
                 {!addMode && selected && (
                   <Button
+                    type="button"
                     svgIcon={trashIcon}
-                    disabled={loading}
-                    onClick={requestDelete}
+                    onClick={() => requestDelete}
                   >
                     {t("common:delete")}
                   </Button>
                 )}
 
                 <Button
+                  type="submit"
                   svgIcon={saveIcon}
                   themeColor="primary"
                   disabled={!formProps.allowSubmit || loading}
-                  onClick={formProps.onSubmit}
                 >
                   {addMode ? t("common:add") : t("common:save")}
                 </Button>
