@@ -28,6 +28,7 @@
   "type_required": "Typ trendu jest wymagany",
   "group_required": "Grupa trendu jest wymagana",
   "unit_required": "Jednostka jest wymagana",
+  "symbol_required": "Symbol jest wymagany",
   "raw_same": "Wartości Raw Min i Raw Max nie mogą być takie same",
   "raw_range": "Raw Max musi być większe niż Raw Min",
   "scaled_same": "Wartości Scaled Min i Scaled Max nie mogą być takie same",

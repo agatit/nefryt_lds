@@ -1,0 +1,13 @@
+{
+  "add_new_template": "Dodaj nowy szablon",
+  "axes": "Osie",
+  "name_required": "Nazwa jest wymagana",
+  "axis_required": "Wymagana jest co najmniej jedna oś",
+  "axis_invalid": "Oś zawiera nieprawidłowe dane",
+  "name": "Nazwa",
+  "title": "Tytuł",
+  "unit": "Jednostka",
+  "min": "Min",
+  "max": "Max",
+  "add_axes": "Dodaj oś"
+}
