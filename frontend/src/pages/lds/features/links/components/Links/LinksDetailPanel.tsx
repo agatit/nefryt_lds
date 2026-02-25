@@ -101,17 +101,21 @@ const LinksDetailPanel = memo(function LinksDetailPanel({
   const [inEdit, setInEdit] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const initialValues = useMemo(
-    () =>
-      addMode || !selected
-        ? { BeginNodeID: null, EndNodeID: null, Length: null }
-        : {
-            BeginNodeID: selected.BeginNodeID ?? null,
-            EndNodeID: selected.EndNodeID ?? null,
-            Length: selected.Length != null ? Number(selected.Length) : null,
-          },
-    [selected, addMode],
-  );
+  const initialValues = useMemo(() => {
+    if (addMode || !selected) {
+      return {
+        BeginNodeID: null,
+        EndNodeID: null,
+        Length: null,
+      };
+    }
+
+    return {
+      BeginNodeID: selected.BeginNodeID ?? null,
+      EndNodeID: selected.EndNodeID ?? null,
+      Length: selected.Length != null ? Number(selected.Length) : null,
+    };
+  }, [selected, addMode]);
 
   const handleSubmit = useCallback(
     async (values: LinkFormValues) => {

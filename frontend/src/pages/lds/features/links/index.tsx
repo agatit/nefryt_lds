@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useState, memo } from "react";
 import { DetailPanel } from "onyks_shared_kendo";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { Button } from "@progress/kendo-react-buttons";
@@ -16,7 +16,7 @@ interface SelectionType {
   link: Link | null;
 }
 
-const LinksPage = React.memo(function LinksPage() {
+const LinksPage = memo(function LinksPage() {
   const { t } = useTranslation(["common", "links-page"]);
   const appContext = useContext(AppContext);
   const ldsContext = useContext(LDSContext);
