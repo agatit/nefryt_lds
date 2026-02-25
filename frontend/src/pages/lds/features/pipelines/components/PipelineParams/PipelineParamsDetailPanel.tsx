@@ -37,6 +37,7 @@ interface Props {
   requestDelete: (value: PipelineParam) => void;
   paramDefs: PipelineParam[];
   pipelineParams: PipelineParam[];
+  closePanel: () => void;
 }
 
 interface ValidationErrors {
@@ -107,6 +108,7 @@ const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
   requestDelete,
   paramDefs,
   pipelineParams,
+  closePanel,
 }: Props) {
   const { t } = useTranslation(["common", "pipelines-page"]);
   const [inEdit, setInEdit] = useState(false);
@@ -153,6 +155,7 @@ const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
         );
 
         setAddMode(false);
+        closePanel();
         return;
       }
 
@@ -219,14 +222,18 @@ const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
           <div className="separator" />
           <div className="item-row">
             {!inEdit && !addMode ? (
-              <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
+              <Button
+                type="button"
+                svgIcon={pencilIcon}
+                onClick={() => setInEdit(true)}
+              >
                 {t("common:edit")}
               </Button>
             ) : (
               <>
                 <Button
+                  type="button"
                   svgIcon={cancelIcon}
-                  disabled={loading}
                   onClick={() => {
                     setAddMode(false);
                     setInEdit(false);
@@ -238,8 +245,8 @@ const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
 
                 {!addMode && selected && (
                   <Button
+                    type="button"
                     svgIcon={trashIcon}
-                    disabled={loading}
                     onClick={() => requestDelete(selected)}
                   >
                     {t("common:delete")}
@@ -247,11 +254,10 @@ const PipelineParamDetailPanel = memo(function PipelineParamDetailPanel({
                 )}
 
                 <Button
-                  svgIcon={saveIcon}
                   type="submit"
+                  svgIcon={saveIcon}
                   themeColor="primary"
                   disabled={!formProps.allowSubmit || loading}
-                  onClick={formProps.onSubmit}
                 >
                   {addMode ? t("common:add") : t("common:save")}
                 </Button>

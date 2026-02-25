@@ -207,6 +207,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
             requestDelete={setDeleteParamTarget}
             paramDefs={availableParamDefs}
             pipelineParams={pipelineParams}
+            closePanel={() => setPanelOpen(false)}
           />
         )}
 
@@ -219,6 +220,7 @@ const PipelinesPage = React.memo(function PipelinesPage() {
               addMode={pipelineAddMode}
               setAddMode={setPipelineAddMode}
               requestDelete={setDeletePipelineTarget}
+              closePanel={() => setPanelOpen(false)}
             />
           )}
       </DetailPanel>
