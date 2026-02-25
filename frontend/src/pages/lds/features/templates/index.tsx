@@ -1,128 +1,54 @@
-import React from "react";
+import { useContext, useState, useCallback } from "react";
 import "./templatePage.scss";
 import { useTranslation } from "react-i18next";
 import Templates from "./components/Templates";
 import TemplatesDetailPanel from "./components/TemplatesDetailPage";
 import { LDSContext } from "../../contexts/ldsContext";
 import { DetailPanel } from "onyks_shared_kendo";
-import { Typography } from "@progress/kendo-react-common";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
-import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
-import { Axis } from "../../../../services/api";
 import { Template } from "../../../../services/api";
-import { Label } from "@progress/kendo-react-labels";
-import {
-  DropDownList,
-  DropDownListChangeEvent,
-} from "@progress/kendo-react-dropdowns";
-import { UNITS } from "./components/constants";
-import {
-  NumericTextBox,
-  NumericTextBoxChangeEvent,
-} from "@progress/kendo-react-inputs";
 import { AppContext } from "../../../../contexts/appContext";
 
 const TemplatePage = () => {
-  const { t } = useTranslation(["common", "nodes-page"]);
-  const appContext = React.useContext(AppContext);
-  const lds = React.useContext(LDSContext);
+  const { t } = useTranslation(["common", "template-page"]);
+  const [selected, setSelected] = useState<Template | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [addMode, setAddMode] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Template | null>(null);
+  const isSelected = addMode || !!selected;
+  const appContext = useContext(AppContext);
+  const lds = useContext(LDSContext);
+
   if (!appContext || !lds) return null;
 
   const { templates, addTemplate, updateTemplate, deleteTemplate } = lds;
-  const [selected, setSelected] = React.useState<Template | null>(null);
-  const [showAddDialog, setShowAddDialog] = React.useState(false);
-  const [name, setName] = React.useState("");
-  const [axes, setAxes] = React.useState<Axis[]>([]);
 
-  const handleAxisTitleChange = (index: number) => (e: TextBoxChangeEvent) => {
-    setAxes((prev) =>
-      prev.map((axis, i) =>
-        i === index ? { ...axis, Title: String(e.value ?? "") } : axis,
-      ),
-    );
+  const openAddMode = () => {
+    setSelected(null);
+    setAddMode(true);
+    setPanelOpen(true);
   };
 
-  const handleAxisUnitChange =
-    (index: number) => (e: DropDownListChangeEvent) => {
-      setAxes((prev) =>
-        prev.map((axis, i) =>
-          i === index ? { ...axis, UnitID: String(e.value ?? "") } : axis,
-        ),
-      );
-    };
+  const handleSelectTemplate = useCallback((value: Template | null) => {
+    setAddMode(false);
 
-  const handleAxisMinChange =
-    (index: number) => (e: NumericTextBoxChangeEvent) => {
-      setAxes((prev) =>
-        prev.map((axis, i) =>
-          i === index ? { ...axis, ScaledMin: e.value ?? 0 } : axis,
-        ),
-      );
-    };
-
-  const handleAxisMaxChange =
-    (index: number) => (e: NumericTextBoxChangeEvent) => {
-      setAxes((prev) =>
-        prev.map((axis, i) =>
-          i === index ? { ...axis, ScaledMax: e.value ?? 0 } : axis,
-        ),
-      );
-    };
-
-  const handleNameChange = React.useCallback(
-    (e: TextBoxChangeEvent) => setName(String(e.value ?? "")),
-    [],
-  );
-
-  const handleAddAxis = () => {
-    setAxes((prev) => [
-      ...prev,
-      {
-        Title: "",
-        UnitID: "",
-        ScaledMin: 0,
-        ScaledMax: 0,
-        TrendsID: [],
-      },
-    ]);
-  };
-
-  const confirmAdd = async () => {
-    const showError = (message: string) =>
-      appContext.showNotification({
-        notificationType: { icon: true, style: "error" },
-        message,
-      });
-
-    if (!name.trim()) {
-      showError("Template name required");
-      return;
+    if (value) {
+      setSelected(value);
+      setPanelOpen(true);
     }
+  }, []);
 
-    if (!axes.length) {
-      showError("Add at least one axis");
-      return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteTemplate(deleteTarget.ID);
+      setSelected(null);
+      setPanelOpen(false);
+    } finally {
+      setDeleteTarget(null);
     }
-
-    if (axes.some((a) => !a.Title || !a.UnitID)) {
-      showError("Axis title and unit required");
-      return;
-    }
-
-    if (axes.some((a) => !a.UnitID?.trim())) {
-      showError("Axis unit required");
-      return;
-    }
-
-    await addTemplate({
-      Name: name,
-      Axes: axes,
-    });
-
-    setShowAddDialog(false);
-    setName("");
-    setAxes([]);
   };
 
   return (
@@ -131,83 +57,45 @@ const TemplatePage = () => {
         <Templates
           templates={templates}
           selected={selected}
-          onSelectTemplate={setSelected}
-          openAddDialog={() => setShowAddDialog(true)}
+          onSelectTemplate={handleSelectTemplate}
+          openAddPanel={openAddMode}
         />
       </div>
 
       <DetailPanel
-        className={"templates-detail-panel" + (selected ? "" : " no-selected")}
+        className={
+          "templates-detail-panel" + (isSelected ? "" : " no-selected")
+        }
         flexGrow={1}
-        extandable={false}
+        extandable
+        extended={panelOpen}
+        onExtendedChange={setPanelOpen}
       >
-        {selected ? (
+        {(selected || addMode) && (
           <TemplatesDetailPanel
             selected={selected}
+            addMode={addMode}
+            setAddMode={setAddMode}
+            addTemplate={addTemplate}
             updateTemplate={updateTemplate}
-            deleteTemplate={deleteTemplate}
-            openAddDialog={() => setShowAddDialog(true)}
+            requestDelete={(t) => setDeleteTarget(t)}
+            closePanel={() => setPanelOpen(false)}
           />
-        ) : (
-          <Typography.p>
-            {t("template-page:select_element_to_edit")}
-          </Typography.p>
         )}
       </DetailPanel>
 
-      {showAddDialog && (
+      {deleteTarget && (
         <Dialog
-          title="Add New Template"
-          onClose={() => setShowAddDialog(false)}
-          className="templates-dialog"
+          title={t("common:confirm_deletion")}
+          onClose={() => setDeleteTarget(null)}
         >
-          <TextBox
-            placeholder="Template Name"
-            value={name}
-            onChange={handleNameChange}
-          />
-
-          <Button
-            themeColor="primary"
-            onClick={handleAddAxis}
-            className="template-button"
-          >
-            Add Axis
-          </Button>
-
-          {axes.map((axis, index) => (
-            <div key={index} className="axis-row">
-              <Label>Title</Label>
-              <TextBox
-                value={axis.Title}
-                onChange={handleAxisTitleChange(index)}
-              />
-
-              <Label>Unit</Label>
-              <DropDownList
-                data={UNITS}
-                value={axis.UnitID}
-                onChange={handleAxisUnitChange(index)}
-              />
-
-              <Label>Min</Label>
-              <NumericTextBox
-                value={axis.ScaledMin}
-                onChange={handleAxisMinChange(index)}
-              />
-
-              <Label>Max</Label>
-              <NumericTextBox
-                value={axis.ScaledMax}
-                onChange={handleAxisMaxChange(index)}
-              />
-            </div>
-          ))}
-
+          {t("template-page:delete_template")}
           <DialogActionsBar>
-            <Button onClick={() => setShowAddDialog(false)}>Cancel</Button>
-            <Button themeColor="primary" onClick={confirmAdd}>
-              Confirm
+            <Button onClick={() => setDeleteTarget(null)}>
+              {t("common:cancel")}
+            </Button>
+            <Button themeColor="primary" onClick={confirmDelete}>
+              {t("common:delete")}
             </Button>
           </DialogActionsBar>
         </Dialog>

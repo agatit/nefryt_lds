@@ -7,6 +7,12 @@ main.templates-page {
   height: var.$underAppBarHeight;
 }
 
+main.templates-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
 .templates-grid-container {
   flex: 4 0 0;
   display: flex;
@@ -25,7 +31,7 @@ main.templates-page {
   background: white;
 }
 
-.templates-detail-panel.no-selected>div {
+.templates-detail-panel.no-selected > div {
   justify-content: center;
   height: 100%;
   cursor: not-allowed;
@@ -42,7 +48,7 @@ main.templates-page {
   gap: 10px;
 }
 
-.templates-panel-content .item-column>div {
+.templates-panel-content .item-column > div {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -56,6 +62,7 @@ main.templates-page {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  align-items: flex-start;
 }
 
 .axis-card {
@@ -65,6 +72,7 @@ main.templates-page {
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
+  align-self: flex-start;
 }
 
 .k-dialog-content label {
@@ -78,6 +86,14 @@ main.templates-page {
   margin-bottom: 12px;
 }
 
-.template-button{
+.template-button {
   margin-bottom: 12px;
+}
+
+.axis-card {
+  margin-bottom: 16px;
+}
+
+.axis-card:last-child {
+  margin-bottom: 0;
 }
