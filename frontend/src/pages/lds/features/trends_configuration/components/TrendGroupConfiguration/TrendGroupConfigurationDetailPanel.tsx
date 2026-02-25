@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import {
   Form,
   Field,
@@ -45,11 +46,11 @@ const ValidatedTextBox = (props: FieldRenderProps) => {
   );
 };
 
-const validator = (values: TrendGroupFormValues) => {
+const validator = (t: TFunction) => (values: TrendGroupFormValues) => {
   const errors: any = {};
 
   if (!values.Name?.trim()) {
-    errors.Name = "Name required";
+    errors.Name = t("config-page:name_required");
   }
 
   return Object.keys(errors).length ? errors : undefined;
@@ -123,7 +124,7 @@ const TrendGroupConfigurationDetailPanel = React.memo(
         <Form
           key={addMode ? "add" : selected?.ID}
           initialValues={initialValues}
-          validator={validator}
+          validator={validator(t)}
           onSubmit={(values) => handleSubmit(values as TrendGroupFormValues)}
           render={(formProps) => (
             <FormElement className="detail-panel-content">
@@ -137,9 +138,7 @@ const TrendGroupConfigurationDetailPanel = React.memo(
                   />
                 </div>
               </div>
-
               <div className="separator" />
-
               <div className="item-row">
                 {!inEdit && !addMode ? (
                   <>

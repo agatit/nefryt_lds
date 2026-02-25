@@ -87,14 +87,7 @@ const ValidatedTextBox = (props: FieldRenderProps) => {
   );
 };
 
-const ValidatedDropDown = (
-  props: FieldRenderProps & {
-    data: any[];
-    textField: string;
-    dataItemKey: string;
-    disabled?: boolean;
-  },
-) => {
+const ValidatedDropDown = (props: FieldRenderProps) => {
   const { validationMessage, touched, modified, ...rest } = props;
 
   return (
@@ -360,7 +353,7 @@ const TrendConfigurationDetailPanel = memo(function ({
           <div className="item-row">
             {!inEdit && !addMode ? (
               <Button svgIcon={pencilIcon} onClick={() => setInEdit(true)}>
-                Edit
+                {t("common:edit")}
               </Button>
             ) : (
               <>
@@ -373,7 +366,7 @@ const TrendConfigurationDetailPanel = memo(function ({
                     formProps.onFormReset();
                   }}
                 >
-                  Cancel
+                  {t("common:cancel")}
                 </Button>
 
                 {!addMode && selected && (
@@ -382,7 +375,7 @@ const TrendConfigurationDetailPanel = memo(function ({
                     disabled={loading}
                     onClick={() => requestDelete(selected)}
                   >
-                    Delete
+                    {t("common:delete")}
                   </Button>
                 )}
 
@@ -392,7 +385,7 @@ const TrendConfigurationDetailPanel = memo(function ({
                   disabled={!formProps.allowSubmit || loading}
                   onClick={formProps.onSubmit}
                 >
-                  {addMode ? "Add" : "Save"}
+                  {addMode ? t("common:add") : t("common:save")}
                 </Button>
               </>
             )}

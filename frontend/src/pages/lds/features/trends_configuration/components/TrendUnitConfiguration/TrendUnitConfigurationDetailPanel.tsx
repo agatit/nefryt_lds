@@ -1,4 +1,6 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import {
   Form,
   Field,
@@ -15,7 +17,6 @@ import {
   saveIcon,
   trashIcon,
 } from "@progress/kendo-svg-icons";
-import { useTranslation } from "react-i18next";
 import { Unit } from "../../../../../../services/api";
 
 export interface TrendUnitConfigurationDetailPanelProps {
@@ -27,6 +28,16 @@ export interface TrendUnitConfigurationDetailPanelProps {
   setAddMode: (v: boolean) => void;
   symbols: string[];
   closePanel: () => void;
+}
+
+interface UnitFormValues {
+  Name: string;
+  Symbol: string | null;
+  Multiplier: string | number;
+}
+
+interface ValidationErrors {
+  [key: string]: string;
 }
 
 const ValidatedTextBox = (props: FieldRenderProps) => {
@@ -59,15 +70,15 @@ const ValidatedDropDown = (props: FieldRenderProps & { data: string[] }) => {
     </div>
   );
 };
-const validator = (values: any) => {
-  const errors: any = {};
+const validator = (t: TFunction) => (values: UnitFormValues) => {
+  const errors: ValidationErrors = {};
 
   if (!values.Name?.trim()) {
-    errors.Name = "Required";
+    errors.Name = t("config-page:name_required");
   }
 
   if (!values.Symbol?.trim()) {
-    errors.Symbol = "Required";
+    errors.Symbol = t("config-page:symbol_required");
   }
 
   return Object.keys(errors).length ? errors : undefined;
@@ -91,25 +102,28 @@ const TrendUnitConfigurationDetailPanel = memo(
       setInEdit(addMode);
     }, [selected, addMode]);
 
-    const initialValues =
-      addMode || !selected
-        ? {
-            Name: "",
-            Symbol: "",
-            Multiplier: "",
-          }
-        : {
-            Name: selected.Name ?? "",
-            Symbol: selected.Symbol ?? "",
-            Multiplier: selected.Multiplier ?? "",
-          };
+    const initialValues = useMemo(() => {
+      if (addMode || !selected) {
+        return {
+          Name: "",
+          Symbol: "",
+          Multiplier: "",
+        };
+      }
 
-    const handleSubmit = async (values: any) => {
+      return {
+        Name: selected.Name ?? "",
+        Symbol: selected.Symbol ?? "",
+        Multiplier: selected.Multiplier ?? "",
+      };
+    }, [addMode, selected]);
+
+    const handleSubmit = async (values: UnitFormValues) => {
       const payload: Unit = {
         ID: addMode ? "0" : selected!.ID,
         Name: values.Name,
-        Symbol: values.Symbol?.Symbol ?? "",
-        Multiplier: values.Multiplier,
+        Symbol: values.Symbol ?? "",
+        Multiplier: String(values.Multiplier ?? ""),
       };
 
       try {
@@ -129,14 +143,12 @@ const TrendUnitConfigurationDetailPanel = memo(
       }
     };
 
-    console.log("Units:", symbols);
-
     return (
       <Form
         key={addMode ? "add" : selected?.ID}
         initialValues={initialValues}
-        validator={validator}
-        onSubmit={handleSubmit}
+        validator={validator(t)}
+        onSubmit={(values) => handleSubmit(values as UnitFormValues)}
         render={(formProps) => (
           <FormElement className="detail-panel-content">
             <div className="item-column">
