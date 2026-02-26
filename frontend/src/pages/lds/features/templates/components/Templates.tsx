@@ -10,13 +10,14 @@ import { SelectDescriptor } from "@progress/kendo-react-data-tools";
 import { useTranslation } from "react-i18next";
 import { Template, Axis } from "../../../../../services/api";
 import { Button, ButtonGroup } from "@progress/kendo-react-buttons";
-import { plusIcon } from "@progress/kendo-svg-icons";
+import { plusIcon, trashIcon } from "@progress/kendo-svg-icons";
 
 interface TemplatesProps {
   templates: Template[];
   selected: Template | null;
   onSelectTemplate: (value: Template | null) => void;
   openAddPanel: () => void;
+  requestDelete: (value: Template) => void;
 }
 
 const Templates = memo(function TemplatesGrid({
@@ -24,6 +25,7 @@ const Templates = memo(function TemplatesGrid({
   selected,
   onSelectTemplate,
   openAddPanel,
+  requestDelete,
 }: TemplatesProps) {
   const { t } = useTranslation(["templates-page"]);
   const [select, setSelect] = useState<SelectDescriptor>();
@@ -55,6 +57,12 @@ const Templates = memo(function TemplatesGrid({
           <Button svgIcon={plusIcon} onClick={openAddPanel}>
             {t("templates-page:add_new_template")}
           </Button>
+
+          {selected && (
+            <Button svgIcon={trashIcon} onClick={() => requestDelete(selected)}>
+              {t("common:delete")}
+            </Button>
+          )}
         </ButtonGroup>
       </GridToolbar>
 

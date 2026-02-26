@@ -51,6 +51,10 @@ const TemplatePage = () => {
     }
   };
 
+  const requestDelete = useCallback((link: Template) => {
+    setDeleteTarget(link);
+  }, []);
+
   return (
     <main className="templates-page">
       <div className="links-grid-container">
@@ -59,6 +63,7 @@ const TemplatePage = () => {
           selected={selected}
           onSelectTemplate={handleSelectTemplate}
           openAddPanel={openAddMode}
+          requestDelete={requestDelete}
         />
       </div>
 

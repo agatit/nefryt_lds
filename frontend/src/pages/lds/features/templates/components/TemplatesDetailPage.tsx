@@ -198,6 +198,14 @@ const TemplatesDetailPanel = memo(function TemplatesDetailPanel({
           });
         };
 
+        const removeAxis = (index: number) => {
+          const updated = axes.filter((_, i) => i !== index);
+
+          formProps.onChange("Axes", {
+            value: updated,
+          });
+        };
+
         return (
           <FormElement className="detail-panel-content">
             <div className="item-column">
@@ -247,16 +255,18 @@ const TemplatesDetailPanel = memo(function TemplatesDetailPanel({
                         disabled={!inEdit}
                       />
                     </div>
+                    {(inEdit || addMode) && (
+                      <Button
+                        type="button"
+                        svgIcon={trashIcon}
+                        onClick={() => removeAxis(i)}
+                      />
+                    )}
                   </div>
                 ))}
 
                 {(inEdit || addMode) && (
-                  <Button
-                    type="button"
-                    svgIcon={plusIcon}
-                    onClick={addAxis}
-                    style={{ marginTop: 12 }}
-                  >
+                  <Button type="button" svgIcon={plusIcon} onClick={addAxis}>
                     {t("templates-page:add_axes")}
                   </Button>
                 )}
