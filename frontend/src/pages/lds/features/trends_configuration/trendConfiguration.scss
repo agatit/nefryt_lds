@@ -13,10 +13,6 @@ main.config-page .k-label {
   font-size: 1rem;
 }
 
-main.config-page .detail-panel-content .k-label {
-  margin-bottom: 4px;
-}
-
 .config-grid-container {
   flex: 4 0 0;
   overflow-y: hidden;
@@ -25,69 +21,57 @@ main.config-page .detail-panel-content .k-label {
   gap: k-spacing(1);
 }
 
-.config-grid-container>* {
+.config-grid-container > * {
   flex: 1 0 0;
   width: 100%;
 }
 
-.config-detail-panel.no-selected>div {
+.config-grid-container > .defs-and-groups {
+  display: flex;
+  flex-direction: row;
+
+  gap: k-spacing(2);
+}
+
+.config-grid-container > .defs-and-groups > * {
+  flex: 1 1 0;
+}
+
+.config-detail-panel.no-selected > div {
   justify-content: center;
   height: 100%;
   cursor: not-allowed;
 }
 
-.detail-panel-content {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  box-sizing: border-box;
+.config-detail-panel .k-alpha-slider {
+  display: none;
 }
 
-.detail-panel-content .item-column {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: 100%;
+// Kendo customization
+
+.config-page .k-table-row:hover {
+  cursor: pointer;
 }
 
-.detail-panel-content .item-column>div {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: 100%;
+.trend-dialog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
-.field-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.field-input {
+/* make inputs full width */
+.trend-dialog-grid .k-input,
+.trend-dialog-grid .k-dropdown,
+.trend-dialog-grid .k-colorpicker,
+.trend-dialog-grid .k-numerictextbox {
   width: 100%;
 }
 
-.field-error {
-  margin-top: 4px;
-  font-size: 12px;
-}
-
-.k-label {
-  font-size: 1rem;
-  color: #000000;
-}
-
-.field-wrapper .k-form-error,
-.field-wrapper .k-error {
-  margin-top: 0;
-  align-self: flex-start;
-  text-align: left;
-}
-
-.field-wrapper .k-coloreditor {
-  width: 100%;
+/* labels nicer spacing */
+.trend-dialog-grid label {
+  margin-bottom: 4px;
+  font-weight: 500;
 }
