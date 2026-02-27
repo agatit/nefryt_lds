@@ -1,23 +1,23 @@
-import { useEffect, useState, useContext, useCallback, useMemo } from "react";
+import { useEffect, useState, useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Splitter,
-  SplitterOnChangeEvent,
-  SplitterPaneProps,
-  TabStrip,
-  TabStripSelectEventArguments,
-  TabStripTab,
-} from "@progress/kendo-react-layout";
+// import {
+//   Splitter,
+//   SplitterOnChangeEvent,
+//   SplitterPaneProps,
+//   TabStrip,
+//   TabStripSelectEventArguments,
+//   TabStripTab,
+// } from "@progress/kendo-react-layout";
 import { Button } from "@progress/kendo-react-buttons";
 import { DetailPanel } from "onyks_shared_kendo";
-import { Typography } from "@progress/kendo-react-common";
+// import { Typography } from "@progress/kendo-react-common";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { LDSContext } from "../../contexts/ldsContext";
 import Methods from "./components/Methods/Methods";
 import MethodsDetailPanel from "./components/Methods/MethodsDetailPanel";
-import MethodParams from "./components/MethodParams/MethodParams";
+// import MethodParams from "./components/MethodParams/MethodParams";
 import MethodParamDetailPanel from "./components/MethodParams/MethodParamDetailPanel";
-import MethodDefs from "./components/MethodDefs/MethodDefs";
+// import MethodDefs from "./components/MethodDefs/MethodDefs";
 import MethodDefDetailPanel from "./components/MethodDefs/MethodDefsDetailPanel";
 import { AppContext } from "../../../../contexts/appContext";
 import { Method, MethodDef, MethodParam } from "../../../../services/api";
@@ -42,10 +42,10 @@ const MethodsPage = () => {
     methodParams,
   } = ldsContext;
   const [selectedMethod, setSelectedMethod] = useState<Method | null>(null);
-  const [verticalPanes, setVerticalPanes] = useState<SplitterPaneProps[]>([
-    { size: "65%" },
-    {},
-  ]);
+  // const [verticalPanes, setVerticalPanes] = useState<SplitterPaneProps[]>([
+  //   { size: "65%" },
+  //   {},
+  // ]);
   const [methodAddMode, setMethodAddMode] = useState(false);
   const [paramAddMode, setParamAddMode] = useState(false);
   const [selectedMethodDef, setSelectedMethodDef] = useState<MethodDef | null>(
@@ -53,7 +53,7 @@ const MethodsPage = () => {
   );
   const [selectedMethodParam, setSelectedMethodParam] =
     useState<MethodParam | null>(null);
-  const [tabSelected, setTabSelected] = useState<number>(0);
+  // const [tabSelected, setTabSelected] = useState<number>(0);
   const [panelOpen, setPanelOpen] = useState(false);
 
   type DeleteTarget =
@@ -70,12 +70,12 @@ const MethodsPage = () => {
   const requestDeleteParam = (p: MethodParam) =>
     setDeleteTarget({ type: "param", item: p });
 
-  const handleVerticalChange = (e: SplitterOnChangeEvent) =>
-    setVerticalPanes(e.newState);
+  // const handleVerticalChange = (e: SplitterOnChangeEvent) =>
+  //   setVerticalPanes(e.newState);
 
-  const handleTabSelect = useCallback((e: TabStripSelectEventArguments) => {
-    setTabSelected(e.selected);
-  }, []);
+  // const handleTabSelect = useCallback((e: TabStripSelectEventArguments) => {
+  //   setTabSelected(e.selected);
+  // }, []);
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
