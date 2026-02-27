@@ -1,237 +1,191 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { TFunction } from "i18next";
-import {
-  Form,
-  Field,
-  FormElement,
-  FieldRenderProps,
-} from "@progress/kendo-react-form";
-import { TextBox } from "@progress/kendo-react-inputs";
-import { DropDownList } from "@progress/kendo-react-dropdowns";
-import { Label, Error } from "@progress/kendo-react-labels";
-import { Button } from "@progress/kendo-react-buttons";
+import { Unit, UnitCreate } from "../../../../../../services/api";
+import { TextBox, TextBoxChangeEvent } from "@progress/kendo-react-inputs";
+import { Label } from "@progress/kendo-react-labels";
 import {
   cancelIcon,
   pencilIcon,
+  plusIcon,
   saveIcon,
   trashIcon,
 } from "@progress/kendo-svg-icons";
-import { Unit } from "../../../../../../services/api";
+import { Button } from "@progress/kendo-react-buttons";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 export interface TrendUnitConfigurationDetailPanelProps {
   editUnit: (value: Unit) => Promise<void>;
-  addUnit: (value: Unit) => Promise<void>;
-  requestDelete: (value: Unit) => void;
+  deleteUnit: (value: Unit) => Promise<void>;
   selected: Unit | null;
-  addMode: boolean;
-  setAddMode: (v: boolean) => void;
-  symbols: string[];
-  closePanel: () => void;
+  enterAddNewUnit: () => void;
 }
 
-interface UnitFormValues {
-  Name: string;
-  Symbol: string | null;
-  Multiplier: string | number;
-}
-
-interface ValidationErrors {
-  [key: string]: string;
-}
-
-const ValidatedTextBox = (props: FieldRenderProps) => {
-  const { validationMessage, touched, modified, ...inputProps } = props;
-
-  return (
-    <div className="field-wrapper">
-      <TextBox {...inputProps} />
-      {(touched || modified) && validationMessage && (
-        <Error>{validationMessage}</Error>
-      )}
-    </div>
-  );
-};
-
-const ValidatedDropDown = (props: FieldRenderProps & { data: string[] }) => {
-  const { validationMessage, touched, modified, value, onChange, data } = props;
-
-  return (
-    <div className="field-wrapper">
-      <DropDownList
-        data={data}
-        value={value ?? ""}
-        onChange={(e) => onChange({ value: e.value ?? "" })}
-      />
-
-      {(touched || modified) && validationMessage && (
-        <Error>{validationMessage}</Error>
-      )}
-    </div>
-  );
-};
-const validator = (t: TFunction) => (values: UnitFormValues) => {
-  const errors: ValidationErrors = {};
-
-  if (!values.Name?.trim()) {
-    errors.Name = t("config-page:name_required");
-  }
-
-  if (!values.Symbol?.trim()) {
-    errors.Symbol = t("config-page:symbol_required");
-  }
-
-  return Object.keys(errors).length ? errors : undefined;
-};
-const TrendUnitConfigurationDetailPanel = memo(
+const TrendUnitConfigurationDetailPanel = React.memo(
   function TrendUnitConfigurationDetailPanel({
     editUnit,
-    addUnit,
-    requestDelete,
+    deleteUnit,
     selected,
-    addMode,
-    setAddMode,
-    symbols,
-    closePanel,
+    enterAddNewUnit,
   }: TrendUnitConfigurationDetailPanelProps) {
     const { t } = useTranslation(["common", "config-page"]);
-    const [inEdit, setInEdit] = useState(false);
-    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-      setInEdit(addMode);
-    }, [selected, addMode]);
+    const setSelectedData = React.useCallback((selectedUnit: Unit) => {
+      setUnitID(selectedUnit.ID);
+      setUnitName(selectedUnit.Name!);
+      setUnitSymbol(selectedUnit.Symbol!);
+      setUnitMultiplier(selectedUnit.Multiplier!);
+    }, []);
 
-    const initialValues = useMemo(() => {
-      if (addMode || !selected) {
-        return {
-          Name: "",
-          Symbol: "",
-          Multiplier: "",
-        };
-      }
+    const [inEdit, setInEdit] = React.useState<boolean>(false);
 
-      return {
-        Name: selected.Name ?? "",
-        Symbol: selected.Symbol ?? "",
-        Multiplier: selected.Multiplier ?? "",
+    const enterEdit = React.useCallback(() => {
+      setInEdit(true);
+    }, []);
+    const cancelEdit = React.useCallback(() => {
+      setInEdit(false);
+      if (selected !== null) setSelectedData(selected);
+    }, [selected, setSelectedData]);
+
+    const [unitID, setUnitID] = React.useState<string | undefined>();
+    const [unitName, setUnitName] = React.useState<string | undefined>();
+    const [unitSymbol, setUnitSymbol] = React.useState<string | undefined>();
+    const [unitMultiplier, setUnitMultiplier] = React.useState<
+      string | undefined
+    >();
+
+    const handleUnitNameChange = React.useCallback(
+      (event: TextBoxChangeEvent) => {
+        if (event.value) setUnitName(event.value.toString());
+      },
+      []
+    );
+    const handleUnitSymbolChange = React.useCallback(
+      (event: TextBoxChangeEvent) => {
+        if (event.value) setUnitSymbol(event.value.toString());
+      },
+      []
+    );
+    const handleUnitMultiplierChange = React.useCallback(
+      (event: TextBoxChangeEvent) => {
+        if (event.value) setUnitMultiplier(event.value.toString());
+      },
+      []
+    );
+
+    React.useEffect(() => {
+      if (selected !== null) setSelectedData(selected);
+    }, [selected]);
+
+    const saveEdit = React.useCallback(async () => {
+      const newUnit: Unit = {
+        ID: unitID!,
+        Name: unitName!,
+        Symbol: unitSymbol!,
+        Multiplier: unitMultiplier,
       };
-    }, [addMode, selected]);
 
-    const handleSubmit = async (values: UnitFormValues) => {
-      const payload: Unit = {
-        ID: addMode ? "0" : selected!.ID,
-        Name: values.Name,
-        Symbol: values.Symbol ?? "",
-        Multiplier: String(values.Multiplier ?? ""),
-      };
+      await editUnit(newUnit);
+      setInEdit(false);
+    }, [editUnit, unitID, unitName, unitSymbol, unitMultiplier]);
 
-      try {
-        setLoading(true);
+    // Deletion dialog
+    const [showDialog, setShowDialog] = React.useState<boolean>(false);
+    const openDialog = React.useCallback(() => {
+      setShowDialog(true);
+    }, []);
+    const closeDialog = React.useCallback(() => {
+      setShowDialog(false);
+    }, []);
 
-        if (addMode) {
-          await addUnit(payload);
-          setAddMode(false);
-          closePanel();
-          return;
-        }
-
-        await editUnit(payload);
-        setInEdit(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const confirmDeletion = React.useCallback(async () => {
+      await deleteUnit(selected!);
+      setInEdit(false);
+    }, [selected, deleteUnit]);
 
     return (
-      <Form
-        key={addMode ? "add" : selected?.ID}
-        initialValues={initialValues}
-        validator={validator(t)}
-        onSubmit={(values) => handleSubmit(values as UnitFormValues)}
-        render={(formProps) => (
-          <FormElement className="detail-panel-content">
-            <div className="item-column">
-              <div>
-                <Label>{t("config-page:name")}</Label>
-                <Field
-                  name="Name"
-                  component={ValidatedTextBox}
-                  disabled={!inEdit && !addMode}
-                />
-              </div>
-
-              <div>
-                <Label>{t("config-page:symbol")}</Label>
-                <Field
-                  name="Symbol"
-                  component={ValidatedDropDown}
-                  data={symbols}
-                  disabled={!inEdit && !addMode}
-                />
-              </div>
-
-              <div>
-                <Label>{t("config-page:multiplier")}</Label>
-                <Field
-                  name="Multiplier"
-                  component={ValidatedTextBox}
-                  disabled={!inEdit && !addMode}
-                />
-              </div>
+      <div className="detail-panel-content">
+        <div className="item">
+          <div className="item-column">
+            <div>
+              <Label editorId="unitName">{t("config-page:name")}</Label>
+              <TextBox
+                id="unitName"
+                value={unitName}
+                onChange={handleUnitNameChange}
+                disabled={!inEdit}
+              />
             </div>
-
-            <div className="separator" />
-
+            <div>
+              <Label editorId="unitSymbol">{t("config-page:symbol")}</Label>
+              <TextBox
+                id="unitSymbol"
+                value={unitSymbol}
+                onChange={handleUnitSymbolChange}
+                disabled={!inEdit}
+              />
+            </div>
+            <div>
+              <Label editorId="unitMultiplier">
+                {t("config-page:multiplier")}
+              </Label>
+              <TextBox
+                id="unitMultiplier"
+                value={unitMultiplier}
+                onChange={handleUnitMultiplierChange}
+                disabled={!inEdit}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="separator" />
+        <div className="item">
+          {!inEdit ? (
             <div className="item-row">
-              {!inEdit && !addMode ? (
-                <Button
-                  svgIcon={pencilIcon}
-                  disabled={loading}
-                  onClick={() => setInEdit(true)}
-                >
-                  {t("common:edit")}
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    svgIcon={cancelIcon}
-                    disabled={loading}
-                    onClick={() => {
-                      setAddMode(false);
-                      setInEdit(false);
-                      formProps.onFormReset();
-                    }}
-                  >
-                    {t("common:cancel")}
-                  </Button>
-
-                  {!addMode && selected && (
-                    <Button
-                      svgIcon={trashIcon}
-                      disabled={loading}
-                      onClick={() => requestDelete(selected)}
-                    >
-                      {t("common:delete")}
-                    </Button>
-                  )}
-
-                  <Button
-                    svgIcon={saveIcon}
-                    themeColor="primary"
-                    disabled={!formProps.allowSubmit || loading}
-                    onClick={formProps.onSubmit}
-                  >
-                    {addMode ? t("common:add") : t("common:save")}
-                  </Button>
-                </>
-              )}
+              <Button svgIcon={pencilIcon} onClick={enterEdit}>
+                {t("common:edit")}
+              </Button>
+              <Button svgIcon={plusIcon} onClick={enterAddNewUnit}>
+                {t("config-page:add_new_unit")}
+              </Button>
             </div>
-          </FormElement>
+          ) : (
+            <div className="item-row">
+              <Button svgIcon={cancelIcon} onClick={cancelEdit}>
+                {t("common:cancel")}
+              </Button>
+              <Button svgIcon={trashIcon} onClick={openDialog}>
+                {t("common:delete")}
+              </Button>
+              <Button
+                svgIcon={saveIcon}
+                onClick={saveEdit}
+                themeColor={"primary"}
+              >
+                {t("common:save")}
+              </Button>
+            </div>
+          )}
+        </div>
+        {showDialog && (
+          <Dialog title={t("common:confirm_deletion")} onClose={closeDialog}>
+            {t("config-page:sure_you_want_delete_unit")}
+            <DialogActionsBar>
+              <Button svgIcon={cancelIcon} onClick={closeDialog}>
+                {t("common:cancel")}
+              </Button>
+              <Button
+                svgIcon={trashIcon}
+                onClick={confirmDeletion}
+                themeColor={"primary"}
+              >
+                {t("common:delete")}
+              </Button>
+            </DialogActionsBar>
+          </Dialog>
         )}
-      />
+      </div>
     );
-  },
+  }
 );
 
 export default TrendUnitConfigurationDetailPanel;

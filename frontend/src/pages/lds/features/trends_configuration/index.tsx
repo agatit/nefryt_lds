@@ -187,7 +187,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     selection.trendGroup ||
     selection.unit;
 
-  const SelectedDetailPanel = () => {
+  const selectedDetailPanel = React.useMemo(() => {
     if (selection.trend || addMode) {
       return (
         <TrendConfigurationDetailPanel
@@ -230,7 +230,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
       );
 
     return <></>;
-  };
+  }, [selection, addMode]);
 
   return (
     <main className="config-page">
@@ -257,13 +257,13 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
           selected={tabSelected}
           onSelect={handleTabSelect}
         >
-          <TabStripTab title={t("config-page:trends_types")}>
+          {/* <TabStripTab title={t("config-page:trends_types")}>
             <TrendDefConfiguration
               trendDefs={ldsContext.trendDefs}
               selected={selection.trendDef}
               setSelected={handleSelectedTrendDefChange}
             />
-          </TabStripTab>
+          </TabStripTab> */}
 
           <TabStripTab title={t("config-page:trends_groups")}>
             <TrendGroupConfiguration
@@ -300,7 +300,7 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
         extended={panelOpen}
         onExtendedChange={setPanelOpen}
       >
-        {isSelected && <SelectedDetailPanel />}
+        {isSelected && selectedDetailPanel}
       </DetailPanel>
     </main>
   );
