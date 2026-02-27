@@ -217,15 +217,15 @@ export default function LDS() {
       {
         separator: true,
       },
-      {
-        text: t("nav:templates"),
-        svgIcon: fileIcon,
-        selected: pathname == "/templates",
-        route: "/templates",
-      },
-      {
-        separator: true,
-      },
+      // {
+      //   text: t("nav:templates"),
+      //   svgIcon: fileIcon,
+      //   selected: pathname == "/templates",
+      //   route: "/templates",
+      // },
+      // {
+      //   separator: true,
+      // },
     ],
   );
 
