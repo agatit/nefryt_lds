@@ -1,0 +1,75 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
+main.methods-page {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+}
+
+main.methods-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
+main.methods-page .k-messagebox .k-messagebox-warning {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.methods-grid-container {
+  flex: 4 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.methods-grid-container .k-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.methods-trend-stuff-tab {
+  flex: 0 0 auto;
+  border-top: 1px solid #ddd;
+  background: white;
+}
+
+.methods-detail-panel.no-selected > div {
+  justify-content: center;
+  height: 100%;
+  cursor: not-allowed;
+}
+
+.detail-panel-content .item-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-panel-content .item-row {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-panel-content .item-column > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.methods-dialog .k-dialog {
+  width: 300px;
+}
+
+.k-dialog-content .k-input,
+.k-dialog-content .k-dropdown,
+.k-dialog-content .k-numerictextbox {
+  margin-bottom: 12px;
+}
+
+.form-field {
+  margin-bottom: 16px;
+}

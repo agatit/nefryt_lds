@@ -1,0 +1,77 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
+main.config-page {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+}
+
+main.config-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.config-grid-container {
+  flex: 4 0 0;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: k-spacing(1);
+}
+
+.config-grid-container > * {
+  flex: 1 0 0;
+  width: 100%;
+}
+
+.config-grid-container > .defs-and-groups {
+  display: flex;
+  flex-direction: row;
+
+  gap: k-spacing(2);
+}
+
+.config-grid-container > .defs-and-groups > * {
+  flex: 1 1 0;
+}
+
+.config-detail-panel.no-selected > div {
+  justify-content: center;
+  height: 100%;
+  cursor: not-allowed;
+}
+
+.config-detail-panel .k-alpha-slider {
+  display: none;
+}
+
+// Kendo customization
+
+.config-page .k-table-row:hover {
+  cursor: pointer;
+}
+
+.trend-dialog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* make inputs full width */
+.trend-dialog-grid .k-input,
+.trend-dialog-grid .k-dropdown,
+.trend-dialog-grid .k-colorpicker,
+.trend-dialog-grid .k-numerictextbox {
+  width: 100%;
+}
+
+/* labels nicer spacing */
+.trend-dialog-grid label {
+  margin-bottom: 4px;
+  font-weight: 500;
+}

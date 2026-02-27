@@ -1,11 +1,11 @@
 import React from "react";
 import "./App.scss";
-import Navbar from "./layouts/Navbar";
+import Navbar from "./components/Navbar";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { LoadingPanel } from "onyks_shared_kendo";
 import { useTranslation } from "react-i18next";
-import Login from "./features/auth/login";
-import LDS from "./features/lds/LDS";
+import Login from "./pages/auth/Login";
+import LDS from "./pages/lds/LDS";
 import { NavbarContextProvider } from "./contexts/navbarContext";
 import PrivateRoute from "./components/PrivateRoute";
 import { SwitchChangeEvent } from "@progress/kendo-react-inputs";
@@ -41,7 +41,7 @@ function App() {
       setUseMockup(event.value);
       setCookies("useMockup", event.value);
     },
-    []
+    [],
   );
 
   // Notification
@@ -59,7 +59,7 @@ function App() {
     (notificationData: NotificationDataType) => {
       setNotificationState({ visible: true, notificationData });
     },
-    []
+    [],
   );
   const closeNotification = React.useCallback(() => {
     setNotificationState({

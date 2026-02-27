@@ -1,0 +1,14 @@
+{
+  "name": "Nazwa",
+  "type": "Typ",
+  "pipelines_params": "Parametry potoków",
+  "choose_pipeline_first": "Najpierw wybierz potok",
+  "delete_param": "Usuń parametr",
+  "delete_pipeline": "Czy jesteś pewien, że chcesz usunąć potok?",
+  "add_new_pipeline": "Dodaj nowy potok",
+  "value": "Wartość",
+  "param_id": "ID parametru",
+  "data_type": "Typ danych",
+  "add_pipeline_param": "Dodaj parametr potoku",
+  "no_more_params_for_pipeline": "Brak dodatkowych parametrów dla wybranego potoku"
+}
