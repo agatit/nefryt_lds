@@ -77,53 +77,32 @@ const trendValidator = (t: TFunction) => (values: TrendFormValues) => {
   if (!values.Name?.trim()) {
     errors.Name = t("config-page:name_required");
   }
-
   if (!values.TrendDef) {
     errors.TrendDefID = t("config-page:type_required");
   }
-
   if (!values.TrendGroup) {
     errors.TrendGroupID = t("config-page:group_required");
   }
-
   if (!values.Unit) {
     errors.UnitID = t("config-page:unit_required");
   }
-
-  if (
-    values.RawMin != null &&
-    values.RawMax != null &&
-    values.RawMin === values.RawMax
-  ) {
-    errors.RawMin = " ";
-    errors.RawMax = t("config-page:raw_same");
+  if (values.RawMin != null && values.RawMax != null) {
+    if (values.RawMin > values.RawMax) {
+      errors.RawMin = t("config-page:raw_range");
+      errors.RawMax = t("config-page:raw_range");
+    } else if (values.RawMin === values.RawMax) {
+      errors.RawMin = t("config-page:raw_same");
+      errors.RawMax = t("config-page:raw_same");
+    }
   }
-
-  if (
-    values.RawMin != null &&
-    values.RawMax != null &&
-    values.RawMin > values.RawMax
-  ) {
-    errors.RawMin = " ";
-    errors.RawMax = t("config-page:raw_range");
-  }
-
-  if (
-    values.ScaledMin != null &&
-    values.ScaledMax != null &&
-    values.ScaledMin > values.ScaledMax
-  ) {
-    errors.ScaledMin = " ";
-    errors.ScaledMax = t("config-page:scaled_same");
-  }
-
-  if (
-    values.ScaledMin != null &&
-    values.ScaledMax != null &&
-    values.ScaledMin === values.ScaledMax
-  ) {
-    errors.ScaledMin = " ";
-    errors.ScaledMax = t("config-page:scaled_range");
+  if (values.ScaledMin != null && values.ScaledMax != null) {
+    if (values.ScaledMin > values.ScaledMax) {
+      errors.ScaledMin = t("config-page:scaled_range");
+      errors.ScaledMax = t("config-page:scaled_range");
+    } else if (values.ScaledMin === values.ScaledMax) {
+      errors.ScaledMin = t("config-page:scaled_same");
+      errors.ScaledMax = t("config-page:scaled_same");
+    }
   }
 
   return Object.keys(errors).length ? errors : undefined;
@@ -131,7 +110,6 @@ const trendValidator = (t: TFunction) => (values: TrendFormValues) => {
 
 const ValidatedTextBox = (props: FieldRenderProps) => {
   const { validationMessage, touched, modified, ...inputProps } = props;
-
   return (
     <div className="field-wrapper">
       <TextBox {...inputProps} />
@@ -144,7 +122,6 @@ const ValidatedTextBox = (props: FieldRenderProps) => {
 
 const ValidatedDropDown = (props: FieldRenderProps) => {
   const { validationMessage, touched, modified, data, ...inputProps } = props;
-
   return (
     <div className="field-wrapper">
       <DropDownList {...inputProps} data={data} />
@@ -156,23 +133,14 @@ const ValidatedDropDown = (props: FieldRenderProps) => {
 };
 
 const ValidatedNumericTextBox = (props: FieldRenderProps) => {
-  const {
-    validationMessage,
-    touched,
-    visited,
-    valid,
-    modified,
-    ...inputProps
-  } = props;
-
+  const { validationMessage, touched, valid, modified, ...inputProps } = props;
   return (
     <div className="field-wrapper">
       <NumericTextBox
         {...inputProps}
         validationMessage={validationMessage ?? undefined}
       />
-
-      {(touched || visited) && validationMessage && (
+      {(touched || modified) && validationMessage && (
         <Error className="error-container">{validationMessage}</Error>
       )}
     </div>
@@ -181,7 +149,6 @@ const ValidatedNumericTextBox = (props: FieldRenderProps) => {
 
 const ColorPickerField = (props: FieldRenderProps) => {
   const { validationMessage, touched, modified, ...rest } = props;
-
   return (
     <div className="field-wrapper">
       <FlatColorPicker
@@ -191,7 +158,6 @@ const ColorPickerField = (props: FieldRenderProps) => {
         showPreview={false}
         onChange={(e) => props.onChange({ value: e.value })}
       />
-
       {(touched || modified) && validationMessage && (
         <Error>{validationMessage}</Error>
       )}
@@ -217,11 +183,13 @@ const TrendConfigurationDetailPanel = memo(function Panel({
   const handleApiResponse = useHandleApiResponse();
   const [inEdit, setInEdit] = useState(addMode);
   const [loading, setLoading] = useState(false);
-  const [paramsLoaded, setParamsLoaded] = useState(addMode);
-  const [trendParams, setTrendParams] = useState<number[]>([]);
+  const [paramsLoaded, setParamsLoaded] = useState(false);
   const [activeTrendDefId, setActiveTrendDefId] = useState<
     TrendDef["ID"] | undefined
-  >(selected?.TrendDefID);
+  >(undefined);
+
+  const [loadedTrendParams, setLoadedTrendParams] = useState<number[]>([]);
+  const [editParamValues, setEditParamValues] = useState<number[]>([]);
 
   const requiredTrendParams = useMemo(
     () => trendParamDefs.filter((d) => d.TrendDefID === activeTrendDefId),
@@ -229,19 +197,28 @@ const TrendConfigurationDetailPanel = memo(function Panel({
   );
 
   useEffect(() => {
+    setInEdit(addMode);
+  }, [addMode]);
+
+  useEffect(() => {
     if (addMode) {
-      setTrendParams([]);
+      setActiveTrendDefId(undefined);
+      setLoadedTrendParams([]);
+      setEditParamValues([]);
       setParamsLoaded(true);
       return;
     }
 
     if (!selected) {
-      setTrendParams([]);
+      setActiveTrendDefId(undefined);
+      setLoadedTrendParams([]);
       setParamsLoaded(true);
       return;
     }
 
+    setActiveTrendDefId(selected.TrendDefID);
     setParamsLoaded(false);
+
     const trendId = selected.ID;
     const paramCount = trendParamDefs.filter(
       (d) => d.TrendDefID === selected.TrendDefID,
@@ -253,12 +230,13 @@ const TrendConfigurationDetailPanel = memo(function Panel({
           await ldsContext!.trendParamApi.listTrendParamsByTrendIdTrendTrendIdParamGet(
             trendId,
           );
-        const values = res.data?.items?.map((p) => Number(p.Value)) ?? [];
-        setTrendParams(
+        const items = res.data?.items ?? [];
+        const values = items.map((p) => Number(p.Value));
+        setLoadedTrendParams(
           Array.from({ length: paramCount }, (_, i) => values[i] ?? 0),
         );
       } catch {
-        setTrendParams(Array(paramCount).fill(0));
+        setLoadedTrendParams(Array(paramCount).fill(0));
       } finally {
         setParamsLoaded(true);
       }
@@ -281,7 +259,6 @@ const TrendConfigurationDetailPanel = memo(function Panel({
         ScaledMax: 0,
       };
     }
-
     return {
       Name: selected.Name,
       TrendDef: trendDefs.find((d) => d.ID === selected.TrendDefID) ?? null,
@@ -296,56 +273,64 @@ const TrendConfigurationDetailPanel = memo(function Panel({
     };
   }, [selected, addMode, trendDefs, trendGroups, units]);
 
-  const saveTrendParams = useCallback(
-    async (trendId: number) => {
-      for (let i = 0; i < requiredTrendParams.length; i++) {
-        const value: TrendParamCreate = {
-          TrendParamDefID: requiredTrendParams[i].ID,
-          Value: String(trendParams[i] ?? 0),
-        };
+  const displayParamValues = addMode ? editParamValues : loadedTrendParams;
 
+  const saveTrendParams = useCallback(
+    async (trendId: number, paramValues: number[]) => {
+      for (let i = 0; i < requiredTrendParams.length; i++) {
+        const paramDef = requiredTrendParams[i];
+        const create: TrendParamCreate = {
+          TrendParamDefID: paramDef.ID,
+          Value: String(paramValues[i] ?? 0),
+        };
         await handleApiResponse(
           ldsContext!.trendParamApi.createTrendParamTrendTrendIdParamPost.bind(
             ldsContext!.trendParamApi,
           ),
           trendId,
-          value,
+          create,
         );
       }
     },
-    [requiredTrendParams, trendParams, ldsContext, handleApiResponse],
+    [requiredTrendParams, ldsContext, handleApiResponse],
   );
 
   const handleSubmit = useCallback(
     async (values: TrendFormValues) => {
       setLoading(true);
-      const payload: TrendCreate = {
-        Name: values.Name,
-        TrendDefID: values.TrendDef!.ID,
-        TrendGroupID: values.TrendGroup!.ID,
-        UnitID: values.Unit!.ID,
-        Color: values.Color,
-        RawMin: values.RawMin ?? 0,
-        RawMax: values.RawMax ?? 0,
-        ScaledMin: values.ScaledMin ?? 0,
-        ScaledMax: values.ScaledMax ?? 0,
-      };
-
       try {
-        setLoading(true);
         if (addMode) {
+          const payload: TrendCreate = {
+            Name: values.Name,
+            TrendDefID: values.TrendDef!.ID,
+            TrendGroupID: values.TrendGroup!.ID,
+            UnitID: values.Unit!.ID,
+            Color: values.Color,
+            RawMin: values.RawMin ?? 0,
+            RawMax: values.RawMax ?? 0,
+            ScaledMin: values.ScaledMin ?? 0,
+            ScaledMax: values.ScaledMax ?? 0,
+          };
           const trend = await addTrend(payload);
-          await saveTrendParams(trend.ID);
-
+          await saveTrendParams(trend.ID, editParamValues);
           closePanel();
-
           return;
         }
 
         if (!selected) return;
 
-        await editTrend(selected.ID, payload as TrendUpdate);
-        await saveTrendParams(selected.ID);
+        const updatePayload: TrendUpdate = {
+          Name: values.Name,
+          TrendDefID: values.TrendDef!.ID,
+          TrendGroupID: values.TrendGroup!.ID,
+          UnitID: values.Unit!.ID,
+          Color: values.Color,
+          RawMin: values.RawMin ?? 0,
+          RawMax: values.RawMax ?? 0,
+          ScaledMin: values.ScaledMin ?? 0,
+          ScaledMax: values.ScaledMax ?? 0,
+        };
+        await editTrend(selected.ID, updatePayload);
         setInEdit(false);
       } finally {
         setLoading(false);
@@ -356,11 +341,13 @@ const TrendConfigurationDetailPanel = memo(function Panel({
       addTrend,
       editTrend,
       selected,
-      setAddMode,
       closePanel,
       saveTrendParams,
+      editParamValues,
     ],
   );
+
+  if (!paramsLoaded) return null;
 
   return (
     <Form
@@ -384,16 +371,16 @@ const TrendConfigurationDetailPanel = memo(function Panel({
               <Field
                 name="TrendDef"
                 component={ValidatedDropDown}
-                disabled={!inEdit}
+                disabled={!inEdit || !addMode}
                 data={trendDefs}
                 textField="Name"
                 dataItemKey="ID"
                 onChange={(e: { value: TrendDef | null }) => {
-                  setActiveTrendDefId(e.value?.ID);
                   const newParamCount = trendParamDefs.filter(
                     (d) => d.TrendDefID === e.value?.ID,
                   ).length;
-                  setTrendParams(Array(newParamCount).fill(0));
+                  setActiveTrendDefId(e.value?.ID);
+                  setEditParamValues(Array(newParamCount).fill(0));
                   formRenderProps.onChange("TrendDef", { value: e.value });
                 }}
               />
@@ -420,7 +407,6 @@ const TrendConfigurationDetailPanel = memo(function Panel({
                 dataItemKey="ID"
               />
             </div>
-
             <div>
               <Label>{t("config-page:color")}</Label>
               <Field
@@ -430,21 +416,21 @@ const TrendConfigurationDetailPanel = memo(function Panel({
               />
             </div>
 
-            {!loading &&
-              requiredTrendParams.map((trendParam, index) => (
-                <div key={trendParam.ID}>
-                  <Label>{trendParam.Name}</Label>
-                  <NumericTextBox
-                    value={trendParams[index] ?? 0}
-                    disabled={!inEdit}
-                    onChange={(e) => {
-                      const copy = [...trendParams];
-                      copy[index] = e.value ?? 0;
-                      setTrendParams(copy);
-                    }}
-                  />
-                </div>
-              ))}
+            {requiredTrendParams.map((trendParam, index) => (
+              <div key={trendParam.ID}>
+                <Label>{trendParam.Name}</Label>
+                <NumericTextBox
+                  value={displayParamValues[index] ?? 0}
+                  disabled={!inEdit || !addMode}
+                  onChange={(e) => {
+                    const copy = [...editParamValues];
+                    copy[index] = e.value ?? 0;
+                    setEditParamValues(copy);
+                  }}
+                />
+              </div>
+            ))}
+
             <div>
               <Label>{t("config-page:raw_min")}</Label>
               <Field
@@ -496,6 +482,7 @@ const TrendConfigurationDetailPanel = memo(function Panel({
                     setInEdit(false);
                     formRenderProps.onFormReset();
                     setActiveTrendDefId(selected?.TrendDefID);
+                    setEditParamValues([]);
                   }}
                 >
                   {t("common:cancel")}
