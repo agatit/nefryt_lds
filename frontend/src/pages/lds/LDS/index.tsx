@@ -13,7 +13,7 @@ import {
   shareIcon,
   arrowsSwapIcon,
   codeIcon,
-  fileIcon,
+  // fileIcon,
 } from "@progress/kendo-svg-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";

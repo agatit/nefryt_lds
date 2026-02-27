@@ -20,7 +20,7 @@ import {
 } from "@progress/kendo-react-layout";
 import TrendConfigurationDetailPanel from "./components/TrendConfiguration/TrendConfigurationDetailPanel";
 import TrendConfiguration from "./components/TrendConfiguration/TrendConfiguration";
-import TrendDefConfiguration from "./components/TrendDefConfiguration/TrendDefConfiguration";
+// import TrendDefConfiguration from "./components/TrendDefConfiguration/TrendDefConfiguration";
 import TrendGroupConfiguration from "./components/TrendGroupConfiguration/TrendGroupConfiguration";
 import TrendUnitConfiguration from "./components/TrendUnitConfiguration/TrendUnitConfiguration";
 import TrendDefConfigurationDetailPanel from "./components/TrendDefConfiguration/TrendDefConfigurationDetailPanel";
@@ -111,16 +111,16 @@ const TrendConfigurationPage = React.memo(function TrendConfigurationPage() {
     setPanelOpen(true);
   };
 
-  const handleSelectedTrendDefChange = (value: TrendDef) => {
-    setSelection({
-      trend: null,
-      trendParamDef: null,
-      trendDef: value,
-      trendGroup: null,
-      unit: null,
-    });
-    setPanelOpen(true);
-  };
+  // const handleSelectedTrendDefChange = (value: TrendDef) => {
+  //   setSelection({
+  //     trend: null,
+  //     trendParamDef: null,
+  //     trendDef: value,
+  //     trendGroup: null,
+  //     unit: null,
+  //   });
+  //   setPanelOpen(true);
+  // };
 
   const handleSelectedTrendGroupChange = (value: TrendGroup) => {
     setSelection({
