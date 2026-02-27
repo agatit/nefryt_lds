@@ -139,34 +139,28 @@ const MethodsPage = () => {
 
   return (
     <main className="methods-page">
-      <Splitter
-        className="methods-grid-container"
-        panes={verticalPanes}
-        orientation="vertical"
-        onChange={handleVerticalChange}
-      >
-        <div className="methods-grid-container">
-          <Methods
-            methods={methods}
-            selected={selectedMethod}
-            onSelect={(m) => {
-              setSelectedMethod(m);
-              setSelectedMethodParam(null);
-              setSelectedMethodDef(null);
-              setMethodAddMode(false);
-              setPanelOpen(!!m);
-            }}
-            onAdd={() => {
-              setSelectedMethod(null);
-              setSelectedMethodParam(null);
-              setMethodAddMode(true);
-              setPanelOpen(true);
-            }}
-            requestDelete={(m) => requestDeleteMethod(m)}
-          />
-        </div>
+      <div className="methods-grid-container">
+        <Methods
+          methods={methods}
+          selected={selectedMethod}
+          onSelect={(m) => {
+            setSelectedMethod(m);
+            setSelectedMethodParam(null);
+            setSelectedMethodDef(null);
+            setMethodAddMode(false);
+            setPanelOpen(!!m);
+          }}
+          onAdd={() => {
+            setSelectedMethod(null);
+            setSelectedMethodParam(null);
+            setMethodAddMode(true);
+            setPanelOpen(true);
+          }}
+          requestDelete={(m) => requestDeleteMethod(m)}
+        />
+      </div>
 
-        <TabStrip
+      {/* <TabStrip
           className="method-stuff-tab"
           selected={tabSelected}
           onSelect={handleTabSelect}
@@ -212,8 +206,7 @@ const MethodsPage = () => {
               </Typography.p>
             )}
           </TabStripTab>
-        </TabStrip>
-      </Splitter>
+        </TabStrip> */}
 
       <DetailPanel
         flexGrow={1}
