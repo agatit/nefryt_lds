@@ -9,5 +9,7 @@
   "pipeline_id": "ID potoku",
   "method_def_id": "ID definicji metody",
   "method_definition": "Definicja metody",
-  "pipeline": "Potok"
+  "pipeline": "Potok",
+  "pipeline_required": "Potok jest wymagany",
+  "method_def_required": "Definicja metody jest wymagana"
 }
