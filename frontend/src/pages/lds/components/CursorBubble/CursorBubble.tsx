@@ -1,5 +1,5 @@
 import React, { ComponentPropsWithoutRef } from "react";
-import "../styles/components/cursorBubble.scss";
+import "./cursorBubble.scss";
 import { Typography } from "@progress/kendo-react-common";
 
 export interface CursorBubbleProps extends ComponentPropsWithoutRef<"div"> {
