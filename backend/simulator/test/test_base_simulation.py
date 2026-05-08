@@ -128,31 +128,31 @@ def reset_objects4():
     return lds_objects
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_objects1], indirect=True)
+@pytest.mark.parametrize('add_test_context', [reset_objects1], indirect=True)
 def test_simulation_base_should_raise_exception_when_no_pipeline_length_param(add_lds_objects):
     with pytest.raises(ValueError, match=f'No \'LENGTH\' param in simulation with id = {simulation.ID}'):
         SimulationBase(simulation, '')
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_objects2], indirect=True)
+@pytest.mark.parametrize('add_test_context', [reset_objects2], indirect=True)
 def test_simulation_base_should_raise_exception_when_pipeline_length_param_is_not_integer(add_lds_objects):
     with pytest.raises(ValueError, match=f'\'LENGTH\' param in simulation with id = {simulation.ID} has to be an integer'):
         SimulationBase(simulation, '')
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_objects3], indirect=True)
+@pytest.mark.parametrize('add_test_context', [reset_objects3], indirect=True)
 def test_simulation_base_should_raise_exception_when_no_flow_trend_param(add_lds_objects):
     with pytest.raises(ValueError, match=f'No param \'FLOW_TREND_ID\' in simulation with id = {simulation.ID}'):
         SimulationBase(simulation, '')
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_objects4], indirect=True)
+@pytest.mark.parametrize('add_test_context', [reset_objects4], indirect=True)
 def test_simulation_base_should_raise_exception_when_no_trend_with_given_flow_trend_id(add_lds_objects):
     with pytest.raises(ValueError, match=f'No flow trend with id = {flow_trend_param.Value} in simulation with id = {simulation.ID}'):
         SimulationBase(simulation, '')
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_objects], indirect=True)
+@pytest.mark.parametrize('add_test_context', [reset_all_objects], indirect=True)
 def test_simulation_base_should_start_correctly(add_lds_objects):
     sim = SimulationBase(simulation, '')
     assert sim.lds_simulation == simulation

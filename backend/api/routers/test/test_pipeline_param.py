@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from sqlmodel import select
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 from db import get_engine
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from api.routers.utils.security import get_user_token
 from database import lds
 import pytest
@@ -54,18 +54,15 @@ def reset_pipeline_param_objects():
     return [pipeline_list, pipeline_param_def_list, pipeline_param_list]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_empty_list_when_no_pipeline_params_for_given_pipeline_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_empty_list_when_no_pipeline_params_for_given_pipeline_id(test_client):  # noqa
     response = test_client.get("/pipeline/" + str(pipeline3.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-def test_list_pipeline_params_by_pipeline_id_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id():
+def test_list_pipeline_params_by_pipeline_id_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id(test_client):
     response = test_client.get("/pipeline/" + str(pipeline2.ID) + "/param")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -73,8 +70,9 @@ def test_list_pipeline_params_by_pipeline_id_should_return_not_found_response_co
     assert error['message'] == 'No pipeline with id = ' + str(pipeline2.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_correct_pipeline_params_for_given_pipeline_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_correct_pipeline_params_for_given_pipeline_id(test_client):
     response = test_client.get("/pipeline/" + str(pipeline2.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -90,8 +88,9 @@ def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_
         assert returned_pipeline_param['Name'] == expected_pipeline_param_def.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 2
     page = 1
     response = test_client.get("/pipeline/" + str(pipeline1.ID) + f"/param?size={size}&page={page}")
@@ -104,8 +103,9 @@ def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/pipeline/" + str(pipeline1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -116,8 +116,9 @@ def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'PipelineParamDefID eq \'{pipeline_param2.PipelineParamDefID.strip()}\''
     response = test_client.get("/pipeline/" + str(pipeline1.ID) + f"/param?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -131,14 +132,15 @@ def test_list_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_
     assert returned_pipeline_param['Name'] == pipeline_param_def2.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_objects], indirect=True)
-def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_empty_list_when_no_pipeline_params_for_given_pipeline_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_empty_list_when_no_pipeline_params_for_given_pipeline_id(test_client):  # noqa
     response = test_client.get("/pipeline/" + str(pipeline1.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-def test_list_required_pipeline_params_by_pipeline_id_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id():
+def test_list_required_pipeline_params_by_pipeline_id_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id(test_client):
     response = test_client.get("/pipeline/" + str(pipeline2.ID) + "/param/all")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -146,8 +148,9 @@ def test_list_required_pipeline_params_by_pipeline_id_should_return_not_found_re
     assert error['message'] == 'No pipeline with id = ' + str(pipeline2.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_correct_pipeline_params_for_given_pipeline_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_correct_pipeline_params_for_given_pipeline_id(test_client):
     response = test_client.get("/pipeline/" + str(pipeline3.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -162,8 +165,9 @@ def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_
         assert returned_pipeline_param['Name'] == expected_pipeline_param_def.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 1
     page = 2
     response = test_client.get("/pipeline/" + str(pipeline2.ID) + f"/param/all?size={size}&page={page}")
@@ -177,8 +181,9 @@ def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/pipeline/" + str(pipeline1.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -189,8 +194,9 @@ def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID eq \'{pipeline_param_def1.ID.strip()}\''
     response = test_client.get("/pipeline/" + str(pipeline3.ID) + f"/param/all?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -204,8 +210,9 @@ def test_list_required_pipeline_params_by_pipeline_id_should_return_ok_response_
     assert returned_pipeline_param['Name'] == pipeline_param_def1.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_get_pipeline_param_by_pipeline_param_def_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_pipeline_param_by_pipeline_param_def_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(test_client):  # noqa
     response = test_client.get("/pipeline/" + str(pipeline1.ID) + "/param/" + pipeline_param2.PipelineParamDefID.strip())
     assert response.status_code == status.HTTP_200_OK
     returned_pipeline_param = response.json()
@@ -216,8 +223,9 @@ def test_get_pipeline_param_by_pipeline_param_def_id_should_return_ok_response_c
     assert returned_pipeline_param['Name'] == pipeline_param_def2.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_get_pipeline_param_by_pipeline_param_def_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_pipeline_param_by_pipeline_param_def_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id(test_client):
     response = test_client.get("/pipeline/" + str(pipeline2.ID) + "/param/" + pipeline_param2.PipelineParamDefID.strip())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -226,7 +234,7 @@ def test_get_pipeline_param_by_pipeline_param_def_id_should_return_not_found_res
                                 f"and pipeline param def with id = {pipeline_param2.PipelineParamDefID.strip()}")
 
 
-def test_get_pipeline_param_by_pipeline_param_def_id_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id():
+def test_get_pipeline_param_by_pipeline_param_def_id_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id(test_client):
     response = test_client.get("/pipeline/" + str(pipeline1.ID) + "/param/" + pipeline_param1.PipelineParamDefID.strip())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -234,8 +242,9 @@ def test_get_pipeline_param_by_pipeline_param_def_id_should_return_not_found_res
     assert error['message'] == 'No pipeline with id = ' + str(pipeline1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_update_pipeline_param_should_return_ok_response_code_and_pipeline_param_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_pipeline_param_should_return_ok_response_code_and_pipeline_param_of_given_id(test_client):
     update_pipeline_param_value = '2,3,4'
     response = test_client.put("/pipeline/" + str(pipeline1.ID) + "/param/" + pipeline_param2.PipelineParamDefID.strip(),
                                json=update_pipeline_param_value)
@@ -248,8 +257,9 @@ def test_update_pipeline_param_should_return_ok_response_code_and_pipeline_param
     assert returned_pipeline_param['Name'] == pipeline_param_def2.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_update_pipeline_param_should_return_not_found_response_code_and_error_when_no_pipeline_param_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_pipeline_param_should_return_not_found_response_code_and_error_when_no_pipeline_param_with_given_id(test_client):
     update_pipeline_param_value = '2,3,4'
     response = test_client.put("/pipeline/" + str(pipeline3.ID) + "/param/" + pipeline_param2.PipelineParamDefID.strip(),
                                json=update_pipeline_param_value)
@@ -260,7 +270,7 @@ def test_update_pipeline_param_should_return_not_found_response_code_and_error_w
                                     f"and pipeline param def with id = {pipeline_param2.PipelineParamDefID.strip()}")
 
 
-def test_update_pipeline_param_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id():
+def test_update_pipeline_param_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id(test_client):
     update_pipeline_param_value = '987.65'
     response = test_client.put("/pipeline/" + str(pipeline1.ID) + "/param/" + pipeline_param1.PipelineParamDefID.strip(),
                                json=update_pipeline_param_value)
@@ -270,8 +280,9 @@ def test_update_pipeline_param_should_return_not_found_response_code_and_error_w
     assert error['message'] == 'No pipeline with id = ' + str(pipeline1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_create_pipeline_param_should_return_created_response_code_and_created_pipeline_param(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_pipeline_param_should_return_created_response_code_and_created_pipeline_param(test_client):
     pipeline_param_dict = {'PipelineParamDefID': pipeline_param_def2.ID.strip(), 'Value': '1,2'}
     response = test_client.post("/pipeline/" + str(pipeline2.ID) + "/param", json=pipeline_param_dict)
     assert response.status_code == status.HTTP_201_CREATED
@@ -286,8 +297,9 @@ def test_create_pipeline_param_should_return_created_response_code_and_created_p
     assert pipeline_params_count == len(pipeline_param_list)+1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_create_pipeline_should_return_conflict_response_code_and_error_when_param_with_given_key_exists(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_pipeline_should_return_conflict_response_code_and_error_when_param_with_given_key_exists(test_client):
     pipeline_param_dict = {'PipelineParamDefID': pipeline_param_def1.ID.strip(), 'Value': '234.56'}
     response = test_client.post("/pipeline/" + str(pipeline1.ID) + "/param", json=pipeline_param_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
@@ -296,7 +308,7 @@ def test_create_pipeline_should_return_conflict_response_code_and_error_when_par
     assert error['message'] == 'Integrity error when creating pipeline param'
 
 
-def test_create_pipeline_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id():
+def test_create_pipeline_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id(test_client):
     pipeline_param_dict = {'PipelineParamDefID': pipeline_param_def1.ID.strip(), 'Value': '1111.11'}
     response = test_client.post("/pipeline/" + str(pipeline3.ID) + "/param", json=pipeline_param_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -305,8 +317,9 @@ def test_create_pipeline_should_return_not_found_response_code_and_error_when_no
     assert error['message'] == 'No pipeline with id = ' + str(pipeline3.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_delete_pipeline_param_by_id_should_return_no_content_response_code_and_remove_pipeline_param(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_pipeline_param_by_id_should_return_no_content_response_code_and_remove_pipeline_param(test_client):
     response = test_client.delete("/pipeline/" + str(pipeline1.ID) + "/param/" + pipeline_param_def1.ID.strip())
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -314,8 +327,9 @@ def test_delete_pipeline_param_by_id_should_return_no_content_response_code_and_
     assert pipelines_count == len(pipeline_list) - 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_pipeline_param_objects], indirect=True)
-def test_delete_pipeline_param_by_id_should_return_not_found_response_code_and_error_when_no_pipeline_param_for_given_ids(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_pipeline_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_pipeline_param_by_id_should_return_not_found_response_code_and_error_when_no_pipeline_param_for_given_ids(test_client):
     response = test_client.delete("/pipeline/" + str(pipeline3.ID) + "/param/" + pipeline_param_def1.ID.strip())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -324,7 +338,7 @@ def test_delete_pipeline_param_by_id_should_return_not_found_response_code_and_e
                                 + ' and pipeline param def with id = ' + pipeline_param_def1.ID.strip())
 
 
-def test_delete_pipeline_param_by_id_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id():
+def test_delete_pipeline_param_by_id_should_return_not_found_response_code_and_error_when_no_pipeline_with_given_id(test_client):
     response = test_client.delete("/pipeline/" + str(pipeline2.ID) + "/param/" + pipeline_param_def1.ID.strip())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()

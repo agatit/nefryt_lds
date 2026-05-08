@@ -4,8 +4,8 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from db import get_engine
 from api.routers.utils.security import get_user_token
 from database import lds
@@ -30,18 +30,15 @@ def reset_event_def_objects():
     return [event_def_list]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_event_defs_should_return_ok_response_code_and_empty_list_when_no_event_defs():
+def test_list_event_defs_should_return_ok_response_code_and_empty_list_when_no_event_defs(test_client):
     response = test_client.get("/event_def")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_list_event_defs_should_return_ok_response_code_and_correct_event_defs(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_event_defs_should_return_ok_response_code_and_correct_event_defs(test_client):
     response = test_client.get("/event_def")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -55,8 +52,9 @@ def test_list_event_defs_should_return_ok_response_code_and_correct_event_defs(a
         assert returned_event_def['Visible'] == expected_event_def.Visible
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_list_event_defs_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_event_defs_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 1
     page = 2
     response = test_client.get(f"/event_def?size={size}&page={page}")
@@ -70,8 +68,9 @@ def test_list_event_defs_should_return_ok_response_code_and_correct_page_data(ad
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_list_event_defs_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_event_defs_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/event_def")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -82,7 +81,7 @@ def test_list_event_defs_should_return_ok_response_code_and_default_page_data(ad
     assert response.json()['page'] == 1
 
 
-def test_create_event_def_should_return_created_response_code_and_created_event_def_data():
+def test_create_event_def_should_return_created_response_code_and_created_event_def_data(test_client):
     event_def_dict = {'ID': 'EVENT_DEF1', 'Verbosity': 'verbosity', 'Caption': 'caption',
                       'Silent': True, 'Visible': True, 'Enabled': True}
     response = test_client.post("/event_def", json=event_def_dict)
@@ -99,8 +98,9 @@ def test_create_event_def_should_return_created_response_code_and_created_event_
     assert event_defs_count == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_create_event_def_should_return_conflict_response_code_and_error_when_id_not_unique(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_event_def_should_return_conflict_response_code_and_error_when_id_not_unique(test_client):
     event_def_dict = {'ID': event_def1.ID, 'Verbosity': 'verbosity2', 'Caption': 'caption2',
                       'Silent': True, 'Visible': True, 'Enabled': True}
     response = test_client.post("/event_def", json=event_def_dict)
@@ -110,8 +110,9 @@ def test_create_event_def_should_return_conflict_response_code_and_error_when_id
     assert error['message'] == 'Integrity error when creating event def'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_delete_event_def_by_id_should_return_no_content_response_code_and_remove_event_def(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_event_def_by_id_should_return_no_content_response_code_and_remove_event_def(test_client):
     response = test_client.delete("/event_def/" + event_def1.ID)
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -119,7 +120,7 @@ def test_delete_event_def_by_id_should_return_no_content_response_code_and_remov
     assert event_defs_count == 1
 
 
-def test_delete_event_def_by_id_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id():
+def test_delete_event_def_by_id_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id(test_client):
     response = test_client.delete("/event_def/" + event_def1.ID)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -127,8 +128,9 @@ def test_delete_event_def_by_id_should_return_not_found_response_code_and_error_
     assert error['message'] == 'No event def with id = ' + event_def1.ID
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_get_event_def_by_id_should_return_ok_response_code_and_event_def_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_event_def_by_id_should_return_ok_response_code_and_event_def_of_given_id(test_client):
     response = test_client.get("/event_def/" + event_def1.ID)
     assert response.status_code == status.HTTP_200_OK
     returned_event_def = response.json()
@@ -140,7 +142,7 @@ def test_get_event_def_by_id_should_return_ok_response_code_and_event_def_of_giv
     assert returned_event_def['Visible'] == event_def1.Visible
 
 
-def test_get_event_def_by_id_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id():
+def test_get_event_def_by_id_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id(test_client):
     response = test_client.get("/event_def/" + event_def1.ID)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -148,8 +150,9 @@ def test_get_event_def_by_id_should_return_not_found_response_code_and_error_whe
     assert error['message'] == 'No event def with id = ' + event_def1.ID
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_def_objects], indirect=True)
-def test_update_event_def_should_return_ok_response_code_and_event_def_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_event_def_should_return_ok_response_code_and_event_def_of_given_id(test_client):
     update_event_def_dict = {'Verbosity': 'verbosity2', 'Caption': 'caption2',
                              'Silent': False, 'Visible': True, 'Enabled': False}
     response = test_client.put("/event_def/" + event_def1.ID, json=update_event_def_dict)
@@ -163,7 +166,7 @@ def test_update_event_def_should_return_ok_response_code_and_event_def_of_given_
     assert returned_event_def['Visible'] == update_event_def_dict['Visible']
 
 
-def test_update_event_def_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id():
+def test_update_event_def_should_return_not_found_response_code_and_error_when_no_event_def_with_given_id(test_client):
     update_event_def_dict = {'Verbosity': 'verbosity2', 'Caption': 'caption2',
                              'Silent': False, 'Visible': True, 'Enabled': False}
     response = test_client.put("/event_def/" + event_def1.ID, json=update_event_def_dict)

@@ -7,11 +7,6 @@ class EditorNode(SQLModel):
     PosY: int | None = Field(None)
 
 
-class LdsNode(SQLModel):
+class Node(SQLModel):
     Type: str = Field(sa_column=Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=False))
     Name: str | None = Field(None, sa_column=Column(String(50, 'SQL_Polish_CP1250_CS_AS')))
-
-
-class Node(LdsNode):
-    EditorParams: EditorNode | None = Field(None)
-    TrendID: int | None = Field(None)

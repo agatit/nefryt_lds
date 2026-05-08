@@ -32,7 +32,7 @@ async def get_simulation_data(simulation_id: Annotated[int, Path()],
                           message='No simulation param with id = \'LENGTH\' for simulation with id = ' + str(simulation_id))
             return JSONResponse(content=error.model_dump(), status_code=status.HTTP_404_NOT_FOUND)
 
-        distances = [distance for distance in range(0, int(lds_simulation_param.Value), lds_simulation.ResolutionMeters)]
+        distances = [distance for distance in range(0, int(float(lds_simulation_param.Value)), lds_simulation.ResolutionMeters)]
         statement = (select(lds.SimulationData)
                      .where(lds.SimulationData.SimulationID == literal(simulation_id)) # noqa
                      .order_by(lds.SimulationData.Distance))

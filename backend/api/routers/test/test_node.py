@@ -4,8 +4,8 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from db import get_engine
 from api.routers.utils.security import get_user_token
 from database import lds, editor
@@ -61,18 +61,15 @@ def reset_node_and_link_objects():
     return [lds_nodes_list, editor_nodes_list, [link]]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_nodes_should_return_ok_response_code_and_empty_list_when_no_nodes():
+def test_list_nodes_should_return_ok_response_code_and_empty_list_when_no_nodes(test_client):
     response = test_client.get("/node")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_list_nodes_should_return_ok_response_code_and_correct_nodes(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_node_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_nodes_should_return_ok_response_code_and_correct_nodes(test_client):
     response = test_client.get("/node")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -86,8 +83,9 @@ def test_list_nodes_should_return_ok_response_code_and_correct_nodes(add_lds_obj
         assert returned_node['EditorParams']['PosY'] == expected_editor_node.PosY
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_list_nodes_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_node_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_nodes_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 5
     page = 2
     response = test_client.get(f"/node?size={size}&page={page}")
@@ -101,8 +99,9 @@ def test_list_nodes_should_return_ok_response_code_and_correct_page_data(add_lds
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_list_nodes_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_node_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_nodes_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/node")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -113,8 +112,9 @@ def test_list_nodes_should_return_ok_response_code_and_default_page_data(add_lds
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_list_nodes_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_node_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_nodes_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID gt {lds_node1.ID} and ID lt {lds_node3.ID}'
     response = test_client.get(f"/node?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -128,7 +128,7 @@ def test_list_nodes_should_return_ok_response_code_and_data_filtered_by_odata_qu
     assert returned_node['EditorParams']['PosY'] == editor_node2.PosY
 
 
-def test_create_node_should_return_created_response_code_and_created_node_data():
+def test_create_node_should_return_created_response_code_and_created_node_data(test_client):
     node_dict = {'Type': 'type', 'Name': 'name', 'EditorParams': {'PosX': 22, 'PosY': 122}}
     response = test_client.post("/node", json=node_dict)
     assert response.status_code == status.HTTP_201_CREATED
@@ -145,8 +145,9 @@ def test_create_node_should_return_created_response_code_and_created_node_data()
     assert editor_nodes_count == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_delete_node_by_id_should_return_no_content_response_code_and_remove_node(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_node_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_node_by_id_should_return_no_content_response_code_and_remove_node(test_client):
     response = test_client.delete("/node/" + str(lds_node1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -156,8 +157,9 @@ def test_delete_node_by_id_should_return_no_content_response_code_and_remove_nod
     assert editor_nodes_count == len(editor_nodes_list) - 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_and_link_objects], indirect=True)
-def test_delete_node_by_id_should_return_conflict_response_code_and_error_when_node_used_in_link_record(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_node_and_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_node_by_id_should_return_conflict_response_code_and_error_when_node_used_in_link_record(test_client):  # noqa
     response = test_client.delete("/node/" + str(lds_node1.ID))
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()
@@ -165,7 +167,7 @@ def test_delete_node_by_id_should_return_conflict_response_code_and_error_when_n
     assert error['message'] == 'Integrity error when deleting node with id = ' + str(lds_node1.ID)
 
 
-def test_delete_node_by_id_should_return_not_found_response_code_and_error_when_no_node_with_given_id():
+def test_delete_node_by_id_should_return_not_found_response_code_and_error_when_no_node_with_given_id(test_client):
     response = test_client.delete("/node/" + str(lds_node1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -173,8 +175,9 @@ def test_delete_node_by_id_should_return_not_found_response_code_and_error_when_
     assert error['message'] == 'No node with id = ' + str(lds_node1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_get_node_by_id_should_return_ok_response_code_and_node_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_node_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_node_by_id_should_return_ok_response_code_and_node_of_given_id(test_client):
     response = test_client.get("/node/" + str(lds_node1.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_node = response.json()
@@ -185,7 +188,7 @@ def test_get_node_by_id_should_return_ok_response_code_and_node_of_given_id(add_
     assert returned_node['EditorParams']['PosY'] == editor_node1.PosY
 
 
-def test_get_node_by_id_should_return_not_found_response_code_and_error_when_no_node_with_given_id():
+def test_get_node_by_id_should_return_not_found_response_code_and_error_when_no_node_with_given_id(test_client):
     response = test_client.get("/node/" + str(lds_node1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -193,8 +196,9 @@ def test_get_node_by_id_should_return_not_found_response_code_and_error_when_no_
     assert error['message'] == 'No node with id = ' + str(lds_node1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_update_node_should_return_ok_response_code_and_node_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_node_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_node_should_return_ok_response_code_and_node_of_given_id(test_client):
     updated_node_dict = {'Type': 'type2', 'Name': 'name2', 'EditorParams': {'PosX': 150, 'PosY': -150}}
     response = test_client.put("/node/" + str(lds_node1.ID), json=updated_node_dict)
     assert response.status_code == status.HTTP_200_OK
@@ -206,7 +210,7 @@ def test_update_node_should_return_ok_response_code_and_node_of_given_id(add_lds
     assert returned_node['EditorParams']['PosY'] == updated_node_dict['EditorParams']['PosY']
 
 
-def test_update_node_should_return_not_found_response_code_and_error_when_no_node_with_given_id():
+def test_update_node_should_return_not_found_response_code_and_error_when_no_node_with_given_id(test_client):
     updated_node_dict = {'Type': 'type2', 'Name': 'name2', 'EditorParams': {'PosX': 150, 'PosY': -150}}
     response = test_client.put("/node/" + str(lds_node1.ID), json=updated_node_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND

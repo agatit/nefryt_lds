@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from sqlmodel import select
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 from db import get_engine
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from api.routers.utils.security import get_user_token
 from database import lds
 import pytest
@@ -111,19 +111,17 @@ def reset_simulation_param_objects():
             simulation_param_list]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_list_simulation_param_defs_should_return_ok_response_code_and_empty_list_when_no_simulation_param_defs(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_param_defs_should_return_ok_response_code_and_empty_list_when_no_simulation_param_defs(test_client):
     response = test_client.get("/simulation/param/def")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_simulation_param_defs(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_simulation_param_defs(test_client):
     response = test_client.get("/simulation/param/def")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -135,8 +133,9 @@ def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_s
         assert returned_simulation_param_def['DataType'] == expected_simulation_param_def.DataType
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 2
     page = 2
     response = test_client.get(f"/simulation/param/def?size={size}&page={page}")
@@ -150,8 +149,9 @@ def test_list_simulation_param_defs_should_return_ok_response_code_and_correct_p
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_simulation_param_defs_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_param_defs_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/simulation/param/def")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -162,8 +162,9 @@ def test_list_simulation_param_defs_should_return_ok_response_code_and_default_p
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_simulation_param_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_param_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'DataType ne \'{simulation_param_def1.DataType}\''
     response = test_client.get(f"/simulation/param/def?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -176,14 +177,15 @@ def test_list_simulation_param_defs_should_return_ok_response_code_and_data_filt
     assert returned_simulation_param_def['DataType'] == simulation_param_def2.DataType
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_empty_list_when_no_simulation_params_for_given_simulation_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_empty_list_when_no_simulation_params_for_given_simulation_id(test_client):  # noqa
     response = test_client.get("/simulation/" + str(simulation1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-def test_list_simulation_params_by_simulation_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_list_simulation_params_by_simulation_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     response = test_client.get("/simulation/" + str(simulation2.ID) + "/param")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -191,8 +193,9 @@ def test_list_simulation_params_by_simulation_id_should_return_not_found_respons
     assert error['message'] == 'No simulation with id = ' + str(simulation2.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_simulation_params_for_given_simulation_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_simulation_params_for_given_simulation_id(test_client):
     response = test_client.get("/simulation/" + str(simulation1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -207,8 +210,9 @@ def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_
         assert returned_simulation_param['Name'] == expected_simulation_param_def.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 1
     page = 2
     response = test_client.get("/simulation/" + str(simulation1.ID) + f"/param?size={size}&page={page}")
@@ -222,8 +226,9 @@ def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/simulation/" + str(simulation1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -234,8 +239,9 @@ def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'SimulationParamDefID eq \'{simulation_param2.SimulationParamDefID.strip()}\''
     response = test_client.get("/simulation/" + str(simulation1.ID) + f"/param?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -249,14 +255,15 @@ def test_list_simulation_params_by_simulation_id_should_return_ok_response_code_
     assert returned_simulation_param['Name'] == simulation_param_def2.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_empty_list_when_no_simulation_params_for_given_simulation_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_empty_list_when_no_simulation_params_for_given_simulation_id(test_client):  # noqa
     response = test_client.get("/simulation/" + str(simulation2.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-def test_list_required_simulation_params_by_simulation_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_list_required_simulation_params_by_simulation_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     response = test_client.get("/simulation/" + str(simulation2.ID) + "/param/all")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -264,8 +271,9 @@ def test_list_required_simulation_params_by_simulation_id_should_return_not_foun
     assert error['message'] == 'No simulation with id = ' + str(simulation2.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_simulation_params_for_given_simulation_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_simulation_params_for_given_simulation_id(test_client):
     response = test_client.get("/simulation/" + str(simulation4.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -280,8 +288,9 @@ def test_list_required_simulation_params_by_simulation_id_should_return_ok_respo
         assert returned_simulation_param['Name'] == expected_simulation_param_def.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 1
     page = 2
     response = test_client.get("/simulation/" + str(simulation4.ID) + f"/param/all?size={size}&page={page}")
@@ -295,8 +304,9 @@ def test_list_required_simulation_params_by_simulation_id_should_return_ok_respo
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/simulation/" + str(simulation4.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -307,8 +317,9 @@ def test_list_required_simulation_params_by_simulation_id_should_return_ok_respo
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_simulation_params_by_simulation_id_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID eq \'{simulation_param2.SimulationParamDefID.strip()}\''
     response = test_client.get("/simulation/" + str(simulation4.ID) + f"/param/all?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -322,8 +333,9 @@ def test_list_required_simulation_params_by_simulation_id_should_return_ok_respo
     assert returned_simulation_param['Name'] == simulation_param_def2.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_get_simulation_param_by_simulation_param_def_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_simulation_param_by_simulation_param_def_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(test_client):  # noqa
     response = test_client.get("/simulation/" + str(simulation1.ID) + "/param/" + simulation_param1.SimulationParamDefID.strip())
     assert response.status_code == status.HTTP_200_OK
     returned_simulation_param = response.json()
@@ -334,8 +346,9 @@ def test_get_simulation_param_by_simulation_param_def_id_should_return_ok_respon
     assert returned_simulation_param['Name'] == simulation_param_def1.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_get_simulation_param_by_simulation_param_def_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_simulation_param_by_simulation_param_def_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id(test_client):
     response = test_client.get("/simulation/" + str(simulation2.ID) + "/param/" + simulation_param1.SimulationParamDefID.strip())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -344,7 +357,7 @@ def test_get_simulation_param_by_simulation_param_def_id_should_return_not_found
                                 f"and simulation param def with id = {simulation_param1.SimulationParamDefID.strip()}")
 
 
-def test_get_simulation_param_by_simulation_param_def_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_get_simulation_param_by_simulation_param_def_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     response = test_client.get("/simulation/" + str(simulation1.ID) + "/param/" + simulation_param1.SimulationParamDefID.strip())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -352,8 +365,9 @@ def test_get_simulation_param_by_simulation_param_def_id_should_return_not_found
     assert error['message'] == 'No simulation with id = ' + str(simulation1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_update_simulation_param_should_return_ok_response_code_and_simulation_param_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_simulation_param_should_return_ok_response_code_and_simulation_param_of_given_id(test_client):
     update_simulation_param_value = '1234'
     response = test_client.put("/simulation/" + str(simulation1.ID) + "/param/" + simulation_param2.SimulationParamDefID.strip(),
                                json=update_simulation_param_value)
@@ -366,8 +380,9 @@ def test_update_simulation_param_should_return_ok_response_code_and_simulation_p
     assert returned_simulation_param['Name'] == simulation_param_def2.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_update_simulation_param_should_return_not_found_response_code_and_error_when_no_simulation_param_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_simulation_param_should_return_not_found_response_code_and_error_when_no_simulation_param_with_given_id(test_client):
     update_simulation_param_value = '888'
     response = test_client.put("/simulation/" + str(simulation2.ID) + "/param/" + simulation_param2.SimulationParamDefID.strip(),
                                json=update_simulation_param_value)
@@ -378,7 +393,7 @@ def test_update_simulation_param_should_return_not_found_response_code_and_error
                                     f"and simulation param def with id = {simulation_param2.SimulationParamDefID.strip()}")
 
 
-def test_update_simulation_param_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_update_simulation_param_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     update_simulation_param_value = '888'
     response = test_client.put(
         "/simulation/" + str(simulation1.ID) + "/param/" + simulation_param1.SimulationParamDefID.strip(),
@@ -389,8 +404,9 @@ def test_update_simulation_param_should_return_not_found_response_code_and_error
     assert error['message'] == 'No simulation with id = ' + str(simulation1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_create_simulation_param_should_return_created_response_code_and_created_simulation_param(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_simulation_param_should_return_created_response_code_and_created_simulation_param(test_client):
     simulation_param_dict = {'SimulationParamDefID': simulation_param_def2.ID.strip(), 'Value': '1111'}
     response = test_client.post("/simulation/" + str(simulation3.ID) + "/param", json=simulation_param_dict)
     assert response.status_code == status.HTTP_201_CREATED
@@ -405,8 +421,9 @@ def test_create_simulation_param_should_return_created_response_code_and_created
     assert simulation_params_count == len(simulation_param_list)+1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_create_simulation_should_return_conflict_response_code_and_error_when_param_with_given_key_exists(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_simulation_should_return_conflict_response_code_and_error_when_param_with_given_key_exists(test_client):
     simulation_param_dict = {'SimulationParamDefID': simulation_param_def2.ID.strip(), 'Value': '1111'}
     response = test_client.post("/simulation/" + str(simulation1.ID) + "/param", json=simulation_param_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
@@ -415,7 +432,7 @@ def test_create_simulation_should_return_conflict_response_code_and_error_when_p
     assert error['message'] == 'Integrity error when creating simulation param'
 
 
-def test_create_simulation_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_create_simulation_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     simulation_param_dict = {'SimulationParamDefID': simulation_param_def2.ID.strip(), 'Value': '1111'}
     response = test_client.post("/simulation/" + str(simulation1.ID) + "/param", json=simulation_param_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -424,8 +441,9 @@ def test_create_simulation_should_return_not_found_response_code_and_error_when_
     assert error['message'] == 'No simulation with id = ' + str(simulation1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_delete_simulation_param_by_id_should_return_no_content_response_code_and_remove_simulation_param(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_simulation_param_by_id_should_return_no_content_response_code_and_remove_simulation_param(test_client):
     response = test_client.delete("/simulation/" + str(simulation1.ID) + "/param/" + simulation_param_def1.ID.strip())
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -433,8 +451,9 @@ def test_delete_simulation_param_by_id_should_return_no_content_response_code_an
     assert simulations_count == len(simulation_param_list) - 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_param_objects], indirect=True)
-def test_delete_simulation_param_by_id_should_return_not_found_response_code_and_error_when_no_simulation_param_for_given_ids(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_param_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_simulation_param_by_id_should_return_not_found_response_code_and_error_when_no_simulation_param_for_given_ids(test_client):
     response = test_client.delete("/simulation/" + str(simulation3.ID) + "/param/" + simulation_param_def2.ID.strip())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -443,7 +462,7 @@ def test_delete_simulation_param_by_id_should_return_not_found_response_code_and
                                 + ' and simulation param def with id = ' + simulation_param_def2.ID.strip())
 
 
-def test_delete_simulation_param_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_delete_simulation_param_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     response = test_client.delete("/simulation/" + str(simulation2.ID) + "/param/" + simulation_param_def1.ID.strip())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()

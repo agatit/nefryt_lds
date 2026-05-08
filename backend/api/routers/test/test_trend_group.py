@@ -4,8 +4,8 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from db import get_engine
 from api.routers.utils.security import get_user_token
 from database import lds
@@ -30,18 +30,15 @@ def reset_trend_group_objects():
     return [[trend_def], trend_groups_list, [unit], [trend]]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_trend_groups_should_return_ok_response_code_and_empty_list_when_no_trend_groups():
+def test_list_trend_groups_should_return_ok_response_code_and_empty_list_when_no_trend_groups(test_client):
     response = test_client.get("/trend_group")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_list_trend_groups_should_return_ok_response_code_and_correct_trend_groups(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_groups_should_return_ok_response_code_and_correct_trend_groups(test_client):
     response = test_client.get("/trend_group")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -52,8 +49,9 @@ def test_list_trend_groups_should_return_ok_response_code_and_correct_trend_grou
         assert returned_trend_group['AnalysisOnly'] == expected_trend_group.AnalysisOnly
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_list_trend_groups_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_groups_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 1
     page = 1
     response = test_client.get(f"/trend_group?size={size}&page={page}")
@@ -67,8 +65,9 @@ def test_list_trend_groups_should_return_ok_response_code_and_correct_page_data(
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_list_trend_groups_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_groups_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/trend_group")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -79,8 +78,9 @@ def test_list_trend_groups_should_return_ok_response_code_and_default_page_data(
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_list_trend_groups_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_groups_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID eq {trend_group1.ID}'
     response = test_client.get(f"/trend_group?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -92,8 +92,9 @@ def test_list_trend_groups_should_return_ok_response_code_and_data_filtered_by_o
     assert returned_trend_group['AnalysisOnly'] == trend_group1.AnalysisOnly
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_create_trend_group_should_return_created_response_code_and_created_trend_group_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_trend_group_should_return_created_response_code_and_created_trend_group_data(test_client):
     trend_group_dict = {'Name': 'Group 3', 'AnalysisOnly': True}
     response = test_client.post("/trend_group", json=trend_group_dict)
     assert response.status_code == status.HTTP_201_CREATED
@@ -106,8 +107,9 @@ def test_create_trend_group_should_return_created_response_code_and_created_tren
     assert trend_groups_count == len(trend_groups_list) + 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_delete_trend_group_by_id_should_return_no_content_response_code_and_remove_trend_group(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_trend_group_by_id_should_return_no_content_response_code_and_remove_trend_group(test_client):
     response = test_client.delete("/trend_group/" + str(trend_group2.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -115,7 +117,7 @@ def test_delete_trend_group_by_id_should_return_no_content_response_code_and_rem
     assert trend_groups_count == len(trend_groups_list) - 1
 
 
-def test_delete_trend_group_by_id_should_return_not_found_response_code_and_error_when_no_trend_group_with_given_id():
+def test_delete_trend_group_by_id_should_return_not_found_response_code_and_error_when_no_trend_group_with_given_id(test_client):
     response = test_client.delete("/trend_group/" + str(trend_group1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -123,8 +125,9 @@ def test_delete_trend_group_by_id_should_return_not_found_response_code_and_erro
     assert error['message'] == 'No trend group with id = ' + str(trend_group1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_delete_trend_group_by_id_should_return_conflict_response_code_and_error_when_exist_trends_with_given_trend_group_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_trend_group_by_id_should_return_conflict_response_code_and_error_when_exist_trends_with_given_trend_group_id(test_client):
     response = test_client.delete("/trend_group/" + str(trend_group1.ID))
     assert response.status_code == status.HTTP_409_CONFLICT
     error = response.json()
@@ -132,8 +135,9 @@ def test_delete_trend_group_by_id_should_return_conflict_response_code_and_error
     assert error['message'] == 'Integrity error when deleting trend group with id = ' + str(trend_group1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_get_trend_group_by_id_should_return_ok_response_code_and_trend_group_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_group_by_id_should_return_ok_response_code_and_trend_group_of_given_id(test_client):
     response = test_client.get("/trend_group/" + str(trend_group2.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_trend_group = response.json()
@@ -142,7 +146,7 @@ def test_get_trend_group_by_id_should_return_ok_response_code_and_trend_group_of
     assert returned_trend_group['AnalysisOnly'] == trend_group2.AnalysisOnly
 
 
-def test_get_trend_group_by_id_should_return_not_found_response_code_and_error_when_no_trend_group_with_given_id():
+def test_get_trend_group_by_id_should_return_not_found_response_code_and_error_when_no_trend_group_with_given_id(test_client):
     response = test_client.get("/trend_group/" + str(trend_group2.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -150,8 +154,9 @@ def test_get_trend_group_by_id_should_return_not_found_response_code_and_error_w
     assert error['message'] == 'No trend group with id = ' + str(trend_group2.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_group_objects], indirect=True)
-def test_update_trend_group_should_return_ok_response_code_and_trend_group_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_group_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_trend_group_should_return_ok_response_code_and_trend_group_of_given_id(test_client):
     updated_trend_group_dict = {'Name': 'UpdatedGroup2', 'AnalysisOnly': False}
     response = test_client.put("/trend_group/" + str(trend_group2.ID), json=updated_trend_group_dict)
     assert response.status_code == status.HTTP_200_OK
@@ -161,7 +166,7 @@ def test_update_trend_group_should_return_ok_response_code_and_trend_group_of_gi
     assert returned_trend_group['AnalysisOnly'] == updated_trend_group_dict['AnalysisOnly']
 
 
-def test_update_trend_group_should_return_not_found_response_code_and_error_when_no_trend_group_with_given_id():
+def test_update_trend_group_should_return_not_found_response_code_and_error_when_no_trend_group_with_given_id(test_client):
     updated_trend_group_dict = {'Name': 'UpdatedGroup2', 'AnalysisOnly': False}
     response = test_client.put("/trend_group/" + str(trend_group2.ID), json=updated_trend_group_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND

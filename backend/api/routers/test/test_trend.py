@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
 from api.routers.utils.security import get_user_token
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from db import get_engine
 from database import lds
 import pytest
@@ -85,18 +85,15 @@ def reset_trend_def_objects():
     return [trend_def_list, [trend_group], [unit]]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_trends_should_return_ok_response_code_and_empty_list_when_no_trends():
+def test_list_trends_should_return_ok_response_code_and_empty_list_when_no_trends(test_client):
     response = test_client.get("/trend")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trends_should_return_ok_response_code_and_correct_trends(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trends_should_return_ok_response_code_and_correct_trends(test_client):
     response = test_client.get("/trend")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -120,8 +117,9 @@ def test_list_trends_should_return_ok_response_code_and_correct_trends(add_lds_o
         assert returned_trend['Enabled'] == expected_trend.Enabled
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trends_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trends_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 1
     page = 1
     response = test_client.get(f"/trend?size={size}&page={page}")
@@ -135,8 +133,9 @@ def test_list_trends_should_return_ok_response_code_and_correct_page_data(add_ld
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trends_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trends_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/trend")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -147,8 +146,9 @@ def test_list_trends_should_return_ok_response_code_and_default_page_data(add_ld
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trends_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trends_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID gt {trend1.ID} and ID lt {trend3.ID}'
     response = test_client.get(f"/trend?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -173,8 +173,9 @@ def test_list_trends_should_return_ok_response_code_and_data_filtered_by_odata_q
     assert returned_trend['Enabled'] == trend2.Enabled
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
-def test_create_trend_should_return_created_response_code_and_created_trend_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_trend_should_return_created_response_code_and_created_trend_data(test_client):
     trend_dict = {'TrendDefID': 'ID_1', 'RawMin': 100,
                   'RawMax': 1000, 'ScaledMin': -1.5, 'ScaledMax': 2.25,
                   'UnitID': unit.ID, 'TrendGroupID': trend_group.ID, 'Color': 'Blue', 'Name': 'New trend'}
@@ -202,8 +203,9 @@ def test_create_trend_should_return_created_response_code_and_created_trend_data
     assert trends_count == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
-def test_create_trend_should_return_unprocessable_entity_response_code_when_model_condition_not_met(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_trend_should_return_unprocessable_entity_response_code_when_model_condition_not_met(test_client):
     trend_dict = {'TrendDefID': 'ID_1', 'RawMin': 100,
                   'RawMax': 100, 'ScaledMin': -1.5, 'ScaledMax': 2.25,
                   'UnitID': unit.ID, 'TrendGroupID': trend_group.ID, 'Color': 'Blue', 'Name': 'New trend'}
@@ -223,7 +225,7 @@ def test_create_trend_should_return_unprocessable_entity_response_code_when_mode
     assert error['message'] == 'ScaledMin must be smaller than ScaledMax'
 
 
-def test_create_trend_should_return_conflict_response_code_and_error_when_no_trend_def_with_given_id():
+def test_create_trend_should_return_conflict_response_code_and_error_when_no_trend_def_with_given_id(test_client):
     trend_dict = {'ID': 1, 'TrendDefID': 'ID_1', 'RawMin': 100,
                   'RawMax': 1000, 'ScaledMin': -1.5, 'ScaledMax': 2.25,
                   'UnitID': unit.ID, 'TrendGroupID': trend_group.ID, 'Color': 'Blue', 'Name': 'New trend'}
@@ -234,8 +236,9 @@ def test_create_trend_should_return_conflict_response_code_and_error_when_no_tre
     assert error['message'] == 'Integrity error when creating trend'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_delete_trend_by_id_should_return_no_content_response_code_and_remove_trend(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_trend_by_id_should_return_no_content_response_code_and_remove_trend(test_client):
     response = test_client.delete("/trend/" + str(trend1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -243,7 +246,7 @@ def test_delete_trend_by_id_should_return_no_content_response_code_and_remove_tr
     assert trends_count == len(trend_list) - 1
 
 
-def test_delete_trend_by_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_delete_trend_by_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id(test_client):
     response = test_client.delete("/trend/" + str(trend1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -251,8 +254,9 @@ def test_delete_trend_by_id_should_return_not_found_response_code_and_error_when
     assert error['message'] == 'No trend with id = ' + str(trend1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_by_id_should_return_ok_response_code_and_trend_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_by_id_should_return_ok_response_code_and_trend_of_given_id(test_client):
     response = test_client.get("/trend/" + str(trend1.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_trend = response.json()
@@ -274,7 +278,7 @@ def test_get_trend_by_id_should_return_ok_response_code_and_trend_of_given_id(ad
     assert returned_trend['Enabled'] == trend1.Enabled
 
 
-def test_get_trend_by_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_get_trend_by_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id(test_client):
     response = test_client.get("/trend/" + str(trend1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -282,8 +286,9 @@ def test_get_trend_by_id_should_return_not_found_response_code_and_error_when_no
     assert error['message'] == 'No trend with id = ' + str(trend1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_update_trend_should_return_ok_response_code_and_trend_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_trend_should_return_ok_response_code_and_trend_of_given_id(test_client):
     update_trend_dict = {'TrendDefID': 'ID_1', 'RawMin': 100, 'RawMax': 1500,
                          'ScaledMin': 1.3, 'ScaledMax': 9.99}
     response = test_client.put("/trend/" + str(trend2.ID), json=update_trend_dict)
@@ -307,8 +312,9 @@ def test_update_trend_should_return_ok_response_code_and_trend_of_given_id(add_l
     assert returned_trend['Enabled'] == trend2.Enabled
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_update_trend_should_return_unprocessable_entity_response_code_when_model_condition_not_met(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_trend_should_return_unprocessable_entity_response_code_when_model_condition_not_met(test_client):
     update_trend_dict = {'RawMax': 0}
     response = test_client.put("/trend/" + str(trend2.ID), json=update_trend_dict)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -324,7 +330,7 @@ def test_update_trend_should_return_unprocessable_entity_response_code_when_mode
     assert error['message'] == 'ScaledMin must be smaller than ScaledMax'
 
 
-def test_update_trend_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_update_trend_should_return_not_found_response_code_and_error_when_no_trend_with_given_id(test_client):
     update_trend_dict = {'TrendDefID': 'ID_1', 'RawMin': 100, 'RawMax': 1500,
                          'ScaledMin': 1.3, 'ScaledMax': 9.99}
     response = test_client.put("/trend/" + str(trend2.ID), json=update_trend_dict)
@@ -334,8 +340,9 @@ def test_update_trend_should_return_not_found_response_code_and_error_when_no_tr
     assert error['message'] == 'No trend with id = ' + str(trend2.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_enable_trend_should_return_no_content_response_code_and_change_trend_enabled_flag(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_enable_trend_should_return_no_content_response_code_and_change_trend_enabled_flag(test_client):
     response = test_client.put("/trend/" + str(trend1.ID) + "/enable")
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -349,7 +356,7 @@ def test_enable_trend_should_return_no_content_response_code_and_change_trend_en
     assert trend.Enabled is trend1.Enabled
 
 
-def test_enable_trend_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_enable_trend_should_return_not_found_response_code_and_error_when_no_trend_with_given_id(test_client):
     response = test_client.put("/trend/" + str(trend1.ID) + "/enable")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()

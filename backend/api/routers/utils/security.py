@@ -4,13 +4,14 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt import InvalidTokenError, InvalidSignatureError, ExpiredSignatureError
 import jwt
+from pwdlib import PasswordHash
 from passlib.context import CryptContext
 from starlette import status
 from ...schemas import api
 
 SECRET_KEY = "45bfa25ea5ae73f9f46909ac22e5ff72d51362129e210e3bc2c728957ee18230"
 ALGORITHM = "HS256"
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+password_hash = PasswordHash.recommended()
 security = HTTPBearer(auto_error=False)
 _iss = 'https://api.nefrytlds.local/'
 
@@ -74,7 +75,7 @@ def get_refresh_token(user_credentials: Annotated[HTTPAuthorizationCredentials, 
     return decoded_token
 
 
-def decode_token(encoded_token: str) -> dict:
+def decode_token(encoded_token: str | bytes) -> dict:
     return jwt.decode(encoded_token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
@@ -98,8 +99,8 @@ def prepare_login_permissions(username: str, permissions: list[str], success: bo
 
 
 def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)
+    return password_hash.verify(plain_password, hashed_password)
 
 
 def hash_password(password: str):
-    return pwd_context.hash(password)
+    return password_hash.hash(password)

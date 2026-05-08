@@ -7,7 +7,7 @@ dependencies = [
     "alembic==1.15.2",
     "bcrypt==4.0.1",
     "connexion[swagger-ui]>=2.6.0",
-    "fastapi==0.115.12",
+    "fastapi>=0.115.12",
     "fastapi-pagination==0.12.34",
     "flask==2.1.0",
     "flask-cors>=3.0.10",

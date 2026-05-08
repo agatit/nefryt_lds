@@ -4,8 +4,9 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from starlette import status
 from starlette.testclient import TestClient
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+from conftest import test_client
+from api.app import init_app
 from api.routers.utils.security import SECRET_KEY, ALGORITHM
 
 
@@ -23,10 +24,8 @@ token_data = {
     'perms': ['confirm', 'refresh']
 }
 
-test_client = TestClient(app)
 
-
-def test_auth_login_should_return_ok_response_code_and_correct_login_permissions_data_for_guest():
+def test_auth_login_should_return_ok_response_code_and_correct_login_permissions_data_for_guest(test_client):
     response = test_client.post("/auth/login", json=login_data1)
     assert response.status_code == status.HTTP_200_OK
     login_permissions = response.json()
@@ -37,7 +36,7 @@ def test_auth_login_should_return_ok_response_code_and_correct_login_permissions
     assert login_permissions['permissions'] == []
 
 
-def test_auth_login_should_return_ok_response_code_and_correct_login_permissions_data_for_admin():
+def test_auth_login_should_return_ok_response_code_and_correct_login_permissions_data_for_admin(test_client):
     response = test_client.post("/auth/login", json=login_data2)
     assert response.status_code == status.HTTP_200_OK
     login_permissions = response.json()
@@ -48,7 +47,7 @@ def test_auth_login_should_return_ok_response_code_and_correct_login_permissions
     assert set(login_permissions['permissions']) == {'admin', 'confirm'}
 
 
-def test_auth_login_should_return_ok_response_code_and_correct_tokens():
+def test_auth_login_should_return_ok_response_code_and_correct_tokens(test_client):
     response = test_client.post("/auth/login", json=login_data2)
     assert response.status_code == status.HTTP_200_OK
     token = jwt.decode(response.json()['token'], SECRET_KEY, algorithms=[ALGORITHM])
@@ -61,7 +60,7 @@ def test_auth_login_should_return_ok_response_code_and_correct_tokens():
     assert datetime.fromtimestamp(refresh_token['exp']) - datetime.now() <= timedelta(hours=24)
 
 
-def test_auth_refresh_should_return_ok_response_code_and_correct_login_permissions_data():
+def test_auth_refresh_should_return_ok_response_code_and_correct_login_permissions_data(test_client):
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     header = {"Authorization": f"Bearer {encoded_token}"}
     response = test_client.post("/auth/refresh", headers=header)
@@ -74,7 +73,7 @@ def test_auth_refresh_should_return_ok_response_code_and_correct_login_permissio
     assert set(login_permissions['permissions']) == set([perm for perm in token_data['perms'] if perm != 'refresh'])
 
 
-def test_auth_refresh_should_return_ok_response_code_and_correct_tokens():
+def test_auth_refresh_should_return_ok_response_code_and_correct_tokens(test_client):
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     header = {"Authorization": f"Bearer {encoded_token}"}
     response = test_client.post("/auth/refresh", headers=header)
@@ -89,7 +88,7 @@ def test_auth_refresh_should_return_ok_response_code_and_correct_tokens():
     assert datetime.fromtimestamp(refresh_token['exp']) - datetime.now() <= timedelta(hours=24)
 
 
-def test_auth_refresh_should_return_bad_request_response_code_and_error_when_token_is_invalid():
+def test_auth_refresh_should_return_bad_request_response_code_and_error_when_token_is_invalid(test_client):
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     header = {"Authorization": f"Bearer {encoded_token}1"}
     response = test_client.post("/auth/refresh", headers=header)
@@ -99,7 +98,7 @@ def test_auth_refresh_should_return_bad_request_response_code_and_error_when_tok
     assert error['message'] == 'Invalid token'
 
 
-def test_auth_refresh_should_return_unauthorized_response_code_when_header_is_invalid():
+def test_auth_refresh_should_return_unauthorized_response_code_when_header_is_invalid(test_client):
     encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
     header = {"Authorization": f"Bear {encoded_token}"}
     response = test_client.post("/auth/refresh", headers=header)

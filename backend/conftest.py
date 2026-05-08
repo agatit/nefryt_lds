@@ -142,21 +142,6 @@ def setup_test_database(request):
 
     cleanup_processes_after_tests()
 
-@pytest.fixture(scope="function")
-def reset_lds_objects(request):
-    return request.param()
-
-
-@pytest.fixture(scope="function")
-def add_lds_objects(reset_lds_objects):
-    lds_objects = reset_lds_objects
-    with Session(get_engine()) as session:
-        for lds_objects_list in lds_objects:
-            session.add_all(lds_objects_list)
-            session.commit()
-        for lds_object in (obj for sublist in lds_objects for obj in sublist):
-            session.refresh(lds_object)
-
 
 @pytest.fixture(autouse=True)
 def reset_db_status():

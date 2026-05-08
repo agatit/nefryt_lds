@@ -35,7 +35,7 @@ class MethodParamDef(SQLModel, table=True):
     DataType: str | None = Field(None, sa_column=Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS'), nullable=True))
 
 
-class Node(base.LdsNode, table=True):
+class Node(base.Node, table=True):
     __tablename__ = 'Node'
     __table_args__ = (
         {'schema': 'lds'}

@@ -6,8 +6,8 @@ from unittest.mock import patch
 from starlette import status
 from starlette.testclient import TestClient
 from api.routers.utils.security import get_user_token
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from database import lds
 import pytest
 
@@ -115,12 +115,9 @@ def reset_trend_objects_with_partial_child_data():
     return [trend_def_list, [trend_group], [unit], trend_list, trend_data_list]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_equal_to_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_equal_to_time_delta(test_client):  # noqa
     samples = 3
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
@@ -133,8 +130,9 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
         assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, 0)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_higher_than_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_higher_than_time_delta(test_client):  # noqa
     samples = 9
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
@@ -149,8 +147,9 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
         assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_lower_than_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_lower_than_time_delta(test_client):  # noqa
     samples = 2
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
@@ -165,8 +164,9 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
         assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(test_client):  # noqa
     samples = 5
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time+0.5) +
                                "/" + str(trend_data3.Time+0.5) + "/" + str(samples))
@@ -181,8 +181,9 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
         assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(test_client):  # noqa
     samples = 4
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time + 1) + "/" + str(samples))
@@ -199,8 +200,9 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
             assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trends_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trends_exists(test_client):  # noqa
     samples = 2
     response = test_client.get("/trend/" + str(trend2.ID) + ",10/data/" + str(trend_data4.Time) +
                                "/" + str(trend_data4.Time) + "/" + str(samples))
@@ -214,8 +216,9 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_trend_data_wh
         assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend2, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_correct_page_data(test_client):
     samples = 3
     size = 2
     page = 2
@@ -230,8 +233,9 @@ def test_get_trend_data_should_return_ok_response_code_and_correct_page_data(add
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_default_page_data(test_client):
     samples = 3
     response = test_client.get("/trend/" + str(trend1.ID) + "/data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
@@ -244,8 +248,9 @@ def test_get_trend_data_should_return_ok_response_code_and_default_page_data(add
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_ok_response_code_and_only_null_values_when_page_data_not_include_any_trend_datas(add_lds_objects): # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_ok_response_code_and_only_null_values_when_page_data_not_include_any_trend_datas(test_client): # noqa
     samples = 10
     size = 2
     page = 5
@@ -260,8 +265,9 @@ def test_get_trend_data_should_return_ok_response_code_and_only_null_values_when
             assert data['Value'] is None
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_data_should_return_not_found_response_code_and_error_when_no_trend_data_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_data_should_return_not_found_response_code_and_error_when_no_trend_data_exists(test_client):  # noqa
     samples = 2
     response = test_client.get("/trend/10/data/" + str(trend_data4.Time) +
                                "/" + str(trend_data4.Time) + "/" + str(samples))
@@ -277,8 +283,9 @@ def test_get_trend_data_should_return_not_found_response_code_and_error_when_no_
     assert error['message'] == 'No data'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_equal_to_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_equal_to_time_delta(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
         samples = 3
@@ -293,8 +300,9 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
             assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, 0)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_higher_than_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_higher_than_time_delta(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
         samples = 9
@@ -311,8 +319,9 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
             assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_lower_than_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_lower_than_time_delta(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
         samples = 2
@@ -329,8 +338,9 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
             assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
         samples = 5
@@ -347,8 +357,9 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
             assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=4, tzinfo=timezone.utc)
         samples = 4
@@ -367,8 +378,9 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
                 assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trends_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trends_exists(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=2, tzinfo=timezone.utc)
         samples = 2
@@ -384,8 +396,9 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_trend
             assert returned_trend_data['Data'][0]['Value'] == calculate_expected_value(trend2, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_ok_response_code_and_correct_page_data(test_client):
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
         samples = 3
@@ -404,8 +417,9 @@ def test_get_trend_current_data_should_return_ok_response_code_and_correct_page_
         assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_ok_response_code_and_default_page_data(test_client):
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
         samples = 3
@@ -421,8 +435,9 @@ def test_get_trend_current_data_should_return_ok_response_code_and_default_page_
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_current_data_should_return_not_found_response_code_and_error_when_no_trend_data_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_not_found_response_code_and_error_when_no_trend_data_exists(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=3, tzinfo=timezone.utc)
         samples = 2
@@ -441,8 +456,9 @@ def test_get_trend_current_data_should_return_not_found_response_code_and_error_
         assert error['message'] == 'No data'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects_with_full_child_data], indirect=True)
-def test_get_trend_current_data_should_return_correct_last_timestamp_value_when_all_trends_have_current_data(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_trend_objects_with_full_child_data], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_correct_last_timestamp_value_when_all_trends_have_current_data(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=50, tzinfo=timezone.utc)
         response = test_client.get("/trend/1,2,3/current_data/5/1")
@@ -452,8 +468,9 @@ def test_get_trend_current_data_should_return_correct_last_timestamp_value_when_
         assert response.json()['items'][0]['LastTimestamp'] == 46
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects_with_partial_child_data], indirect=True)
-def test_get_trend_current_data_should_return_correct_last_timestamp_value_when_not_all_trends_have_current_data(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_trend_objects_with_partial_child_data], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_current_data_should_return_correct_last_timestamp_value_when_not_all_trends_have_current_data(test_client):  # noqa
     with patch('api.routers.trend_data.datetime') as mock_datetime:
         mock_datetime.now.return_value = datetime(1970, 1, 1, second=50, tzinfo=timezone.utc)
         response = test_client.get("/trend/1,2,3/current_data/5/3")
@@ -463,8 +480,9 @@ def test_get_trend_current_data_should_return_correct_last_timestamp_value_when_
         assert response.json()['items'][0]['LastTimestamp'] == 48
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_equal_to_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_equal_to_time_delta(test_client):  # noqa
     samples = 3
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
@@ -476,8 +494,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
         assert returned_trend_data['Value'] == calculate_expected_value(trend1, 0)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_higher_than_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_higher_than_time_delta(test_client):  # noqa
     samples = 9
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
@@ -491,8 +510,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
         assert returned_trend_data['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_lower_than_time_delta(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_samples_count_is_lower_than_time_delta(test_client):  # noqa
     samples = 2
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
@@ -506,8 +526,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
         assert returned_trend_data['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_begin_and_end_not_integer(test_client):  # noqa
     samples = 8
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time+0.5) +
                                "/" + str(trend_data3.Time+0.5) + "/" + str(samples))
@@ -521,8 +542,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
         assert returned_trend_data['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(test_client):  # noqa
     samples = 4
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time + 1) + "/" + str(samples))
@@ -536,8 +558,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
         assert returned_trend_data['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_data_when_not_all_trend_datas_exists(test_client):  # noqa
     samples = 4
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time + 1) + "/" + str(samples))
@@ -551,8 +574,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_trend_
         assert returned_trend_data['Value'] == calculate_expected_value(trend1, timestamp_ms)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_correct_page_data(test_client):
     samples = 3
     size = 2
     page = 2
@@ -567,8 +591,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_correct_page_d
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_default_page_data(test_client):
     samples = 3
     response = test_client.get("/trend/" + str(trend1.ID) + "/single_data/" + str(trend_data1.Time) +
                                "/" + str(trend_data3.Time) + "/" + str(samples))
@@ -581,8 +606,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_default_page_d
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_no_items_when_page_data_not_include_any_trend_datas(add_lds_objects): # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_no_items_when_page_data_not_include_any_trend_datas(test_client): # noqa
     samples = 10
     size = 2
     page = 5
@@ -608,8 +634,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_no_items_when_
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_ok_response_code_and_part_items_list_when_page_data_include_part_data(add_lds_objects): # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_ok_response_code_and_part_items_list_when_page_data_include_part_data(test_client): # noqa
     samples = 9
     size = 2
     page = 2
@@ -635,8 +662,9 @@ def test_get_single_trend_data_should_return_ok_response_code_and_part_items_lis
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_single_trend_data_should_return_not_found_response_code_and_error_when_no_trend_data_exists(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_single_trend_data_should_return_not_found_response_code_and_error_when_no_trend_data_exists(test_client):  # noqa
     samples = 2
     response = test_client.get("/trend/10/single_data/" + str(trend_data4.Time) +
                                "/" + str(trend_data4.Time) + "/" + str(samples))

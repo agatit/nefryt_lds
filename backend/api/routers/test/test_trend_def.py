@@ -2,8 +2,8 @@ import os
 import sys
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from api.routers.utils.security import get_user_token
 from database import lds
 import pytest
@@ -23,18 +23,15 @@ def reset_trend_def_objects():
     return [trend_def_list]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_trend_defs_should_return_ok_response_code_and_empty_list_when_no_trend_defs():
+def test_list_trend_defs_should_return_ok_response_code_and_empty_list_when_no_trend_defs(test_client):
     response = test_client.get("/trend_def")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
-def test_list_trend_defs_should_return_ok_response_code_and_correct_trend_defs(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_defs_should_return_ok_response_code_and_correct_trend_defs(test_client):
     response = test_client.get("/trend_def")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -44,8 +41,9 @@ def test_list_trend_defs_should_return_ok_response_code_and_correct_trend_defs(a
         assert returned_trend_def['Name'] == expected_trend_def.Name
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
-def test_list_trend_defs_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_defs_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 2
     page = 3
     response = test_client.get(f"/trend_def?size={size}&page={page}")
@@ -59,8 +57,9 @@ def test_list_trend_defs_should_return_ok_response_code_and_correct_page_data(ad
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
-def test_list_trend_defs_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_defs_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/trend_def")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -71,8 +70,9 @@ def test_list_trend_defs_should_return_ok_response_code_and_default_page_data(ad
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_def_objects], indirect=True)
-def test_list_trend_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_def_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID ne \'{trend_def2.ID}\''
     response = test_client.get(f"/trend_def?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK

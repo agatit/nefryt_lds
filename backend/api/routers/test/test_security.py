@@ -9,11 +9,10 @@ from fastapi.security import HTTPAuthorizationCredentials
 from jwt import InvalidSignatureError, InvalidTokenError
 from starlette.testclient import TestClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from api.routers.utils.security import (SECRET_KEY, ALGORITHM, generate_token, get_expiration_time,
-                                        get_user_permissions, get_user_token, decode_token, pwd_context,
+                                        get_user_permissions, get_user_token, decode_token,
                                         verify_password, hash_password, is_refresh, get_refresh_token,
-                                        prepare_login_permissions)
+                                        prepare_login_permissions, password_hash)
 
 login_data1: dict = {'username': 'user1',
                      'password': 'abc'}
@@ -35,8 +34,6 @@ expired_token_data['exp'] = int((datetime_now - timedelta(hours=24)).timestamp()
 expired_refresh_token_data = copy.deepcopy(refresh_token_data)
 expired_refresh_token_data['exp'] = int((datetime_now - timedelta(hours=24)).timestamp())
 password = 'abc'
-
-test_client = TestClient(app)
 
 
 def test_generate_token_should_return_encoded_token_with_correct_data():
@@ -157,11 +154,11 @@ def test_decode_token_should_raise_invalid_token_error_when_token_is_expired():
 
 
 def test_verify_password_should_return_if_passwords_are_equal():
-    hashed_password = pwd_context.hash(password)
+    hashed_password = password_hash.hash(password)
     assert verify_password(password, hashed_password)
     assert not verify_password(password + 'a', hashed_password)
 
 
 def test_hash_password_should_return_correct_hash():
     hashed_password = hash_password(password)
-    assert pwd_context.verify(password, hashed_password)
+    assert password_hash.verify(password, hashed_password)

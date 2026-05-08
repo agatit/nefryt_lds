@@ -3,8 +3,8 @@ import random
 import sys
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from api.routers.utils.security import get_user_token
 from database import lds
 import pytest
@@ -56,12 +56,9 @@ def reset_method_data_objects():
     return [[method_def], [pipeline], method_list, method_param_def_list, method_param_list, method_data_list]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_method_data_objects], indirect=True)
-def test_get_method_data_should_return_full_data_for_method(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_method_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_method_data_should_return_full_data_for_method(test_client):
     response = test_client.get(f"/method/{method2.ID}/data")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -87,8 +84,9 @@ def test_get_method_data_should_return_full_data_for_method(add_lds_objects):
         assert 0 < returned_method_data['Value'] < 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_method_data_objects], indirect=True)
-def test_get_method_data_should_return_not_found_response_code_and_error_when_no_data_for_method(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_method_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_method_data_should_return_not_found_response_code_and_error_when_no_data_for_method(test_client):
     response = test_client.get(f"/method/{method3.ID}/data")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -96,8 +94,9 @@ def test_get_method_data_should_return_not_found_response_code_and_error_when_no
     assert error['message'] == 'No method data for method with id = ' + str(method3.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_method_data_objects], indirect=True)
-def test_get_method_data_should_return_not_found_response_code_and_error_when_no_method_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_method_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_method_data_should_return_not_found_response_code_and_error_when_no_method_with_given_id(test_client):
     response = test_client.get(f"/method/{method3.ID + 1}/data")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -105,8 +104,9 @@ def test_get_method_data_should_return_not_found_response_code_and_error_when_no
     assert error['message'] == 'No method with id = ' + str(method3.ID + 1)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_method_data_objects], indirect=True)
-def test_get_method_data_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_method_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_method_data_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 3
     page = 3
     response = test_client.get(f"/method/{method2.ID}/data?size={size}&page={page}")
@@ -119,8 +119,9 @@ def test_get_method_data_should_return_ok_response_code_and_correct_page_data(ad
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_method_data_objects], indirect=True)
-def test_get_method_data_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_method_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_method_data_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get(f"/method/{method1.ID}/data")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5

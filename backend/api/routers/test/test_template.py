@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
 from api.schemas.base import Axis
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from db import get_engine
 from api.routers.utils.security import get_user_token
 from database import lds
@@ -58,18 +58,15 @@ def reset_templates_objects():
     return lds_objects
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_templates_should_return_ok_response_code_and_empty_list_when_no_templates():
+def test_list_templates_should_return_ok_response_code_and_empty_list_when_no_templates(test_client):
     response = test_client.get("/template")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_list_templates_should_return_ok_response_code_and_correct_templates(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_templates_should_return_ok_response_code_and_correct_templates(test_client):
     response = test_client.get("/template")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -80,8 +77,9 @@ def test_list_templates_should_return_ok_response_code_and_correct_templates(add
         assert returned_template['Axes'] == expected_template.Axes
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_list_templates_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_templates_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 2
     page = 1
     response = test_client.get(f"/template?size={size}&page={page}")
@@ -95,8 +93,9 @@ def test_list_templates_should_return_ok_response_code_and_correct_page_data(add
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_list_templates_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_templates_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/template")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -107,8 +106,9 @@ def test_list_templates_should_return_ok_response_code_and_default_page_data(add
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_list_templates_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_templates_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID gt {template1.ID} and ID lt {template3.ID}'
     response = test_client.get(f"/template?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -120,8 +120,9 @@ def test_list_templates_should_return_ok_response_code_and_data_filtered_by_odat
     assert returned_template['Axes'] == template2.Axes
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_create_template_should_return_created_response_code_and_created_template_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_template_should_return_created_response_code_and_created_template_data(test_client):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore")
 
@@ -140,8 +141,9 @@ def test_create_template_should_return_created_response_code_and_created_templat
         assert templates_count == len(templates_list) + 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_create_template_should_return_not_acceptable_response_code_and_error_when_no_trends_with_given_ids(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_template_should_return_not_acceptable_response_code_and_error_when_no_trends_with_given_ids(test_client):
     template_dict = {'Name': 'Template3', 'Axes': [
         axis1.model_dump(),
         axis2.model_dump(),
@@ -154,8 +156,9 @@ def test_create_template_should_return_not_acceptable_response_code_and_error_wh
     assert error['message'] == 'No trends with ids = [3]'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_create_template_should_return_not_acceptable_response_code_and_error_when_no_units_with_given_ids(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_template_should_return_not_acceptable_response_code_and_error_when_no_units_with_given_ids(test_client):
     template_dict = {'Name': 'Template3', 'Axes': [
         axis1.model_dump(),
         axis4.model_dump()
@@ -167,8 +170,9 @@ def test_create_template_should_return_not_acceptable_response_code_and_error_wh
     assert error['message'] == f'No units with ids = [{axis4.UnitID}]'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_delete_template_by_id_should_return_no_content_response_code_and_remove_template(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_template_by_id_should_return_no_content_response_code_and_remove_template(test_client):
     response = test_client.delete("/template/" + str(template1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -176,7 +180,7 @@ def test_delete_template_by_id_should_return_no_content_response_code_and_remove
     assert templates_count == len(templates_list) - 1
 
 
-def test_delete_template_by_id_should_return_not_found_response_code_and_error_when_no_template_with_given_id():
+def test_delete_template_by_id_should_return_not_found_response_code_and_error_when_no_template_with_given_id(test_client):
     response = test_client.delete("/template/" + str(template1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -184,8 +188,9 @@ def test_delete_template_by_id_should_return_not_found_response_code_and_error_w
     assert error['message'] == 'No template with id = ' + str(template1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_get_template_by_id_should_return_ok_response_code_and_template_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_template_by_id_should_return_ok_response_code_and_template_of_given_id(test_client):
     response = test_client.get("/template/" + str(template1.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_link = response.json()
@@ -194,7 +199,7 @@ def test_get_template_by_id_should_return_ok_response_code_and_template_of_given
     assert returned_link['Axes'] == template1.Axes
 
 
-def test_get_template_by_id_should_return_not_found_response_code_and_error_when_no_template_with_given_id():
+def test_get_template_by_id_should_return_not_found_response_code_and_error_when_no_template_with_given_id(test_client):
     response = test_client.get("/template/" + str(template1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -202,8 +207,9 @@ def test_get_template_by_id_should_return_not_found_response_code_and_error_when
     assert error['message'] == 'No template with id = ' + str(template1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_update_template_should_return_ok_response_code_and_template_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_template_should_return_ok_response_code_and_template_of_given_id(test_client):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore")
 
@@ -216,8 +222,9 @@ def test_update_template_should_return_ok_response_code_and_template_of_given_id
         assert returned_link['Axes'] == updated_template_dict['Axes']
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_update_template_should_return_not_acceptable_response_code_and_error_when_no_trends_with_given_ids(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_template_should_return_not_acceptable_response_code_and_error_when_no_trends_with_given_ids(test_client):
     updated_template_dict = {'Axes': [axis1.model_dump(), axis2.model_dump(), axis3.model_dump()]}
     response = test_client.put("/template/" + str(template1.ID), json=updated_template_dict)
     assert response.status_code == status.HTTP_406_NOT_ACCEPTABLE
@@ -226,8 +233,9 @@ def test_update_template_should_return_not_acceptable_response_code_and_error_wh
     assert error['message'] == 'No trends with ids = [3]'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_templates_objects], indirect=True)
-def test_update_template_should_return_not_acceptable_response_code_and_error_when_no_unit_with_given_ids(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_templates_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_template_should_return_not_acceptable_response_code_and_error_when_no_unit_with_given_ids(test_client):
     updated_template_dict = {'Axes': [axis1.model_dump(), axis2.model_dump(), axis4.model_dump()]}
     response = test_client.put("/template/" + str(template1.ID), json=updated_template_dict)
     assert response.status_code == status.HTTP_406_NOT_ACCEPTABLE
@@ -236,7 +244,7 @@ def test_update_template_should_return_not_acceptable_response_code_and_error_wh
     assert error['message'] == f'No units with ids = [{axis4.UnitID}]'
 
 
-def test_update_template_should_return_not_found_response_code_and_error_when_no_template_with_given_id():
+def test_update_template_should_return_not_found_response_code_and_error_when_no_template_with_given_id(test_client):
     updated_template_dict = {'Name': 'NewTemplateName', 'Axes': [axis1.model_dump(), axis2.model_dump()]}
     response = test_client.put("/template/" + str(template2.ID), json=updated_template_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND

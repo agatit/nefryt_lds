@@ -3,8 +3,8 @@ import sys
 from unittest.mock import patch
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from api.routers.utils.security import get_user_token
 from database import lds
 import pytest
@@ -47,18 +47,15 @@ def reset_profiler_data_objects():
     return [trend_def], [trend_group], [unit], trend_list, profiler_data_list
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_profiler_data_should_return_ok_response_code_and_empty_list_when_no_profiler_data():
+def test_list_profiler_data_should_return_ok_response_code_and_empty_list_when_no_profiler_data(test_client):
     response = test_client.get("/trend_writer")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_profiler_data_objects], indirect=True)
-def test_list_profiler_data_should_return_ok_response_code_and_correct_profiler_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_profiler_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_profiler_data_should_return_ok_response_code_and_correct_profiler_data(test_client):
     response = test_client.get("/trend_writer")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -80,8 +77,9 @@ def test_list_profiler_data_should_return_ok_response_code_and_correct_profiler_
         assert returned_profiler_data['QueueSize'] == expected_profiler_data.QueueSize
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_profiler_data_objects], indirect=True)
-def test_list_profiler_data_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_profiler_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_profiler_data_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 2
     page = 1
     response = test_client.get(f"/trend_writer?size={size}&page={page}")
@@ -95,8 +93,9 @@ def test_list_profiler_data_should_return_ok_response_code_and_correct_page_data
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_profiler_data_objects], indirect=True)
-def test_list_profiler_data_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_profiler_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_profiler_data_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/trend_writer")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -107,8 +106,9 @@ def test_list_profiler_data_should_return_ok_response_code_and_default_page_data
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_profiler_data_objects], indirect=True)
-def test_get_general_profiler_data_should_return_ok_response_code_and_correct_general_profiler_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_profiler_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_general_profiler_data_should_return_ok_response_code_and_correct_general_profiler_data(test_client):
     response = test_client.get("/trend_writer/general")
     assert response.status_code == status.HTTP_200_OK
     returned_general_data = response.json()
@@ -119,7 +119,7 @@ def test_get_general_profiler_data_should_return_ok_response_code_and_correct_ge
     assert returned_general_data['QueueSize'] == (profiler_data2.QueueSize + profiler_data1.QueueSize)/2
 
 
-def test_get_general_profiler_data_should_return_bad_request_response_code_and_error_when_no_profiler_data_stored():
+def test_get_general_profiler_data_should_return_bad_request_response_code_and_error_when_no_profiler_data_stored(test_client):
     response = test_client.get("/trend_writer/general")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     error = response.json()
@@ -127,8 +127,9 @@ def test_get_general_profiler_data_should_return_bad_request_response_code_and_e
     assert error['message'] == 'No stored profiler data to calculate general data'
     
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_profiler_data_objects], indirect=True)
-def test_get_profiler_data_by_id_should_return_ok_response_code_and_profiler_data_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_profiler_data_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_profiler_data_by_id_should_return_ok_response_code_and_profiler_data_of_given_id(test_client):
     response = test_client.get("/trend_writer/" + str(profiler_data2.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_profiler_data = response.json()
@@ -139,7 +140,7 @@ def test_get_profiler_data_by_id_should_return_ok_response_code_and_profiler_dat
     assert returned_profiler_data['QueueSize'] == profiler_data2.QueueSize
 
 
-def test_get_profiler_data_by_id_should_return_not_found_response_code_and_error_when_no_profiler_data_with_given_id():
+def test_get_profiler_data_by_id_should_return_not_found_response_code_and_error_when_no_profiler_data_with_given_id(test_client):
     response = test_client.get("/trend_writer/"+ str(profiler_data2.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -147,7 +148,7 @@ def test_get_profiler_data_by_id_should_return_not_found_response_code_and_error
     assert error['message'] == 'No profiler data for trend with id = ' + str(profiler_data2.ID)
 
 
-def test_run_past_writer_should_return_no_content_response_code():
+def test_run_past_writer_should_return_no_content_response_code(test_client):
     module_params_dict = {'from_timestamp': 1000, 'to_timestamp': 2000, 'quick_trend_ids': [50,55]}
     with patch("api.routers.trend_writer.subprocess.Popen") as popen_mock:
         response = test_client.post("/trend_writer/run_past_writer", json=module_params_dict)

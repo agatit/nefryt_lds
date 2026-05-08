@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from sqlmodel import select
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 from db import get_engine
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from api.routers.utils.security import get_user_token
 from database import lds
 import pytest
@@ -60,18 +60,15 @@ def reset_simulation_objects():
     return [simulation_def_list, [trend_def], [trend_group], [unit], [trend1, trend2], simulation_list]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_simulations_should_return_ok_response_code_and_empty_list_when_no_simulations():
+def test_list_simulations_should_return_ok_response_code_and_empty_list_when_no_simulations(test_client):
     response = test_client.get("/simulation")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_list_simulations_should_return_ok_response_code_and_correct_simulations(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulations_should_return_ok_response_code_and_correct_simulations(test_client):
     response = test_client.get("/simulation")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -86,8 +83,9 @@ def test_list_simulations_should_return_ok_response_code_and_correct_simulations
         assert returned_simulation['Enabled'] == expected_simulation.Enabled
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_list_simulations_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulations_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 1
     page = 1
     response = test_client.get(f"/simulation?size={size}&page={page}")
@@ -101,8 +99,9 @@ def test_list_simulations_should_return_ok_response_code_and_correct_page_data(a
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_list_simulations_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulations_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/simulation")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -113,8 +112,9 @@ def test_list_simulations_should_return_ok_response_code_and_default_page_data(a
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_list_simulations_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_simulations_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'TrendID ne {trend1.ID}'
     response = test_client.get(f"/simulation?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -131,8 +131,9 @@ def test_list_simulations_should_return_ok_response_code_and_data_filtered_by_od
         assert returned_simulation['Enabled'] == expected_simulation.Enabled
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_create_simulation_should_return_created_response_code_and_created_simulation_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_simulation_should_return_created_response_code_and_created_simulation_data(test_client):
     simulation_dict = {'SimulationDefID': simulation_def1.ID, 'TrendID': trend2.ID,
                        'RefreshTimeSeconds': 5, 'ResolutionMeters': 100, 'Name': 'Sim'}
     response = test_client.post("/simulation", json=simulation_dict)
@@ -150,8 +151,9 @@ def test_create_simulation_should_return_created_response_code_and_created_simul
     assert simulations_count == len(simulation_list)+1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_create_simulation_should_return_conflict_response_code_and_error_when_no_simulation_def_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_simulation_should_return_conflict_response_code_and_error_when_no_simulation_def_with_given_id(test_client):
     simulation_dict = {'SimulationDefID': 'ABC', 'TrendID': trend2.ID,
                        'RefreshTimeSeconds': 5, 'ResolutionMeters': 100, 'Name': 'Sim'}
     response = test_client.post("/simulation", json=simulation_dict)
@@ -161,8 +163,9 @@ def test_create_simulation_should_return_conflict_response_code_and_error_when_n
     assert error['message'] == 'Integrity error when creating simulation'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_create_simulation_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_simulation_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(test_client):
     simulation_dict = {'SimulationDefID': simulation_def1.ID, 'TrendID': trend2.ID+1,
                        'RefreshTimeSeconds': 5, 'ResolutionMeters': 100, 'Name': 'Sim'}
     response = test_client.post("/simulation", json=simulation_dict)
@@ -172,8 +175,9 @@ def test_create_simulation_should_return_conflict_response_code_and_error_when_n
     assert error['message'] == 'Integrity error when creating simulation'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_delete_simulation_by_id_should_return_no_content_response_code_and_remove_simulation(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_simulation_by_id_should_return_no_content_response_code_and_remove_simulation(test_client):
     response = test_client.delete("/simulation/" + str(simulation1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -181,7 +185,7 @@ def test_delete_simulation_by_id_should_return_no_content_response_code_and_remo
     assert simulations_count == len(simulation_list) - 1
 
 
-def test_delete_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_delete_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     response = test_client.delete("/simulation/" + str(simulation3.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -189,8 +193,9 @@ def test_delete_simulation_by_id_should_return_not_found_response_code_and_error
     assert error['message'] == 'No simulation with id = ' + str(simulation3.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_get_simulation_by_id_should_return_ok_response_code_and_simulation_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_simulation_by_id_should_return_ok_response_code_and_simulation_of_given_id(test_client):
     response = test_client.get("/simulation/" + str(simulation3.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_simulation = response.json()
@@ -203,7 +208,7 @@ def test_get_simulation_by_id_should_return_ok_response_code_and_simulation_of_g
     assert returned_simulation['Enabled'] == simulation3.Enabled
 
 
-def test_get_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_get_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     response = test_client.get("/simulation/" + str(simulation2.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -211,8 +216,9 @@ def test_get_simulation_by_id_should_return_not_found_response_code_and_error_wh
     assert error['message'] == 'No simulation with id = ' + str(simulation2.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_update_simulation_by_id_should_return_ok_response_code_and_simulation_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_simulation_by_id_should_return_ok_response_code_and_simulation_of_given_id(test_client):
     update_simulation_dict = {'SimulationDefID': 'WAVE', 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation2.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_200_OK
@@ -226,8 +232,9 @@ def test_update_simulation_by_id_should_return_ok_response_code_and_simulation_o
     assert returned_simulation['Enabled'] == simulation2.Enabled
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_update_simulation_by_id_should_return_conflict_response_code_and_error_when_no_simulation_def_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_simulation_by_id_should_return_conflict_response_code_and_error_when_no_simulation_def_with_given_id(test_client):
     update_simulation_dict = {'SimulationDefID': 'ABC', 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation3.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
@@ -236,8 +243,9 @@ def test_update_simulation_by_id_should_return_conflict_response_code_and_error_
     assert error['message'] == 'Integrity error when updating simulation with id = ' + str(simulation3.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_update_simulation_by_id_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_simulation_by_id_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(test_client):
     update_simulation_dict = {'TrendID': trend2.ID+10, 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation3.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
@@ -246,7 +254,7 @@ def test_update_simulation_by_id_should_return_conflict_response_code_and_error_
     assert error['message'] == 'Integrity error when updating simulation with id = ' + str(simulation3.ID)
 
 
-def test_update_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id():
+def test_update_simulation_by_id_should_return_not_found_response_code_and_error_when_no_simulation_with_given_id(test_client):
     update_simulation_dict = {'SimulationDefID': 'WAVE', 'RefreshTimeSeconds': 45, 'ResolutionMeters': 111}
     response = test_client.put("/simulation/" + str(simulation3.ID), json=update_simulation_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -255,8 +263,9 @@ def test_update_simulation_by_id_should_return_not_found_response_code_and_error
     assert error['message'] == 'No simulation with id = ' + str(simulation3.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_simulation_objects], indirect=True)
-def test_enable_simulation_should_return_no_content_response_code_and_change_simulation_enabled_flag(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_simulation_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_enable_simulation_should_return_no_content_response_code_and_change_simulation_enabled_flag(test_client):
     response = test_client.put("/simulation/" + str(simulation1.ID) + "/enable")
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -270,7 +279,7 @@ def test_enable_simulation_should_return_no_content_response_code_and_change_sim
     assert simulation.Enabled is simulation1.Enabled
 
 
-def test_enable_trend_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_enable_trend_should_return_not_found_response_code_and_error_when_no_trend_with_given_id(test_client):
     response = test_client.put("/simulation/" + str(simulation3.ID) + "/enable")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()

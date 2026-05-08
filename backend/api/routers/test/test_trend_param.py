@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
 from api.routers.utils.security import get_user_token
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from db import get_engine
 from database import lds
 import pytest
@@ -91,19 +91,17 @@ def reset_trend_objects():
     return [trend_def_list, [trend_group], [unit], trend_list]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
-def test_list_trend_param_defs_should_return_ok_response_code_and_empty_list_when_no_trend_param_defs(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_param_defs_should_return_ok_response_code_and_empty_list_when_no_trend_param_defs(test_client):
     response = test_client.get("/trend/param/def")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_param_defs_should_return_ok_response_code_and_correct_trend_param_defs(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_param_defs_should_return_ok_response_code_and_correct_trend_param_defs(test_client):
     response = test_client.get("/trend/param/def")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -115,8 +113,9 @@ def test_list_trend_param_defs_should_return_ok_response_code_and_correct_trend_
         assert returned_trend_param_def['DataType'] == expected_trend_param_def.DataType
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_param_defs_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_param_defs_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 2
     page = 2
     response = test_client.get(f"/trend/param/def?size={size}&page={page}")
@@ -130,8 +129,9 @@ def test_list_trend_param_defs_should_return_ok_response_code_and_correct_page_d
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_param_defs_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_param_defs_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/trend/param/def")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -142,8 +142,9 @@ def test_list_trend_param_defs_should_return_ok_response_code_and_default_page_d
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_param_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_param_defs_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'DataType ne \'{trend_param_def1.DataType}\''
     response = test_client.get(f"/trend/param/def?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -156,14 +157,15 @@ def test_list_trend_param_defs_should_return_ok_response_code_and_data_filtered_
     assert returned_trend_param_def['DataType'] == trend_param_def3.DataType
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
-def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_empty_list_when_no_trend_params_for_given_trend_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_empty_list_when_no_trend_params_for_given_trend_id(test_client):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-def test_list_trend_params_by_trend_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_list_trend_params_by_trend_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id(test_client):
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -171,8 +173,9 @@ def test_list_trend_params_by_trend_id_should_return_not_found_response_code_and
     assert error['message'] == 'No trend with id = ' + str(trend1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(test_client):
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -186,8 +189,9 @@ def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_correc
         assert returned_trend_param['Name'] == expected_trend_param_def.Name.strip()
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 3
     page = 1
     response = test_client.get("/trend/" + str(trend1.ID) + f"/param?size={size}&page={page}")
@@ -201,8 +205,9 @@ def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_correc
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/trend/" + str(trend1.ID) + "/param")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -213,8 +218,9 @@ def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_defaul
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'Value eq {trend_param3.Value}'
     response = test_client.get("/trend/" + str(trend1.ID) + f"/param?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -228,14 +234,15 @@ def test_list_trend_params_by_trend_id_should_return_ok_response_code_and_data_f
     assert returned_trend_param['Name'] == trend_param_def3.Name.strip()
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_trend_objects], indirect=True)
-def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_empty_list_when_no_trend_param_defs_for_given_trend_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_empty_list_when_no_trend_param_defs_for_given_trend_id(test_client):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-def test_list_required_trend_params_by_trend_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id():
+def test_list_required_trend_params_by_trend_id_should_return_not_found_response_code_and_error_when_no_trend_with_given_id(test_client):
     response = test_client.get("/trend/" + str(trend1.ID) + "/param/all")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -243,8 +250,9 @@ def test_list_required_trend_params_by_trend_id_should_return_not_found_response
     assert error['message'] == 'No trend with id = ' + str(trend1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_correct_trend_params_for_given_trend_id(test_client):
     response = test_client.get("/trend/" + str(trend3.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -258,8 +266,9 @@ def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_a
         assert returned_trend_param['Name'] == expected_trend_param_def.Name.strip()
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 2
     page = 1
     response = test_client.get("/trend/" + str(trend3.ID) + f"/param/all?size={size}&page={page}")
@@ -273,8 +282,9 @@ def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_a
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/trend/" + str(trend3.ID) + "/param/all")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -285,8 +295,9 @@ def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_a
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID eq \'{trend_param_def3.ID.strip()}\''
     response = test_client.get("/trend/" + str(trend3.ID) + f"/param/all?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -300,8 +311,9 @@ def test_list_required_trend_params_by_trend_id_should_return_ok_response_code_a
     assert returned_trend_param['Name'] == trend_param_def3.Name.strip()
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_create_trend_param_should_return_created_response_code_and_created_trend_param_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_trend_param_should_return_created_response_code_and_created_trend_param_data(test_client):
     trend_param_dict = {'TrendParamDefID': trend_param_def1.ID.strip(), 'Value': '1111'}
     response = test_client.post("/trend/" + str(trend3.ID) + "/param", json=trend_param_dict)
     assert response.status_code == status.HTTP_201_CREATED
@@ -316,8 +328,9 @@ def test_create_trend_param_should_return_created_response_code_and_created_tren
     assert trend_params_count == len(trend_param_list) + 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_create_trend_param_should_return_conflict_response_code_and_error_when_key_not_unique(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_trend_param_should_return_conflict_response_code_and_error_when_key_not_unique(test_client):
     trend_param_dict = {'TrendParamDefID': trend_param_def3.ID, 'Value': '1111'}
     response = test_client.post("/trend/" + str(trend1.ID) + "/param", json=trend_param_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
@@ -326,8 +339,9 @@ def test_create_trend_param_should_return_conflict_response_code_and_error_when_
     assert error['message'] == 'Integrity error when creating trend param'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_create_trend_param_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_trend_param_should_return_conflict_response_code_and_error_when_no_trend_with_given_id(test_client):
     trend_param_dict = {'TrendParamDefID': trend_param_def3.ID, 'Value': '1111'}
     response = test_client.post("/trend/100/param", json=trend_param_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
@@ -336,8 +350,9 @@ def test_create_trend_param_should_return_conflict_response_code_and_error_when_
     assert error['message'] == 'No trend with id = 100'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_create_trend_param_should_return_conflict_response_code_and_error_when_no_trend_param_def_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_trend_param_should_return_conflict_response_code_and_error_when_no_trend_param_def_with_given_id(test_client):
     trend_param_dict = {'TrendParamDefID': 'DEF', 'Value': '1111'}
     response = test_client.post(f"/trend/{trend1.ID}/param", json=trend_param_dict)
     assert response.status_code == status.HTTP_409_CONFLICT
@@ -346,8 +361,9 @@ def test_create_trend_param_should_return_conflict_response_code_and_error_when_
     assert error['message'] == 'No TrendParamDef with id = DEF'
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_delete_trend_param_by_id_should_return_no_content_response_code_and_remove_trend_param(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_trend_param_by_id_should_return_no_content_response_code_and_remove_trend_param(test_client):
     response = test_client.delete("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID)
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -355,7 +371,7 @@ def test_delete_trend_param_by_id_should_return_no_content_response_code_and_rem
     assert trend_params_count == len(trend_param_list) - 1
 
 
-def test_delete_trend_param_by_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id():
+def test_delete_trend_param_by_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id(test_client):
     response = test_client.delete("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -364,8 +380,9 @@ def test_delete_trend_param_by_id_should_return_not_found_response_code_and_erro
             ' for trend with id = ' + str(trend1.ID))
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_get_trend_param_by_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(add_lds_objects):  # noqa
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_trend_param_by_id_should_return_ok_response_code_and_trend_param_of_given_trend_and_trend_param_id(test_client):  # noqa
     response = test_client.get("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID)
     assert response.status_code == status.HTTP_200_OK
     returned_trend_param = response.json()
@@ -376,7 +393,7 @@ def test_get_trend_param_by_id_should_return_ok_response_code_and_trend_param_of
     assert returned_trend_param['Name'] == trend_param_def1.Name.strip()
 
 
-def test_get_trend_param_by_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id():
+def test_get_trend_param_by_id_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id(test_client):
     response = test_client.get("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -385,8 +402,9 @@ def test_get_trend_param_by_id_should_return_not_found_response_code_and_error_w
                                 f"and trendParamDef with id = {trend_param1.TrendParamDefID.strip()}")
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_all_trend_objects], indirect=True)
-def test_update_trend_param_should_return_ok_response_code_and_trend_param_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_all_trend_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_trend_param_should_return_ok_response_code_and_trend_param_of_given_id(test_client):
     update_trend_param_value = '1444'
     response = test_client.put("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID.strip(),
                                json=update_trend_param_value)
@@ -399,7 +417,7 @@ def test_update_trend_param_should_return_ok_response_code_and_trend_param_of_gi
     assert returned_trend_param['Name'] == trend_param_def1.Name.strip()
 
 
-def test_update_trend_param_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id():
+def test_update_trend_param_should_return_not_found_response_code_and_error_when_no_trend_param_with_given_id(test_client):
     update_trend_param_value = '1444'
     response = test_client.put("/trend/" + str(trend1.ID) + "/param/" + trend_param1.TrendParamDefID.strip(),
                                json=update_trend_param_value)

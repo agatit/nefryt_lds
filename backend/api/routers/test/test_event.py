@@ -5,8 +5,8 @@ import jwt
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from db import get_engine
 from api.routers.utils.security import get_user_token
 from database import lds
@@ -54,18 +54,15 @@ def reset_event_objects():
     return lds_objects
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_events_should_return_ok_response_code_and_empty_list_when_no_events():
+def test_list_events_should_return_ok_response_code_and_empty_list_when_no_events(test_client):
     response = test_client.get("/event")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
-def test_list_events_should_return_ok_response_code_and_correct_visible_and_enabled_events(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_events_should_return_ok_response_code_and_correct_visible_and_enabled_events(test_client):
     response = test_client.get("/event")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -80,8 +77,9 @@ def test_list_events_should_return_ok_response_code_and_correct_visible_and_enab
     assert not items[0]['EndDate']
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
-def test_list_events_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_events_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 1
     page = 2
     response = test_client.get(f"/event?size={size}&page={page}")
@@ -94,8 +92,9 @@ def test_list_events_should_return_ok_response_code_and_correct_page_data(add_ld
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
-def test_list_events_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_events_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/event")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -106,8 +105,9 @@ def test_list_events_should_return_ok_response_code_and_default_page_data(add_ld
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
-def test_get_event_by_id_should_return_ok_response_code_and_correct_event(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_event_by_id_should_return_ok_response_code_and_correct_event(test_client):
     response = test_client.get("/event/" + str(event_invisible.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_event = response.json()
@@ -121,7 +121,7 @@ def test_get_event_by_id_should_return_ok_response_code_and_correct_event(add_ld
     assert not returned_event['EndDate']
 
 
-def test_get_event_by_id_should_return_not_found_response_code_and_error_when_no_event_with_given_id():
+def test_get_event_by_id_should_return_not_found_response_code_and_error_when_no_event_with_given_id(test_client):
     event_id = -1
     response = test_client.get("/event/" + str(event_id))
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -130,8 +130,9 @@ def test_get_event_by_id_should_return_not_found_response_code_and_error_when_no
     assert error['message'] == 'No event with id = ' + str(event_id)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
-def test_ack_event_should_return_ok_response_code_and_information_and_set_ack_date(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_ack_event_should_return_ok_response_code_and_information_and_set_ack_date(test_client):
     token_data = {
         'perms': ['admin']
     }
@@ -148,8 +149,9 @@ def test_ack_event_should_return_ok_response_code_and_information_and_set_ack_da
     assert changed_event.AckDate
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
-def test_ack_event_should_return_unauthorized_response_code_when_header_is_invalid(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_ack_event_should_return_unauthorized_response_code_when_header_is_invalid(test_client):
     token_data = {
         'perms': ['admin']
     }
@@ -159,8 +161,9 @@ def test_ack_event_should_return_unauthorized_response_code_when_header_is_inval
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_event_objects], indirect=True)
-def test_ack_event_should_return_forbidden_response_code_and_error_when_permissions_are_incorrect(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_event_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_ack_event_should_return_forbidden_response_code_and_error_when_permissions_are_incorrect(test_client):
     token_data = {
         'perms': ['user']
     }
@@ -173,7 +176,7 @@ def test_ack_event_should_return_forbidden_response_code_and_error_when_permissi
     assert error['message'] == 'Action requires admin permissions'
 
 
-def test_ack_event_should_return_not_found_response_code_and_error_when_no_event_with_given_id():
+def test_ack_event_should_return_not_found_response_code_and_error_when_no_event_with_given_id(test_client):
     event_id = -1
     token_data = {
         'perms': ['admin']

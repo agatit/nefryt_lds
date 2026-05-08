@@ -4,8 +4,8 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.testclient import TestClient
+from conftest import test_client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # noqa: E402
-from api.app import app
 from db import get_engine
 from api.routers.utils.security import get_user_token
 from database import lds
@@ -44,18 +44,15 @@ def reset_node_objects():
     return [lds_objects]
 
 
-app.dependency_overrides[get_user_token] = lambda: {"sub": "test_user"}  # type: ignore[attr-defined]
-test_client = TestClient(app)
-
-
-def test_list_links_should_return_ok_response_code_and_empty_list_when_no_links():
+def test_list_links_should_return_ok_response_code_and_empty_list_when_no_links(test_client):
     response = test_client.get("/link")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()['items']) == 0
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_list_links_should_return_ok_response_code_and_correct_links(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_links_should_return_ok_response_code_and_correct_links(test_client):
     response = test_client.get("/link")
     assert response.status_code == status.HTTP_200_OK
     items = response.json()['items']
@@ -67,8 +64,9 @@ def test_list_links_should_return_ok_response_code_and_correct_links(add_lds_obj
         assert returned_link['Length'] == expected_link.Length
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_list_links_should_return_ok_response_code_and_correct_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_links_should_return_ok_response_code_and_correct_page_data(test_client):
     size = 3
     page = 1
     response = test_client.get(f"/link?size={size}&page={page}")
@@ -82,8 +80,9 @@ def test_list_links_should_return_ok_response_code_and_correct_page_data(add_lds
     assert response.json()['page'] == page
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_list_links_should_return_ok_response_code_and_default_page_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_links_should_return_ok_response_code_and_default_page_data(test_client):
     response = test_client.get("/link")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 5
@@ -94,8 +93,9 @@ def test_list_links_should_return_ok_response_code_and_default_page_data(add_lds
     assert response.json()['page'] == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_list_links_should_return_ok_response_code_and_data_filtered_by_odata_query(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_list_links_should_return_ok_response_code_and_data_filtered_by_odata_query(test_client):
     odata_filter = f'ID gt {link1.ID} and ID lt {link3.ID}'
     response = test_client.get(f"/link?filter={odata_filter}")
     assert response.status_code == status.HTTP_200_OK
@@ -108,8 +108,9 @@ def test_list_links_should_return_ok_response_code_and_data_filtered_by_odata_qu
     assert returned_link['Length'] == link2.Length
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_node_objects], indirect=True)
-def test_create_link_should_return_created_response_code_and_created_link_data(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_node_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_create_link_should_return_created_response_code_and_created_link_data(test_client):
     link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 100.11}
     response = test_client.post("/link", json=link_dict)
     assert response.status_code == status.HTTP_201_CREATED
@@ -123,8 +124,9 @@ def test_create_link_should_return_created_response_code_and_created_link_data(a
     assert links_count == 1
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_delete_link_by_id_should_return_no_content_response_code_and_remove_link(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_delete_link_by_id_should_return_no_content_response_code_and_remove_link(test_client):
     response = test_client.delete("/link/" + str(link1.ID))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     with Session(get_engine()) as session:
@@ -132,7 +134,7 @@ def test_delete_link_by_id_should_return_no_content_response_code_and_remove_lin
     assert links_count == len(links_list) - 1
 
 
-def test_delete_link_by_id_should_return_not_found_response_code_and_error_when_no_link_with_given_id():
+def test_delete_link_by_id_should_return_not_found_response_code_and_error_when_no_link_with_given_id(test_client):
     response = test_client.delete("/link/" + str(link1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -140,8 +142,9 @@ def test_delete_link_by_id_should_return_not_found_response_code_and_error_when_
     assert error['message'] == 'No link with id = ' + str(link1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_get_link_by_id_should_return_ok_response_code_and_link_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_get_link_by_id_should_return_ok_response_code_and_link_of_given_id(test_client):
     response = test_client.get("/link/" + str(link1.ID))
     assert response.status_code == status.HTTP_200_OK
     returned_link = response.json()
@@ -151,7 +154,7 @@ def test_get_link_by_id_should_return_ok_response_code_and_link_of_given_id(add_
     assert returned_link['Length'] == link1.Length
 
 
-def test_get_link_by_id_should_return_not_found_response_code_and_error_when_no_link_with_given_id():
+def test_get_link_by_id_should_return_not_found_response_code_and_error_when_no_link_with_given_id(test_client):
     response = test_client.get("/link/" + str(link1.ID))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     error = response.json()
@@ -159,8 +162,9 @@ def test_get_link_by_id_should_return_not_found_response_code_and_error_when_no_
     assert error['message'] == 'No link with id = ' + str(link1.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_update_link_should_return_ok_response_code_and_link_of_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_link_should_return_ok_response_code_and_link_of_given_id(test_client):
     updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 99.99}
     response = test_client.put("/link/" + str(link2.ID), json=updated_link_dict)
     assert response.status_code == status.HTTP_200_OK
@@ -171,7 +175,7 @@ def test_update_link_should_return_ok_response_code_and_link_of_given_id(add_lds
     assert returned_link['Length'] == str(updated_link_dict['Length'])
 
 
-def test_update_link_should_return_not_found_response_code_and_error_when_no_link_with_given_id():
+def test_update_link_should_return_not_found_response_code_and_error_when_no_link_with_given_id(test_client):
     updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 2, 'Length': 99.99}
     response = test_client.put("/link/" + str(link2.ID), json=updated_link_dict)
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -180,8 +184,9 @@ def test_update_link_should_return_not_found_response_code_and_error_when_no_lin
     assert error['message'] == 'No link with id = ' + str(link2.ID)
 
 
-@pytest.mark.parametrize('reset_lds_objects', [reset_link_objects], indirect=True)
-def test_update_link_should_return_conflict_response_code_and_error_when_no_node_with_given_id(add_lds_objects):
+@pytest.mark.parametrize('add_test_context', [reset_link_objects], indirect=True)
+@pytest.mark.usefixtures("add_test_context")
+def test_update_link_should_return_conflict_response_code_and_error_when_no_node_with_given_id(test_client):
     updated_link_dict = {'BeginNodeID': 1, 'EndNodeID': 5, 'Length': 99.99}
     response = test_client.put("/link/" + str(link2.ID), json=updated_link_dict)
     assert response.status_code == status.HTTP_409_CONFLICT

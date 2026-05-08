@@ -1,16 +1,18 @@
-from sqlalchemy import Column, CHAR
+from sqlalchemy import Column, CHAR, String
 from sqlmodel import Field
 from ...schemas import base
 
 
 class Node(base.Node):
     ID: int | None = Field(None)
+    EditorParams: base.EditorNode | None = Field(None)
 
 
 class NodeCreate(base.Node):
-    pass
+    EditorParams: base.EditorNode | None = Field(None)
 
 
-class NodeUpdate(base.LdsNode):
+class NodeUpdate(base.Node):
     Type: str | None = Field(None, sa_column=Column(CHAR(6, 'SQL_Polish_CP1250_CS_AS')))
+    Name: str | None = Field(None, sa_column=Column(String(50, 'SQL_Polish_CP1250_CS_AS')))
     EditorParams: base.EditorNode | None = Field(None)
