@@ -42,7 +42,7 @@ class PipePlant:
                 trend_def_id = trend_def.ID.strip()
                 if trend_def_id == 'QUICK' and trend.ID in quick_trend_ids or trend_def_id != 'QUICK':
                     trend_class = TREND_CLASSES[trend_def_id]
-                    new_trend = trend_class(trend.ID, Queue(), Settings.db_uri)
+                    new_trend = trend_class(trend.ID, Queue(), Settings.DB_URI)
                     trend_ids.append(trend.ID)
                     TrendManager.add(new_trend)
                     if trend_def_id == 'QUICK':

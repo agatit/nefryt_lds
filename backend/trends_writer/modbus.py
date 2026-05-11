@@ -1,45 +1,51 @@
 import asyncio
 import logging
-from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
+from typing import Any
+
+from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusDeviceContext
 from pymodbus.server import StartAsyncTcpServer
+from pymodbus.simulator import SimDevice, SimData, DataType
+from pymodbus.simulator.simcore import SimCore
+
 from .config import TrendsWriterSettings
 from .plant import PipePlant
-
 
 logger = logging.getLogger(__name__)
 
 
-class PipePlantDataBlock(ModbusSequentialDataBlock):
-    def __init__(self, address: int, values: list, pipe_plant: PipePlant):
-        super().__init__(address, values)
-        self.pipe_plant = pipe_plant
-
-    def setValues(self, address, values):
-        try:
-            self.pipe_plant.update(address - self.address, values)
-            super().setValues(address, values)
-            logger.debug(f"Modbus: setValues (address={address}, values={values})")
-        except Exception as e:
-            logger.exception(f"Modbus: Exception in setValues: {e}", exc_info=True)
-
-    def getValues(self, address, count=1):
-        logger.debug(f"Modbus: getValues (address={address}, count={count})")
-        return super().getValues(address - self.address, count)
-
-
 async def run_server(pipe_plant: PipePlant, port: int | None = None):
-    datablock = PipePlantDataBlock(1, [0] * 1000, pipe_plant)
-    slave_context = ModbusSlaveContext(
-        hr=datablock,
-        di=ModbusSequentialDataBlock.create(),
-        co=ModbusSequentialDataBlock.create(),
-        ir=ModbusSequentialDataBlock.create()
+    async def on_register_access(
+            function_code: int,
+            start_address: int,
+            address: int,
+            count: int,
+            current_registers: list,
+            set_values: list | None,
+    ):
+        if set_values is not None:
+            try:
+                pipe_plant.update(address, set_values)
+                logger.debug(f"Modbus: setValues (address={address}, values={set_values})")
+            except Exception as e:
+                logger.exception(f"Modbus: Exception in setValues: {e}", exc_info=True)
+        else:
+            logger.debug(f"Modbus: getValues (address={address}, count={count})")
+
+    device = SimDevice(
+        id=0,
+        simdata=SimData(
+            address=0,
+            count=65535,
+            values=0,
+            datatype=DataType.REGISTERS,
+        ),
+        action=on_register_access,
     )
-    server_context = ModbusServerContext(slaves=slave_context, single=True)
+
     try:
         logger.info(f"Modbus: Server started")
         await StartAsyncTcpServer(
-            context=server_context,
+            context=device,
             address=('', port if port else TrendsWriterSettings.modbus_port),
         )
     except (KeyboardInterrupt, asyncio.CancelledError):

@@ -4,7 +4,7 @@ import time
 from multiprocessing import Queue
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from config import Settings
+from config import Config, Settings
 from database import lds
 from db import get_engine
 from .profiler import Profiler
@@ -43,7 +43,7 @@ class PipePlant:
         for trend, trend_def in result:
             try:
                 trend_class = TREND_CLASSES[trend_def.ID.strip()]
-                new_trend = trend_class(trend.ID, Queue(), Settings.db_uri, Profiler.queue)
+                new_trend = trend_class(trend.ID, Queue(), Settings.TEST_DB_URI if Config.tests else Settings.DB_URI, Profiler.queue)
                 trend_ids.append(trend.ID)
                 TrendManager.add(new_trend)
                 if trend_def.ID.strip() == 'QUICK':
@@ -112,7 +112,7 @@ class PipePlant:
     @staticmethod
     def shutdown_processes():
         Profiler.queue.put((-1, None, None))
-        if not Settings.tests:
+        if not Config.tests:
             for trend in TrendManager.get_all():
                 trend.queue.put(None)
                 trend.process.terminate()

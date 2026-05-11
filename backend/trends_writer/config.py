@@ -37,7 +37,6 @@ def reset_manager_handler(manager_handler: dict) -> dict:
 
 
 class AppConfig(BaseModel):
-    db_uri: str
     modbus_port: int = 502
     log_profiler: bool = False
     use_past_trend_data: bool = True

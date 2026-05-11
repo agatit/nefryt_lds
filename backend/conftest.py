@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, text, Connection, Engine
 from sqlalchemy.orm import Session
 from sqlmodel import SQLModel
 from testcontainers.mssql import SqlServerContainer
-from config import Settings
+from config import Config, Settings, env_file_path, setup_engine
 from config_utils import load_yaml, clear_test_db
 from db import set_new_engine, get_engine
 from trends_writer.config import TrendsWriterSettings
@@ -18,24 +18,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 path = pathlib.Path(__file__).parent.resolve()
 
 
-class PasswordSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=os.path.join(path, '.env'), env_file_encoding='utf-8')
-    password_test: str = Field(alias='PASSWORD_TEST_DB')
-
-
-class TestModel(BaseModel):
-    db_uri: str
-    server_url: str
-    db_name: str = 'NefrytLDS_Test_Database'
-
-
-class TestConfig(BaseModel):
-    test_model: TestModel
-    password_settings: PasswordSettings
-
-
-_config_test = load_yaml(path, "config.test.yaml")
-TestSettings = TestConfig(test_model=TestModel(**_config_test), password_settings=PasswordSettings()) # type: ignore
 TrendsWriterSettings.log_profiler = False
 
 def pytest_addoption(parser):
@@ -91,29 +73,24 @@ def cleanup_processes_after_tests():
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_database(request):
-    Settings.tests = True
+    Config.tests = True
     db_type = request.config.db_type
-    test_db_uri = TestSettings.test_model.db_uri.format(db_password=TestSettings.password_settings.password_test)
-    test_db_name = TestSettings.test_model.db_name
-    server_url = TestSettings.test_model.server_url.format(db_password=TestSettings.password_settings.password_test)
-    Settings.db_uri = test_db_uri
-    TrendsWriterSettings.db_uri = test_db_uri
     if db_type == 'temp':
-        engine = create_engine(server_url)
+        engine = create_engine(Settings.TEST_DB_MASTER_URI)
         with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM sys.databases WHERE name = '{test_db_name}'"))
+            result = conn.execute(text(f"SELECT COUNT(*) FROM sys.databases WHERE name = '{Settings.TEST_DB_DB}'"))
             db_exists = result.scalar() > 0
             if db_exists:
-                drop_database(conn, test_db_name)
+                drop_database(conn, Settings.TEST_DB_DB)
 
-            conn.execute(text(f"CREATE DATABASE {test_db_name}"))
-            conn.execute(text(f"USE {test_db_name}"))
+            conn.execute(text(f"CREATE DATABASE {Settings.TEST_DB_DB}"))
+            conn.execute(text(f"USE {Settings.TEST_DB_DB}"))
             conn.execute(text("CREATE SCHEMA lds"))
             conn.execute(text("CREATE SCHEMA editor"))
 
         engine.dispose()
 
-        test_engine = create_engine(url=test_db_uri, echo=False)
+        test_engine = create_engine(url=Settings.TEST_DB_URI, echo=False)
         SQLModel.metadata.create_all(test_engine)
         create_procedure(test_engine)
         set_new_engine(test_engine)
@@ -121,7 +98,7 @@ def setup_test_database(request):
         yield
 
         with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
-            drop_database(conn, test_db_name)
+            drop_database(conn, Settings.TEST_DB_DB)
 
         engine.dispose()
     elif db_type == 'tc':

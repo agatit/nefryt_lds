@@ -3,7 +3,7 @@ import logging
 import time
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from config import Settings
+from config import Config, Settings
 from database import lds
 from db import get_engine
 from simulator.simulations import SimulationDensityRKVolume, SimulationDensityPCHIPVolume, SimulationDensityRKMass, \
@@ -34,7 +34,7 @@ class SimulationManager:
         for simulation in simulations:
             try:
                 simulation_class = SIMULATION_CLASSES[simulation.SimulationDefID.strip()]
-                new_simulation = simulation_class(simulation, Settings.db_uri)
+                new_simulation = simulation_class(simulation, Settings.DB_URI)
                 self.simulations.append(new_simulation)
             except Exception as e:
                 logger.warning(f"SimulationManager: Simulation with id = {simulation.ID} init error: {e}", exc_info=True)
@@ -43,7 +43,7 @@ class SimulationManager:
             simulation.run_process()
         logger.info("SimulationManager: Finished reading simulations")
 
-        if Settings.tests:
+        if Config.tests:
             return self.simulations
         else:
             try:

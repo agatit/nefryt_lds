@@ -3,7 +3,7 @@ import pathlib
 import logging.config
 import sys
 from pydantic import BaseModel
-from config import app_config, Settings
+from config import app_config, Config
 import platform
 
 path = pathlib.Path(__file__).parent.resolve()
@@ -40,7 +40,7 @@ def setup_leak_detector_logging():
     for name in logging.root.manager.loggerDict:
         if name.startswith('leak_detector'):
             logger = logging.getLogger(name)
-            logger.setLevel(Settings.verbosity)
+            logger.setLevel(Config.verbosity)
 
 
 class AppConfig(BaseModel):

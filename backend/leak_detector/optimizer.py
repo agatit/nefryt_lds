@@ -9,7 +9,7 @@ from itertools import product
 import numpy as np
 import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import setup_engine, Settings, setup_logging
+from config import setup_engine, Config, setup_logging
 from leak_detector.config import LeakDetectorSettings, setup_leak_detector_logging
 from leak_detector.plant import Plant
 
@@ -155,7 +155,7 @@ params_spaces = {
 }
 
 if __name__ == '__main__':
-    Settings.verbosity = 'ERROR'
+    Config.verbosity = 'ERROR'
     setup_logging()
     setup_leak_detector_logging()
     LeakDetectorSettings.plot_heatmap = False

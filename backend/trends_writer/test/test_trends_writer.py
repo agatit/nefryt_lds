@@ -168,7 +168,8 @@ def cleanup_multiprocessing():
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_objects):
+@pytest.mark.usefixtures("add_test_context")
+async def test_trend_data_should_be_written_to_db_when_correct_address():
     port = 5022
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
@@ -188,7 +189,8 @@ async def test_trend_data_should_be_written_to_db_when_correct_address(add_lds_o
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_trend_data_should_write_only_when_correct_address(add_lds_objects):
+@pytest.mark.usefixtures("add_test_context")
+async def test_trend_data_should_write_only_when_correct_address():
     port = 5023
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
@@ -214,7 +216,8 @@ async def test_trend_data_should_write_only_when_correct_address(add_lds_objects
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects_with_children], indirect=True)
-async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_objects):
+@pytest.mark.usefixtures("add_test_context")
+async def test_trend_data_should_write_trend_data_for_children_trends():
     port = 5024
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
@@ -234,7 +237,8 @@ async def test_trend_data_should_write_trend_data_for_children_trends(add_lds_ob
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_trend_data_should_not_update_data_when_the_same_primary_key_in_one_timestamp(add_lds_objects):
+@pytest.mark.usefixtures("add_test_context")
+async def test_trend_data_should_not_update_data_when_the_same_primary_key_in_one_timestamp():
     port = 5025
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
@@ -260,7 +264,8 @@ async def test_trend_data_should_not_update_data_when_the_same_primary_key_in_on
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_trend_data_should_update_data_when_the_same_primary_key_in_repeated_timestamp(add_lds_objects):
+@pytest.mark.usefixtures("add_test_context")
+async def test_trend_data_should_update_data_when_the_same_primary_key_in_repeated_timestamp():
     port = 5026
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
@@ -290,7 +295,8 @@ async def test_trend_data_should_update_data_when_the_same_primary_key_in_repeat
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_two_objects], indirect=True)
-async def test_profiler_should_write_data_to_database(add_lds_objects):
+@pytest.mark.usefixtures("add_test_context")
+async def test_profiler_should_write_data_to_database():
     port = 5027
     Profiler.init()
     plant = PipePlant()
@@ -312,7 +318,8 @@ async def test_profiler_should_write_data_to_database(add_lds_objects):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_disabled_objects], indirect=True)
-async def test_trend_data_should_not_be_written_to_db_when_trend_is_disabled(add_lds_objects):
+@pytest.mark.usefixtures("add_test_context")
+async def test_trend_data_should_not_be_written_to_db_when_trend_is_disabled():
     port = 5029
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))
@@ -332,7 +339,8 @@ async def test_trend_data_should_not_be_written_to_db_when_trend_is_disabled(add
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects_with_children_two_layers], indirect=True)
-async def test_trends_writer_should_update_trend_time_delta_in_database(add_lds_objects):
+@pytest.mark.usefixtures("add_test_context")
+async def test_trends_writer_should_update_trend_time_delta_in_database():
     port = 5028
     Profiler.init()
     server_task = asyncio.create_task(run_server(PipePlant(), port))

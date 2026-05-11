@@ -6,7 +6,7 @@ import multiprocessing
 from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
-from config import setup_engine
+from config import setup_engine, Settings, Config
 from database.models import lds
 from db import get_engine
 from trends_writer.config import TrendsWriterSettings

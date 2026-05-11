@@ -16,7 +16,8 @@ dependencies = [
     "bcrypt==5.0.0",
     "mypy==2.0.0",
     "black==26.3.1",
-    "pwdlib[argon2]==0.3.0"
+    "pwdlib[argon2]==0.3.0",
+    "alembic==1.18.4"
 ]
 
 [project.optional-dependencies]

@@ -15,7 +15,7 @@ dependencies = [
     "odata-query==0.10.0",
     "passlib==1.7.4",
     "pyjwt>=2.4.0",
-    "pymodbus==3.9.2",
+    "pymodbus==3.13.0",
     "pymssql==2.3.7",
     "pyodbc>=4.0.22",
     "python-dateutil>=2.6.0",
@@ -27,7 +27,8 @@ dependencies = [
     "swagger-ui-bundle>=0.0.2",
     "umodbus>=1.0.4",
     "uv==0.7.2",
-    "uvicorn==0.34.0"
+    "uvicorn==0.34.0",
+    "pydantic-settings==2.9.1"
 ]
 
 [project.optional-dependencies]
