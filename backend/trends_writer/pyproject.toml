@@ -24,6 +24,9 @@ dev = [
     "starlette==1.0.0",
     "httpx==0.28.1"
 ]
+service = [
+    "pywin32==311"
+]
 
 [tool.setuptools]
 packages = [

@@ -1,21 +1,21 @@
 import atexit
 import logging
+import multiprocessing
 import time
-from multiprocessing import Queue
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from config import Config, Settings
 from database import lds
 from db import get_engine
 from .profiler import Profiler
-import trends_writer.trend # noqa
+import trends_writer.trend  # noqa
 from .trend import TrendManager, TrendBase, TrendQuick, TrendMean, TrendDeriv, TrendDiff
 
 TREND_CLASSES = {
-    'QUICK': TrendQuick,
-    'MEAN': TrendMean,
-    'DERIV': TrendDeriv,
-    'DIFF': TrendDiff
+    "QUICK": TrendQuick,
+    "MEAN": TrendMean,
+    "DERIV": TrendDeriv,
+    "DIFF": TrendDiff,
 }
 
 logger = logging.getLogger(__name__)
@@ -27,14 +27,17 @@ class PipePlant:
         self.quick_trends_by_ids = {}
         self.quick_trends_ids_not_updated = []
         self.double_trends_ids = []
+        self.manager = multiprocessing.Manager()
         self.read_trends()
         self.last_timestamp = round(time.time())
         atexit.register(self.shutdown_processes)
 
     def read_trends(self):
-        stmt = (select(lds.Trend, lds.TrendDef)
-                .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID) # noqa
-                .where(lds.Trend.Enabled == 1))
+        stmt = (
+            select(lds.Trend, lds.TrendDef)
+            .join(lds.TrendDef, lds.TrendDef.ID == lds.Trend.TrendDefID)  # noqa
+            .where(lds.Trend.Enabled == 1)
+        )
         logger.info("PipePlant: Started reading trends")
         with Session(get_engine()) as session:
             result = session.execute(stmt).all()
@@ -43,15 +46,23 @@ class PipePlant:
         for trend, trend_def in result:
             try:
                 trend_class = TREND_CLASSES[trend_def.ID.strip()]
-                new_trend = trend_class(trend.ID, Queue(), Settings.TEST_DB_URI if Config.tests else Settings.DB_URI, Profiler.queue)
+                new_trend = trend_class(
+                    trend.ID,
+                    self.manager.Queue(),
+                    Settings.TEST_DB_URI if Config.tests else Settings.DB_URI,
+                    Profiler.queue,
+                )
                 trend_ids.append(trend.ID)
                 TrendManager.add(new_trend)
-                if trend_def.ID.strip() == 'QUICK':
+                if trend_def.ID.strip() == "QUICK":
                     self.quick_trends[new_trend.register] = (trend.ID, new_trend.queue)
-                elif trend_def.ID.strip() == 'DIFF':
+                elif trend_def.ID.strip() == "DIFF":
                     self.double_trends_ids.append(trend.ID)
             except Exception as e:
-                logger.warning(f"PipePlant: Trend with id = ({trend.ID}) init error: {e}", exc_info=True)
+                logger.warning(
+                    f"PipePlant: Trend with id = ({trend.ID}) init error: {e}",
+                    exc_info=True,
+                )
 
         logger.info(f"PipePlant: Initialized trends (count={len(trend_ids)})")
         Profiler.set_trends(trend_ids, self.double_trends_ids)
@@ -89,15 +100,23 @@ class PipePlant:
             if timestamp != self.last_timestamp:
                 not_updated_count = len(self._prepare_not_updated_trends())
                 if not_updated_count != 0:
-                    Profiler.queue.put((2, not_updated_count, self.last_timestamp, None, None))
+                    Profiler.queue.put(
+                        (2, not_updated_count, self.last_timestamp, None, None)
+                    )
                 self.last_timestamp = timestamp
-                self.quick_trends_ids_not_updated = list(self.quick_trends_by_ids.keys())
+                self.quick_trends_ids_not_updated = list(
+                    self.quick_trends_by_ids.keys()
+                )
             if self.quick_trends[register][0] in self.quick_trends_ids_not_updated:
                 self.quick_trends[register][1].put((data, timestamp, 0))
                 self.quick_trends_ids_not_updated.remove(self.quick_trends[register][0])
-                logger.debug(f"PipePlant: Trend with id={self.quick_trends[register][0]} data sent (timestamp={timestamp})")
+                logger.debug(
+                    f"PipePlant: Trend with id={self.quick_trends[register][0]} data sent (timestamp={timestamp})"
+                )
             else:
-                logger.warning(f"PipePlant: Quick trend with id = {self.quick_trends[register][0]} already updated (timestamp={timestamp})")
+                logger.warning(
+                    f"PipePlant: Quick trend with id = {self.quick_trends[register][0]} already updated (timestamp={timestamp})"
+                )
         except KeyError:
             logger.exception(f"PipePlant: No quick trend using register={register}")
 
@@ -109,11 +128,14 @@ class PipePlant:
 
         return ids
 
-    @staticmethod
-    def shutdown_processes():
-        Profiler.queue.put((-1, None, None))
+    def shutdown_processes(self):
+        try:
+            Profiler.queue.put((-1, None, None))
+        except (BrokenPipeError, EOFError, OSError):
+            pass
         if not Config.tests:
             for trend in TrendManager.get_all():
                 trend.queue.put(None)
                 trend.process.terminate()
                 trend.process.join(1)
+            self.manager.shutdown()

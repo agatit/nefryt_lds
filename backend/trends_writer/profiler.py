@@ -9,25 +9,29 @@ from sqlalchemy.orm import Session
 from config import setup_engine, Settings, Config
 from database.models import lds
 from db import get_engine
-from trends_writer.config import TrendsWriterSettings
+from trends_writer.config_trends_writer import TrendsWriterSettings
 
 logger = logging.getLogger(__name__)
 
 
 class Profiler:
     queue = None
+    manager = None
     process = None
     updates = {}
 
     @staticmethod
     def init():
-        Profiler.queue = multiprocessing.Queue()
+        Profiler.manager = multiprocessing.Manager()
+        Profiler.queue = Profiler.manager.Queue()
         atexit.register(Profiler._shutdown)
         logger.info(f"Profiler: Initialized")
 
     @staticmethod
     def set_trends(trend_ids: list[str], double_trends_ids: list[str]):
-        profiler_dict: dict[str, list] = {'total': [len(trend_ids) + len(double_trends_ids), None]}
+        profiler_dict: dict[str, list] = {
+            "total": [len(trend_ids) + len(double_trends_ids), None]
+        }
         for trend_id in trend_ids:
             profiler_dict[trend_id] = [[1, 0], [None, None, None]]
             if trend_id in double_trends_ids:
@@ -64,16 +68,28 @@ class Profiler:
 
     @staticmethod
     def _start_process(trends_dict: dict, trends_count: int):
-        Profiler.process = multiprocessing.Process(target=Profiler._process_queue,
-                                                   args=(Profiler.queue, trends_dict, trends_count, TrendsWriterSettings.db_uri,
-                                                         TrendsWriterSettings.log_profiler))
+        Profiler.process = multiprocessing.Process(
+            target=Profiler._process_queue,
+            args=(
+                Profiler.queue,
+                trends_dict,
+                trends_count,
+                Settings.TEST_DB_URI if Config.tests else Settings.DB_URI,
+                TrendsWriterSettings.log_profiler,
+            ),
+        )
         Profiler.process.daemon = True
         Profiler.process.start()
         logger.info("Profiler: Process started")
 
     @staticmethod
-    def _process_queue(queue: multiprocessing.Queue, trends_dict: dict, expected_trends_count: int, db_uri: str,
-                       log_profiler: bool):
+    def _process_queue(
+        queue: multiprocessing.Queue,
+        trends_dict: dict,
+        expected_trends_count: int,
+        db_uri: str,
+        log_profiler: bool,
+    ):
         setup_engine(db_uri)
         initialized_processes_count = 0
         first_timestamp = math.inf
@@ -87,16 +103,29 @@ class Profiler:
             if operation == 1 and timestamp >= first_timestamp:
                 if timestamp not in Profiler.updates:
                     Profiler.updates[timestamp] = copy.deepcopy(trends_dict)
-                    Profiler.updates[timestamp]['total'][1] = (1, 0, perf_counter, 0)
+                    Profiler.updates[timestamp]["total"][1] = (1, 0, perf_counter, 0)
                 else:
-                    current_count, finished_count, start, time_used = Profiler.updates[timestamp]['total'][1]
+                    current_count, finished_count, start, time_used = Profiler.updates[
+                        timestamp
+                    ]["total"][1]
                     if current_count > 0:
-                        Profiler.updates[timestamp]['total'][1] = (current_count + 1, finished_count, start, time_used)
+                        Profiler.updates[timestamp]["total"][1] = (
+                            current_count + 1,
+                            finished_count,
+                            start,
+                            time_used,
+                        )
                     else:
-                        Profiler.updates[timestamp]['total'][1] = (1, finished_count, perf_counter, time_used)
+                        Profiler.updates[timestamp]["total"][1] = (
+                            1,
+                            finished_count,
+                            perf_counter,
+                            time_used,
+                        )
                 if Profiler.updates[timestamp][trend_id][0][0] == 0:
                     logger.warning(
-                        f'Profiler: Already got start time for trend with id={trend_id} (timestamp={timestamp})')
+                        f"Profiler: Already got start time for trend with id={trend_id} (timestamp={timestamp})"
+                    )
                 else:
                     Profiler.updates[timestamp][trend_id][0][0] -= 1
                     Profiler.updates[timestamp][trend_id][0][1] += 1
@@ -104,49 +133,76 @@ class Profiler:
                         Profiler.updates[timestamp][trend_id][1][0] = perf_counter
             elif operation == 0 and timestamp >= first_timestamp:
                 if timestamp in Profiler.updates:
-                    trends_count, (current_count, finished_count, start, time_used) = Profiler.updates[timestamp][
-                        'total']
+                    trends_count, (current_count, finished_count, start, time_used) = (
+                        Profiler.updates[timestamp]["total"]
+                    )
                     if current_count == 1:
                         time_used += perf_counter - start
                     finished_count += 1
                     current_count -= 1
-                    Profiler.updates[timestamp]['total'][1] = (current_count, finished_count, start, time_used)
-                    if Profiler.updates[timestamp][trend_id][1][0] is None and Profiler.updates[timestamp][trend_id][1][1] is None:
-                        logger.warning(f'Profiler: No start time for trend with id={trend_id} (timestamp={timestamp})')
-                    elif Profiler.updates[timestamp][trend_id][1][0] is None and \
-                            Profiler.updates[timestamp][trend_id][1][1] is not None:
+                    Profiler.updates[timestamp]["total"][1] = (
+                        current_count,
+                        finished_count,
+                        start,
+                        time_used,
+                    )
+                    if (
+                        Profiler.updates[timestamp][trend_id][1][0] is None
+                        and Profiler.updates[timestamp][trend_id][1][1] is None
+                    ):
                         logger.warning(
-                            f'Profiler: Already got stop time for trend with id={trend_id} (timestamp={timestamp})')
+                            f"Profiler: No start time for trend with id={trend_id} (timestamp={timestamp})"
+                        )
+                    elif (
+                        Profiler.updates[timestamp][trend_id][1][0] is None
+                        and Profiler.updates[timestamp][trend_id][1][1] is not None
+                    ):
+                        logger.warning(
+                            f"Profiler: Already got stop time for trend with id={trend_id} (timestamp={timestamp})"
+                        )
                     elif Profiler.updates[timestamp][trend_id][0][1] == 1:
                         start_time = Profiler.updates[timestamp][trend_id][1][0]
                         trend_time_used = perf_counter - start_time
                         if Profiler.updates[timestamp][trend_id][1][1] is None:
-                            Profiler.updates[timestamp][trend_id][1][1] = trend_time_used
+                            Profiler.updates[timestamp][trend_id][1][
+                                1
+                            ] = trend_time_used
                         else:
-                            Profiler.updates[timestamp][trend_id][1][1] += trend_time_used
+                            Profiler.updates[timestamp][trend_id][1][
+                                1
+                            ] += trend_time_used
                         Profiler.updates[timestamp][trend_id][1][2] = qsize
                         Profiler.updates[timestamp][trend_id][1][0] = None
                         Profiler.updates[timestamp][trend_id][0][1] = 0
                         if finished_count >= trends_count and current_count == 0:
-                            Profiler.write_profiler_data(log_profiler, time_used, timestamp)
+                            Profiler.write_profiler_data(
+                                log_profiler, time_used, timestamp
+                            )
                         else:
                             Profiler.updates[timestamp][trend_id][0][1] -= 0
             elif operation == 2 and timestamp >= first_timestamp:
                 if timestamp in Profiler.updates:
-                    trends_count, (current_count, finished_count, start, time_used) = Profiler.updates[timestamp]['total']
+                    trends_count, (current_count, finished_count, start, time_used) = (
+                        Profiler.updates[timestamp]["total"]
+                    )
                     finished_count += trend_id
-                    Profiler.updates[timestamp]['total'][1] = (current_count, finished_count, start, time_used)
+                    Profiler.updates[timestamp]["total"][1] = (
+                        current_count,
+                        finished_count,
+                        start,
+                        time_used,
+                    )
                     if finished_count >= trends_count and current_count == 0:
                         Profiler.write_profiler_data(log_profiler, time_used, timestamp)
-                elif trend_id < trends_dict['total'][0]:
+                elif trend_id < trends_dict["total"][0]:
                     Profiler.updates[timestamp] = copy.deepcopy(trends_dict)
-                    Profiler.updates[timestamp]['total'][1] = (0, trend_id, None, 0)
+                    Profiler.updates[timestamp]["total"][1] = (0, trend_id, None, 0)
             elif operation == 3:
                 initialized_processes_count += 1
                 if initialized_processes_count == expected_trends_count:
                     first_timestamp = timestamp + 1
             elif operation is None:
-                logger.info(f'Profiler: Started shutdown')
+                logger.info(f"Profiler: Started shutdown")
                 Profiler._shutdown()
                 break
 
@@ -154,37 +210,73 @@ class Profiler:
     def write_profiler_data(log_profiler: bool, time_used: float, timestamp: int):
         time_used_percent = (time_used / 1.0) * 100
         if log_profiler:
-            with (open(TrendsWriterSettings.profiler_filename, "a") as f):
+            with open(TrendsWriterSettings.profiler_filename, "a") as f:
                 for trend_id, saved_trend_data in Profiler.updates[timestamp].items():
-                    if trend_id == 'total' or saved_trend_data[1][1] is None or saved_trend_data[0][0] != 0:
+                    if (
+                        trend_id == "total"
+                        or saved_trend_data[1][1] is None
+                        or saved_trend_data[0][0] != 0
+                    ):
                         continue
-                    f.write(f"{timestamp}: Trends writer for trend id={trend_id} used {100 * (saved_trend_data[1][1] / 1.0):.2f}% of time\n")
+                    f.write(
+                        f"{timestamp}: Trends writer for trend id={trend_id} used {100 * (saved_trend_data[1][1] / 1.0):.2f}% of time\n"
+                    )
                     with Session(get_engine()) as session:
                         profiler_data = session.get(lds.ProfilerData, trend_id)
                         if profiler_data:
-                            profiler_data.Time10 = float(profiler_data.Time10) * 0.9 + saved_trend_data[1][1] * 0.1 \
-                                if profiler_data.Time10 else saved_trend_data[1][1]
-                            profiler_data.Time100 = float(profiler_data.Time100) * 0.99 + saved_trend_data[1][1] * 0.01 \
-                                if profiler_data.Time100 else saved_trend_data[1][1]
-                            profiler_data.Time1000 = float(profiler_data.Time1000) * 0.999 + saved_trend_data[1][1] * 0.001 \
-                                if profiler_data.Time1000 else saved_trend_data[1][1]
+                            profiler_data.Time10 = (
+                                float(profiler_data.Time10) * 0.9
+                                + saved_trend_data[1][1] * 0.1
+                                if profiler_data.Time10
+                                else saved_trend_data[1][1]
+                            )
+                            profiler_data.Time100 = (
+                                float(profiler_data.Time100) * 0.99
+                                + saved_trend_data[1][1] * 0.01
+                                if profiler_data.Time100
+                                else saved_trend_data[1][1]
+                            )
+                            profiler_data.Time1000 = (
+                                float(profiler_data.Time1000) * 0.999
+                                + saved_trend_data[1][1] * 0.001
+                                if profiler_data.Time1000
+                                else saved_trend_data[1][1]
+                            )
                             if saved_trend_data[1][2] is not None:
                                 profiler_data.QueueSize = saved_trend_data[1][2]
                             session.commit()
-                f.write(f"{timestamp}: Trends writer used {time_used_percent:.2f}% of time\n")
+                f.write(
+                    f"{timestamp}: Trends writer used {time_used_percent:.2f}% of time\n"
+                )
         else:
             for trend_id, saved_trend_data in Profiler.updates[timestamp].items():
-                if trend_id == 'total' or saved_trend_data[1][1] is None or saved_trend_data[0][0] != 0:
+                if (
+                    trend_id == "total"
+                    or saved_trend_data[1][1] is None
+                    or saved_trend_data[0][0] != 0
+                ):
                     continue
                 with Session(get_engine()) as session:
                     profiler_data = session.get(lds.ProfilerData, trend_id)
                     if profiler_data:
-                        profiler_data.Time10 = float(profiler_data.Time10) * 0.9 + saved_trend_data[1][1] * 0.1 \
-                            if profiler_data.Time10 else saved_trend_data[1][1]
-                        profiler_data.Time100 = float(profiler_data.Time100) * 0.99 + saved_trend_data[1][1] * 0.01 \
-                            if profiler_data.Time100 else saved_trend_data[1][1]
-                        profiler_data.Time1000 = float(profiler_data.Time1000) * 0.999 + saved_trend_data[1][1] * 0.001 \
-                            if profiler_data.Time1000 else saved_trend_data[1][1]
+                        profiler_data.Time10 = (
+                            float(profiler_data.Time10) * 0.9
+                            + saved_trend_data[1][1] * 0.1
+                            if profiler_data.Time10
+                            else saved_trend_data[1][1]
+                        )
+                        profiler_data.Time100 = (
+                            float(profiler_data.Time100) * 0.99
+                            + saved_trend_data[1][1] * 0.01
+                            if profiler_data.Time100
+                            else saved_trend_data[1][1]
+                        )
+                        profiler_data.Time1000 = (
+                            float(profiler_data.Time1000) * 0.999
+                            + saved_trend_data[1][1] * 0.001
+                            if profiler_data.Time1000
+                            else saved_trend_data[1][1]
+                        )
                         if saved_trend_data[1][2] is not None:
                             profiler_data.QueueSize = saved_trend_data[1][2]
                         session.commit()
@@ -193,6 +285,7 @@ class Profiler:
     @staticmethod
     def _shutdown():
         Profiler.delete_profiler_data_from_db()
+        Profiler.manager.shutdown()
         if Profiler.process:
             Profiler.process.terminate()
             Profiler.process.join()
