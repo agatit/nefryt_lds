@@ -1,0 +1,8 @@
+{
+  "name": "Nazwa",
+  "type": "Typ",
+  "pos_x": "Pozycja X",
+  "pos_y": "Pozycja Y",
+  "add_new_node": "Dodaj nowy węzeł",
+  "delete_node": "Czy jesteś pewien, że chcesz usunąć węzeł?"
+}

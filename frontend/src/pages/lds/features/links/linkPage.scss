@@ -1,0 +1,104 @@
+@use "@progress/kendo-theme-default/dist/all.scss" as *;
+@use "../../../../themes/variables.scss" as var;
+
+main.links-page {
+  display: flex;
+  flex-direction: row;
+  height: var.$underAppBarHeight;
+}
+
+main.links-page .k-label {
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.links-grid-container {
+  flex: 4 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.links-grid-container .k-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.links-detail-panel > div {
+  width: 100%;
+}
+
+.links-detail-panel.no-selected > div {
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.detail-panel-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.detail-panel-content .item-column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+.detail-panel-content .item-column > div {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0 !important;
+}
+
+.field-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.field-wrapper .k-input,
+.field-wrapper .k-textbox,
+.field-wrapper .k-input-inner {
+  width: 100%;
+}
+
+.field-input {
+  width: 100%;
+}
+
+.field-error {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.detail-panel-content .item-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.detail-panel-content .item-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-wrapper .k-form-error,
+.field-wrapper .k-error {
+  margin-top: 0;
+  align-self: flex-start;
+  text-align: left;
+}
+
+.field-wrapper .k-form-error,
+.field-wrapper .k-error {
+  align-self: flex-start;
+  text-align: left;
+}

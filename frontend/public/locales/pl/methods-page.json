@@ -1,0 +1,15 @@
+{
+  "id": "ID",
+  "name": "Nazwa",
+  "data_type": "Typ danych",
+  "add_method_param": "Dodaj nowy parametr metody",
+  "add_new_method": "Dodaj nową metodę",
+  "value": "Wartość",
+  "method_param_id": "ID parametru metody",
+  "pipeline_id": "ID potoku",
+  "method_def_id": "ID definicji metody",
+  "method_definition": "Definicja metody",
+  "pipeline": "Potok",
+  "pipeline_required": "Potok jest wymagany",
+  "method_def_required": "Definicja metody jest wymagana"
+}

@@ -274,6 +274,191 @@ export interface CustomPageLink {
 /**
  * 
  * @export
+ * @interface CustomPageMethod
+ */
+export interface CustomPageMethod {
+    /**
+     * 
+     * @type {Array<Method>}
+     * @memberof CustomPageMethod
+     */
+    'items': Array<Method>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethod
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethod
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethod
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethod
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageMethodData
+ */
+export interface CustomPageMethodData {
+    /**
+     * 
+     * @type {Array<MethodData>}
+     * @memberof CustomPageMethodData
+     */
+    'items': Array<MethodData>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodData
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodData
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodData
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodData
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageMethodDef
+ */
+export interface CustomPageMethodDef {
+    /**
+     * 
+     * @type {Array<MethodDef>}
+     * @memberof CustomPageMethodDef
+     */
+    'items': Array<MethodDef>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodDef
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodDef
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodDef
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodDef
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageMethodParam
+ */
+export interface CustomPageMethodParam {
+    /**
+     * 
+     * @type {Array<MethodParam>}
+     * @memberof CustomPageMethodParam
+     */
+    'items': Array<MethodParam>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodParam
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodParam
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodParam
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodParam
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPageMethodParamDef
+ */
+export interface CustomPageMethodParamDef {
+    /**
+     * 
+     * @type {Array<MethodParamDef>}
+     * @memberof CustomPageMethodParamDef
+     */
+    'items': Array<MethodParamDef>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodParamDef
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodParamDef
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodParamDef
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPageMethodParamDef
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
  * @interface CustomPageNode
  */
 export interface CustomPageNode {
@@ -305,6 +490,80 @@ export interface CustomPageNode {
      * 
      * @type {number}
      * @memberof CustomPageNode
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPagePipeline
+ */
+export interface CustomPagePipeline {
+    /**
+     * 
+     * @type {Array<Pipeline>}
+     * @memberof CustomPagePipeline
+     */
+    'items': Array<Pipeline>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPagePipeline
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPagePipeline
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPagePipeline
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPagePipeline
+     */
+    'pages'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface CustomPagePipelineParam
+ */
+export interface CustomPagePipelineParam {
+    /**
+     * 
+     * @type {Array<PipelineParam>}
+     * @memberof CustomPagePipelineParam
+     */
+    'items': Array<PipelineParam>;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPagePipelineParam
+     */
+    'total': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPagePipelineParam
+     */
+    'page': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPagePipelineParam
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof CustomPagePipelineParam
      */
     'pages'?: number | null;
 }
@@ -893,25 +1152,7 @@ export interface Event {
      * @type {number}
      * @memberof Event
      */
-    'ID'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof Event
-     */
-    'MethodID': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Event
-     */
-    'Details'?: string | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof Event
-     */
-    'Position'?: number | null;
+    'ID': number;
     /**
      * 
      * @type {string}
@@ -920,22 +1161,10 @@ export interface Event {
     'EventDefID': string;
     /**
      * 
-     * @type {string}
+     * @type {number}
      * @memberof Event
      */
-    'Verbosity'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof Event
-     */
-    'Caption'?: string | null;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Event
-     */
-    'Silient'?: boolean | null;
+    'MethodID': number;
     /**
      * 
      * @type {string}
@@ -954,6 +1183,36 @@ export interface Event {
      * @memberof Event
      */
     'EndDate'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Event
+     */
+    'Details'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Event
+     */
+    'Position'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Event
+     */
+    'Verbosity': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Event
+     */
+    'Caption': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Event
+     */
+    'Silent'?: boolean;
 }
 /**
  * 
@@ -1281,6 +1540,218 @@ export interface LoginPermissions {
 /**
  * 
  * @export
+ * @interface Method
+ */
+export interface Method {
+    /**
+     * 
+     * @type {string}
+     * @memberof Method
+     */
+    'MethodDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Method
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Method
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Method
+     */
+    'ID': number;
+}
+/**
+ * 
+ * @export
+ * @interface MethodCreate
+ */
+export interface MethodCreate {
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodCreate
+     */
+    'MethodDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof MethodCreate
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodCreate
+     */
+    'Name'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface MethodData
+ */
+export interface MethodData {
+    /**
+     * 
+     * @type {number}
+     * @memberof MethodData
+     */
+    'Position': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof MethodData
+     */
+    'Time': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof MethodData
+     */
+    'Value'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface MethodDef
+ */
+export interface MethodDef {
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodDef
+     */
+    'ID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodDef
+     */
+    'Name': string;
+}
+/**
+ * 
+ * @export
+ * @interface MethodParam
+ */
+export interface MethodParam {
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParam
+     */
+    'MethodParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParam
+     */
+    'Value'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof MethodParam
+     */
+    'MethodID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParam
+     */
+    'DataType'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParam
+     */
+    'Name'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface MethodParamCreate
+ */
+export interface MethodParamCreate {
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParamCreate
+     */
+    'MethodParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParamCreate
+     */
+    'Value': string;
+}
+/**
+ * 
+ * @export
+ * @interface MethodParamDef
+ */
+export interface MethodParamDef {
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParamDef
+     */
+    'ID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParamDef
+     */
+    'MethodDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParamDef
+     */
+    'Name'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodParamDef
+     */
+    'DataType'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface MethodUpdate
+ */
+export interface MethodUpdate {
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodUpdate
+     */
+    'MethodDefID'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof MethodUpdate
+     */
+    'PipelineID'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MethodUpdate
+     */
+    'Name'?: string | null;
+}
+/**
+ * 
+ * @export
  * @interface ModelError
  */
 export interface ModelError {
@@ -1303,6 +1774,13 @@ export interface ModelError {
  * @interface Multiplier
  */
 export interface Multiplier {
+}
+/**
+ * 
+ * @export
+ * @interface Multiplier1
+ */
+export interface Multiplier1 {
 }
 /**
  * 
@@ -1396,6 +1874,145 @@ export interface NodeUpdate {
      * @memberof NodeUpdate
      */
     'EditorParams'?: EditorNode | null;
+}
+/**
+ * 
+ * @export
+ * @interface PastDetectorConfig
+ */
+export interface PastDetectorConfig {
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof PastDetectorConfig
+     */
+    'DetectionPeriods'?: Array<number> | null;
+}
+/**
+ * 
+ * @export
+ * @interface PastWriterConfig
+ */
+export interface PastWriterConfig {
+    /**
+     * 
+     * @type {number}
+     * @memberof PastWriterConfig
+     */
+    'FromTimestamp'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof PastWriterConfig
+     */
+    'ToTimestamp'?: number | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof PastWriterConfig
+     */
+    'QuickTrendIds'?: Array<number> | null;
+}
+/**
+ * 
+ * @export
+ * @interface Pipeline
+ */
+export interface Pipeline {
+    /**
+     * 
+     * @type {string}
+     * @memberof Pipeline
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Pipeline
+     */
+    'ID': number;
+}
+/**
+ * 
+ * @export
+ * @interface PipelineCreate
+ */
+export interface PipelineCreate {
+    /**
+     * 
+     * @type {string}
+     * @memberof PipelineCreate
+     */
+    'Name': string;
+}
+/**
+ * 
+ * @export
+ * @interface PipelineParam
+ */
+export interface PipelineParam {
+    /**
+     * 
+     * @type {string}
+     * @memberof PipelineParam
+     */
+    'PipelineParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PipelineParam
+     */
+    'Value'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof PipelineParam
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PipelineParam
+     */
+    'DataType'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PipelineParam
+     */
+    'Name'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface PipelineParamCreate
+ */
+export interface PipelineParamCreate {
+    /**
+     * 
+     * @type {string}
+     * @memberof PipelineParamCreate
+     */
+    'PipelineParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PipelineParamCreate
+     */
+    'Value': string;
+}
+/**
+ * 
+ * @export
+ * @interface PipelineUpdate
+ */
+export interface PipelineUpdate {
+    /**
+     * 
+     * @type {string}
+     * @memberof PipelineUpdate
+     */
+    'Name'?: string | null;
 }
 /**
  * 
@@ -1603,6 +2220,98 @@ export interface ResponseCreateLinkLinkPost {
 /**
  * 
  * @export
+ * @interface ResponseCreateMethodMethodPost
+ */
+export interface ResponseCreateMethodMethodPost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateMethodMethodPost
+     */
+    'MethodDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateMethodMethodPost
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateMethodMethodPost
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateMethodMethodPost
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateMethodMethodPost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateMethodMethodPost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseCreateMethodParamMethodMethodIdParamPost
+ */
+export interface ResponseCreateMethodParamMethodMethodIdParamPost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateMethodParamMethodMethodIdParamPost
+     */
+    'MethodParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateMethodParamMethodMethodIdParamPost
+     */
+    'Value'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateMethodParamMethodMethodIdParamPost
+     */
+    'MethodID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateMethodParamMethodMethodIdParamPost
+     */
+    'DataType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateMethodParamMethodMethodIdParamPost
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreateMethodParamMethodMethodIdParamPost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreateMethodParamMethodMethodIdParamPost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseCreateNodeNodePost
  */
 export interface ResponseCreateNodeNodePost {
@@ -1646,6 +2355,86 @@ export interface ResponseCreateNodeNodePost {
      * 
      * @type {string}
      * @memberof ResponseCreateNodeNodePost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseCreatePipelineParamPipelinePipelineIdParamPost
+ */
+export interface ResponseCreatePipelineParamPipelinePipelineIdParamPost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreatePipelineParamPipelinePipelineIdParamPost
+     */
+    'PipelineParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreatePipelineParamPipelinePipelineIdParamPost
+     */
+    'Value'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreatePipelineParamPipelinePipelineIdParamPost
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreatePipelineParamPipelinePipelineIdParamPost
+     */
+    'DataType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreatePipelineParamPipelinePipelineIdParamPost
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreatePipelineParamPipelinePipelineIdParamPost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreatePipelineParamPipelinePipelineIdParamPost
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseCreatePipelinePipelinePost
+ */
+export interface ResponseCreatePipelinePipelinePost {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreatePipelinePipelinePost
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreatePipelinePipelinePost
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseCreatePipelinePipelinePost
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseCreatePipelinePipelinePost
      */
     'message': string;
 }
@@ -1740,6 +2529,12 @@ export interface ResponseCreateSimulationSimulationPost {
      * @memberof ResponseCreateSimulationSimulationPost
      */
     'ID': number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseCreateSimulationSimulationPost
+     */
+    'Enabled'?: boolean;
     /**
      * 
      * @type {number}
@@ -1965,13 +2760,19 @@ export interface ResponseCreateTrendTrendPost {
      * @type {number}
      * @memberof ResponseCreateTrendTrendPost
      */
-    'TimeDelta'?: number;
+    'ID': number;
     /**
      * 
      * @type {number}
      * @memberof ResponseCreateTrendTrendPost
      */
-    'ID': number;
+    'TimeDelta'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseCreateTrendTrendPost
+     */
+    'Enabled'?: boolean;
     /**
      * 
      * @type {number}
@@ -2037,161 +2838,6 @@ export interface ResponseCreateUnitUnitPost {
 /**
  * 
  * @export
- * @interface ResponseDeleteEventDefByIdEventDefEventDefIdDelete
- */
-export interface ResponseDeleteEventDefByIdEventDefEventDefIdDelete {
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseDeleteEventDefByIdEventDefEventDefIdDelete
-     */
-    'message': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteEventDefByIdEventDefEventDefIdDelete
-     */
-    'affected': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteEventDefByIdEventDefEventDefIdDelete
-     */
-    'status': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteEventDefByIdEventDefEventDefIdDelete
-     */
-    'code': number;
-}
-/**
- * 
- * @export
- * @interface ResponseDeleteSimulationByIdSimulationSimulationIdDelete
- */
-export interface ResponseDeleteSimulationByIdSimulationSimulationIdDelete {
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseDeleteSimulationByIdSimulationSimulationIdDelete
-     */
-    'message': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteSimulationByIdSimulationSimulationIdDelete
-     */
-    'affected': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteSimulationByIdSimulationSimulationIdDelete
-     */
-    'status': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteSimulationByIdSimulationSimulationIdDelete
-     */
-    'code': number;
-}
-/**
- * 
- * @export
- * @interface ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
- */
-export interface ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete {
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
-     */
-    'message': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
-     */
-    'affected': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
-     */
-    'status': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete
-     */
-    'code': number;
-}
-/**
- * 
- * @export
- * @interface ResponseDeleteTrendByIdTrendTrendIdDelete
- */
-export interface ResponseDeleteTrendByIdTrendTrendIdDelete {
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseDeleteTrendByIdTrendTrendIdDelete
-     */
-    'message': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteTrendByIdTrendTrendIdDelete
-     */
-    'affected': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteTrendByIdTrendTrendIdDelete
-     */
-    'status': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteTrendByIdTrendTrendIdDelete
-     */
-    'code': number;
-}
-/**
- * 
- * @export
- * @interface ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
- */
-export interface ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete {
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
-     */
-    'message': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
-     */
-    'affected': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
-     */
-    'status': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete
-     */
-    'code': number;
-}
-/**
- * 
- * @export
  * @interface ResponseGetEventByIdEventEventIdGet
  */
 export interface ResponseGetEventByIdEventEventIdGet {
@@ -2200,25 +2846,7 @@ export interface ResponseGetEventByIdEventEventIdGet {
      * @type {number}
      * @memberof ResponseGetEventByIdEventEventIdGet
      */
-    'ID'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseGetEventByIdEventEventIdGet
-     */
-    'MethodID': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseGetEventByIdEventEventIdGet
-     */
-    'Details'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResponseGetEventByIdEventEventIdGet
-     */
-    'Position'?: number;
+    'ID': number;
     /**
      * 
      * @type {string}
@@ -2227,22 +2855,10 @@ export interface ResponseGetEventByIdEventEventIdGet {
     'EventDefID': string;
     /**
      * 
-     * @type {string}
+     * @type {number}
      * @memberof ResponseGetEventByIdEventEventIdGet
      */
-    'Verbosity'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ResponseGetEventByIdEventEventIdGet
-     */
-    'Caption'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof ResponseGetEventByIdEventEventIdGet
-     */
-    'Silient'?: boolean;
+    'MethodID': number;
     /**
      * 
      * @type {string}
@@ -2261,6 +2877,36 @@ export interface ResponseGetEventByIdEventEventIdGet {
      * @memberof ResponseGetEventByIdEventEventIdGet
      */
     'EndDate'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetEventByIdEventEventIdGet
+     */
+    'Details'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetEventByIdEventEventIdGet
+     */
+    'Position'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetEventByIdEventEventIdGet
+     */
+    'Verbosity': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetEventByIdEventEventIdGet
+     */
+    'Caption': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseGetEventByIdEventEventIdGet
+     */
+    'Silent'?: boolean;
     /**
      * 
      * @type {number}
@@ -2424,6 +3070,147 @@ export interface ResponseGetLinkByIdLinkLinkIdGet {
 /**
  * 
  * @export
+ * @interface ResponseGetMethodByIdMethodMethodIdGet
+ */
+export interface ResponseGetMethodByIdMethodMethodIdGet {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodByIdMethodMethodIdGet
+     */
+    'MethodDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodByIdMethodMethodIdGet
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodByIdMethodMethodIdGet
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodByIdMethodMethodIdGet
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodByIdMethodMethodIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodByIdMethodMethodIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetMethodDataMethodMethodIdDataGet
+ */
+export interface ResponseGetMethodDataMethodMethodIdDataGet {
+    /**
+     * 
+     * @type {Array<MethodData>}
+     * @memberof ResponseGetMethodDataMethodMethodIdDataGet
+     */
+    'items': Array<MethodData>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodDataMethodMethodIdDataGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodDataMethodMethodIdDataGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodDataMethodMethodIdDataGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodDataMethodMethodIdDataGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodDataMethodMethodIdDataGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodDataMethodMethodIdDataGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet
+ */
+export interface ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet
+     */
+    'MethodParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet
+     */
+    'Value'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet
+     */
+    'MethodID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet
+     */
+    'DataType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseGetNodeByIdNodeNodeIdGet
  */
 export interface ResponseGetNodeByIdNodeNodeIdGet {
@@ -2467,6 +3254,86 @@ export interface ResponseGetNodeByIdNodeNodeIdGet {
      * 
      * @type {string}
      * @memberof ResponseGetNodeByIdNodeNodeIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetPipelineByIdPipelinePipelineIdGet
+ */
+export interface ResponseGetPipelineByIdPipelinePipelineIdGet {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetPipelineByIdPipelinePipelineIdGet
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetPipelineByIdPipelinePipelineIdGet
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetPipelineByIdPipelinePipelineIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetPipelineByIdPipelinePipelineIdGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet
+ */
+export interface ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet
+     */
+    'PipelineParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet
+     */
+    'Value'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet
+     */
+    'DataType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet
      */
     'message': string;
 }
@@ -2561,6 +3428,12 @@ export interface ResponseGetSimulationByIdSimulationSimulationIdGet {
      * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
      */
     'ID': number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseGetSimulationByIdSimulationSimulationIdGet
+     */
+    'Enabled'?: boolean;
     /**
      * 
      * @type {number}
@@ -2847,13 +3720,19 @@ export interface ResponseGetTrendByIdTrendTrendIdGet {
      * @type {number}
      * @memberof ResponseGetTrendByIdTrendTrendIdGet
      */
-    'TimeDelta'?: number;
+    'ID': number;
     /**
      * 
      * @type {number}
      * @memberof ResponseGetTrendByIdTrendTrendIdGet
      */
-    'ID': number;
+    'TimeDelta'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseGetTrendByIdTrendTrendIdGet
+     */
+    'Enabled'?: boolean;
     /**
      * 
      * @type {number}
@@ -3250,6 +4129,202 @@ export interface ResponseListLinksLinkGet {
 /**
  * 
  * @export
+ * @interface ResponseListMethodDefsMethodDefGet
+ */
+export interface ResponseListMethodDefsMethodDefGet {
+    /**
+     * 
+     * @type {Array<MethodDef>}
+     * @memberof ResponseListMethodDefsMethodDefGet
+     */
+    'items': Array<MethodDef>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodDefsMethodDefGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodDefsMethodDefGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodDefsMethodDefGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodDefsMethodDefGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodDefsMethodDefGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListMethodDefsMethodDefGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListMethodParamDefsMethodParamDefGet
+ */
+export interface ResponseListMethodParamDefsMethodParamDefGet {
+    /**
+     * 
+     * @type {Array<MethodParamDef>}
+     * @memberof ResponseListMethodParamDefsMethodParamDefGet
+     */
+    'items': Array<MethodParamDef>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamDefsMethodParamDefGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamDefsMethodParamDefGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamDefsMethodParamDefGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamDefsMethodParamDefGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamDefsMethodParamDefGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListMethodParamDefsMethodParamDefGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListMethodParamsByMethodIdMethodMethodIdParamGet
+ */
+export interface ResponseListMethodParamsByMethodIdMethodMethodIdParamGet {
+    /**
+     * 
+     * @type {Array<MethodParam>}
+     * @memberof ResponseListMethodParamsByMethodIdMethodMethodIdParamGet
+     */
+    'items': Array<MethodParam>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamsByMethodIdMethodMethodIdParamGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamsByMethodIdMethodMethodIdParamGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamsByMethodIdMethodMethodIdParamGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamsByMethodIdMethodMethodIdParamGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodParamsByMethodIdMethodMethodIdParamGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListMethodParamsByMethodIdMethodMethodIdParamGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListMethodsMethodGet
+ */
+export interface ResponseListMethodsMethodGet {
+    /**
+     * 
+     * @type {Array<Method>}
+     * @memberof ResponseListMethodsMethodGet
+     */
+    'items': Array<Method>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodsMethodGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodsMethodGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodsMethodGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodsMethodGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListMethodsMethodGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListMethodsMethodGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseListNodesNodeGet
  */
 export interface ResponseListNodesNodeGet {
@@ -3299,6 +4374,104 @@ export interface ResponseListNodesNodeGet {
 /**
  * 
  * @export
+ * @interface ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet
+ */
+export interface ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet {
+    /**
+     * 
+     * @type {Array<PipelineParam>}
+     * @memberof ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet
+     */
+    'items': Array<PipelineParam>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListPipelinesPipelineGet
+ */
+export interface ResponseListPipelinesPipelineGet {
+    /**
+     * 
+     * @type {Array<Pipeline>}
+     * @memberof ResponseListPipelinesPipelineGet
+     */
+    'items': Array<Pipeline>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelinesPipelineGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelinesPipelineGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelinesPipelineGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelinesPipelineGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListPipelinesPipelineGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListPipelinesPipelineGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseListProfilerDataTrendWriterGet
  */
 export interface ResponseListProfilerDataTrendWriterGet {
@@ -3342,6 +4515,104 @@ export interface ResponseListProfilerDataTrendWriterGet {
      * 
      * @type {string}
      * @memberof ResponseListProfilerDataTrendWriterGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet
+ */
+export interface ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet {
+    /**
+     * 
+     * @type {Array<MethodParam>}
+     * @memberof ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet
+     */
+    'items': Array<MethodParam>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet
+ */
+export interface ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet {
+    /**
+     * 
+     * @type {Array<PipelineParam>}
+     * @memberof ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet
+     */
+    'items': Array<PipelineParam>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet
+     */
+    'size': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet
+     */
+    'pages'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet
      */
     'message': string;
 }
@@ -4083,6 +5354,98 @@ export interface ResponseUpdateLinkLinkLinkIdPut {
 /**
  * 
  * @export
+ * @interface ResponseUpdateMethodMethodMethodIdPut
+ */
+export interface ResponseUpdateMethodMethodMethodIdPut {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateMethodMethodMethodIdPut
+     */
+    'MethodDefID': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateMethodMethodMethodIdPut
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateMethodMethodMethodIdPut
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateMethodMethodMethodIdPut
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateMethodMethodMethodIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateMethodMethodMethodIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut
+ */
+export interface ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut
+     */
+    'MethodParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut
+     */
+    'Value'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut
+     */
+    'MethodID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut
+     */
+    'DataType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
  * @interface ResponseUpdateNodeNodeNodeIdPut
  */
 export interface ResponseUpdateNodeNodeNodeIdPut {
@@ -4126,6 +5489,86 @@ export interface ResponseUpdateNodeNodeNodeIdPut {
      * 
      * @type {string}
      * @memberof ResponseUpdateNodeNodeNodeIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut
+ */
+export interface ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut
+     */
+    'PipelineParamDefID': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut
+     */
+    'Value'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut
+     */
+    'PipelineID': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut
+     */
+    'DataType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut
+     */
+    'Name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut
+     */
+    'message': string;
+}
+/**
+ * 
+ * @export
+ * @interface ResponseUpdatePipelinePipelinePipelineIdPut
+ */
+export interface ResponseUpdatePipelinePipelinePipelineIdPut {
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdatePipelinePipelinePipelineIdPut
+     */
+    'Name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdatePipelinePipelinePipelineIdPut
+     */
+    'ID': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseUpdatePipelinePipelinePipelineIdPut
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseUpdatePipelinePipelinePipelineIdPut
      */
     'message': string;
 }
@@ -4220,6 +5663,12 @@ export interface ResponseUpdateSimulationSimulationSimulationIdPut {
      * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
      */
     'ID': number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseUpdateSimulationSimulationSimulationIdPut
+     */
+    'Enabled'?: boolean;
     /**
      * 
      * @type {number}
@@ -4445,13 +5894,19 @@ export interface ResponseUpdateTrendTrendTrendIdPut {
      * @type {number}
      * @memberof ResponseUpdateTrendTrendTrendIdPut
      */
-    'TimeDelta'?: number;
+    'ID': number;
     /**
      * 
      * @type {number}
      * @memberof ResponseUpdateTrendTrendTrendIdPut
      */
-    'ID': number;
+    'TimeDelta'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ResponseUpdateTrendTrendTrendIdPut
+     */
+    'Enabled'?: boolean;
     /**
      * 
      * @type {number}
@@ -4556,6 +6011,12 @@ export interface Simulation {
      * @memberof Simulation
      */
     'ID': number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Simulation
+     */
+    'Enabled'?: boolean;
 }
 /**
  * 
@@ -4889,13 +6350,19 @@ export interface Trend {
      * @type {number}
      * @memberof Trend
      */
-    'TimeDelta'?: number;
+    'ID': number;
     /**
      * 
      * @type {number}
      * @memberof Trend
      */
-    'ID': number;
+    'TimeDelta'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Trend
+     */
+    'Enabled'?: boolean;
 }
 /**
  * 
@@ -4981,12 +6448,6 @@ export interface TrendCreate {
      * @memberof TrendCreate
      */
     'NodeID'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof TrendCreate
-     */
-    'TimeDelta'?: number;
 }
 /**
  * 
@@ -5291,12 +6752,6 @@ export interface TrendUpdate {
      * @memberof TrendUpdate
      */
     'NodeID'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof TrendUpdate
-     */
-    'TimeDelta'?: number;
 }
 /**
  * 
@@ -5346,7 +6801,7 @@ export interface Unit {
      * @type {string}
      * @memberof Unit
      */
-    'Multiplier'?: string | null;
+    'Multiplier'?: string;
     /**
      * 
      * @type {string}
@@ -5383,7 +6838,7 @@ export interface UnitCreate {
      * @type {Multiplier}
      * @memberof UnitCreate
      */
-    'Multiplier'?: Multiplier | null;
+    'Multiplier'?: Multiplier;
     /**
      * 
      * @type {string}
@@ -5417,10 +6872,10 @@ export interface UnitUpdate {
     'BaseID'?: string | null;
     /**
      * 
-     * @type {Multiplier}
+     * @type {Multiplier1}
      * @memberof UnitUpdate
      */
-    'Multiplier'?: Multiplier | null;
+    'Multiplier'?: Multiplier1 | null;
 }
 /**
  * 
@@ -6138,7 +7593,7 @@ export const EventDefApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteEventDefByIdEventDefEventDefIdDelete(eventDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseDeleteEventDefByIdEventDefEventDefIdDelete>> {
+        async deleteEventDefByIdEventDefEventDefIdDelete(eventDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteEventDefByIdEventDefEventDefIdDelete(eventDefId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['EventDefApi.deleteEventDefByIdEventDefEventDefIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -6212,7 +7667,7 @@ export const EventDefApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteEventDefByIdEventDefEventDefIdDelete(eventDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteEventDefByIdEventDefEventDefIdDelete> {
+        deleteEventDefByIdEventDefEventDefIdDelete(eventDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
             return localVarFp.deleteEventDefByIdEventDefEventDefIdDelete(eventDefId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6317,6 +7772,120 @@ export class EventDefApi extends BaseAPI {
      */
     public updateEventDefEventDefEventDefIdPut(eventDefId: string, eventDefUpdate: EventDefUpdate, options?: RawAxiosRequestConfig) {
         return EventDefApiFp(this.configuration).updateEventDefEventDefEventDefIdPut(eventDefId, eventDefUpdate, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * LeakDetectorApi - axios parameter creator
+ * @export
+ */
+export const LeakDetectorApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Run Past Detector
+         * @param {PastDetectorConfig} pastDetectorConfig 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        runPastDetectorLeakDetectorRunPastDetectorPost: async (pastDetectorConfig: PastDetectorConfig, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pastDetectorConfig' is not null or undefined
+            assertParamExists('runPastDetectorLeakDetectorRunPastDetectorPost', 'pastDetectorConfig', pastDetectorConfig)
+            const localVarPath = `/leak_detector/run_past_detector`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(pastDetectorConfig, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * LeakDetectorApi - functional programming interface
+ * @export
+ */
+export const LeakDetectorApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = LeakDetectorApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Run Past Detector
+         * @param {PastDetectorConfig} pastDetectorConfig 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async runPastDetectorLeakDetectorRunPastDetectorPost(pastDetectorConfig: PastDetectorConfig, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.runPastDetectorLeakDetectorRunPastDetectorPost(pastDetectorConfig, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['LeakDetectorApi.runPastDetectorLeakDetectorRunPastDetectorPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * LeakDetectorApi - factory interface
+ * @export
+ */
+export const LeakDetectorApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = LeakDetectorApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Run Past Detector
+         * @param {PastDetectorConfig} pastDetectorConfig 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        runPastDetectorLeakDetectorRunPastDetectorPost(pastDetectorConfig: PastDetectorConfig, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.runPastDetectorLeakDetectorRunPastDetectorPost(pastDetectorConfig, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * LeakDetectorApi - object-oriented interface
+ * @export
+ * @class LeakDetectorApi
+ * @extends {BaseAPI}
+ */
+export class LeakDetectorApi extends BaseAPI {
+    /**
+     * 
+     * @summary Run Past Detector
+     * @param {PastDetectorConfig} pastDetectorConfig 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LeakDetectorApi
+     */
+    public runPastDetectorLeakDetectorRunPastDetectorPost(pastDetectorConfig: PastDetectorConfig, options?: RawAxiosRequestConfig) {
+        return LeakDetectorApiFp(this.configuration).runPastDetectorLeakDetectorRunPastDetectorPost(pastDetectorConfig, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -6755,6 +8324,1349 @@ export class LinkApi extends BaseAPI {
 
 
 /**
+ * MethodApi - axios parameter creator
+ * @export
+ */
+export const MethodApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create Method
+         * @param {MethodCreate} methodCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createMethodMethodPost: async (methodCreate: MethodCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodCreate' is not null or undefined
+            assertParamExists('createMethodMethodPost', 'methodCreate', methodCreate)
+            const localVarPath = `/method`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(methodCreate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Method By Id
+         * @param {number} methodId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteMethodByIdMethodMethodIdDelete: async (methodId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('deleteMethodByIdMethodMethodIdDelete', 'methodId', methodId)
+            const localVarPath = `/method/{method_id}`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Method By Id
+         * @param {number} methodId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMethodByIdMethodMethodIdGet: async (methodId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('getMethodByIdMethodMethodIdGet', 'methodId', methodId)
+            const localVarPath = `/method/{method_id}`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Methods
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listMethodsMethodGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/method`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Method
+         * @param {number} methodId 
+         * @param {MethodUpdate} methodUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateMethodMethodMethodIdPut: async (methodId: number, methodUpdate: MethodUpdate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('updateMethodMethodMethodIdPut', 'methodId', methodId)
+            // verify required parameter 'methodUpdate' is not null or undefined
+            assertParamExists('updateMethodMethodMethodIdPut', 'methodUpdate', methodUpdate)
+            const localVarPath = `/method/{method_id}`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(methodUpdate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * MethodApi - functional programming interface
+ * @export
+ */
+export const MethodApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = MethodApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Method
+         * @param {MethodCreate} methodCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createMethodMethodPost(methodCreate: MethodCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateMethodMethodPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createMethodMethodPost(methodCreate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodApi.createMethodMethodPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Method By Id
+         * @param {number} methodId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteMethodByIdMethodMethodIdDelete(methodId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteMethodByIdMethodMethodIdDelete(methodId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodApi.deleteMethodByIdMethodMethodIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Method By Id
+         * @param {number} methodId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getMethodByIdMethodMethodIdGet(methodId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetMethodByIdMethodMethodIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getMethodByIdMethodMethodIdGet(methodId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodApi.getMethodByIdMethodMethodIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Methods
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listMethodsMethodGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListMethodsMethodGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listMethodsMethodGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodApi.listMethodsMethodGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Method
+         * @param {number} methodId 
+         * @param {MethodUpdate} methodUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateMethodMethodMethodIdPut(methodId: number, methodUpdate: MethodUpdate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdateMethodMethodMethodIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateMethodMethodMethodIdPut(methodId, methodUpdate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodApi.updateMethodMethodMethodIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * MethodApi - factory interface
+ * @export
+ */
+export const MethodApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = MethodApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Method
+         * @param {MethodCreate} methodCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createMethodMethodPost(methodCreate: MethodCreate, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateMethodMethodPost> {
+            return localVarFp.createMethodMethodPost(methodCreate, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Method By Id
+         * @param {number} methodId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteMethodByIdMethodMethodIdDelete(methodId: number, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.deleteMethodByIdMethodMethodIdDelete(methodId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Method By Id
+         * @param {number} methodId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMethodByIdMethodMethodIdGet(methodId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetMethodByIdMethodMethodIdGet> {
+            return localVarFp.getMethodByIdMethodMethodIdGet(methodId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Methods
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listMethodsMethodGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListMethodsMethodGet> {
+            return localVarFp.listMethodsMethodGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Method
+         * @param {number} methodId 
+         * @param {MethodUpdate} methodUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateMethodMethodMethodIdPut(methodId: number, methodUpdate: MethodUpdate, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdateMethodMethodMethodIdPut> {
+            return localVarFp.updateMethodMethodMethodIdPut(methodId, methodUpdate, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * MethodApi - object-oriented interface
+ * @export
+ * @class MethodApi
+ * @extends {BaseAPI}
+ */
+export class MethodApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Method
+     * @param {MethodCreate} methodCreate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodApi
+     */
+    public createMethodMethodPost(methodCreate: MethodCreate, options?: RawAxiosRequestConfig) {
+        return MethodApiFp(this.configuration).createMethodMethodPost(methodCreate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Method By Id
+     * @param {number} methodId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodApi
+     */
+    public deleteMethodByIdMethodMethodIdDelete(methodId: number, options?: RawAxiosRequestConfig) {
+        return MethodApiFp(this.configuration).deleteMethodByIdMethodMethodIdDelete(methodId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Method By Id
+     * @param {number} methodId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodApi
+     */
+    public getMethodByIdMethodMethodIdGet(methodId: number, options?: RawAxiosRequestConfig) {
+        return MethodApiFp(this.configuration).getMethodByIdMethodMethodIdGet(methodId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Methods
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodApi
+     */
+    public listMethodsMethodGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return MethodApiFp(this.configuration).listMethodsMethodGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Method
+     * @param {number} methodId 
+     * @param {MethodUpdate} methodUpdate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodApi
+     */
+    public updateMethodMethodMethodIdPut(methodId: number, methodUpdate: MethodUpdate, options?: RawAxiosRequestConfig) {
+        return MethodApiFp(this.configuration).updateMethodMethodMethodIdPut(methodId, methodUpdate, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * MethodDataApi - axios parameter creator
+ * @export
+ */
+export const MethodDataApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Get Method Data
+         * @param {number} methodId 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMethodDataMethodMethodIdDataGet: async (methodId: number, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('getMethodDataMethodMethodIdDataGet', 'methodId', methodId)
+            const localVarPath = `/method/{method_id}/data`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * MethodDataApi - functional programming interface
+ * @export
+ */
+export const MethodDataApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = MethodDataApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Get Method Data
+         * @param {number} methodId 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getMethodDataMethodMethodIdDataGet(methodId: number, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetMethodDataMethodMethodIdDataGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getMethodDataMethodMethodIdDataGet(methodId, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodDataApi.getMethodDataMethodMethodIdDataGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * MethodDataApi - factory interface
+ * @export
+ */
+export const MethodDataApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = MethodDataApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Get Method Data
+         * @param {number} methodId 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMethodDataMethodMethodIdDataGet(methodId: number, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetMethodDataMethodMethodIdDataGet> {
+            return localVarFp.getMethodDataMethodMethodIdDataGet(methodId, page, size, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * MethodDataApi - object-oriented interface
+ * @export
+ * @class MethodDataApi
+ * @extends {BaseAPI}
+ */
+export class MethodDataApi extends BaseAPI {
+    /**
+     * 
+     * @summary Get Method Data
+     * @param {number} methodId 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodDataApi
+     */
+    public getMethodDataMethodMethodIdDataGet(methodId: number, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return MethodDataApiFp(this.configuration).getMethodDataMethodMethodIdDataGet(methodId, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * MethodDefApi - axios parameter creator
+ * @export
+ */
+export const MethodDefApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary List Method Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listMethodDefsMethodDefGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/method_def`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * MethodDefApi - functional programming interface
+ * @export
+ */
+export const MethodDefApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = MethodDefApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary List Method Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listMethodDefsMethodDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListMethodDefsMethodDefGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listMethodDefsMethodDefGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodDefApi.listMethodDefsMethodDefGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * MethodDefApi - factory interface
+ * @export
+ */
+export const MethodDefApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = MethodDefApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary List Method Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listMethodDefsMethodDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListMethodDefsMethodDefGet> {
+            return localVarFp.listMethodDefsMethodDefGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * MethodDefApi - object-oriented interface
+ * @export
+ * @class MethodDefApi
+ * @extends {BaseAPI}
+ */
+export class MethodDefApi extends BaseAPI {
+    /**
+     * 
+     * @summary List Method Defs
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodDefApi
+     */
+    public listMethodDefsMethodDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return MethodDefApiFp(this.configuration).listMethodDefsMethodDefGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * MethodParamApi - axios parameter creator
+ * @export
+ */
+export const MethodParamApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create Method Param
+         * @param {number} methodId 
+         * @param {MethodParamCreate} methodParamCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createMethodParamMethodMethodIdParamPost: async (methodId: number, methodParamCreate: MethodParamCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('createMethodParamMethodMethodIdParamPost', 'methodId', methodId)
+            // verify required parameter 'methodParamCreate' is not null or undefined
+            assertParamExists('createMethodParamMethodMethodIdParamPost', 'methodParamCreate', methodParamCreate)
+            const localVarPath = `/method/{method_id}/param`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(methodParamCreate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Method Param By Id
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete: async (methodId: number, methodParamDefId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete', 'methodId', methodId)
+            // verify required parameter 'methodParamDefId' is not null or undefined
+            assertParamExists('deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete', 'methodParamDefId', methodParamDefId)
+            const localVarPath = `/method/{method_id}/param/{method_param_def_id}`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)))
+                .replace(`{${"method_param_def_id"}}`, encodeURIComponent(String(methodParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Method Param By Id
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet: async (methodId: number, methodParamDefId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet', 'methodId', methodId)
+            // verify required parameter 'methodParamDefId' is not null or undefined
+            assertParamExists('getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet', 'methodParamDefId', methodParamDefId)
+            const localVarPath = `/method/{method_id}/param/{method_param_def_id}`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)))
+                .replace(`{${"method_param_def_id"}}`, encodeURIComponent(String(methodParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Method Param Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listMethodParamDefsMethodParamDefGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/method/param/def`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Method Params By Method Id
+         * @param {number} methodId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listMethodParamsByMethodIdMethodMethodIdParamGet: async (methodId: number, filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('listMethodParamsByMethodIdMethodMethodIdParamGet', 'methodId', methodId)
+            const localVarPath = `/method/{method_id}/param`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Required Method Params By Method Id
+         * @param {number} methodId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet: async (methodId: number, filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet', 'methodId', methodId)
+            const localVarPath = `/method/{method_id}/param/all`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Method Param
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateMethodParamMethodMethodIdParamMethodParamDefIdPut: async (methodId: number, methodParamDefId: string, body: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'methodId' is not null or undefined
+            assertParamExists('updateMethodParamMethodMethodIdParamMethodParamDefIdPut', 'methodId', methodId)
+            // verify required parameter 'methodParamDefId' is not null or undefined
+            assertParamExists('updateMethodParamMethodMethodIdParamMethodParamDefIdPut', 'methodParamDefId', methodParamDefId)
+            // verify required parameter 'body' is not null or undefined
+            assertParamExists('updateMethodParamMethodMethodIdParamMethodParamDefIdPut', 'body', body)
+            const localVarPath = `/method/{method_id}/param/{method_param_def_id}`
+                .replace(`{${"method_id"}}`, encodeURIComponent(String(methodId)))
+                .replace(`{${"method_param_def_id"}}`, encodeURIComponent(String(methodParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * MethodParamApi - functional programming interface
+ * @export
+ */
+export const MethodParamApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = MethodParamApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Method Param
+         * @param {number} methodId 
+         * @param {MethodParamCreate} methodParamCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createMethodParamMethodMethodIdParamPost(methodId: number, methodParamCreate: MethodParamCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreateMethodParamMethodMethodIdParamPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createMethodParamMethodMethodIdParamPost(methodId, methodParamCreate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodParamApi.createMethodParamMethodMethodIdParamPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Method Param By Id
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete(methodId: number, methodParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete(methodId, methodParamDefId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodParamApi.deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Method Param By Id
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet(methodId: number, methodParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet(methodId, methodParamDefId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodParamApi.getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Method Param Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listMethodParamDefsMethodParamDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListMethodParamDefsMethodParamDefGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listMethodParamDefsMethodParamDefGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodParamApi.listMethodParamDefsMethodParamDefGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Method Params By Method Id
+         * @param {number} methodId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listMethodParamsByMethodIdMethodMethodIdParamGet(methodId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListMethodParamsByMethodIdMethodMethodIdParamGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listMethodParamsByMethodIdMethodMethodIdParamGet(methodId, filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodParamApi.listMethodParamsByMethodIdMethodMethodIdParamGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Required Method Params By Method Id
+         * @param {number} methodId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet(methodId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet(methodId, filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodParamApi.listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Method Param
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateMethodParamMethodMethodIdParamMethodParamDefIdPut(methodId: number, methodParamDefId: string, body: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateMethodParamMethodMethodIdParamMethodParamDefIdPut(methodId, methodParamDefId, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MethodParamApi.updateMethodParamMethodMethodIdParamMethodParamDefIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * MethodParamApi - factory interface
+ * @export
+ */
+export const MethodParamApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = MethodParamApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Method Param
+         * @param {number} methodId 
+         * @param {MethodParamCreate} methodParamCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createMethodParamMethodMethodIdParamPost(methodId: number, methodParamCreate: MethodParamCreate, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreateMethodParamMethodMethodIdParamPost> {
+            return localVarFp.createMethodParamMethodMethodIdParamPost(methodId, methodParamCreate, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Method Param By Id
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete(methodId: number, methodParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete(methodId, methodParamDefId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Method Param By Id
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet(methodId: number, methodParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetMethodParamByIdMethodMethodIdParamMethodParamDefIdGet> {
+            return localVarFp.getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet(methodId, methodParamDefId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Method Param Defs
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listMethodParamDefsMethodParamDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListMethodParamDefsMethodParamDefGet> {
+            return localVarFp.listMethodParamDefsMethodParamDefGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Method Params By Method Id
+         * @param {number} methodId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listMethodParamsByMethodIdMethodMethodIdParamGet(methodId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListMethodParamsByMethodIdMethodMethodIdParamGet> {
+            return localVarFp.listMethodParamsByMethodIdMethodMethodIdParamGet(methodId, filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Required Method Params By Method Id
+         * @param {number} methodId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet(methodId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet> {
+            return localVarFp.listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet(methodId, filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Method Param
+         * @param {number} methodId 
+         * @param {string} methodParamDefId 
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateMethodParamMethodMethodIdParamMethodParamDefIdPut(methodId: number, methodParamDefId: string, body: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdateMethodParamMethodMethodIdParamMethodParamDefIdPut> {
+            return localVarFp.updateMethodParamMethodMethodIdParamMethodParamDefIdPut(methodId, methodParamDefId, body, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * MethodParamApi - object-oriented interface
+ * @export
+ * @class MethodParamApi
+ * @extends {BaseAPI}
+ */
+export class MethodParamApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Method Param
+     * @param {number} methodId 
+     * @param {MethodParamCreate} methodParamCreate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodParamApi
+     */
+    public createMethodParamMethodMethodIdParamPost(methodId: number, methodParamCreate: MethodParamCreate, options?: RawAxiosRequestConfig) {
+        return MethodParamApiFp(this.configuration).createMethodParamMethodMethodIdParamPost(methodId, methodParamCreate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Method Param By Id
+     * @param {number} methodId 
+     * @param {string} methodParamDefId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodParamApi
+     */
+    public deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete(methodId: number, methodParamDefId: string, options?: RawAxiosRequestConfig) {
+        return MethodParamApiFp(this.configuration).deleteMethodParamByIdMethodMethodIdParamMethodParamDefIdDelete(methodId, methodParamDefId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Method Param By Id
+     * @param {number} methodId 
+     * @param {string} methodParamDefId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodParamApi
+     */
+    public getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet(methodId: number, methodParamDefId: string, options?: RawAxiosRequestConfig) {
+        return MethodParamApiFp(this.configuration).getMethodParamByIdMethodMethodIdParamMethodParamDefIdGet(methodId, methodParamDefId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Method Param Defs
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodParamApi
+     */
+    public listMethodParamDefsMethodParamDefGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return MethodParamApiFp(this.configuration).listMethodParamDefsMethodParamDefGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Method Params By Method Id
+     * @param {number} methodId 
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodParamApi
+     */
+    public listMethodParamsByMethodIdMethodMethodIdParamGet(methodId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return MethodParamApiFp(this.configuration).listMethodParamsByMethodIdMethodMethodIdParamGet(methodId, filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Required Method Params By Method Id
+     * @param {number} methodId 
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodParamApi
+     */
+    public listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet(methodId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return MethodParamApiFp(this.configuration).listRequiredMethodParamsByMethodIdMethodMethodIdParamAllGet(methodId, filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Method Param
+     * @param {number} methodId 
+     * @param {string} methodParamDefId 
+     * @param {string} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MethodParamApi
+     */
+    public updateMethodParamMethodMethodIdParamMethodParamDefIdPut(methodId: number, methodParamDefId: string, body: string, options?: RawAxiosRequestConfig) {
+        return MethodParamApiFp(this.configuration).updateMethodParamMethodMethodIdParamMethodParamDefIdPut(methodId, methodParamDefId, body, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * NodeApi - axios parameter creator
  * @export
  */
@@ -7187,6 +10099,1002 @@ export class NodeApi extends BaseAPI {
 
 
 /**
+ * PipelineApi - axios parameter creator
+ * @export
+ */
+export const PipelineApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create Pipeline
+         * @param {PipelineCreate} pipelineCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createPipelinePipelinePost: async (pipelineCreate: PipelineCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineCreate' is not null or undefined
+            assertParamExists('createPipelinePipelinePost', 'pipelineCreate', pipelineCreate)
+            const localVarPath = `/pipeline`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(pipelineCreate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Pipeline By Id
+         * @param {number} pipelineId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deletePipelineByIdPipelinePipelineIdDelete: async (pipelineId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('deletePipelineByIdPipelinePipelineIdDelete', 'pipelineId', pipelineId)
+            const localVarPath = `/pipeline/{pipeline_id}`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Pipeline By Id
+         * @param {number} pipelineId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPipelineByIdPipelinePipelineIdGet: async (pipelineId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('getPipelineByIdPipelinePipelineIdGet', 'pipelineId', pipelineId)
+            const localVarPath = `/pipeline/{pipeline_id}`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Pipelines
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPipelinesPipelineGet: async (filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/pipeline`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Pipeline
+         * @param {number} pipelineId 
+         * @param {PipelineUpdate} pipelineUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updatePipelinePipelinePipelineIdPut: async (pipelineId: number, pipelineUpdate: PipelineUpdate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('updatePipelinePipelinePipelineIdPut', 'pipelineId', pipelineId)
+            // verify required parameter 'pipelineUpdate' is not null or undefined
+            assertParamExists('updatePipelinePipelinePipelineIdPut', 'pipelineUpdate', pipelineUpdate)
+            const localVarPath = `/pipeline/{pipeline_id}`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(pipelineUpdate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * PipelineApi - functional programming interface
+ * @export
+ */
+export const PipelineApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = PipelineApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Pipeline
+         * @param {PipelineCreate} pipelineCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createPipelinePipelinePost(pipelineCreate: PipelineCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreatePipelinePipelinePost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createPipelinePipelinePost(pipelineCreate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineApi.createPipelinePipelinePost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Pipeline By Id
+         * @param {number} pipelineId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deletePipelineByIdPipelinePipelineIdDelete(pipelineId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deletePipelineByIdPipelinePipelineIdDelete(pipelineId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineApi.deletePipelineByIdPipelinePipelineIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Pipeline By Id
+         * @param {number} pipelineId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPipelineByIdPipelinePipelineIdGet(pipelineId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetPipelineByIdPipelinePipelineIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPipelineByIdPipelinePipelineIdGet(pipelineId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineApi.getPipelineByIdPipelinePipelineIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Pipelines
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPipelinesPipelineGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListPipelinesPipelineGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPipelinesPipelineGet(filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineApi.listPipelinesPipelineGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Pipeline
+         * @param {number} pipelineId 
+         * @param {PipelineUpdate} pipelineUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updatePipelinePipelinePipelineIdPut(pipelineId: number, pipelineUpdate: PipelineUpdate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdatePipelinePipelinePipelineIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updatePipelinePipelinePipelineIdPut(pipelineId, pipelineUpdate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineApi.updatePipelinePipelinePipelineIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * PipelineApi - factory interface
+ * @export
+ */
+export const PipelineApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = PipelineApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Pipeline
+         * @param {PipelineCreate} pipelineCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createPipelinePipelinePost(pipelineCreate: PipelineCreate, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreatePipelinePipelinePost> {
+            return localVarFp.createPipelinePipelinePost(pipelineCreate, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Pipeline By Id
+         * @param {number} pipelineId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deletePipelineByIdPipelinePipelineIdDelete(pipelineId: number, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.deletePipelineByIdPipelinePipelineIdDelete(pipelineId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Pipeline By Id
+         * @param {number} pipelineId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPipelineByIdPipelinePipelineIdGet(pipelineId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetPipelineByIdPipelinePipelineIdGet> {
+            return localVarFp.getPipelineByIdPipelinePipelineIdGet(pipelineId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Pipelines
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPipelinesPipelineGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListPipelinesPipelineGet> {
+            return localVarFp.listPipelinesPipelineGet(filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Pipeline
+         * @param {number} pipelineId 
+         * @param {PipelineUpdate} pipelineUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updatePipelinePipelinePipelineIdPut(pipelineId: number, pipelineUpdate: PipelineUpdate, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdatePipelinePipelinePipelineIdPut> {
+            return localVarFp.updatePipelinePipelinePipelineIdPut(pipelineId, pipelineUpdate, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * PipelineApi - object-oriented interface
+ * @export
+ * @class PipelineApi
+ * @extends {BaseAPI}
+ */
+export class PipelineApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Pipeline
+     * @param {PipelineCreate} pipelineCreate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineApi
+     */
+    public createPipelinePipelinePost(pipelineCreate: PipelineCreate, options?: RawAxiosRequestConfig) {
+        return PipelineApiFp(this.configuration).createPipelinePipelinePost(pipelineCreate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Pipeline By Id
+     * @param {number} pipelineId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineApi
+     */
+    public deletePipelineByIdPipelinePipelineIdDelete(pipelineId: number, options?: RawAxiosRequestConfig) {
+        return PipelineApiFp(this.configuration).deletePipelineByIdPipelinePipelineIdDelete(pipelineId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Pipeline By Id
+     * @param {number} pipelineId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineApi
+     */
+    public getPipelineByIdPipelinePipelineIdGet(pipelineId: number, options?: RawAxiosRequestConfig) {
+        return PipelineApiFp(this.configuration).getPipelineByIdPipelinePipelineIdGet(pipelineId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Pipelines
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineApi
+     */
+    public listPipelinesPipelineGet(filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return PipelineApiFp(this.configuration).listPipelinesPipelineGet(filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Pipeline
+     * @param {number} pipelineId 
+     * @param {PipelineUpdate} pipelineUpdate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineApi
+     */
+    public updatePipelinePipelinePipelineIdPut(pipelineId: number, pipelineUpdate: PipelineUpdate, options?: RawAxiosRequestConfig) {
+        return PipelineApiFp(this.configuration).updatePipelinePipelinePipelineIdPut(pipelineId, pipelineUpdate, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * PipelineParamApi - axios parameter creator
+ * @export
+ */
+export const PipelineParamApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create Pipeline Param
+         * @param {number} pipelineId 
+         * @param {PipelineParamCreate} pipelineParamCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createPipelineParamPipelinePipelineIdParamPost: async (pipelineId: number, pipelineParamCreate: PipelineParamCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('createPipelineParamPipelinePipelineIdParamPost', 'pipelineId', pipelineId)
+            // verify required parameter 'pipelineParamCreate' is not null or undefined
+            assertParamExists('createPipelineParamPipelinePipelineIdParamPost', 'pipelineParamCreate', pipelineParamCreate)
+            const localVarPath = `/pipeline/{pipeline_id}/param`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(pipelineParamCreate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Pipeline Param By Id
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete: async (pipelineId: number, pipelineParamDefId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete', 'pipelineId', pipelineId)
+            // verify required parameter 'pipelineParamDefId' is not null or undefined
+            assertParamExists('deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete', 'pipelineParamDefId', pipelineParamDefId)
+            const localVarPath = `/pipeline/{pipeline_id}/param/{pipeline_param_def_id}`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)))
+                .replace(`{${"pipeline_param_def_id"}}`, encodeURIComponent(String(pipelineParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Pipeline Param By Id
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet: async (pipelineId: number, pipelineParamDefId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet', 'pipelineId', pipelineId)
+            // verify required parameter 'pipelineParamDefId' is not null or undefined
+            assertParamExists('getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet', 'pipelineParamDefId', pipelineParamDefId)
+            const localVarPath = `/pipeline/{pipeline_id}/param/{pipeline_param_def_id}`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)))
+                .replace(`{${"pipeline_param_def_id"}}`, encodeURIComponent(String(pipelineParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Pipeline Params By Pipeline Id
+         * @param {number} pipelineId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPipelineParamsByPipelineIdPipelinePipelineIdParamGet: async (pipelineId: number, filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('listPipelineParamsByPipelineIdPipelinePipelineIdParamGet', 'pipelineId', pipelineId)
+            const localVarPath = `/pipeline/{pipeline_id}/param`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Required Pipeline Params By Pipeline Id
+         * @param {number} pipelineId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet: async (pipelineId: number, filter?: string | null, page?: number, size?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet', 'pipelineId', pipelineId)
+            const localVarPath = `/pipeline/{pipeline_id}/param/all`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filter !== undefined) {
+                localVarQueryParameter['filter'] = filter;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update Pipeline Param
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut: async (pipelineId: number, pipelineParamDefId: string, body: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pipelineId' is not null or undefined
+            assertParamExists('updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut', 'pipelineId', pipelineId)
+            // verify required parameter 'pipelineParamDefId' is not null or undefined
+            assertParamExists('updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut', 'pipelineParamDefId', pipelineParamDefId)
+            // verify required parameter 'body' is not null or undefined
+            assertParamExists('updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut', 'body', body)
+            const localVarPath = `/pipeline/{pipeline_id}/param/{pipeline_param_def_id}`
+                .replace(`{${"pipeline_id"}}`, encodeURIComponent(String(pipelineId)))
+                .replace(`{${"pipeline_param_def_id"}}`, encodeURIComponent(String(pipelineParamDefId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * PipelineParamApi - functional programming interface
+ * @export
+ */
+export const PipelineParamApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = PipelineParamApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Pipeline Param
+         * @param {number} pipelineId 
+         * @param {PipelineParamCreate} pipelineParamCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createPipelineParamPipelinePipelineIdParamPost(pipelineId: number, pipelineParamCreate: PipelineParamCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseCreatePipelineParamPipelinePipelineIdParamPost>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createPipelineParamPipelinePipelineIdParamPost(pipelineId, pipelineParamCreate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineParamApi.createPipelineParamPipelinePipelineIdParamPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Pipeline Param By Id
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete(pipelineId: number, pipelineParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete(pipelineId, pipelineParamDefId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineParamApi.deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Pipeline Param By Id
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet(pipelineId: number, pipelineParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet(pipelineId, pipelineParamDefId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineParamApi.getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Pipeline Params By Pipeline Id
+         * @param {number} pipelineId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listPipelineParamsByPipelineIdPipelinePipelineIdParamGet(pipelineId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listPipelineParamsByPipelineIdPipelinePipelineIdParamGet(pipelineId, filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineParamApi.listPipelineParamsByPipelineIdPipelinePipelineIdParamGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Required Pipeline Params By Pipeline Id
+         * @param {number} pipelineId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet(pipelineId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet(pipelineId, filter, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineParamApi.listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update Pipeline Param
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut(pipelineId: number, pipelineParamDefId: string, body: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut(pipelineId, pipelineParamDefId, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PipelineParamApi.updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * PipelineParamApi - factory interface
+ * @export
+ */
+export const PipelineParamApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = PipelineParamApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create Pipeline Param
+         * @param {number} pipelineId 
+         * @param {PipelineParamCreate} pipelineParamCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createPipelineParamPipelinePipelineIdParamPost(pipelineId: number, pipelineParamCreate: PipelineParamCreate, options?: RawAxiosRequestConfig): AxiosPromise<ResponseCreatePipelineParamPipelinePipelineIdParamPost> {
+            return localVarFp.createPipelineParamPipelinePipelineIdParamPost(pipelineId, pipelineParamCreate, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Pipeline Param By Id
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete(pipelineId: number, pipelineParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete(pipelineId, pipelineParamDefId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Pipeline Param By Id
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet(pipelineId: number, pipelineParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet> {
+            return localVarFp.getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet(pipelineId, pipelineParamDefId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Pipeline Params By Pipeline Id
+         * @param {number} pipelineId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listPipelineParamsByPipelineIdPipelinePipelineIdParamGet(pipelineId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListPipelineParamsByPipelineIdPipelinePipelineIdParamGet> {
+            return localVarFp.listPipelineParamsByPipelineIdPipelinePipelineIdParamGet(pipelineId, filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Required Pipeline Params By Pipeline Id
+         * @param {number} pipelineId 
+         * @param {string | null} [filter] 
+         * @param {number} [page] 
+         * @param {number} [size] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet(pipelineId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet> {
+            return localVarFp.listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet(pipelineId, filter, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update Pipeline Param
+         * @param {number} pipelineId 
+         * @param {string} pipelineParamDefId 
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut(pipelineId: number, pipelineParamDefId: string, body: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseUpdatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut> {
+            return localVarFp.updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut(pipelineId, pipelineParamDefId, body, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * PipelineParamApi - object-oriented interface
+ * @export
+ * @class PipelineParamApi
+ * @extends {BaseAPI}
+ */
+export class PipelineParamApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create Pipeline Param
+     * @param {number} pipelineId 
+     * @param {PipelineParamCreate} pipelineParamCreate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineParamApi
+     */
+    public createPipelineParamPipelinePipelineIdParamPost(pipelineId: number, pipelineParamCreate: PipelineParamCreate, options?: RawAxiosRequestConfig) {
+        return PipelineParamApiFp(this.configuration).createPipelineParamPipelinePipelineIdParamPost(pipelineId, pipelineParamCreate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Pipeline Param By Id
+     * @param {number} pipelineId 
+     * @param {string} pipelineParamDefId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineParamApi
+     */
+    public deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete(pipelineId: number, pipelineParamDefId: string, options?: RawAxiosRequestConfig) {
+        return PipelineParamApiFp(this.configuration).deletePipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdDelete(pipelineId, pipelineParamDefId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Pipeline Param By Id
+     * @param {number} pipelineId 
+     * @param {string} pipelineParamDefId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineParamApi
+     */
+    public getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet(pipelineId: number, pipelineParamDefId: string, options?: RawAxiosRequestConfig) {
+        return PipelineParamApiFp(this.configuration).getPipelineParamByIdPipelinePipelineIdParamPipelineParamDefIdGet(pipelineId, pipelineParamDefId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Pipeline Params By Pipeline Id
+     * @param {number} pipelineId 
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineParamApi
+     */
+    public listPipelineParamsByPipelineIdPipelinePipelineIdParamGet(pipelineId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return PipelineParamApiFp(this.configuration).listPipelineParamsByPipelineIdPipelinePipelineIdParamGet(pipelineId, filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Required Pipeline Params By Pipeline Id
+     * @param {number} pipelineId 
+     * @param {string | null} [filter] 
+     * @param {number} [page] 
+     * @param {number} [size] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineParamApi
+     */
+    public listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet(pipelineId: number, filter?: string | null, page?: number, size?: number, options?: RawAxiosRequestConfig) {
+        return PipelineParamApiFp(this.configuration).listRequiredPipelineParamsByPipelineIdPipelinePipelineIdParamAllGet(pipelineId, filter, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update Pipeline Param
+     * @param {number} pipelineId 
+     * @param {string} pipelineParamDefId 
+     * @param {string} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PipelineParamApi
+     */
+    public updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut(pipelineId: number, pipelineParamDefId: string, body: string, options?: RawAxiosRequestConfig) {
+        return PipelineParamApiFp(this.configuration).updatePipelineParamPipelinePipelineIdParamPipelineParamDefIdPut(pipelineId, pipelineParamDefId, body, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * SimulationApi - axios parameter creator
  * @export
  */
@@ -7252,6 +11160,44 @@ export const SimulationApiAxiosParamCreator = function (configuration?: Configur
             }
 
             const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Enable Simulation
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        enableSimulationSimulationSimulationIdEnablePut: async (simulationId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'simulationId' is not null or undefined
+            assertParamExists('enableSimulationSimulationSimulationIdEnablePut', 'simulationId', simulationId)
+            const localVarPath = `/simulation/{simulation_id}/enable`
+                .replace(`{${"simulation_id"}}`, encodeURIComponent(String(simulationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -7431,10 +11377,23 @@ export const SimulationApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteSimulationByIdSimulationSimulationIdDelete(simulationId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseDeleteSimulationByIdSimulationSimulationIdDelete>> {
+        async deleteSimulationByIdSimulationSimulationIdDelete(simulationId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSimulationByIdSimulationSimulationIdDelete(simulationId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SimulationApi.deleteSimulationByIdSimulationSimulationIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Enable Simulation
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async enableSimulationSimulationSimulationIdEnablePut(simulationId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.enableSimulationSimulationSimulationIdEnablePut(simulationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SimulationApi.enableSimulationSimulationSimulationIdEnablePut']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -7506,8 +11465,18 @@ export const SimulationApiFactory = function (configuration?: Configuration, bas
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteSimulationByIdSimulationSimulationIdDelete(simulationId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteSimulationByIdSimulationSimulationIdDelete> {
+        deleteSimulationByIdSimulationSimulationIdDelete(simulationId: number, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
             return localVarFp.deleteSimulationByIdSimulationSimulationIdDelete(simulationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Enable Simulation
+         * @param {number} simulationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        enableSimulationSimulationSimulationIdEnablePut(simulationId: number, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.enableSimulationSimulationSimulationIdEnablePut(simulationId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -7574,6 +11543,18 @@ export class SimulationApi extends BaseAPI {
      */
     public deleteSimulationByIdSimulationSimulationIdDelete(simulationId: number, options?: RawAxiosRequestConfig) {
         return SimulationApiFp(this.configuration).deleteSimulationByIdSimulationSimulationIdDelete(simulationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Enable Simulation
+     * @param {number} simulationId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SimulationApi
+     */
+    public enableSimulationSimulationSimulationIdEnablePut(simulationId: number, options?: RawAxiosRequestConfig) {
+        return SimulationApiFp(this.configuration).enableSimulationSimulationSimulationIdEnablePut(simulationId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -8244,7 +12225,7 @@ export const SimulationParamApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete>> {
+        async deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId, simulationParamDefId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SimulationParamApi.deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -8355,7 +12336,7 @@ export const SimulationParamApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete> {
+        deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId: number, simulationParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
             return localVarFp.deleteSimulationParamByIdSimulationSimulationIdParamSimulationParamDefIdDelete(simulationId, simulationParamDefId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -9047,6 +13028,44 @@ export const TrendApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Enable Trend
+         * @param {number} trendId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        enableTrendTrendTrendIdEnablePut: async (trendId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'trendId' is not null or undefined
+            assertParamExists('enableTrendTrendTrendIdEnablePut', 'trendId', trendId)
+            const localVarPath = `/trend/{trend_id}/enable`
+                .replace(`{${"trend_id"}}`, encodeURIComponent(String(trendId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Get Trend By Id
          * @param {number} trendId 
          * @param {*} [options] Override http request option.
@@ -9206,10 +13225,23 @@ export const TrendApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteTrendByIdTrendTrendIdDelete(trendId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseDeleteTrendByIdTrendTrendIdDelete>> {
+        async deleteTrendByIdTrendTrendIdDelete(trendId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTrendByIdTrendTrendIdDelete(trendId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TrendApi.deleteTrendByIdTrendTrendIdDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Enable Trend
+         * @param {number} trendId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async enableTrendTrendTrendIdEnablePut(trendId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.enableTrendTrendTrendIdEnablePut(trendId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendApi.enableTrendTrendTrendIdEnablePut']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -9281,8 +13313,18 @@ export const TrendApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteTrendByIdTrendTrendIdDelete(trendId: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteTrendByIdTrendTrendIdDelete> {
+        deleteTrendByIdTrendTrendIdDelete(trendId: number, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
             return localVarFp.deleteTrendByIdTrendTrendIdDelete(trendId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Enable Trend
+         * @param {number} trendId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        enableTrendTrendTrendIdEnablePut(trendId: number, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.enableTrendTrendTrendIdEnablePut(trendId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -9349,6 +13391,18 @@ export class TrendApi extends BaseAPI {
      */
     public deleteTrendByIdTrendTrendIdDelete(trendId: number, options?: RawAxiosRequestConfig) {
         return TrendApiFp(this.configuration).deleteTrendByIdTrendTrendIdDelete(trendId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Enable Trend
+     * @param {number} trendId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendApi
+     */
+    public enableTrendTrendTrendIdEnablePut(trendId: number, options?: RawAxiosRequestConfig) {
+        return TrendApiFp(this.configuration).enableTrendTrendTrendIdEnablePut(trendId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -10685,7 +14739,7 @@ export const TrendParamApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId: number, trendParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete>> {
+        async deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId: number, trendParamDefId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId, trendParamDefId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TrendParamApi.deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -10796,7 +14850,7 @@ export const TrendParamApiFactory = function (configuration?: Configuration, bas
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId: number, trendParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseDeleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete> {
+        deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId: number, trendParamDefId: string, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
             return localVarFp.deleteTrendParamByIdTrendTrendIdParamTrendParamDefIdDelete(trendId, trendParamDefId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -11092,6 +15146,46 @@ export const TrendWriterApiAxiosParamCreator = function (configuration?: Configu
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Run Past Writer
+         * @param {PastWriterConfig} pastWriterConfig 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        runPastWriterTrendWriterRunPastWriterPost: async (pastWriterConfig: PastWriterConfig, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pastWriterConfig' is not null or undefined
+            assertParamExists('runPastWriterTrendWriterRunPastWriterPost', 'pastWriterConfig', pastWriterConfig)
+            const localVarPath = `/trend_writer/run_past_writer`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(pastWriterConfig, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -11141,6 +15235,19 @@ export const TrendWriterApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['TrendWriterApi.listProfilerDataTrendWriterGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * 
+         * @summary Run Past Writer
+         * @param {PastWriterConfig} pastWriterConfig 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async runPastWriterTrendWriterRunPastWriterPost(pastWriterConfig: PastWriterConfig, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Error>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.runPastWriterTrendWriterRunPastWriterPost(pastWriterConfig, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TrendWriterApi.runPastWriterTrendWriterRunPastWriterPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -11180,6 +15287,16 @@ export const TrendWriterApiFactory = function (configuration?: Configuration, ba
          */
         listProfilerDataTrendWriterGet(page?: number, size?: number, options?: RawAxiosRequestConfig): AxiosPromise<ResponseListProfilerDataTrendWriterGet> {
             return localVarFp.listProfilerDataTrendWriterGet(page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Run Past Writer
+         * @param {PastWriterConfig} pastWriterConfig 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        runPastWriterTrendWriterRunPastWriterPost(pastWriterConfig: PastWriterConfig, options?: RawAxiosRequestConfig): AxiosPromise<Error> {
+            return localVarFp.runPastWriterTrendWriterRunPastWriterPost(pastWriterConfig, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -11225,6 +15342,18 @@ export class TrendWriterApi extends BaseAPI {
      */
     public listProfilerDataTrendWriterGet(page?: number, size?: number, options?: RawAxiosRequestConfig) {
         return TrendWriterApiFp(this.configuration).listProfilerDataTrendWriterGet(page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Run Past Writer
+     * @param {PastWriterConfig} pastWriterConfig 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TrendWriterApi
+     */
+    public runPastWriterTrendWriterRunPastWriterPost(pastWriterConfig: PastWriterConfig, options?: RawAxiosRequestConfig) {
+        return TrendWriterApiFp(this.configuration).runPastWriterTrendWriterRunPastWriterPost(pastWriterConfig, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
