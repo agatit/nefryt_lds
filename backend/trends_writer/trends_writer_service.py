@@ -1,43 +1,25 @@
 import logging
 import multiprocessing
 from logging.handlers import RotatingFileHandler
-
 multiprocessing.freeze_support()
+
 import sys
 import os
-from datetime import datetime
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '.venv', 'Lib', 'site-packages'))
-
-import multiprocessing
 import win32serviceutil
 import win32service
 import win32event
 import servicemanager
-import socket
-import time
-
-
 import asyncio
 import multiprocessing
-import sys
 import threading
-import os
+import socket
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-venv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.venv')
-sys.path.insert(0, os.path.join(venv_path, 'Lib', 'site-packages'))
 from config import setup_engine
 from trends_writer import modbus, plant
 from trends_writer.profiler import Profiler
 
-
-import win32serviceutil
-import win32service
-import win32event
-import servicemanager
-import socket
-import time
 
 class MyService(win32serviceutil.ServiceFramework):
     _svc_name_ = 'TrendsWriterService'
@@ -55,11 +37,9 @@ class MyService(win32serviceutil.ServiceFramework):
             logger.setLevel(logging.DEBUG)
             logger.handlers.clear()
             handler = RotatingFileHandler(os.path.join(path, self._svc_name_ + '.log'), maxBytes=5242880, backupCount=5)
-            formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s",
-                                          "%Y-%m-%d %H:%M:%S")
+            formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s", "%Y-%m-%d %H:%M:%S")
             handler.setFormatter(formatter)
-            logging.basicConfig(level=logging.DEBUG, handlers=[handler])
-            logging.info(f"{self._svc_name_} created.")
+            logger.addHandler(handler)
 
             win32serviceutil.ServiceFramework.__init__(self, args)
             self.hWaitStop = win32event.CreateEvent(None, 0, 0, None)
@@ -69,10 +49,10 @@ class MyService(win32serviceutil.ServiceFramework):
             logging.fatal(f"{self._svc_name_} creation failed. Exception: {e}")
 
     def SvcStop(self):
-        logging.info(f"{self._svc_name_} stopping.")
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.hWaitStop)
-        self.loop.call_soon_threadsafe(self.loop.stop)
+        if self.loop and self.loop.is_running():
+            self.loop.call_soon_threadsafe(self.loop.stop)
         children = multiprocessing.active_children()
         for child in children:
             child.terminate()

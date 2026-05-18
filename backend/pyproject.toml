@@ -2,7 +2,7 @@
 name = "nefrytlds-backend"
 version = "1.0.0"
 description = "System LDS Backend"
-requires-python = ">=3.10"
+requires-python = "==3.10.*"
 dependencies = [
     "alembic==1.15.2",
     "bcrypt==4.0.1",
@@ -21,7 +21,8 @@ dependencies = [
     "sqlmodel==0.0.24",
     "uv==0.7.2",
     "uvicorn==0.34.0",
-    "pydantic-settings==2.9.1"
+    "pydantic-settings==2.9.1",
+    "pyyaml==6.0.3",
 ]
 
 [project.optional-dependencies]
