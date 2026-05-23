@@ -25,7 +25,8 @@ dev = [
     "httpx==0.28.1"
 ]
 service = [
-    "pywin32==311"
+    "pywin32==311",
+    "pyinstaller==6.20.0"
 ]
 
 [tool.setuptools]

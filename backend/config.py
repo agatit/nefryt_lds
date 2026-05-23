@@ -11,7 +11,7 @@ path = pathlib.Path(__file__).parent.resolve()
 
 
 def setup_logging():
-    logging.basicConfig(stream=sys.stdout, level=Config.verbosity, force=True)
+    logging.getLogger().setLevel(Config.verbosity)
 
 
 def setup_engine(db_uri: str | None = None):
