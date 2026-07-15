@@ -10,3 +10,5 @@ __pycache__
 backend/**/*.log
 backend/**/*.csv
 *.egg-info/
+.env
+.venv/

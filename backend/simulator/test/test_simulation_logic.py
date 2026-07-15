@@ -154,7 +154,7 @@ def run_simulations_for_test():
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_both_trends_data_are_regularly_saved(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_both_trends_data_are_regularly_saved(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -186,7 +186,7 @@ async def test_simulation_logic_when_both_trends_data_are_regularly_saved(add_ld
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_no_new_trend_data(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_no_new_trend_data(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -232,7 +232,7 @@ async def test_simulation_logic_when_no_new_trend_data(add_lds_objects, run_simu
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_no_trend_data(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_no_trend_data(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -264,7 +264,7 @@ async def test_simulation_logic_when_no_trend_data(add_lds_objects, run_simulati
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_no_new_trend_data_and_no_trend_data_in_db(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_no_new_trend_data_and_no_trend_data_in_db(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -315,7 +315,7 @@ async def test_simulation_logic_when_no_new_trend_data_and_no_trend_data_in_db(a
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_both_trends_data_are_stopped(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_both_trends_data_are_stopped(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -357,7 +357,7 @@ async def test_simulation_logic_when_both_trends_data_are_stopped(add_lds_object
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_no_both_trends_data(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_no_both_trends_data(add_test_context, run_simulations_for_test):
     t = math.floor(time.time())
     async with run_simulations_for_test():
         sim_time = 5
@@ -372,7 +372,7 @@ async def test_simulation_logic_when_no_both_trends_data(add_lds_objects, run_si
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_no_new_flow_data_should_use_older_data_in_max_time_gap(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_no_new_flow_data_should_use_older_data_in_max_time_gap(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -418,7 +418,7 @@ async def test_simulation_logic_when_no_new_flow_data_should_use_older_data_in_m
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_no_flow_data(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_no_flow_data(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -450,7 +450,7 @@ async def test_simulation_logic_when_no_flow_data(add_lds_objects, run_simulatio
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_no_new_flow_data_should_not_use_older_data_over_max_time_gap(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_no_new_flow_data_should_not_use_older_data_over_max_time_gap(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -490,7 +490,7 @@ async def test_simulation_logic_when_no_new_flow_data_should_not_use_older_data_
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_trend_data_is_not_regularly_saved(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_trend_data_is_not_regularly_saved(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -524,7 +524,7 @@ async def test_simulation_logic_when_trend_data_is_not_regularly_saved(add_lds_o
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_flow_trend_data_is_not_regularly_saved(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_flow_trend_data_is_not_regularly_saved(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -558,7 +558,7 @@ async def test_simulation_logic_when_flow_trend_data_is_not_regularly_saved(add_
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_both_trends_data_are_not_regularly_saved(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_both_trends_data_are_not_regularly_saved(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -594,7 +594,7 @@ async def test_simulation_logic_when_both_trends_data_are_not_regularly_saved(ad
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects_with_time_delta], indirect=True)
-async def test_simulation_logic_when_trend_has_time_delta(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_trend_has_time_delta(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -628,7 +628,7 @@ async def test_simulation_logic_when_trend_has_time_delta(add_lds_objects, run_s
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_trend_writer_saves_data_with_past_timestamps(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_trend_writer_saves_data_with_past_timestamps(add_test_context, run_simulations_for_test):
     time_buffer = 3
     time_diff = 10
     t = math.floor(time.time())
@@ -653,7 +653,7 @@ async def test_simulation_logic_when_trend_writer_saves_data_with_past_timestamp
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_trend_writer_saves_data_with_future_timestamps(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_trend_writer_saves_data_with_future_timestamps(add_test_context, run_simulations_for_test):
     time_buffer = 3
     time_diff = 8
     t = math.floor(time.time())
@@ -681,7 +681,7 @@ async def test_simulation_logic_when_trend_writer_saves_data_with_future_timesta
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_trend_data_have_incorrect_values(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_trend_data_have_incorrect_values(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -713,7 +713,7 @@ async def test_simulation_logic_when_trend_data_have_incorrect_values(add_lds_ob
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_flow_trend_data_have_incorrect_values(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_flow_trend_data_have_incorrect_values(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -742,7 +742,7 @@ async def test_simulation_logic_when_flow_trend_data_have_incorrect_values(add_l
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_logic_when_flow_trend_data_is_changing(add_lds_objects, run_simulations_for_test):
+async def test_simulation_logic_when_flow_trend_data_is_changing(add_test_context, run_simulations_for_test):
     time_buffer = 3
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -791,7 +791,7 @@ async def test_simulation_logic_when_flow_trend_data_is_changing(add_lds_objects
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_calculate_simulation_data_on_start_correctly(add_lds_objects, run_simulations_for_test):
+async def test_simulation_calculate_simulation_data_on_start_correctly(add_test_context, run_simulations_for_test):
     time_buffer = 5
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -817,7 +817,7 @@ async def test_simulation_calculate_simulation_data_on_start_correctly(add_lds_o
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_not_calculate_simulation_data_on_start_when_no_trend_data(add_lds_objects, run_simulations_for_test):
+async def test_simulation_not_calculate_simulation_data_on_start_when_no_trend_data(add_test_context, run_simulations_for_test):
     time_buffer = 5
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -842,7 +842,7 @@ async def test_simulation_not_calculate_simulation_data_on_start_when_no_trend_d
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_not_calculate_simulation_data_on_start_when_no_flow_data(add_lds_objects, run_simulations_for_test):
+async def test_simulation_not_calculate_simulation_data_on_start_when_no_flow_data(add_test_context, run_simulations_for_test):
     time_buffer = 5
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -867,7 +867,7 @@ async def test_simulation_not_calculate_simulation_data_on_start_when_no_flow_da
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_calculate_simulation_data_on_start_when_no_old_density_data(add_lds_objects, run_simulations_for_test):
+async def test_simulation_calculate_simulation_data_on_start_when_no_old_density_data(add_test_context, run_simulations_for_test):
     time_buffer = 5
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -893,7 +893,7 @@ async def test_simulation_calculate_simulation_data_on_start_when_no_old_density
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_calculate_simulation_data_on_start_when_density_data_have_gap(add_lds_objects, run_simulations_for_test):
+async def test_simulation_calculate_simulation_data_on_start_when_density_data_have_gap(add_test_context, run_simulations_for_test):
     time_buffer = 5
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -920,7 +920,7 @@ async def test_simulation_calculate_simulation_data_on_start_when_density_data_h
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_calculate_simulation_data_on_start_when_flow_data_have_gap_within_maximum_gap(add_lds_objects, run_simulations_for_test):
+async def test_simulation_calculate_simulation_data_on_start_when_flow_data_have_gap_within_maximum_gap(add_test_context, run_simulations_for_test):
     time_buffer = 5
     t = math.floor(time.time())
     for i in range(time_buffer):
@@ -947,7 +947,7 @@ async def test_simulation_calculate_simulation_data_on_start_when_flow_data_have
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('add_test_context', [add_objects], indirect=True)
-async def test_simulation_not_calculate_simulation_data_on_start_when_flow_data_have_gap_over_maximum_gap(add_lds_objects, run_simulations_for_test):
+async def test_simulation_not_calculate_simulation_data_on_start_when_flow_data_have_gap_over_maximum_gap(add_test_context, run_simulations_for_test):
     time_buffer = 5
     t = math.floor(time.time())
     for i in range(time_buffer):

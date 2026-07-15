@@ -108,7 +108,8 @@ class SimulationBase:
         return max(self.simulation_trend.TimeDelta, self.flow_trend.TimeDelta) + 3
         
     def calculate_distances(self):
-        return [distance for distance in range(0, self.pipeline_length, self.lds_simulation.ResolutionMeters)]
+        num_steps = int(self.pipeline_length // self.lds_simulation.ResolutionMeters)
+        return [i * self.lds_simulation.ResolutionMeters for i in range(num_steps)]
 
     def calculate_simulation_data_on_start(self):
         raise NotImplementedError

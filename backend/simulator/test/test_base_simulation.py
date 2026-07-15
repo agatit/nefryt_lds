@@ -76,7 +76,7 @@ def reset_objects2():
     simulation = lds.Simulation(ID=1, SimulationDefID=simulation_def.ID, TrendID=1, Name='Sim', RefreshTimeSeconds=5,
                                 ResolutionMeters=100)
     pipeline_length_param = lds.SimulationParam(SimulationDefID=simulation_def.ID, SimulationID=simulation.ID,
-                                                SimulationParamDefID=length_param_def.ID, Value=0.5)
+                                            SimulationParamDefID=length_param_def.ID, Value='not_a_number')
 
     lds_objects = [[trend_def], [unit_density], [trend_group], [trend], [simulation_def],
                    [length_param_def], [simulation], [pipeline_length_param]]
@@ -129,38 +129,38 @@ def reset_objects4():
 
 
 @pytest.mark.parametrize('add_test_context', [reset_objects1], indirect=True)
-def test_simulation_base_should_raise_exception_when_no_pipeline_length_param(add_lds_objects):
+def test_simulation_base_should_raise_exception_when_no_pipeline_length_param(add_test_context):
     with pytest.raises(ValueError, match=f'No \'LENGTH\' param in simulation with id = {simulation.ID}'):
         SimulationBase(simulation, '')
 
 
 @pytest.mark.parametrize('add_test_context', [reset_objects2], indirect=True)
-def test_simulation_base_should_raise_exception_when_pipeline_length_param_is_not_integer(add_lds_objects):
-    with pytest.raises(ValueError, match=f'\'LENGTH\' param in simulation with id = {simulation.ID} has to be an integer'):
+def test_simulation_base_should_raise_exception_when_pipeline_length_param_is_not_float(add_test_context):
+    with pytest.raises(ValueError, match=f'\'LENGTH\' param in simulation with id = {simulation.ID} has to be a float'):
         SimulationBase(simulation, '')
 
 
 @pytest.mark.parametrize('add_test_context', [reset_objects3], indirect=True)
-def test_simulation_base_should_raise_exception_when_no_flow_trend_param(add_lds_objects):
+def test_simulation_base_should_raise_exception_when_no_flow_trend_param(add_test_context):
     with pytest.raises(ValueError, match=f'No param \'FLOW_TREND_ID\' in simulation with id = {simulation.ID}'):
         SimulationBase(simulation, '')
 
 
 @pytest.mark.parametrize('add_test_context', [reset_objects4], indirect=True)
-def test_simulation_base_should_raise_exception_when_no_trend_with_given_flow_trend_id(add_lds_objects):
+def test_simulation_base_should_raise_exception_when_no_trend_with_given_flow_trend_id(add_test_context):
     with pytest.raises(ValueError, match=f'No flow trend with id = {flow_trend_param.Value} in simulation with id = {simulation.ID}'):
         SimulationBase(simulation, '')
 
 
 @pytest.mark.parametrize('add_test_context', [reset_all_objects], indirect=True)
-def test_simulation_base_should_start_correctly(add_lds_objects):
+def test_simulation_base_should_start_correctly(add_test_context):
     sim = SimulationBase(simulation, '')
     assert sim.lds_simulation == simulation
-    assert sim.pipeline_length == int(pipeline_length_param.Value)
+    assert sim.pipeline_length == float(pipeline_length_param.Value)
     assert sim.simulation_trend == trend
     assert sim.simulation_unit == unit_density
     assert sim.flow_trend == flow_trend
-    assert sim.distances == [i*sim.lds_simulation.ResolutionMeters for i in range(sim.pipeline_length // sim.lds_simulation.ResolutionMeters)]
+    assert sim.distances == [i * sim.lds_simulation.ResolutionMeters for i in range(int(sim.pipeline_length // sim.lds_simulation.ResolutionMeters))]
 
 
 def test_simulation_base_should_save_simulation_data_correctly():

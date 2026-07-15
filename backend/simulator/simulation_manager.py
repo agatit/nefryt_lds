@@ -34,7 +34,7 @@ class SimulationManager:
         for simulation in simulations:
             try:
                 simulation_class = SIMULATION_CLASSES[simulation.SimulationDefID.strip()]
-                new_simulation = simulation_class(simulation, Settings.DB_URI)
+                new_simulation = simulation_class(simulation, Settings.TEST_DB_URI if Config.tests else Settings.DB_URI)
                 self.simulations.append(new_simulation)
             except Exception as e:
                 logger.warning(f"SimulationManager: Simulation with id = {simulation.ID} init error: {e}", exc_info=True)
